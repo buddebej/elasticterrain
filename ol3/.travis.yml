@@ -1,0 +1,11 @@
+before_install:
+  - "sudo pip install -r requirements.txt"
+  - "git clone --depth=50 https://github.com/jsdoc3/jsdoc build/jsdoc"
+
+before_script:
+  - "./build.py plovr"
+  - "./build.py serve-integration-test &"
+  - "rm src/ol/renderer/webgl/*shader.js"
+  - "sleep 3"
+
+script: "./build.py JSDOC=build/jsdoc/jsdoc integration-test"
