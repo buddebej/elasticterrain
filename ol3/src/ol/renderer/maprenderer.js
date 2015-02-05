@@ -1,15 +1,27 @@
+goog.provide('ol.RendererType');
 goog.provide('ol.renderer.Map');
 
 goog.require('goog.Disposable');
-goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.dispose');
-goog.require('goog.functions');
 goog.require('goog.object');
 goog.require('goog.vec.Mat4');
-goog.require('ol.FrameState');
 goog.require('ol.layer.Layer');
 goog.require('ol.renderer.Layer');
+goog.require('ol.style.IconImageCache');
+goog.require('ol.vec.Mat4');
+
+
+/**
+ * Available renderers: `'canvas'`, `'dom'` or `'webgl'`.
+ * @enum {string}
+ * @api stable
+ */
+ol.RendererType = {
+  CANVAS: 'canvas',
+  DOM: 'dom',
+  WEBGL: 'webgl'
+};
 
 
 
@@ -18,16 +30,24 @@ goog.require('ol.renderer.Layer');
  * @extends {goog.Disposable}
  * @param {Element} container Container.
  * @param {ol.Map} map Map.
+ * @suppress {checkStructDictInheritance}
+ * @struct
  */
 ol.renderer.Map = function(container, map) {
 
   goog.base(this);
 
   /**
-   * @private
+   * @public
    * @type {ol.Map}
    */
   this.map_ = map;
+
+  /**
+   * @protected
+   * @type {ol.render.IReplayGroup}
+   */
+  this.replayGroup = null;
 
   /**
    * @private
@@ -40,34 +60,21 @@ goog.inherits(ol.renderer.Map, goog.Disposable);
 
 
 /**
- * @param {ol.FrameState} frameState FrameState.
+ * @param {olx.FrameState} frameState FrameState.
  * @protected
  */
 ol.renderer.Map.prototype.calculateMatrices2D = function(frameState) {
-
-  var view2DState = frameState.view2DState;
+  var viewState = frameState.viewState;
   var coordinateToPixelMatrix = frameState.coordinateToPixelMatrix;
-
-  goog.vec.Mat4.makeIdentity(coordinateToPixelMatrix);
-  goog.vec.Mat4.translate(coordinateToPixelMatrix,
-      frameState.size[0] / 2,
-      frameState.size[1] / 2,
-      0);
-  goog.vec.Mat4.scale(coordinateToPixelMatrix,
-      1 / view2DState.resolution,
-      -1 / view2DState.resolution,
-      1);
-  goog.vec.Mat4.rotateZ(coordinateToPixelMatrix,
-      -view2DState.rotation);
-  goog.vec.Mat4.translate(coordinateToPixelMatrix,
-      -view2DState.center[0],
-      -view2DState.center[1],
-      0);
-
+  goog.asserts.assert(!goog.isNull(coordinateToPixelMatrix));
+  ol.vec.Mat4.makeTransform2D(coordinateToPixelMatrix,
+      frameState.size[0] / 2, frameState.size[1] / 2,
+      1 / viewState.resolution, -1 / viewState.resolution,
+      -viewState.rotation,
+      -viewState.center[0], -viewState.center[1]);
   var inverted = goog.vec.Mat4.invert(
       coordinateToPixelMatrix, frameState.pixelToCoordinateMatrix);
   goog.asserts.assert(inverted);
-
 };
 
 
@@ -85,94 +92,86 @@ ol.renderer.Map.prototype.createLayerRenderer = function(layer) {
  * @inheritDoc
  */
 ol.renderer.Map.prototype.disposeInternal = function() {
-  goog.object.forEach(this.layerRenderers_, function(layerRenderer) {
-    goog.dispose(layerRenderer);
-  });
+  goog.object.forEach(this.layerRenderers_, goog.dispose);
   goog.base(this, 'disposeInternal');
 };
 
 
 /**
- * @return {Element} Canvas.
+ * @param {ol.Map} map Map.
+ * @param {olx.FrameState} frameState Frame state.
+ * @private
  */
-ol.renderer.Map.prototype.getCanvas = goog.functions.NULL;
-
-
-/**
- * @param {ol.Pixel} pixel Pixel coordinate relative to the map viewport.
- * @param {Array.<ol.layer.Layer>} layers Layers to query.
- * @param {function(Array.<Array.<string|undefined>>)} success Callback for
- *     successful queries. The passed argument is the resulting feature
- *     information.  Layers that are able to provide attribute data will put
- *     ol.Feature instances, other layers will put a string which can either
- *     be plain text or markup.
- * @param {function()=} opt_error Callback for unsuccessful
- *     queries.
- */
-ol.renderer.Map.prototype.getFeatureInfoForPixel =
-    function(pixel, layers, success, opt_error) {
-  var numLayers = layers.length;
-  var featureInfo = new Array(numLayers);
-  var callback = function(layerFeatureInfo, layer) {
-    featureInfo[goog.array.indexOf(layers, layer)] = layerFeatureInfo;
-    --numLayers;
-    if (!numLayers) {
-      success(featureInfo);
-    }
-  };
-
-  var layer, layerRenderer;
-  for (var i = 0; i < numLayers; ++i) {
-    layer = layers[i];
-    layerRenderer = this.getLayerRenderer(layer);
-    if (goog.isFunction(layerRenderer.getFeatureInfoForPixel)) {
-      layerRenderer.getFeatureInfoForPixel(pixel, callback, opt_error);
-    } else {
-      --numLayers;
-    }
-  }
+ol.renderer.Map.expireIconCache_ = function(map, frameState) {
+  ol.style.IconImageCache.getInstance().expire();
 };
 
 
 /**
- * @param {ol.Pixel} pixel Pixel coordinate relative to the map viewport.
- * @param {Array.<ol.layer.Layer>} layers Layers to query.
- * @param {function(Array.<Array.<ol.Feature|undefined>>)} success Callback for
- *     successful queries. The passed argument is the resulting feature
- *     information.  Layers that are able to provide attribute data will put
- *     ol.Feature instances, other layers will put a string which can either
- *     be plain text or markup.
- * @param {function()=} opt_error Callback for unsuccessful
- *     queries.
+ * @param {ol.Coordinate} coordinate Coordinate.
+ * @param {olx.FrameState} frameState FrameState.
+ * @param {function(this: S, ol.Feature, ol.layer.Layer): T} callback Feature
+ *     callback.
+ * @param {S} thisArg Value to use as `this` when executing `callback`.
+ * @param {function(this: U, ol.layer.Layer): boolean} layerFilter Layer filter
+ *     function, only layers which are visible and for which this function
+ *     returns `true` will be tested for features.  By default, all visible
+ *     layers will be tested.
+ * @param {U} thisArg2 Value to use as `this` when executing `layerFilter`.
+ * @return {T|undefined} Callback result.
+ * @template S,T,U
  */
-ol.renderer.Map.prototype.getFeaturesForPixel =
-    function(pixel, layers, success, opt_error) {
-  var numLayers = layers.length;
-  var features = new Array(numLayers);
-  var callback = function(layerFeatures, layer) {
-    features[goog.array.indexOf(layers, layer)] = layerFeatures;
-    --numLayers;
-    if (!numLayers) {
-      success(features);
-    }
-  };
-
-  var layer, layerRenderer;
-  for (var i = 0; i < numLayers; ++i) {
-    layer = layers[i];
-    layerRenderer = this.getLayerRenderer(layer);
-    if (goog.isFunction(layerRenderer.getFeaturesForPixel)) {
-      layerRenderer.getFeaturesForPixel(pixel, callback, opt_error);
-    } else {
-      --numLayers;
+ol.renderer.Map.prototype.forEachFeatureAtPixel =
+    function(coordinate, frameState, callback, thisArg,
+        layerFilter, thisArg2) {
+  var result;
+  var viewState = frameState.viewState;
+  var viewResolution = viewState.resolution;
+  var viewRotation = viewState.rotation;
+  if (!goog.isNull(this.replayGroup)) {
+    /** @type {Object.<string, boolean>} */
+    var features = {};
+    result = this.replayGroup.forEachGeometryAtPixel(viewResolution,
+        viewRotation, coordinate, {},
+        /**
+         * @param {ol.Feature} feature Feature.
+         * @return {?} Callback result.
+         */
+        function(feature) {
+          goog.asserts.assert(goog.isDef(feature));
+          var key = goog.getUid(feature).toString();
+          if (!(key in features)) {
+            features[key] = true;
+            return callback.call(thisArg, feature, null);
+          }
+        });
+    if (result) {
+      return result;
     }
   }
+  var layerStates = this.map_.getLayerGroup().getLayerStatesArray();
+  var numLayers = layerStates.length;
+  var i;
+  for (i = numLayers - 1; i >= 0; --i) {
+    var layerState = layerStates[i];
+    var layer = layerState.layer;
+    if (ol.layer.Layer.visibleAtResolution(layerState, viewResolution) &&
+        layerFilter.call(thisArg2, layer)) {
+      var layerRenderer = this.getLayerRenderer(layer);
+      result = layerRenderer.forEachFeatureAtPixel(
+          coordinate, frameState, callback, thisArg);
+      if (result) {
+        return result;
+      }
+    }
+  }
+  return undefined;
 };
 
 
 /**
  * @param {ol.layer.Layer} layer Layer.
- * @protected
+ * @public
  * @return {ol.renderer.Layer} Layer renderer.
  */
 ol.renderer.Map.prototype.getLayerRenderer = function(layer) {
@@ -185,7 +184,10 @@ ol.renderer.Map.prototype.getLayerRenderer = function(layer) {
     return layerRenderer;
   }
 };
-
+goog.exportProperty(
+    ol.renderer.Map.prototype,
+    'getLayerRenderer',
+    ol.renderer.Map.prototype.getLayerRenderer);
 
 /**
  * @param {string} layerKey Layer key.
@@ -216,6 +218,12 @@ ol.renderer.Map.prototype.getMap = function() {
 
 
 /**
+ * @return {string} Type
+ */
+ol.renderer.Map.prototype.getType = goog.abstractMethod;
+
+
+/**
  * @param {string} layerKey Layer key.
  * @return {ol.renderer.Layer} Layer renderer.
  * @private
@@ -230,14 +238,14 @@ ol.renderer.Map.prototype.removeLayerRendererByKey_ = function(layerKey) {
 
 /**
  * Render.
- * @param {?ol.FrameState} frameState Frame state.
+ * @param {?olx.FrameState} frameState Frame state.
  */
 ol.renderer.Map.prototype.renderFrame = goog.nullFunction;
 
 
 /**
  * @param {ol.Map} map Map.
- * @param {ol.FrameState} frameState Frame state.
+ * @param {olx.FrameState} frameState Frame state.
  * @private
  */
 ol.renderer.Map.prototype.removeUnusedLayerRenderers_ =
@@ -252,7 +260,16 @@ ol.renderer.Map.prototype.removeUnusedLayerRenderers_ =
 
 
 /**
- * @param {!ol.FrameState} frameState Frame state.
+ * @param {olx.FrameState} frameState Frame state.
+ * @protected
+ */
+ol.renderer.Map.prototype.scheduleExpireIconCache = function(frameState) {
+  frameState.postRenderFunctions.push(ol.renderer.Map.expireIconCache_);
+};
+
+
+/**
+ * @param {!olx.FrameState} frameState Frame state.
  * @protected
  */
 ol.renderer.Map.prototype.scheduleRemoveUnusedLayerRenderers =

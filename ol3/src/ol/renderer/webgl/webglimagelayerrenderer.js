@@ -1,16 +1,15 @@
 goog.provide('ol.renderer.webgl.ImageLayer');
 
 goog.require('goog.asserts');
-goog.require('goog.events');
-goog.require('goog.events.EventType');
 goog.require('goog.vec.Mat4');
 goog.require('goog.webgl');
 goog.require('ol.Coordinate');
 goog.require('ol.Extent');
-goog.require('ol.Image');
-goog.require('ol.ImageState');
+goog.require('ol.ImageBase');
 goog.require('ol.ViewHint');
+goog.require('ol.extent');
 goog.require('ol.layer.Image');
+goog.require('ol.proj');
 goog.require('ol.renderer.webgl.Layer');
 
 
@@ -28,7 +27,7 @@ ol.renderer.webgl.ImageLayer = function(mapRenderer, imageLayer) {
   /**
    * The last rendered image.
    * @private
-   * @type {?ol.Image}
+   * @type {?ol.ImageBase}
    */
   this.image_ = null;
 
@@ -37,7 +36,7 @@ goog.inherits(ol.renderer.webgl.ImageLayer, ol.renderer.webgl.Layer);
 
 
 /**
- * @param {ol.Image} image Image.
+ * @param {ol.ImageBase} image Image.
  * @private
  * @return {WebGLTexture} Texture.
  */
@@ -47,7 +46,7 @@ ol.renderer.webgl.ImageLayer.prototype.createTexture_ = function(image) {
   // http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
   // http://learningwebgl.com/blog/?p=2101
 
-  var imageElement = image.getImageElement(this);
+  var imageElement = image.getImage();
   var gl = this.getWebGLMapRenderer().getGL();
 
   var texture = gl.createTexture();
@@ -72,53 +71,81 @@ ol.renderer.webgl.ImageLayer.prototype.createTexture_ = function(image) {
 
 
 /**
- * @protected
- * @return {ol.layer.Image} Tile layer.
+ * @inheritDoc
  */
-ol.renderer.webgl.ImageLayer.prototype.getImageLayer = function() {
-  return /** @type {ol.layer.Image} */ (this.getLayer());
+ol.renderer.webgl.ImageLayer.prototype.forEachFeatureAtPixel =
+    function(coordinate, frameState, callback, thisArg) {
+  var layer = this.getLayer();
+  var source = layer.getSource();
+  var resolution = frameState.viewState.resolution;
+  var rotation = frameState.viewState.rotation;
+  var skippedFeatureUids = frameState.skippedFeatureUids;
+  return source.forEachFeatureAtPixel(
+      resolution, rotation, coordinate, skippedFeatureUids,
+
+      /**
+       * @param {ol.Feature} feature Feature.
+       * @return {?} Callback result.
+       */
+      function(feature) {
+        return callback.call(thisArg, feature, layer);
+      });
 };
 
 
 /**
  * @inheritDoc
  */
-ol.renderer.webgl.ImageLayer.prototype.renderFrame =
-    function(frameState, layerState) {
+ol.renderer.webgl.ImageLayer.prototype.prepareFrame =
+    function(frameState, layerState, context) {
 
   var gl = this.getWebGLMapRenderer().getGL();
 
-  var view2DState = frameState.view2DState;
-  var viewCenter = view2DState.center;
-  var viewResolution = view2DState.resolution;
-  var viewRotation = view2DState.rotation;
+  var viewState = frameState.viewState;
+  var viewCenter = viewState.center;
+  var viewResolution = viewState.resolution;
+  var viewRotation = viewState.rotation;
 
   var image = this.image_;
   var texture = this.texture;
-  var imageLayer = this.getImageLayer();
-  var imageSource = imageLayer.getImageSource();
+  var imageLayer = this.getLayer();
+  goog.asserts.assertInstanceof(imageLayer, ol.layer.Image);
+  var imageSource = imageLayer.getSource();
 
   var hints = frameState.viewHints;
 
-  if (!hints[ol.ViewHint.ANIMATING] && !hints[ol.ViewHint.INTERACTING]) {
-    var image_ = imageSource.getImage(
-        frameState.extent, viewResolution, view2DState.projection);
+  var renderedExtent = frameState.extent;
+  if (goog.isDef(layerState.extent)) {
+    renderedExtent = ol.extent.getIntersection(
+        renderedExtent, layerState.extent);
+  }
+  if (!hints[ol.ViewHint.ANIMATING] && !hints[ol.ViewHint.INTERACTING] &&
+      !ol.extent.isEmpty(renderedExtent)) {
+    var projection = viewState.projection;
+    var sourceProjection = imageSource.getProjection();
+    if (!goog.isNull(sourceProjection)) {
+      goog.asserts.assert(ol.proj.equivalent(projection, sourceProjection));
+      projection = sourceProjection;
+    }
+    var image_ = imageSource.getImage(renderedExtent, viewResolution,
+        frameState.pixelRatio, projection);
     if (!goog.isNull(image_)) {
-      var imageState = image_.getState();
-      if (imageState == ol.ImageState.IDLE) {
-        goog.events.listenOnce(image_, goog.events.EventType.CHANGE,
-            this.handleImageChange, false, this);
-        image_.load();
-      } else if (imageState == ol.ImageState.LOADED) {
+      var loaded = this.loadImage(image_);
+      if (loaded) {
         image = image_;
         texture = this.createTexture_(image_);
         if (!goog.isNull(this.texture)) {
           frameState.postRenderFunctions.push(
-              goog.partial(function(gl, texture) {
-                if (!gl.isContextLost()) {
-                  gl.deleteTexture(texture);
-                }
-              }, gl, this.texture));
+              goog.partial(
+                  /**
+                   * @param {WebGLRenderingContext} gl GL.
+                   * @param {WebGLTexture} texture Texture.
+                   */
+                  function(gl, texture) {
+                    if (!gl.isContextLost()) {
+                      gl.deleteTexture(texture);
+                    }
+                  }, gl, this.texture));
         }
       }
     }
@@ -127,7 +154,7 @@ ol.renderer.webgl.ImageLayer.prototype.renderFrame =
   if (!goog.isNull(image)) {
     goog.asserts.assert(!goog.isNull(texture));
 
-    var canvas = this.getWebGLMapRenderer().getCanvas();
+    var canvas = this.getWebGLMapRenderer().getContext().getCanvas();
 
     this.updateProjectionMatrix_(canvas.width, canvas.height,
         viewCenter, viewResolution, viewRotation, image.getExtent());
@@ -144,6 +171,8 @@ ol.renderer.webgl.ImageLayer.prototype.renderFrame =
     this.updateAttributions(frameState.attributions, image.getAttributions());
     this.updateLogos(frameState, imageSource);
   }
+
+  return true;
 };
 
 

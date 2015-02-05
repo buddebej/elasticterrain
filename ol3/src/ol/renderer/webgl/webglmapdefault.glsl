@@ -15,8 +15,9 @@ uniform mat4 u_projectionMatrix;
 
 void main(void) {
   gl_Position = u_projectionMatrix * vec4(a_position, 0., 1.);
-  v_texCoord = (u_texCoordMatrix * (vec4(a_texCoord, 0., 1.))).st;
+  v_texCoord = (u_texCoordMatrix * vec4(a_texCoord, 0., 1.)).st;
 }
+
 
 //! FRAGMENT
 uniform float u_opacity;

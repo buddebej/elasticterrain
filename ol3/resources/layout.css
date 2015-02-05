@@ -1,4 +1,3 @@
-@import url(font-awesome/css/font-awesome.min.css);
 @import url(http://fonts.googleapis.com/css?family=Quattrocento+Sans:400,400italic,700);
 
 body {
@@ -10,8 +9,12 @@ body {
   background: url(textured_paper.jpeg) repeat;
 }
 .ol-attribution {
-  max-width: 50%;
+  max-width: calc(100% - 3em);
 }
+.ol-control button, .ol-attribution, .ol-scale-line-inner {
+  font-family: 'Lucida Grande',Verdana,Geneva,Lucida,Arial,Helvetica,sans-serif;
+}
+
 #tags {
   display: none;
 }
@@ -26,4 +29,3 @@ body, h1, h2, h3, h4, p, li, td, th {
   color: white;
   padding: 5px;
 }
-

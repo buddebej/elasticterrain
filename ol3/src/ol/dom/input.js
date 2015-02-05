@@ -1,6 +1,7 @@
 goog.provide('ol.dom.Input');
 goog.provide('ol.dom.InputProperty');
 
+goog.require('goog.asserts');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('ol.Object');
@@ -11,13 +12,13 @@ goog.require('ol.Object');
  */
 ol.dom.InputProperty = {
   VALUE: 'value',
-  VALUE_AS_NUMBER: 'valueAsNumber',
   CHECKED: 'checked'
 };
 
 
 
 /**
+ * @classdesc
  * Helper class for binding HTML input to an {@link ol.Object}.
  *
  * Example:
@@ -29,25 +30,24 @@ ol.dom.InputProperty = {
  * @constructor
  * @extends {ol.Object}
  * @param {Element} target Target element.
+ * @api
  */
 ol.dom.Input = function(target) {
   goog.base(this);
 
   /**
    * @private
-   * @type {Element}
+   * @type {HTMLInputElement}
    */
-  this.target_ = target;
+  this.target_ = /** @type {HTMLInputElement} */ (target);
 
-  goog.events.listen(this.target_, goog.events.EventType.CHANGE,
+  goog.events.listen(this.target_,
+      [goog.events.EventType.CHANGE, goog.events.EventType.INPUT],
       this.handleInputChanged_, false, this);
 
   goog.events.listen(this,
       ol.Object.getChangeEventType(ol.dom.InputProperty.VALUE),
       this.handleValueChanged_, false, this);
-  goog.events.listen(this,
-      ol.Object.getChangeEventType(ol.dom.InputProperty.VALUE_AS_NUMBER),
-      this.handleValueAsNumberChanged_, false, this);
   goog.events.listen(this,
       ol.Object.getChangeEventType(ol.dom.InputProperty.CHECKED),
       this.handleCheckedChanged_, false, this);
@@ -56,8 +56,10 @@ goog.inherits(ol.dom.Input, ol.Object);
 
 
 /**
- * If the input is a checkbox, return whether or not the checbox is checked.
- * @return {boolean|undefined} checked.
+ * If the input is a checkbox, return whether or not the checkbox is checked.
+ * @return {boolean|undefined} The checked state of the Input.
+ * @observable
+ * @api
  */
 ol.dom.Input.prototype.getChecked = function() {
   return /** @type {boolean} */ (this.get(ol.dom.InputProperty.CHECKED));
@@ -70,7 +72,9 @@ goog.exportProperty(
 
 /**
  * Get the value of the input.
- * @return {string|undefined} input value.
+ * @return {string|undefined} The value of the Input.
+ * @observable
+ * @api
  */
 ol.dom.Input.prototype.getValue = function() {
   return /** @type {string} */ (this.get(ol.dom.InputProperty.VALUE));
@@ -82,21 +86,10 @@ goog.exportProperty(
 
 
 /**
- * Get the value of the input as a number.
- * @return {number|null|undefined} input value as number.
- */
-ol.dom.Input.prototype.getValueAsNumber = function() {
-  return /** @type {number} */ (this.get(ol.dom.InputProperty.VALUE_AS_NUMBER));
-};
-goog.exportProperty(
-    ol.dom.Input.prototype,
-    'getValueAsNumber',
-    ol.dom.Input.prototype.getValueAsNumber);
-
-
-/**
  * Sets the value of the input.
- * @param {string} value Value.
+ * @param {string} value The value of the Input.
+ * @observable
+ * @api
  */
 ol.dom.Input.prototype.setValue = function(value) {
   this.set(ol.dom.InputProperty.VALUE, value);
@@ -108,21 +101,10 @@ goog.exportProperty(
 
 
 /**
- * Sets the number value of the input.
- * @param {number} value Number value.
- */
-ol.dom.Input.prototype.setValueAsNumber = function(value) {
-  this.set(ol.dom.InputProperty.VALUE_AS_NUMBER, value);
-};
-goog.exportProperty(
-    ol.dom.Input.prototype,
-    'setValueAsNumber',
-    ol.dom.Input.prototype.setValueAsNumber);
-
-
-/**
  * Set whether or not a checkbox is checked.
- * @param {boolean} checked Checked.
+ * @param {boolean} checked The checked state of the Input.
+ * @observable
+ * @api
  */
 ol.dom.Input.prototype.setChecked = function(checked) {
   this.set(ol.dom.InputProperty.CHECKED, checked);
@@ -134,38 +116,33 @@ goog.exportProperty(
 
 
 /**
+ * @param {goog.events.BrowserEvent} browserEvent Browser event.
  * @private
  */
-ol.dom.Input.prototype.handleInputChanged_ = function() {
-  if (this.target_.type === 'checkbox' || this.target_.type === 'radio') {
-    this.setChecked(this.target_.checked);
+ol.dom.Input.prototype.handleInputChanged_ = function(browserEvent) {
+  goog.asserts.assert(browserEvent.currentTarget == this.target_);
+  var target = this.target_;
+  if (target.type === 'checkbox' || target.type === 'radio') {
+    this.setChecked(target.checked);
   } else {
-    this.setValue(this.target_.value);
-    this.setValueAsNumber(this.target_.valueAsNumber);
+    this.setValue(target.value);
   }
 };
 
 
 /**
+ * @param {goog.events.Event} event Change event.
  * @private
  */
-ol.dom.Input.prototype.handleCheckedChanged_ = function() {
-  this.target_.checked = this.getChecked() ? 'checked' : undefined;
+ol.dom.Input.prototype.handleCheckedChanged_ = function(event) {
+  this.target_.checked = /** @type {boolean} */ (this.getChecked());
 };
 
 
 /**
+ * @param {goog.events.Event} event Change event.
  * @private
  */
-ol.dom.Input.prototype.handleValueChanged_ = function() {
-  this.target_.value = this.getValue();
-};
-
-
-/**
- * @private
- */
-ol.dom.Input.prototype.handleValueAsNumberChanged_ = function() {
-  // firefox raises an exception if this.target_.valueAsNumber is set instead
-  this.target_.value = this.getValueAsNumber();
+ol.dom.Input.prototype.handleValueChanged_ = function(event) {
+  this.target_.value =  /** @type {string} */ (this.getValue());
 };

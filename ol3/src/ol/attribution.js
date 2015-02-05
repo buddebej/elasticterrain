@@ -5,22 +5,25 @@ goog.require('ol.TileRange');
 
 
 /**
- * Create a new attribution to be associated with a layer source.
+ * @classdesc
+ * An attribution for a layer source.
  *
  * Example:
  *
  *     source: new ol.source.OSM({
  *       attributions: [
- *       new ol.Attribution({
- *         html: 'All maps &copy; ' +
- *             '<a href="http://www.opencyclemap.org/">OpenCycleMap</a>'
- *       }),
- *       ol.source.OSM.DATA_ATTRIBUTION
- *     ],
+ *         new ol.Attribution({
+ *           html: 'All maps &copy; ' +
+ *               '<a href="http://www.opencyclemap.org/">OpenCycleMap</a>'
+ *         }),
+ *         ol.source.OSM.ATTRIBUTION
+ *       ],
  *     ..
  *
  * @constructor
- * @param {ol.AttributionOptions} options Attribution options.
+ * @param {olx.AttributionOptions} options Attribution options.
+ * @struct
+ * @api stable
  */
 ol.Attribution = function(options) {
 
@@ -42,6 +45,7 @@ ol.Attribution = function(options) {
 
 /**
  * @return {string} HTML.
+ * @api stable
  */
 ol.Attribution.prototype.getHTML = function() {
   return this.html_;

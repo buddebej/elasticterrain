@@ -8,9 +8,14 @@ goog.require('ol.tilegrid.TileGrid');
 
 
 /**
+ * @classdesc
+ * Set the grid pattern for sources accessing WMTS tiled-image servers.
+ *
  * @constructor
  * @extends {ol.tilegrid.TileGrid}
- * @param {ol.tilegrid.WMTSOptions} options WMTS options.
+ * @param {olx.tilegrid.WMTSOptions} options WMTS options.
+ * @struct
+ * @api
  */
 ol.tilegrid.WMTS = function(options) {
 
@@ -48,6 +53,7 @@ ol.tilegrid.WMTS.prototype.getMatrixId = function(z) {
 
 /**
  * @return {Array.<string>} MatrixIds.
+ * @api
  */
 ol.tilegrid.WMTS.prototype.getMatrixIds = function() {
   return this.matrixIds_;
@@ -62,9 +68,13 @@ ol.tilegrid.WMTS.prototype.getMatrixIds = function() {
 ol.tilegrid.WMTS.createFromCapabilitiesMatrixSet =
     function(matrixSet) {
 
+  /** @type {!Array.<number>} */
   var resolutions = [];
+  /** @type {!Array.<string>} */
   var matrixIds = [];
+  /** @type {!Array.<ol.Coordinate>} */
   var origins = [];
+  /** @type {!Array.<number>} */
   var tileSizes = [];
 
   var supportedCRSPropName = 'supportedCRS';
@@ -88,7 +98,10 @@ ol.tilegrid.WMTS.createFromCapabilitiesMatrixSet =
         origins.push(elt[topLeftCornerPropName]);
         resolutions.push(elt[scaleDenominatorPropName] * 0.28E-3 /
             metersPerUnit);
-        tileSizes.push([elt[tileWidthPropName], elt[tileHeightPropName]]);
+        var tileWidth = elt[tileWidthPropName];
+        var tileHeight = elt[tileHeightPropName];
+        goog.asserts.assert(tileWidth == tileHeight);
+        tileSizes.push(tileWidth);
       });
 
   return new ol.tilegrid.WMTS({

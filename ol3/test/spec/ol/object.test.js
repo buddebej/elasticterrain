@@ -82,10 +82,10 @@ describe('ol.Object', function() {
 
   });
 
-  describe('setValues', function() {
+  describe('setProperties', function() {
 
     it('sets multiple values at once', function() {
-      o.setValues({
+      o.setProperties({
         k1: 1,
         k2: 2
       });
@@ -106,7 +106,7 @@ describe('ol.Object', function() {
       goog.events.listen(o, 'change:k', listener1);
 
       listener2 = sinon.spy();
-      goog.events.listen(o, 'change', listener2);
+      goog.events.listen(o, ol.ObjectEventType.PROPERTYCHANGE, listener2);
 
       var o2 = new ol.Object();
       o2.bindTo('k', o);
@@ -115,18 +115,33 @@ describe('ol.Object', function() {
     });
 
     it('dispatches events', function() {
-      o.notify('k');
-      expect(listener1).to.be.called();
+      o.notify('k', 1);
+      expect(listener1.calledOnce).to.be(true);
+      var args = listener1.firstCall.args;
+      expect(args).to.have.length(1);
+      var event = args[0];
+      expect(event.key).to.be('k');
+      expect(event.oldValue).to.be(1);
     });
 
     it('dispatches generic change events to bound objects', function() {
-      o.notify('k');
-      expect(listener2).to.be.called();
+      o.notify('k', 1);
+      expect(listener2.calledOnce).to.be(true);
+      var args = listener2.firstCall.args;
+      expect(args).to.have.length(1);
+      var event = args[0];
+      expect(event.key).to.be('k');
+      expect(event.oldValue).to.be(1);
     });
 
     it('dispatches events to bound objects', function() {
-      o.notify('k');
-      expect(listener3).to.be.called();
+      o.notify('k', 1);
+      expect(listener3.calledOnce).to.be(true);
+      var args = listener3.firstCall.args;
+      expect(args).to.have.length(1);
+      var event = args[0];
+      expect(event.key).to.be('k');
+      expect(event.oldValue).to.be(1);
     });
   });
 
@@ -139,7 +154,7 @@ describe('ol.Object', function() {
       goog.events.listen(o, 'change:k', listener1);
 
       listener2 = sinon.spy();
-      goog.events.listen(o, 'change', listener2);
+      goog.events.listen(o, ol.ObjectEventType.PROPERTYCHANGE, listener2);
 
       o2 = new ol.Object();
       o2.bindTo('k', o);
@@ -157,7 +172,11 @@ describe('ol.Object', function() {
 
     it('dispatches generic change events to object', function() {
       o.set('k', 1);
-      expect(listener2).to.be.called();
+      expect(listener2.calledOnce).to.be(true);
+      var args = listener2.firstCall.args;
+      expect(args).to.have.length(1);
+      var event = args[0];
+      expect(event.key).to.be('k');
     });
 
     it('dispatches events to bound object', function() {
@@ -175,8 +194,13 @@ describe('ol.Object', function() {
 
     it('dispatches generic change events to object bound to', function() {
       o2.set('k', 2);
-      expect(listener2).to.be.called();
+      expect(listener2.calledOnce).to.be(true);
+      var args = listener2.firstCall.args;
+      expect(args).to.have.length(1);
+      var event = args[0];
+      expect(event.key).to.be('k');
     });
+
   });
 
   describe('bind', function() {
@@ -189,8 +213,12 @@ describe('ol.Object', function() {
 
     describe('bindTo after set', function() {
 
-      it('gets expected value', function() {
+      beforeEach(function() {
         o.set('k', 1);
+        o2.set('k', 0);
+      });
+
+      it('gets expected value', function() {
         o2.bindTo('k', o);
         expect(o.get('k')).to.eql(1);
         expect(o2.get('k')).to.eql(1);
@@ -198,6 +226,31 @@ describe('ol.Object', function() {
         expect(o.getKeys()).to.eql(['k']);
         expect(o2.getKeys()).to.eql(['k']);
       });
+
+      it('dispatches a change: event', function() {
+        var listener = sinon.spy();
+        o2.on('change:k', listener);
+        o2.bindTo('k', o);
+        expect(listener.calledOnce).to.be(true);
+        var call = listener.firstCall;
+        expect(call.args).to.have.length(1);
+        expect(call.args[0].key).to.be('k');
+        expect(call.args[0].oldValue).to.be(0);
+        expect(o2.get('k')).to.be(1);
+      });
+
+      it('dispatches a propertychange event', function() {
+        var listener = sinon.spy();
+        o2.on('propertychange', listener);
+        o2.bindTo('k', o);
+        expect(listener.calledOnce).to.be(true);
+        var call = listener.firstCall;
+        expect(call.args).to.have.length(1);
+        expect(call.args[0].key).to.be('k');
+        expect(call.args[0].oldValue).to.be(0);
+        expect(o2.get('k')).to.be(1);
+      });
+
     });
 
     describe('bindTo before set', function() {
@@ -256,6 +309,7 @@ describe('ol.Object', function() {
       expect(o.get('k')).to.eql(1);
       expect(o2.get('k')).to.eql(2);
     });
+
   });
 
   describe('unbindAll', function() {
@@ -467,14 +521,140 @@ describe('ol.Object', function() {
 
     it('dispatches the expected event', function() {
       o.set('K', 1);
-      expect(listener1).to.be.called();
-      expect(listener2).to.not.be.called();
+      expect(listener1).to.not.be.called();
+      expect(listener2).to.be.called();
 
       expect(o.getKeys()).to.eql(['K']);
     });
   });
+
+  describe('transforms', function() {
+
+    describe('original states and events', function() {
+      it('bindTo and transform emit propertychange events', function() {
+        var source = new ol.Object();
+        var target = new ol.Object();
+        source.set('x', 1);
+        target.set('x', 2);
+        var sourceSpy = sinon.spy();
+        var targetSpy = sinon.spy();
+        source.on('propertychange', sourceSpy);
+        target.on('propertychange', targetSpy);
+        var accessor = source.bindTo('x', target);
+        expect(sourceSpy.callCount).to.be(1);
+        expect(targetSpy.callCount).to.be(0);
+        expect(source.get('x')).to.be(2);
+        expect(target.get('x')).to.be(2);
+        accessor.transform(function(v) {
+          return v * 2;
+        }, function(v) {
+          return v / 2;
+        });
+        var call, args;
+        expect(sourceSpy.calledTwice).to.be(true);
+        call = sourceSpy.firstCall;
+        expect(call.args).to.have.length(1);
+        expect(call.args[0].key).to.be('x');
+        expect(call.args[0].oldValue).to.be(1);
+        call = sourceSpy.secondCall;
+        expect(call.args).to.have.length(1);
+        expect(call.args[0].key).to.be('x');
+        expect(call.args[0].oldValue).to.be(2);
+        expect(targetSpy.called).to.be(false);
+        expect(source.get('x')).to.be(1);
+        expect(target.get('x')).to.be(2);
+      });
+    });
+
+    describe('with multiple binds to a single property', function() {
+
+      var original, plusOne, asString;
+
+      beforeEach(function() {
+        original = new ol.Object();
+        original.set('x', 1);
+        plusOne = new ol.Object();
+        plusOne.bindTo('x', original).transform(
+            function(x) { return x - 1; },
+            function(x) { return x + 1; }
+        );
+        asString = new ol.Object();
+        asString.bindTo('x', original).transform(
+            function(x) { return +x; },
+            function(x) { return x + ''; }
+        );
+      });
+
+      it('returns the expected value', function() {
+        expect(original.get('x')).to.be(1);
+        expect(plusOne.get('x')).to.be(2);
+        expect(asString.get('x')).to.be('1');
+      });
+
+      it('allows the original value to be set correctly', function() {
+        original.set('x', 2);
+        expect(plusOne.get('x')).to.be(3);
+        expect(asString.get('x')).to.be('2');
+      });
+
+      it('allows the transformed values to be set correctly', function() {
+        plusOne.set('x', 3);
+        expect(original.get('x')).to.be(2);
+        expect(asString.get('x')).to.be('2');
+        asString.set('x', '3');
+        expect(original.get('x')).to.be(3);
+        expect(plusOne.get('x')).to.be(4);
+      });
+
+    });
+
+    describe('with transitive binds', function() {
+
+      var original, plusOne, plusOneAsString;
+
+      beforeEach(function() {
+        original = new ol.Object();
+        original.set('x', 1);
+        plusOne = new ol.Object();
+        plusOne.bindTo('x', original).transform(
+            function(x) { return x - 1; },
+            function(x) { return x + 1; }
+        );
+        plusOneAsString = new ol.Object();
+        plusOneAsString.bindTo('x', plusOne).transform(
+            parseFloat,
+            function(x) { return x + ''; }
+        );
+      });
+
+      it('returns the expected value', function() {
+        expect(original.get('x')).to.be(1);
+        expect(plusOne.get('x')).to.be(2);
+        expect(plusOneAsString.get('x')).to.be('2');
+      });
+
+      it('allows the original value to be set correctly', function() {
+        original.set('x', 2);
+        expect(plusOne.get('x')).to.be(3);
+        expect(plusOneAsString.get('x')).to.be('3');
+      });
+
+      it('allows the transformed values to be set correctly', function() {
+        plusOne.set('x', 3);
+        expect(original.get('x')).to.be(2);
+        expect(plusOneAsString.get('x')).to.be('3');
+        plusOneAsString.set('x', '4');
+        expect(original.get('x')).to.be(3);
+        expect(plusOne.get('x')).to.be(4);
+      });
+
+    });
+
+  });
+
 });
 
 
 goog.require('goog.events');
 goog.require('ol.Object');
+goog.require('ol.ObjectEventType');

@@ -3,7 +3,7 @@ goog.provide('ol.control.FullScreen');
 goog.require('goog.asserts');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.dom.fullscreen');
 goog.require('goog.dom.fullscreen.EventType');
 goog.require('goog.events');
@@ -14,6 +14,7 @@ goog.require('ol.css');
 
 
 /**
+ * @classdesc
  * Provides a button that when clicked fills up the full screen with the map.
  * When in full screen mode, a close button is shown to exit full screen mode.
  * The [Fullscreen API](http://www.w3.org/TR/fullscreen/) is used to
@@ -22,7 +23,8 @@ goog.require('ol.css');
  *
  * @constructor
  * @extends {ol.control.Control}
- * @param {ol.control.FullScreenOptions=} opt_options Options.
+ * @param {olx.control.FullScreenOptions=} opt_options Options.
+ * @api stable
  */
 ol.control.FullScreen = function(opt_options) {
 
@@ -35,22 +37,32 @@ ol.control.FullScreen = function(opt_options) {
   this.cssClassName_ = goog.isDef(options.className) ?
       options.className : 'ol-full-screen';
 
-  var aElement = goog.dom.createDom(goog.dom.TagName.A, {
-    'href': '#fullScreen',
-    'class': this.cssClassName_ + '-' + goog.dom.fullscreen.isFullScreen()
+  var tipLabel = goog.isDef(options.tipLabel) ?
+      options.tipLabel : 'Toggle full-screen';
+  var button = goog.dom.createDom(goog.dom.TagName.BUTTON, {
+    'class': this.cssClassName_ + '-' + goog.dom.fullscreen.isFullScreen(),
+    'type': 'button',
+    'title': tipLabel
   });
-  goog.events.listen(aElement, [
-    goog.events.EventType.CLICK,
-    goog.events.EventType.TOUCHEND
-  ], this.handleClick_, false, this);
 
-  goog.events.listen(goog.global.document, goog.dom.fullscreen.EventType.CHANGE,
+  goog.events.listen(button, goog.events.EventType.CLICK,
+      this.handleClick_, false, this);
+
+  goog.events.listen(button, [
+    goog.events.EventType.MOUSEOUT,
+    goog.events.EventType.FOCUSOUT
+  ], function() {
+    this.blur();
+  }, false);
+
+  goog.events.listen(goog.global.document,
+      goog.dom.fullscreen.EventType.CHANGE,
       this.handleFullScreenChange_, false, this);
 
-  var element = goog.dom.createDom(goog.dom.TagName.DIV, {
-    'class': this.cssClassName_ + ' ' + ol.css.CLASS_UNSELECTABLE + ' ' +
-        (!goog.dom.fullscreen.isSupported() ? ol.css.CLASS_UNSUPPORTED : '')
-  }, aElement);
+  var cssClasses = this.cssClassName_ + ' ' + ol.css.CLASS_UNSELECTABLE +
+      ' ' + ol.css.CLASS_CONTROL + ' ' +
+      (!goog.dom.fullscreen.isSupported() ? ol.css.CLASS_UNSUPPORTED : '');
+  var element = goog.dom.createDom(goog.dom.TagName.DIV, cssClasses, button);
 
   goog.base(this, {
     element: element,
@@ -68,14 +80,22 @@ goog.inherits(ol.control.FullScreen, ol.control.Control);
 
 
 /**
- * @param {goog.events.BrowserEvent} browserEvent Browser event.
+ * @param {goog.events.BrowserEvent} event The event to handle
  * @private
  */
-ol.control.FullScreen.prototype.handleClick_ = function(browserEvent) {
+ol.control.FullScreen.prototype.handleClick_ = function(event) {
+  event.preventDefault();
+  this.handleFullScreen_();
+};
+
+
+/**
+ * @private
+ */
+ol.control.FullScreen.prototype.handleFullScreen_ = function() {
   if (!goog.dom.fullscreen.isSupported()) {
     return;
   }
-  browserEvent.preventDefault();
   var map = this.getMap();
   if (goog.isNull(map)) {
     return;
@@ -103,9 +123,13 @@ ol.control.FullScreen.prototype.handleFullScreenChange_ = function() {
   var opened = this.cssClassName_ + '-true';
   var closed = this.cssClassName_ + '-false';
   var anchor = goog.dom.getFirstElementChild(this.element);
+  var map = this.getMap();
   if (goog.dom.fullscreen.isFullScreen()) {
-    goog.dom.classes.swap(anchor, closed, opened);
+    goog.dom.classlist.swap(anchor, closed, opened);
   } else {
-    goog.dom.classes.swap(anchor, opened, closed);
+    goog.dom.classlist.swap(anchor, opened, closed);
+  }
+  if (!goog.isNull(map)) {
+    map.updateSize();
   }
 };

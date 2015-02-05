@@ -4,7 +4,6 @@ goog.provide('ol.TileQueue');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('ol.Coordinate');
-goog.require('ol.Tile');
 goog.require('ol.structs.PriorityQueue');
 
 
@@ -17,11 +16,12 @@ ol.TilePriorityFunction;
 
 /**
  * @constructor
- * @extends {ol.structs.PriorityQueue}
+ * @extends {ol.structs.PriorityQueue.<Array>}
  * @param {ol.TilePriorityFunction} tilePriorityFunction
  *     Tile priority function.
- * @param {Function} tileChangeCallback
+ * @param {function(): ?} tileChangeCallback
  *     Function called on each tile change event.
+ * @struct
  */
 ol.TileQueue = function(tilePriorityFunction, tileChangeCallback) {
 
@@ -44,7 +44,7 @@ ol.TileQueue = function(tilePriorityFunction, tileChangeCallback) {
 
   /**
    * @private
-   * @type {Function}
+   * @type {function(): ?}
    */
   this.tileChangeCallback_ = tileChangeCallback;
 

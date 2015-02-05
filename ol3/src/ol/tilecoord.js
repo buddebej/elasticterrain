@@ -1,7 +1,17 @@
 goog.provide('ol.TileCoord');
+goog.provide('ol.tilecoord');
 
 goog.require('goog.array');
 goog.require('goog.asserts');
+
+
+/**
+ * An array of three numbers representing the location of a tile in a tile
+ * grid. The order is `z`, `x`, and `y`. `z` is the zoom level.
+ * @typedef {Array.<number>} ol.TileCoord
+ * @api
+ */
+ol.TileCoord;
 
 
 /**
@@ -15,39 +25,11 @@ ol.QuadKeyCharCode = {
 };
 
 
-
-/**
- * @constructor
- * @param {number} z Zoom level.
- * @param {number} x X.
- * @param {number} y Y.
- */
-ol.TileCoord = function(z, x, y) {
-
-  /**
-   * Zoom level.
-   * @type {number}
-   */
-  this.z = z;
-
-  /**
-   * @type {number}
-   */
-  this.x = x;
-
-  /**
-   * @type {number}
-   */
-  this.y = y;
-
-};
-
-
 /**
  * @param {string} quadKey Quad key.
  * @return {ol.TileCoord} Tile coordinate.
  */
-ol.TileCoord.createFromQuadKey = function(quadKey) {
+ol.tilecoord.createFromQuadKey = function(quadKey) {
   var z = quadKey.length, x = 0, y = 0;
   var mask = 1 << (z - 1);
   var i;
@@ -66,7 +48,7 @@ ol.TileCoord.createFromQuadKey = function(quadKey) {
     }
     mask >>= 1;
   }
-  return new ol.TileCoord(z, x, y);
+  return [z, x, y];
 };
 
 
@@ -75,12 +57,13 @@ ol.TileCoord.createFromQuadKey = function(quadKey) {
  *   numbers.
  * @return {ol.TileCoord} Tile coord.
  */
-ol.TileCoord.createFromString = function(str) {
+ol.tilecoord.createFromString = function(str) {
   var v = str.split('/');
+  goog.asserts.assert(v.length === 3);
   v = goog.array.map(v, function(e, i, a) {
     return parseInt(e, 10);
   });
-  return new ol.TileCoord(v[0], v[1], v[2]);
+  return v;
 };
 
 
@@ -88,17 +71,17 @@ ol.TileCoord.createFromString = function(str) {
  * @param {number} z Z.
  * @param {number} x X.
  * @param {number} y Y.
- * @param {ol.TileCoord|undefined} tileCoord Tile coordinate.
+ * @param {ol.TileCoord=} opt_tileCoord Tile coordinate.
  * @return {ol.TileCoord} Tile coordinate.
  */
-ol.TileCoord.createOrUpdate = function(z, x, y, tileCoord) {
-  if (goog.isDef(tileCoord)) {
-    tileCoord.z = z;
-    tileCoord.x = x;
-    tileCoord.y = y;
-    return tileCoord;
+ol.tilecoord.createOrUpdate = function(z, x, y, opt_tileCoord) {
+  if (goog.isDef(opt_tileCoord)) {
+    opt_tileCoord[0] = z;
+    opt_tileCoord[1] = x;
+    opt_tileCoord[2] = y;
+    return opt_tileCoord;
   } else {
-    return new ol.TileCoord(z, x, y);
+    return [z, x, y];
   }
 };
 
@@ -109,49 +92,35 @@ ol.TileCoord.createOrUpdate = function(z, x, y, tileCoord) {
  * @param {number} y Y.
  * @return {string} Key.
  */
-ol.TileCoord.getKeyZXY = function(z, x, y) {
+ol.tilecoord.getKeyZXY = function(z, x, y) {
   return z + '/' + x + '/' + y;
 };
 
 
 /**
- * @param {Array.<number>=} opt_result Optional array to reuse.
- * @return {Array.<number>} Array of z, x, y.
- */
-ol.TileCoord.prototype.getZXY = function(opt_result) {
-  if (goog.isDef(opt_result)) {
-    goog.asserts.assert(opt_result.length == 3);
-    opt_result[0] = this.z;
-    opt_result[1] = this.x;
-    opt_result[2] = this.y;
-    return opt_result;
-  } else {
-    return [this.z, this.x, this.y];
-  }
-};
-
-
-/**
+ * @param {ol.TileCoord} tileCoord Tile coord.
  * @return {number} Hash.
  */
-ol.TileCoord.prototype.hash = function() {
-  return (this.x << this.z) + this.y;
+ol.tilecoord.hash = function(tileCoord) {
+  return (tileCoord[1] << tileCoord[0]) + tileCoord[2];
 };
 
 
 /**
+ * @param {ol.TileCoord} tileCoord Tile coord.
  * @return {string} Quad key.
  */
-ol.TileCoord.prototype.quadKey = function() {
-  var digits = new Array(this.z);
-  var mask = 1 << (this.z - 1);
+ol.tilecoord.quadKey = function(tileCoord) {
+  var z = tileCoord[0];
+  var digits = new Array(z);
+  var mask = 1 << (z - 1);
   var i, charCode;
-  for (i = 0; i < this.z; ++i) {
+  for (i = 0; i < z; ++i) {
     charCode = ol.QuadKeyCharCode.ZERO;
-    if (this.x & mask) {
+    if (tileCoord[1] & mask) {
       charCode += 1;
     }
-    if (this.y & mask) {
+    if (tileCoord[2] & mask) {
       charCode += 2;
     }
     digits[i] = String.fromCharCode(charCode);
@@ -162,8 +131,9 @@ ol.TileCoord.prototype.quadKey = function() {
 
 
 /**
+ * @param {ol.TileCoord} tileCoord Tile coord.
  * @return {string} String.
  */
-ol.TileCoord.prototype.toString = function() {
-  return ol.TileCoord.getKeyZXY(this.z, this.x, this.y);
+ol.tilecoord.toString = function(tileCoord) {
+  return ol.tilecoord.getKeyZXY(tileCoord[0], tileCoord[1], tileCoord[2]);
 };

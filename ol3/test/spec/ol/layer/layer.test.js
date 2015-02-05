@@ -48,6 +48,7 @@ describe('ol.layer.Layer', function() {
 
     it('provides default layerState', function() {
       expect(layer.getLayerState()).to.eql({
+        layer: layer,
         brightness: 0,
         contrast: 1,
         hue: 0,
@@ -55,6 +56,7 @@ describe('ol.layer.Layer', function() {
         saturation: 1,
         visible: true,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: Infinity,
         minResolution: 0
       });
@@ -90,6 +92,7 @@ describe('ol.layer.Layer', function() {
       expect(layer.getMinResolution()).to.be(0.25);
       expect(layer.get('foo')).to.be(42);
       expect(layer.getLayerState()).to.eql({
+        layer: layer,
         brightness: 0.5,
         contrast: 10,
         hue: 180,
@@ -97,11 +100,61 @@ describe('ol.layer.Layer', function() {
         saturation: 5,
         visible: false,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: 500,
         minResolution: 0.25
       });
 
       goog.dispose(layer);
+    });
+
+  });
+
+  describe('visibleAtResolution', function() {
+    var layer;
+
+    beforeEach(function() {
+      layer = new ol.layer.Layer({
+        source: new ol.source.Source({
+          projection: ol.proj.get('EPSG:4326')
+        })
+      });
+    });
+
+    afterEach(function() {
+      goog.dispose(layer);
+    });
+
+    it('returns false if layer is not visible', function() {
+      layer.setVisible(false);
+      layer.setMinResolution(3);
+      layer.setMaxResolution(5);
+      var layerState = layer.getLayerState();
+      expect(ol.layer.Layer.visibleAtResolution(layerState, 4)).to.be(false);
+    });
+
+    it('returns false if resolution lower than minResolution', function() {
+      layer.setVisible(true);
+      layer.setMinResolution(3);
+      layer.setMaxResolution(5);
+      var layerState = layer.getLayerState();
+      expect(ol.layer.Layer.visibleAtResolution(layerState, 2)).to.be(false);
+    });
+
+    it('returns false if resolution greater than maxResolution', function() {
+      layer.setVisible(true);
+      layer.setMinResolution(3);
+      layer.setMaxResolution(5);
+      var layerState = layer.getLayerState();
+      expect(ol.layer.Layer.visibleAtResolution(layerState, 6)).to.be(false);
+    });
+
+    it('returns true otherwise', function() {
+      layer.setVisible(true);
+      layer.setMinResolution(3);
+      layer.setMaxResolution(5);
+      var layerState = layer.getLayerState();
+      expect(ol.layer.Layer.visibleAtResolution(layerState, 4)).to.be(true);
     });
 
   });
@@ -132,6 +185,7 @@ describe('ol.layer.Layer', function() {
       layer.setMaxResolution(500);
       layer.setMinResolution(0.25);
       expect(layer.getLayerState()).to.eql({
+        layer: layer,
         brightness: -0.7,
         contrast: 0.3,
         hue: -0.3,
@@ -139,6 +193,7 @@ describe('ol.layer.Layer', function() {
         saturation: 0.3,
         visible: false,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: 500,
         minResolution: 0.25
       });
@@ -152,6 +207,7 @@ describe('ol.layer.Layer', function() {
       layer.setSaturation(-0.7);
       layer.setVisible(false);
       expect(layer.getLayerState()).to.eql({
+        layer: layer,
         brightness: 1,
         contrast: 0,
         hue: 42,
@@ -159,6 +215,7 @@ describe('ol.layer.Layer', function() {
         saturation: 0,
         visible: false,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: Infinity,
         minResolution: 0
       });
@@ -170,6 +227,7 @@ describe('ol.layer.Layer', function() {
       layer.setSaturation(42);
       layer.setVisible(true);
       expect(layer.getLayerState()).to.eql({
+        layer: layer,
         brightness: -1,
         contrast: 42,
         hue: -100,
@@ -177,9 +235,112 @@ describe('ol.layer.Layer', function() {
         saturation: 42,
         visible: true,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: Infinity,
         minResolution: 0
       });
+    });
+
+  });
+
+  describe('#getSource', function() {
+
+    it('gets the layer source', function() {
+      var source = new ol.source.Source({projection: ol.proj.get('EPSG:4326')});
+      var layer = new ol.layer.Layer({source: source});
+      expect(layer.getSource()).to.be(source);
+    });
+
+  });
+
+  describe('#set("source", source)', function() {
+    var projection = ol.proj.get('EPSG:4326');
+
+    it('sets the layer source', function() {
+      var layer = new ol.layer.Layer({
+        source: new ol.source.Source({projection: projection})
+      });
+
+      var source = new ol.source.Source({projection: projection});
+      layer.set('source', source);
+      expect(layer.getSource()).to.be(source);
+    });
+
+    it('calls changed', function() {
+      var layer = new ol.layer.Layer({
+        source: new ol.source.Source({projection: projection})
+      });
+      sinon.spy(layer, 'changed');
+
+      var source = new ol.source.Source({projection: projection});
+      layer.set('source', source);
+      expect(layer.changed.calledOnce).to.be(true);
+    });
+
+    it('sets up event listeners', function() {
+      sinon.spy(ol.layer.Layer.prototype, 'handleSourceChange_');
+
+      var first = new ol.source.Source({projection: projection});
+      var layer = new ol.layer.Layer({source: first});
+
+      first.setState(ol.source.State.READY);
+      expect(layer.handleSourceChange_.calledOnce).to.be(true);
+
+      var second = new ol.source.Source({projection: projection});
+      layer.set('source', second);
+
+      expect(layer.handleSourceChange_.calledOnce).to.be(true);
+      second.setState(ol.source.State.READY);
+      expect(layer.handleSourceChange_.callCount).to.be(2);
+
+      // remove spy
+      ol.layer.Layer.prototype.handleSourceChange_.restore();
+    });
+
+  });
+
+  describe('#setSource()', function() {
+    var projection = ol.proj.get('EPSG:4326');
+
+    it('sets the layer source', function() {
+      var layer = new ol.layer.Layer({
+        source: new ol.source.Source({projection: projection})
+      });
+
+      var source = new ol.source.Source({projection: projection});
+      layer.setSource(source);
+      expect(layer.getSource()).to.be(source);
+    });
+
+    it('calls changed', function() {
+      var layer = new ol.layer.Layer({
+        source: new ol.source.Source({projection: projection})
+      });
+      sinon.spy(layer, 'changed');
+
+      var source = new ol.source.Source({projection: projection});
+      layer.setSource(source);
+      expect(layer.changed.calledOnce).to.be(true);
+    });
+
+    it('sets up event listeners', function() {
+      sinon.spy(ol.layer.Layer.prototype, 'handleSourceChange_');
+
+      var first = new ol.source.Source({projection: projection});
+      var layer = new ol.layer.Layer({source: first});
+
+      first.setState(ol.source.State.READY);
+      expect(layer.handleSourceChange_.calledOnce).to.be(true);
+
+      var second = new ol.source.Source({projection: projection});
+      layer.setSource(second);
+
+      expect(layer.handleSourceChange_.calledOnce).to.be(true);
+      second.setState(ol.source.State.READY);
+      expect(layer.handleSourceChange_.callCount).to.be(2);
+
+      // remove spy
+      ol.layer.Layer.prototype.handleSourceChange_.restore();
     });
 
   });
@@ -210,6 +371,13 @@ describe('ol.layer.Layer', function() {
       expect(layer.getBrightness()).to.be(-0.7);
     });
 
+    it('triggers a change event', function() {
+      var listener = sinon.spy();
+      layer.on(ol.ObjectEventType.PROPERTYCHANGE, listener);
+      layer.setBrightness(0.5);
+      expect(listener.calledOnce).to.be(true);
+    });
+
   });
 
   describe('#setContrast', function() {
@@ -236,6 +404,13 @@ describe('ol.layer.Layer', function() {
     it('accepts a big positive number', function() {
       layer.setContrast(42);
       expect(layer.getContrast()).to.be(42);
+    });
+
+    it('triggers a change event', function() {
+      var listener = sinon.spy();
+      layer.on(ol.ObjectEventType.PROPERTYCHANGE, listener);
+      layer.setContrast(43);
+      expect(listener.calledOnce).to.be(true);
     });
 
   });
@@ -277,6 +452,13 @@ describe('ol.layer.Layer', function() {
       expect(layer.getHue()).to.be(-100);
     });
 
+    it('triggers a change event', function() {
+      var listener = sinon.spy();
+      layer.on(ol.ObjectEventType.PROPERTYCHANGE, listener);
+      layer.setHue(0.5);
+      expect(listener.calledOnce).to.be(true);
+    });
+
   });
 
 
@@ -299,6 +481,13 @@ describe('ol.layer.Layer', function() {
     it('accepts a positive number', function() {
       layer.setOpacity(0.3);
       expect(layer.getOpacity()).to.be(0.3);
+    });
+
+    it('triggers a change event', function() {
+      var listener = sinon.spy();
+      layer.on(ol.ObjectEventType.PROPERTYCHANGE, listener);
+      layer.setOpacity(0.4);
+      expect(listener.calledOnce).to.be(true);
     });
 
   });
@@ -330,25 +519,48 @@ describe('ol.layer.Layer', function() {
       expect(layer.getSaturation()).to.be(42);
     });
 
+    it('triggers a change event', function() {
+      var listener = sinon.spy();
+      layer.on(ol.ObjectEventType.PROPERTYCHANGE, listener);
+      layer.setSaturation(42);
+      expect(listener.calledOnce).to.be(true);
+    });
+
   });
 
 
   describe('#setVisible', function() {
 
-    it('sets visible property', function() {
-      var layer = new ol.layer.Layer({
+    var layer;
+    beforeEach(function() {
+      layer = new ol.layer.Layer({
         source: new ol.source.Source({
           projection: ol.proj.get('EPSG:4326')
         })
       });
+    });
 
+    afterEach(function() {
+      goog.dispose(layer);
+    });
+
+    it('sets visible property', function() {
       layer.setVisible(false);
       expect(layer.getVisible()).to.be(false);
 
       layer.setVisible(true);
       expect(layer.getVisible()).to.be(true);
+    });
 
-      goog.dispose(layer);
+    it('fires a change event', function() {
+      var listener = sinon.spy();
+      layer.on(ol.ObjectEventType.PROPERTYCHANGE, listener);
+
+      layer.setVisible(false);
+      expect(listener.callCount).to.be(1);
+
+      layer.setVisible(true);
+      expect(listener.callCount).to.be(2);
     });
 
   });
@@ -356,6 +568,7 @@ describe('ol.layer.Layer', function() {
 });
 
 goog.require('goog.dispose');
+goog.require('ol.ObjectEventType');
 goog.require('ol.layer.Layer');
 goog.require('ol.proj');
 goog.require('ol.source.Source');

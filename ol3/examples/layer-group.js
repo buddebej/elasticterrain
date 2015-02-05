@@ -1,17 +1,16 @@
 goog.require('ol.Map');
-goog.require('ol.RendererHints');
-goog.require('ol.View2D');
+goog.require('ol.View');
 goog.require('ol.dom.Input');
 goog.require('ol.layer.Group');
 goog.require('ol.layer.Tile');
 goog.require('ol.proj');
-goog.require('ol.source.MapQuestOpenAerial');
+goog.require('ol.source.MapQuest');
 goog.require('ol.source.TileJSON');
 
 var map = new ol.Map({
   layers: [
     new ol.layer.Tile({
-      source: new ol.source.MapQuestOpenAerial()
+      source: new ol.source.MapQuest({layer: 'sat'})
     }), new ol.layer.Group({
       layers: [
         new ol.layer.Tile({
@@ -31,9 +30,9 @@ var map = new ol.Map({
       ]
     })
   ],
-  renderers: ol.RendererHints.createFromQueryData(),
+  renderer: exampleNS.getRendererFromQueryString(),
   target: 'map',
-  view: new ol.View2D({
+  view: new ol.View({
     center: ol.proj.transform([37.40570, 8.81566], 'EPSG:4326', 'EPSG:3857'),
     zoom: 4
   })
@@ -45,7 +44,8 @@ function bindInputs(layerid, layer) {
   $.each(['opacity', 'hue', 'saturation', 'contrast', 'brightness'],
       function(i, v) {
         new ol.dom.Input($(layerid + ' .' + v)[0])
-            .bindTo('valueAsNumber', layer, v);
+            .bindTo('value', layer, v)
+            .transform(parseFloat, String);
       }
   );
 }

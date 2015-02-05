@@ -1,14 +1,15 @@
 goog.provide('ol.renderer.canvas.ImageLayer');
 
-goog.require('goog.events');
-goog.require('goog.events.EventType');
+goog.require('goog.asserts');
 goog.require('goog.vec.Mat4');
-goog.require('ol.Image');
-goog.require('ol.ImageState');
+goog.require('ol.ImageBase');
 goog.require('ol.ViewHint');
+goog.require('ol.extent');
 goog.require('ol.layer.Image');
+goog.require('ol.proj');
 goog.require('ol.renderer.Map');
 goog.require('ol.renderer.canvas.Layer');
+goog.require('ol.vec.Mat4');
 
 
 
@@ -24,7 +25,7 @@ ol.renderer.canvas.ImageLayer = function(mapRenderer, imageLayer) {
 
   /**
    * @private
-   * @type {?ol.Image}
+   * @type {?ol.ImageBase}
    */
   this.image_ = null;
 
@@ -32,7 +33,7 @@ ol.renderer.canvas.ImageLayer = function(mapRenderer, imageLayer) {
    * @private
    * @type {!goog.vec.Mat4.Number}
    */
-  this.transform_ = goog.vec.Mat4.createNumber();
+  this.imageTransform_ = goog.vec.Mat4.createNumber();
 
 };
 goog.inherits(ol.renderer.canvas.ImageLayer, ol.renderer.canvas.Layer);
@@ -41,56 +42,80 @@ goog.inherits(ol.renderer.canvas.ImageLayer, ol.renderer.canvas.Layer);
 /**
  * @inheritDoc
  */
+ol.renderer.canvas.ImageLayer.prototype.forEachFeatureAtPixel =
+    function(coordinate, frameState, callback, thisArg) {
+  var layer = this.getLayer();
+  var source = layer.getSource();
+  var resolution = frameState.viewState.resolution;
+  var rotation = frameState.viewState.rotation;
+  var skippedFeatureUids = frameState.skippedFeatureUids;
+  return source.forEachFeatureAtPixel(
+      resolution, rotation, coordinate, skippedFeatureUids,
+      /**
+       * @param {ol.Feature} feature Feature.
+       * @return {?} Callback result.
+       */
+      function(feature) {
+        return callback.call(thisArg, feature, layer);
+      });
+};
+
+
+/**
+ * @inheritDoc
+ */
 ol.renderer.canvas.ImageLayer.prototype.getImage = function() {
   return goog.isNull(this.image_) ?
-      null : this.image_.getImageElement(this);
-};
-
-
-/**
- * @protected
- * @return {ol.layer.Image} Single image layer.
- */
-ol.renderer.canvas.ImageLayer.prototype.getImageLayer = function() {
-  return /** @type {ol.layer.Image} */ (this.getLayer());
+      null : this.image_.getImage();
 };
 
 
 /**
  * @inheritDoc
  */
-ol.renderer.canvas.ImageLayer.prototype.getTransform = function() {
-  return this.transform_;
+ol.renderer.canvas.ImageLayer.prototype.getImageTransform = function() {
+  return this.imageTransform_;
 };
 
 
 /**
  * @inheritDoc
  */
-ol.renderer.canvas.ImageLayer.prototype.renderFrame =
+ol.renderer.canvas.ImageLayer.prototype.prepareFrame =
     function(frameState, layerState) {
 
-  var view2DState = frameState.view2DState;
-  var viewCenter = view2DState.center;
-  var viewResolution = view2DState.resolution;
-  var viewRotation = view2DState.rotation;
+  var pixelRatio = frameState.pixelRatio;
+  var viewState = frameState.viewState;
+  var viewCenter = viewState.center;
+  var viewResolution = viewState.resolution;
+  var viewRotation = viewState.rotation;
 
   var image;
-  var imageLayer = this.getImageLayer();
-  var imageSource = imageLayer.getImageSource();
+  var imageLayer = this.getLayer();
+  goog.asserts.assertInstanceof(imageLayer, ol.layer.Image);
+  var imageSource = imageLayer.getSource();
 
   var hints = frameState.viewHints;
 
-  if (!hints[ol.ViewHint.ANIMATING] && !hints[ol.ViewHint.INTERACTING]) {
+  var renderedExtent = frameState.extent;
+  if (goog.isDef(layerState.extent)) {
+    renderedExtent = ol.extent.getIntersection(
+        renderedExtent, layerState.extent);
+  }
+
+  if (!hints[ol.ViewHint.ANIMATING] && !hints[ol.ViewHint.INTERACTING] &&
+      !ol.extent.isEmpty(renderedExtent)) {
+    var projection = viewState.projection;
+    var sourceProjection = imageSource.getProjection();
+    if (!goog.isNull(sourceProjection)) {
+      goog.asserts.assert(ol.proj.equivalent(projection, sourceProjection));
+      projection = sourceProjection;
+    }
     image = imageSource.getImage(
-        frameState.extent, viewResolution, view2DState.projection);
+        renderedExtent, viewResolution, pixelRatio, projection);
     if (!goog.isNull(image)) {
-      var imageState = image.getState();
-      if (imageState == ol.ImageState.IDLE) {
-        goog.events.listenOnce(image, goog.events.EventType.CHANGE,
-            this.handleImageChange, false, this);
-        image.load();
-      } else if (imageState == ol.ImageState.LOADED) {
+      var loaded = this.loadImage(image);
+      if (loaded) {
         this.image_ = image;
       }
     }
@@ -98,26 +123,21 @@ ol.renderer.canvas.ImageLayer.prototype.renderFrame =
 
   if (!goog.isNull(this.image_)) {
     image = this.image_;
-
     var imageExtent = image.getExtent();
     var imageResolution = image.getResolution();
-    var transform = this.transform_;
-    goog.vec.Mat4.makeIdentity(transform);
-    goog.vec.Mat4.translate(transform,
-        frameState.size[0] / 2, frameState.size[1] / 2, 0);
-    goog.vec.Mat4.rotateZ(transform, viewRotation);
-    goog.vec.Mat4.scale(
-        transform,
-        imageResolution / viewResolution,
-        imageResolution / viewResolution,
-        1);
-    goog.vec.Mat4.translate(
-        transform,
-        (imageExtent[0] - viewCenter[0]) / imageResolution,
-        (viewCenter[1] - imageExtent[3]) / imageResolution,
-        0);
-
+    var imagePixelRatio = image.getPixelRatio();
+    var scale = pixelRatio * imageResolution /
+        (viewResolution * imagePixelRatio);
+    ol.vec.Mat4.makeTransform2D(this.imageTransform_,
+        pixelRatio * frameState.size[0] / 2,
+        pixelRatio * frameState.size[1] / 2,
+        scale, scale,
+        viewRotation,
+        imagePixelRatio * (imageExtent[0] - viewCenter[0]) / imageResolution,
+        imagePixelRatio * (viewCenter[1] - imageExtent[3]) / imageResolution);
     this.updateAttributions(frameState.attributions, image.getAttributions());
     this.updateLogos(frameState, imageSource);
   }
+
+  return true;
 };

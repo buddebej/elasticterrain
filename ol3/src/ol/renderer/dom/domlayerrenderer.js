@@ -28,9 +28,29 @@ goog.inherits(ol.renderer.dom.Layer, ol.renderer.Layer);
 
 
 /**
- * @protected
+ * Clear rendered elements.
+ */
+ol.renderer.dom.Layer.prototype.clearFrame = goog.nullFunction;
+
+
+/**
+ * @param {olx.FrameState} frameState Frame state.
+ * @param {ol.layer.LayerState} layerState Layer state.
+ */
+ol.renderer.dom.Layer.prototype.composeFrame = goog.nullFunction;
+
+
+/**
  * @return {!Element} Target.
  */
 ol.renderer.dom.Layer.prototype.getTarget = function() {
   return this.target;
 };
+
+
+/**
+ * @param {olx.FrameState} frameState Frame state.
+ * @param {ol.layer.LayerState} layerState Layer state.
+ * @return {boolean} whether composeFrame should be called.
+ */
+ol.renderer.dom.Layer.prototype.prepareFrame = goog.abstractMethod;

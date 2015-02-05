@@ -34,9 +34,22 @@ var GeoJSONCRS = function() {};
 
 
 /**
- * @type {!GeoJSONCRSName|!GeoJSONLink}
+ * TODO: remove GeoJSONCRSCode when http://jira.codehaus.org/browse/GEOS-5996
+ * is fixed and widely deployed.
+ * @type {!GeoJSONCRSCode|!GeoJSONCRSName|!GeoJSONLink}
  */
 GeoJSONCRS.prototype.properties;
+
+
+
+/**
+ * `GeoJSONCRSCode` is not part of the GeoJSON specification, but is generated
+ * by GeoServer.
+ * TODO: remove GeoJSONCRSCode when http://jira.codehaus.org/browse/GEOS-5996
+ * is fixed and widely deployed.
+ * @constructor
+ */
+var GeoJSONCRSCode = function() {};
 
 
 
@@ -44,6 +57,14 @@ GeoJSONCRS.prototype.properties;
  * @constructor
  */
 var GeoJSONCRSName = function() {};
+
+
+/**
+ * TODO: remove this when http://jira.codehaus.org/browse/GEOS-5996 is fixed
+ * and widely deployed.
+ * @type {string}
+ */
+GeoJSONCRSName.prototype.code;
 
 
 /**
@@ -90,9 +111,21 @@ var GeoJSONFeature = function() {};
 
 
 /**
+ * @type {!Array.<number>|undefined}
+ */
+GeoJSONFeature.prototype.bbox;
+
+
+/**
  * @type {GeoJSONGeometry}
  */
 GeoJSONFeature.prototype.geometry;
+
+
+/**
+ * @type {number|string|undefined}
+ */
+GeoJSONFeature.prototype.id;
 
 
 /**

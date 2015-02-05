@@ -8,6 +8,7 @@ goog.require('ol.webgl.shader');
 /**
  * @constructor
  * @extends {ol.webgl.shader.Fragment}
+ * @struct
  */
 ol.renderer.webgl.map.shader.DefaultFragment = function() {
   goog.base(this, ol.renderer.webgl.map.shader.DefaultFragment.SOURCE);
@@ -43,6 +44,7 @@ ol.renderer.webgl.map.shader.DefaultFragment.SOURCE = goog.DEBUG ?
 /**
  * @constructor
  * @extends {ol.webgl.shader.Vertex}
+ * @struct
  */
 ol.renderer.webgl.map.shader.DefaultVertex = function() {
   goog.base(this, ol.renderer.webgl.map.shader.DefaultVertex.SOURCE);
@@ -55,14 +57,14 @@ goog.addSingletonGetter(ol.renderer.webgl.map.shader.DefaultVertex);
  * @const
  * @type {string}
  */
-ol.renderer.webgl.map.shader.DefaultVertex.DEBUG_SOURCE = 'varying vec2 v_texCoord;\n\n\nattribute vec2 a_position;\nattribute vec2 a_texCoord;\n\nuniform mat4 u_texCoordMatrix;\nuniform mat4 u_projectionMatrix;\n\nvoid main(void) {\n  gl_Position = u_projectionMatrix * vec4(a_position, 0., 1.);\n  v_texCoord = (u_texCoordMatrix * (vec4(a_texCoord, 0., 1.))).st;\n}\n\n';
+ol.renderer.webgl.map.shader.DefaultVertex.DEBUG_SOURCE = 'varying vec2 v_texCoord;\n\n\nattribute vec2 a_position;\nattribute vec2 a_texCoord;\n\nuniform mat4 u_texCoordMatrix;\nuniform mat4 u_projectionMatrix;\n\nvoid main(void) {\n  gl_Position = u_projectionMatrix * vec4(a_position, 0., 1.);\n  v_texCoord = (u_texCoordMatrix * vec4(a_texCoord, 0., 1.)).st;\n}\n\n\n';
 
 
 /**
  * @const
  * @type {string}
  */
-ol.renderer.webgl.map.shader.DefaultVertex.OPTIMIZED_SOURCE = 'varying vec2 a;attribute vec2 b;attribute vec2 c;uniform mat4 d;uniform mat4 e;void main(void){gl_Position=e*vec4(b,0.,1.);a=(d*(vec4(c,0.,1.))).st;}';
+ol.renderer.webgl.map.shader.DefaultVertex.OPTIMIZED_SOURCE = 'varying vec2 a;attribute vec2 b;attribute vec2 c;uniform mat4 d;uniform mat4 e;void main(void){gl_Position=e*vec4(b,0.,1.);a=(d*vec4(c,0.,1.)).st;}';
 
 
 /**
@@ -79,6 +81,7 @@ ol.renderer.webgl.map.shader.DefaultVertex.SOURCE = goog.DEBUG ?
  * @constructor
  * @param {WebGLRenderingContext} gl GL.
  * @param {WebGLProgram} program Program.
+ * @struct
  */
 ol.renderer.webgl.map.shader.Default.Locations = function(gl, program) {
 

@@ -1,27 +1,28 @@
 goog.provide('ol.source.Source');
 goog.provide('ol.source.State');
 
-goog.require('goog.events.EventTarget');
 goog.require('goog.events.EventType');
 goog.require('ol.Attribution');
-goog.require('ol.Extent');
+goog.require('ol.Observable');
 goog.require('ol.proj');
 
 
 /**
- * @enum {number}
+ * State of the source, one of 'undefined', 'loading', 'ready' or 'error'.
+ * @enum {string}
+ * @api
  */
 ol.source.State = {
-  LOADING: 0,
-  READY: 1,
-  ERROR: 2
+  UNDEFINED: 'undefined',
+  LOADING: 'loading',
+  READY: 'ready',
+  ERROR: 'error'
 };
 
 
 /**
  * @typedef {{attributions: (Array.<ol.Attribution>|undefined),
- *            extent: (ol.Extent|undefined),
- *            logo: (string|undefined),
+ *            logo: (string|olx.LogoOptions|undefined),
  *            projection: ol.proj.ProjectionLike,
  *            state: (ol.source.State|undefined)}}
  */
@@ -30,9 +31,16 @@ ol.source.SourceOptions;
 
 
 /**
+ * @classdesc
+ * Abstract base class; normally only used for creating subclasses and not
+ * instantiated in apps.
+ * Base class for {@link ol.layer.Layer} sources.
+ *
  * @constructor
- * @extends {goog.events.EventTarget}
+ * @extends {ol.Observable}
+ * @fires change Triggered when the state of the source changes.
  * @param {ol.source.SourceOptions} options Source options.
+ * @api stable
  */
 ol.source.Source = function(options) {
 
@@ -46,14 +54,6 @@ ol.source.Source = function(options) {
 
   /**
    * @private
-   * @type {ol.Extent}
-   */
-  this.extent_ = goog.isDef(options.extent) ?
-      options.extent : goog.isDef(options.projection) ?
-          this.projection_.getExtent() : null;
-
-  /**
-   * @private
    * @type {Array.<ol.Attribution>}
    */
   this.attributions_ = goog.isDef(options.attributions) ?
@@ -61,7 +61,7 @@ ol.source.Source = function(options) {
 
   /**
    * @private
-   * @type {string|undefined}
+   * @type {string|olx.LogoOptions|undefined}
    */
   this.logo_ = options.logo;
 
@@ -72,27 +72,26 @@ ol.source.Source = function(options) {
   this.state_ = goog.isDef(options.state) ?
       options.state : ol.source.State.READY;
 
-  /**
-   * @private
-   * @type {number}
-   */
-  this.revision_ = 0;
-
 };
-goog.inherits(ol.source.Source, goog.events.EventTarget);
+goog.inherits(ol.source.Source, ol.Observable);
 
 
 /**
- * @protected
+ * @param {number} resolution Resolution.
+ * @param {number} rotation Rotation.
+ * @param {ol.Coordinate} coordinate Coordinate.
+ * @param {Object.<string, boolean>} skippedFeatureUids Skipped feature uids.
+ * @param {function(ol.Feature): T} callback Feature callback.
+ * @return {T|undefined} Callback result.
+ * @template T
  */
-ol.source.Source.prototype.dispatchChangeEvent = function() {
-  ++this.revision_;
-  this.dispatchEvent(goog.events.EventType.CHANGE);
-};
+ol.source.Source.prototype.forEachFeatureAtPixel =
+    goog.nullFunction;
 
 
 /**
  * @return {Array.<ol.Attribution>} Attributions.
+ * @api stable
  */
 ol.source.Source.prototype.getAttributions = function() {
   return this.attributions_;
@@ -100,15 +99,8 @@ ol.source.Source.prototype.getAttributions = function() {
 
 
 /**
- * @return {ol.Extent} Extent.
- */
-ol.source.Source.prototype.getExtent = function() {
-  return this.extent_;
-};
-
-
-/**
- * @return {string|undefined} Logo.
+ * @return {string|olx.LogoOptions|undefined} Logo.
+ * @api stable
  */
 ol.source.Source.prototype.getLogo = function() {
   return this.logo_;
@@ -117,6 +109,7 @@ ol.source.Source.prototype.getLogo = function() {
 
 /**
  * @return {ol.proj.Projection} Projection.
+ * @api
  */
 ol.source.Source.prototype.getProjection = function() {
   return this.projection_;
@@ -130,15 +123,8 @@ ol.source.Source.prototype.getResolutions = goog.abstractMethod;
 
 
 /**
- * @return {number} Revision.
- */
-ol.source.Source.prototype.getRevision = function() {
-  return this.revision_;
-};
-
-
-/**
  * @return {ol.source.State} State.
+ * @api
  */
 ol.source.Source.prototype.getState = function() {
   return this.state_;
@@ -154,15 +140,7 @@ ol.source.Source.prototype.setAttributions = function(attributions) {
 
 
 /**
- * @param {ol.Extent} extent Extent.
- */
-ol.source.Source.prototype.setExtent = function(extent) {
-  this.extent_ = extent;
-};
-
-
-/**
- * @param {string|undefined} logo Logo.
+ * @param {string|olx.LogoOptions|undefined} logo Logo.
  */
 ol.source.Source.prototype.setLogo = function(logo) {
   this.logo_ = logo;
@@ -175,7 +153,7 @@ ol.source.Source.prototype.setLogo = function(logo) {
  */
 ol.source.Source.prototype.setState = function(state) {
   this.state_ = state;
-  this.dispatchChangeEvent();
+  this.changed();
 };
 
 

@@ -1,4 +1,0 @@
-@exportSymbol ol.coordinate.createStringXY
-@exportSymbol ol.coordinate.toStringHDMS
-@exportSymbol ol.coordinate.toStringXY
-@exportSymbol ol.coordinate.fromProjectedArray

@@ -10,6 +10,8 @@ goog.require('goog.object');
  * Object's properties (e.g. 'hasOwnProperty' is not allowed as a key). Expiring
  * items from the cache is the responsibility of the user.
  * @constructor
+ * @struct
+ * @template T
  */
 ol.structs.LRUCache = function() {
 
@@ -20,7 +22,7 @@ ol.structs.LRUCache = function() {
   this.count_ = 0;
 
   /**
-   * @private
+   * @protected
    * @type {Object.<string, ol.structs.LRUCacheEntry>}
    */
   this.entries_ = {};
@@ -96,13 +98,17 @@ ol.structs.LRUCache.prototype.containsKey = function(key) {
 
 
 /**
- * @param {Function} f Function.
- * @param {Object=} opt_obj Object.
+ * @param {function(this: S, T, string, ol.structs.LRUCache): ?} f The function
+ *     to call for every entry from the oldest to the newer. This function takes
+ *     3 arguments (the entry value, the entry key and the LRUCache object).
+ *     The return value is ignored.
+ * @param {S=} opt_this The object to use as `this` in `f`.
+ * @template S
  */
-ol.structs.LRUCache.prototype.forEach = function(f, opt_obj) {
+ol.structs.LRUCache.prototype.forEach = function(f, opt_this) {
   var entry = this.oldest_;
   while (!goog.isNull(entry)) {
-    f.call(opt_obj, entry.value_, entry.key_, this);
+    f.call(opt_this, entry.value_, entry.key_, this);
     entry = entry.newer;
   }
 };
@@ -110,7 +116,7 @@ ol.structs.LRUCache.prototype.forEach = function(f, opt_obj) {
 
 /**
  * @param {string} key Key.
- * @return {*} Value.
+ * @return {T} Value.
  */
 ol.structs.LRUCache.prototype.get = function(key) {
   var entry = this.entries_[key];
@@ -156,7 +162,7 @@ ol.structs.LRUCache.prototype.getKeys = function() {
 
 
 /**
- * @return {Array} Values.
+ * @return {Array.<T>} Values.
  */
 ol.structs.LRUCache.prototype.getValues = function() {
   var values = new Array(this.count_);
@@ -171,7 +177,7 @@ ol.structs.LRUCache.prototype.getValues = function() {
 
 
 /**
- * @return {*} Last value.
+ * @return {T} Last value.
  */
 ol.structs.LRUCache.prototype.peekLast = function() {
   goog.asserts.assert(!goog.isNull(this.oldest_));
@@ -189,7 +195,7 @@ ol.structs.LRUCache.prototype.peekLastKey = function() {
 
 
 /**
- * @return {*} value Value.
+ * @return {T} value Value.
  */
 ol.structs.LRUCache.prototype.pop = function() {
   goog.asserts.assert(!goog.isNull(this.oldest_));
@@ -211,7 +217,7 @@ ol.structs.LRUCache.prototype.pop = function() {
 
 /**
  * @param {string} key Key.
- * @param {*} value Value.
+ * @param {T} value Value.
  */
 ol.structs.LRUCache.prototype.set = function(key, value) {
   goog.asserts.assert(!(key in {}));

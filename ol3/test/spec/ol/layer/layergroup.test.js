@@ -44,6 +44,7 @@ describe('ol.layer.Group', function() {
 
     it('provides default layerState', function() {
       expect(layerGroup.getLayerState()).to.eql({
+        layer: layerGroup,
         brightness: 0,
         contrast: 1,
         hue: 0,
@@ -51,6 +52,7 @@ describe('ol.layer.Group', function() {
         saturation: 1,
         visible: true,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: Infinity,
         minResolution: 0
       });
@@ -59,6 +61,84 @@ describe('ol.layer.Group', function() {
     it('provides default empty layers collection', function() {
       expect(layerGroup.getLayers()).to.be.a(ol.Collection);
       expect(layerGroup.getLayers().getLength()).to.be(0);
+    });
+
+  });
+
+  describe('generic change event', function() {
+
+    var layer, group, listener;
+    beforeEach(function() {
+      layer = new ol.layer.Layer({
+        source: new ol.source.Source({
+          projection: 'EPSG:4326'
+        })
+      });
+      group = new ol.layer.Group({
+        layers: [layer]
+      });
+      listener = sinon.spy();
+    });
+
+    afterEach(function() {
+      goog.dispose(group);
+      goog.dispose(layer);
+    });
+
+    it('is dispatched by the group when layer opacity changes', function() {
+      group.on(goog.events.EventType.CHANGE, listener);
+
+      layer.setOpacity(0.5);
+      expect(listener.calledOnce).to.be(true);
+    });
+
+    it('is dispatched by the group when layer visibility changes', function() {
+      group.on(goog.events.EventType.CHANGE, listener);
+
+      layer.setVisible(false);
+      expect(listener.callCount).to.be(1);
+
+      layer.setVisible(true);
+      expect(listener.callCount).to.be(2);
+    });
+
+  });
+
+  describe('property change event', function() {
+
+    var layer, group, listener;
+    beforeEach(function() {
+      layer = new ol.layer.Layer({
+        source: new ol.source.Source({
+          projection: 'EPSG:4326'
+        })
+      });
+      group = new ol.layer.Group({
+        layers: [layer]
+      });
+      listener = sinon.spy();
+    });
+
+    afterEach(function() {
+      goog.dispose(group);
+      goog.dispose(layer);
+    });
+
+    it('is dispatched by the group when group opacity changes', function() {
+      group.on(ol.ObjectEventType.PROPERTYCHANGE, listener);
+
+      group.setOpacity(0.5);
+      expect(listener.calledOnce).to.be(true);
+    });
+
+    it('is dispatched by the group when group visibility changes', function() {
+      group.on(ol.ObjectEventType.PROPERTYCHANGE, listener);
+
+      group.setVisible(false);
+      expect(listener.callCount).to.be(1);
+
+      group.setVisible(true);
+      expect(listener.callCount).to.be(2);
     });
 
   });
@@ -92,6 +172,7 @@ describe('ol.layer.Group', function() {
       expect(layerGroup.getMaxResolution()).to.be(500);
       expect(layerGroup.getMinResolution()).to.be(0.25);
       expect(layerGroup.getLayerState()).to.eql({
+        layer: layerGroup,
         brightness: 0.5,
         contrast: 10,
         hue: 180,
@@ -99,17 +180,68 @@ describe('ol.layer.Group', function() {
         saturation: 5,
         visible: false,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: 500,
         minResolution: 0.25
       });
       expect(layerGroup.getLayers()).to.be.a(ol.Collection);
       expect(layerGroup.getLayers().getLength()).to.be(1);
-      expect(layerGroup.getLayers().getAt(0)).to.be(layer);
+      expect(layerGroup.getLayers().item(0)).to.be(layer);
 
       goog.dispose(layer);
       goog.dispose(layerGroup);
     });
 
+    it('accepts an extent option', function() {
+      var layer = new ol.layer.Layer({
+        source: new ol.source.Source({
+          projection: 'EPSG:4326'
+        })
+      });
+
+      var groupExtent = [-10, -5, 10, 5];
+      var layerGroup = new ol.layer.Group({
+        layers: [layer],
+        brightness: 0.5,
+        contrast: 10,
+        hue: 180,
+        opacity: 0.5,
+        saturation: 5,
+        visible: false,
+        extent: groupExtent,
+        maxResolution: 500,
+        minResolution: 0.25
+      });
+
+      expect(layerGroup.getBrightness()).to.be(0.5);
+      expect(layerGroup.getContrast()).to.be(10);
+      expect(layerGroup.getHue()).to.be(180);
+      expect(layerGroup.getOpacity()).to.be(0.5);
+      expect(layerGroup.getSaturation()).to.be(5);
+      expect(layerGroup.getVisible()).to.be(false);
+      expect(layerGroup.getExtent()).to.eql(groupExtent);
+      expect(layerGroup.getMaxResolution()).to.be(500);
+      expect(layerGroup.getMinResolution()).to.be(0.25);
+      expect(layerGroup.getLayerState()).to.eql({
+        layer: layerGroup,
+        brightness: 0.5,
+        contrast: 10,
+        hue: 180,
+        opacity: 0.5,
+        saturation: 5,
+        visible: false,
+        sourceState: ol.source.State.READY,
+        extent: groupExtent,
+        maxResolution: 500,
+        minResolution: 0.25
+      });
+      expect(layerGroup.getLayers()).to.be.a(ol.Collection);
+      expect(layerGroup.getLayers().getLength()).to.be(1);
+      expect(layerGroup.getLayers().item(0)).to.be(layer);
+
+      goog.dispose(layer);
+      goog.dispose(layerGroup);
+    });
   });
 
   describe('#getLayerState', function() {
@@ -131,9 +263,12 @@ describe('ol.layer.Group', function() {
       layerGroup.setOpacity(0.3);
       layerGroup.setSaturation(0.3);
       layerGroup.setVisible(false);
+      var groupExtent = [-100, 50, 100, 50];
+      layerGroup.setExtent(groupExtent);
       layerGroup.setMaxResolution(500);
       layerGroup.setMinResolution(0.25);
       expect(layerGroup.getLayerState()).to.eql({
+        layer: layerGroup,
         brightness: -0.7,
         contrast: 0.3,
         hue: -0.3,
@@ -141,6 +276,7 @@ describe('ol.layer.Group', function() {
         saturation: 0.3,
         visible: false,
         sourceState: ol.source.State.READY,
+        extent: groupExtent,
         maxResolution: 500,
         minResolution: 0.25
       });
@@ -154,6 +290,7 @@ describe('ol.layer.Group', function() {
       layerGroup.setSaturation(-0.7);
       layerGroup.setVisible(false);
       expect(layerGroup.getLayerState()).to.eql({
+        layer: layerGroup,
         brightness: 1,
         contrast: 0,
         hue: 42,
@@ -161,6 +298,7 @@ describe('ol.layer.Group', function() {
         saturation: 0,
         visible: false,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: Infinity,
         minResolution: 0
       });
@@ -172,6 +310,7 @@ describe('ol.layer.Group', function() {
       layerGroup.setSaturation(42);
       layerGroup.setVisible(true);
       expect(layerGroup.getLayerState()).to.eql({
+        layer: layerGroup,
         brightness: -1,
         contrast: 42,
         hue: -100,
@@ -179,6 +318,7 @@ describe('ol.layer.Group', function() {
         saturation: 42,
         visible: true,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: Infinity,
         minResolution: 0
       });
@@ -214,19 +354,10 @@ describe('ol.layer.Group', function() {
 
   describe('#getLayerStatesArray', function() {
 
-    var layerGroup;
-    var layersArray;
-    var layerStatesArray;
-    var obj;
-
     it('returns an empty array if no layer', function() {
-      layerGroup = new ol.layer.Group();
+      var layerGroup = new ol.layer.Group();
 
-      obj = layerGroup.getLayerStatesArray();
-      layersArray = obj.layers;
-      layerStatesArray = obj.layerStates;
-      expect(layersArray).to.be.a(Array);
-      expect(layersArray.length).to.be(0);
+      var layerStatesArray = layerGroup.getLayerStatesArray();
       expect(layerStatesArray).to.be.a(Array);
       expect(layerStatesArray.length).to.be(0);
 
@@ -251,30 +382,60 @@ describe('ol.layer.Group', function() {
       maxResolution: 500,
       minResolution: 0.25
     });
+    var layer3 = new ol.layer.Layer({
+      source: new ol.source.Source({
+        projection: 'EPSG:4326'
+      }),
+      extent: [-5, -2, 5, 2]
+    });
 
     it('does not transform layerStates by default', function() {
-      layerGroup = new ol.layer.Group({
+      var layerGroup = new ol.layer.Group({
         layers: [layer1, layer2]
       });
 
-      obj = layerGroup.getLayerStatesArray();
-      layersArray = obj.layers;
-      layerStatesArray = obj.layerStates;
-      expect(layersArray).to.be.a(Array);
-      expect(layersArray.length).to.be(2);
-      expect(layersArray[0]).to.be(layer1);
-      expect(layersArray[1]).to.be(layer2);
+      var layerStatesArray = layerGroup.getLayerStatesArray();
       expect(layerStatesArray).to.be.a(Array);
       expect(layerStatesArray.length).to.be(2);
       expect(layerStatesArray[0]).to.eql(layer1.getLayerState());
-      expect(layerStatesArray[0]).to.eql(layerGroup.getLayerState());
+
+      // layer state should match except for layer reference
+      var layerState = goog.object.clone(layerStatesArray[0]);
+      delete layerState.layer;
+      var groupState = goog.object.clone(layerGroup.getLayerState());
+      delete groupState.layer;
+      expect(layerState).to.eql(groupState);
+
       expect(layerStatesArray[1]).to.eql(layer2.getLayerState());
 
       goog.dispose(layerGroup);
     });
 
+    it('uses the layer group extent if layer has no extent', function() {
+      var groupExtent = [-10, -5, 10, 5];
+      var layerGroup = new ol.layer.Group({
+        extent: groupExtent,
+        layers: [layer1]
+      });
+      var layerStatesArray = layerGroup.getLayerStatesArray();
+      expect(layerStatesArray[0].extent).to.eql(groupExtent);
+      goog.dispose(layerGroup);
+    });
+
+    it('uses the intersection of group and child extent', function() {
+      var groupExtent = [-10, -5, 10, 5];
+      var layerGroup = new ol.layer.Group({
+        extent: groupExtent,
+        layers: [layer3]
+      });
+      var layerStatesArray = layerGroup.getLayerStatesArray();
+      expect(layerStatesArray[0].extent).to.eql(
+          ol.extent.getIntersection(layer3.getExtent(), groupExtent));
+      goog.dispose(layerGroup);
+    });
+
     it('transforms layerStates correctly', function() {
-      layerGroup = new ol.layer.Group({
+      var layerGroup = new ol.layer.Group({
         layers: [layer1, layer2],
         brightness: 0.5,
         contrast: 10,
@@ -286,11 +447,22 @@ describe('ol.layer.Group', function() {
         minResolution: 0.2
       });
 
-      obj = layerGroup.getLayerStatesArray();
-      layersArray = obj.layers;
-      layerStatesArray = obj.layerStates;
-      expect(layerStatesArray[0]).to.eql(layerGroup.getLayerState());
-      expect(layerStatesArray[1]).to.eql({
+      var layerStatesArray = layerGroup.getLayerStatesArray();
+
+      // compare layer state to group state
+      var groupState, layerState;
+
+      // layer state should match except for layer reference
+      layerState = goog.object.clone(layerStatesArray[0]);
+      delete layerState.layer;
+      groupState = goog.object.clone(layerGroup.getLayerState());
+      delete groupState.layer;
+      expect(layerState).to.eql(groupState);
+
+      // layer state should be transformed (and we ignore layer reference)
+      layerState = goog.object.clone(layerStatesArray[1]);
+      delete layerState.layer;
+      expect(layerState).to.eql({
         brightness: 1,
         contrast: 100,
         hue: 360,
@@ -298,6 +470,7 @@ describe('ol.layer.Group', function() {
         saturation: 25,
         visible: false,
         sourceState: ol.source.State.READY,
+        extent: undefined,
         maxResolution: 150,
         minResolution: 0.25
       });
@@ -307,12 +480,17 @@ describe('ol.layer.Group', function() {
 
     goog.dispose(layer1);
     goog.dispose(layer2);
+    goog.dispose(layer3);
 
   });
 
 });
 
 goog.require('goog.dispose');
+goog.require('goog.events.EventType');
+goog.require('goog.object');
+goog.require('ol.ObjectEventType');
+goog.require('ol.extent');
 goog.require('ol.layer.Layer');
 goog.require('ol.layer.Group');
 goog.require('ol.source.Source');

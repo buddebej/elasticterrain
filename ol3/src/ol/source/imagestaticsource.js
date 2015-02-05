@@ -1,7 +1,7 @@
 goog.provide('ol.source.ImageStatic');
 
+goog.require('goog.events');
 goog.require('ol.Image');
-goog.require('ol.ImageUrlFunctionType');
 goog.require('ol.extent');
 goog.require('ol.proj');
 goog.require('ol.source.Image');
@@ -9,35 +9,46 @@ goog.require('ol.source.Image');
 
 
 /**
+ * @classdesc
+ * A layer source for displaying a single, static image.
+ *
  * @constructor
  * @extends {ol.source.Image}
- * @param {ol.source.ImageStaticOptions} options Options.
+ * @param {olx.source.ImageStaticOptions} options Options.
+ * @api stable
  */
 ol.source.ImageStatic = function(options) {
 
-  var imageFunction = ol.source.ImageStatic.createImageFunction(
-      options.url);
+  var attributions = goog.isDef(options.attributions) ?
+      options.attributions : null;
 
   var imageExtent = options.imageExtent;
-  var imageSize = options.imageSize;
-  var imageResolution = (imageExtent[3] - imageExtent[1]) / imageSize[1];
-  var projection = ol.proj.get(options.projection);
+
+  var resolution, resolutions;
+  if (goog.isDef(options.imageSize)) {
+    resolution = ol.extent.getHeight(imageExtent) / options.imageSize[1];
+    resolutions = [resolution];
+  }
+
+  var crossOrigin = goog.isDef(options.crossOrigin) ?
+      options.crossOrigin : null;
+
+  var imageLoadFunction = goog.isDef(options.imageLoadFunction) ?
+      options.imageLoadFunction : ol.source.Image.defaultImageLoadFunction;
 
   goog.base(this, {
-    attributions: options.attributions,
-    crossOrigin: options.crossOrigin,
-    extent: options.extent,
-    projection: options.projection,
-    imageUrlFunction: imageFunction,
-    resolutions: [imageResolution]
+    attributions: attributions,
+    logo: options.logo,
+    projection: ol.proj.get(options.projection),
+    resolutions: resolutions
   });
 
   /**
    * @private
    * @type {ol.Image}
    */
-  this.image_ = this.createImage(
-      imageExtent, imageResolution, imageSize, projection);
+  this.image_ = new ol.Image(imageExtent, resolution, 1, attributions,
+      options.url, crossOrigin, imageLoadFunction);
 
 };
 goog.inherits(ol.source.ImageStatic, ol.source.Image);
@@ -47,27 +58,9 @@ goog.inherits(ol.source.ImageStatic, ol.source.Image);
  * @inheritDoc
  */
 ol.source.ImageStatic.prototype.getImage =
-    function(extent, resolution, projection) {
+    function(extent, resolution, pixelRatio, projection) {
   if (ol.extent.intersects(extent, this.image_.getExtent())) {
     return this.image_;
   }
   return null;
-};
-
-
-/**
- * @param {string|undefined} url URL.
- * @return {ol.ImageUrlFunctionType} Function.
- */
-ol.source.ImageStatic.createImageFunction = function(url) {
-  return (
-      /**
-       * @param {ol.Extent} extent Extent.
-       * @param {ol.Size} size Size.
-       * @param {ol.proj.Projection} projection Projection.
-       * @return {string|undefined} URL.
-       */
-      function(extent, size, projection) {
-        return url;
-      });
 };

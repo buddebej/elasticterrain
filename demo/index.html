@@ -1,0 +1,154 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+
+    <link rel="stylesheet" href="css/ol.css" type="text/css">
+    <link rel="stylesheet" href="css/jquery-ui-1.10.3.custom.min.css" />
+    <link rel="stylesheet" href="css/ol3demUi.css" />
+    <link rel="stylesheet" href="css/ol3dem.css" />
+
+    <script src="lib/jquery-1.9.1.js"></script>
+    <script src="lib/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="lib/jquery_knob.js"></script>
+    <script src="js/checkWebgl.js" type="text/javascript"></script>
+    <script src="js/ol3demUi.js" type="text/javascript"></script>
+    <script src="js/ol3demInit.js" type="text/javascript"></script>
+
+    <title>ol3dem</title>
+</head>
+
+<body>
+    <div id="map" class="map"></div>
+
+    <div class="controlBox">
+        <div class="controlBoxHeader">
+            <div class="icon">
+                <span class="ui-state-hover ui-icon ui-icon-minusthick"></span>
+            </div>
+            <span class="ui-icon-title">Hide Controls</span>
+        </div>
+        <div class="controls">
+            <div class="controlHeader">
+                <p>Plan Oblique Relief</p>
+            </div>
+            <div class="controlBody">
+                <p>Inclination</p>
+                <div class="knob">
+                    <input type="text" class="inclination" data-cursor=true>
+                </div>
+                <p>Resolution of Mesh (%)</p>
+                <div class="resolutionSlider"></div>
+                <div id="resolution">
+                    <div class="scaleMin">1</div>
+                    <div class="scaleMax">100</div>
+                    <div class="clearFloat"></div>
+                </div>
+                <span>Lower resolutions increase rendering speed.</span>
+            </div>
+
+           <div class="textureControls">
+                <div class="controlHeader">
+                    <p>Texture</p>
+                </div>
+                <select class="selectTexture">
+                  <option value="dem">Hypsometric Colors</option>        
+                </select>
+
+                <div class="controlBody">
+                    <div class="colorControls">
+                        <p>Scale of Color Ramp (m)</p>
+                        <div class="colorSlider"></div>
+                        <div id="colorScale">
+                            <div class="scaleMin"></div>
+                            <div class="scaleMax"></div>
+                            <div class="clearFloat"></div>
+                        </div>
+                        <div class="checkbox t_WaterBodies">
+                            <input type="checkbox"> Detect Water Bodies</div>
+                    </div>                        
+                </div>
+            </div>
+
+            <div class="controlBody">
+                <div class="colorControls">
+                    <p>Scale of Color Ramp (m)</p>
+                    <div class="colorSlider"></div>
+                    <div id="colorScale">
+                        <div class="scaleMin"></div>
+                        <div class="scaleMax"></div>
+                        <div class="clearFloat"></div>
+                    </div>
+                    <div class="checkbox t_WaterBodies">
+                        <input type="checkbox"> Detect Water Bodies</div>
+                </div>                        
+            </div>
+
+
+            <div class="controlHeader">
+                <p>Shading</p>
+            </div>
+            <div class="controlBody">
+                   <div class="shadingControls">
+
+                    <div class="floatBox">
+                        <p>Zenith (&deg;)</p>
+                        <div class="knob">
+                            <input type="text" class="lightZenith" data-cursor=true>
+                        </div>
+                    </div>
+                    <div class="floatBox">
+                        <p>Azimuth (&deg;)</p>
+                        <div class="knob">
+                            <input type="text" class="lightAzimuth" data-cursor=true>
+                        </div>
+                    </div>
+                    <div class="clearFloat"></div>
+                    <p>Ambient Light</p>
+                    <div class="ambientLightSlider"></div>
+                    <div id="ambientLight">
+                        <div class="scaleMin">-</div>
+                        <div class="scaleMax">+</div>
+                        <div class="clearFloat"></div>
+                    </div>   
+                    </div>
+                <div class="checkbox t_HillShading">
+                    <input type="checkbox"> Compute Shading
+                </div>                                 
+            </div>
+
+            <div class="controlHeader">
+                <p>Map Rotation</p>
+            </div>
+            <div class="checkbox controlBody">
+                <p>0&deg; is North</p>
+                <div class="floatBox">
+                    <div class="knob">
+                        <input type="text" class="rotateView" data-cursor=true>
+                    </div>
+                </div>
+                <div class="floatBox floatBoxWide">
+                    <span>Or press Alt+Shift and drag map with mouse to rotate.
+                </div>
+                <div class="clearFloat"></div>
+
+                <div class="checkbox t_Testing">
+                <input type="checkbox"><span>Enable Testing mode.</span></div>
+
+                <div class="checkbox t_Interaction">
+                <input type="checkbox"><span>Enable Terrain Interactions.</span></div>
+            </div>
+        </div>
+         <div class="controlBoxFooter">
+                <p><a href="http://cartography.oregonstate.edu/"><img class="logo" src="img/cartogroup_logo.png"></img></a></p>
+                <p>Jonas Buddeberg, Bernhard Jenny,<br>Johannes Liem | <a href="https://github.com/buddebej/ol3-dem" target="_blank">Fork on github</a></p>
+            </div>
+    </div>
+</body>
+
+<script src="../build/ol.js" type="text/javascript"></script>
+
+</html>

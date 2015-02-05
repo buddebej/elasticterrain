@@ -1,6 +1,7 @@
 goog.require('ol.Map');
-goog.require('ol.RendererHints');
-goog.require('ol.View2D');
+goog.require('ol.View');
+goog.require('ol.control');
+goog.require('ol.extent');
 goog.require('ol.layer.Tile');
 goog.require('ol.proj');
 goog.require('ol.source.OSM');
@@ -12,9 +13,14 @@ var map = new ol.Map({
       source: new ol.source.OSM()
     })
   ],
-  renderers: ol.RendererHints.createFromQueryData(),
+  renderer: exampleNS.getRendererFromQueryString(),
   target: 'map',
-  view: new ol.View2D({
+  controls: ol.control.defaults({
+    attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+      collapsible: false
+    })
+  }),
+  view: new ol.View({
     center: [0, 0],
     zoom: 2
   })
@@ -32,14 +38,14 @@ function wrapLon(value) {
 function onMoveEnd(evt) {
   var map = evt.map;
   var extent = map.getView().calculateExtent(map.getSize());
-  var leftBottom = ol.proj.transform(
-      [extent[0], extent[2]], 'EPSG:3857', 'EPSG:4326');
-  var rightTop = ol.proj.transform(
-      [extent[1], extent[3]], 'EPSG:3857', 'EPSG:4326');
-  display('left', wrapLon(leftBottom[0]));
-  display('bottom', leftBottom[1]);
-  display('right', wrapLon(rightTop[0]));
-  display('top', rightTop[1]);
+  var bottomLeft = ol.proj.transform(ol.extent.getBottomLeft(extent),
+      'EPSG:3857', 'EPSG:4326');
+  var topRight = ol.proj.transform(ol.extent.getTopRight(extent),
+      'EPSG:3857', 'EPSG:4326');
+  display('left', wrapLon(bottomLeft[0]));
+  display('bottom', bottomLeft[1]);
+  display('right', wrapLon(topRight[0]));
+  display('top', topRight[1]);
 }
 
 map.on('moveend', onMoveEnd);

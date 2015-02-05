@@ -1,103 +1,65 @@
-// FIXME draw drag box
-// FIXME works for View2D only
-
 goog.provide('ol.interaction.DragZoom');
 
 goog.require('goog.asserts');
-goog.require('ol.Size');
-goog.require('ol.View2D');
-goog.require('ol.control.DragBox');
+goog.require('ol');
+goog.require('ol.events.condition');
 goog.require('ol.extent');
-goog.require('ol.interaction.ConditionType');
-goog.require('ol.interaction.Drag');
-goog.require('ol.interaction.condition');
-
-
-/**
- * @define {number} Hysterisis pixels.
- */
-ol.SHIFT_DRAG_ZOOM_HYSTERESIS_PIXELS = 8;
-
-
-/**
- * @const {number}
- */
-ol.SHIFT_DRAG_ZOOM_HYSTERESIS_PIXELS_SQUARED =
-    ol.SHIFT_DRAG_ZOOM_HYSTERESIS_PIXELS *
-    ol.SHIFT_DRAG_ZOOM_HYSTERESIS_PIXELS;
+goog.require('ol.interaction.DragBox');
+goog.require('ol.interaction.Interaction');
+goog.require('ol.style.Stroke');
+goog.require('ol.style.Style');
 
 
 
 /**
+ * @classdesc
  * Allows the user to zoom the map by clicking and dragging on the map,
- * normally combined with an {@link ol.interaction.condition} that limits
- * it to when the shift key is held down.
+ * normally combined with an {@link ol.events.condition} that limits
+ * it to when a key, shift by default, is held down.
+ *
  * @constructor
- * @extends {ol.interaction.Drag}
- * @param {ol.interaction.DragZoomOptions=} opt_options Options.
+ * @extends {ol.interaction.DragBox}
+ * @param {olx.interaction.DragZoomOptions=} opt_options Options.
+ * @api stable
  */
 ol.interaction.DragZoom = function(opt_options) {
-
-  goog.base(this);
-
   var options = goog.isDef(opt_options) ? opt_options : {};
 
-  /**
-   * @private
-   * @type {ol.interaction.ConditionType}
-   */
-  this.condition_ = goog.isDef(options.condition) ?
-      options.condition : ol.interaction.condition.shiftKeyOnly;
+  var condition = goog.isDef(options.condition) ?
+      options.condition : ol.events.condition.shiftKeyOnly;
 
   /**
-   * @type {ol.control.DragBox}
    * @private
+   * @type {ol.style.Style}
    */
-  this.dragBox_ = null;
+  var style = goog.isDef(options.style) ?
+      options.style : new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: [0, 0, 255, 1]
+        })
+      });
 
+  goog.base(this, {
+    condition: condition,
+    style: style
+  });
 
 };
-goog.inherits(ol.interaction.DragZoom, ol.interaction.Drag);
+goog.inherits(ol.interaction.DragZoom, ol.interaction.DragBox);
 
 
 /**
  * @inheritDoc
  */
-ol.interaction.DragZoom.prototype.handleDragEnd =
-    function(mapBrowserEvent) {
-  this.dragBox_.setMap(null);
-  this.dragBox_ = null;
-  if (this.deltaX * this.deltaX + this.deltaY * this.deltaY >=
-      ol.SHIFT_DRAG_ZOOM_HYSTERESIS_PIXELS_SQUARED) {
-    var map = mapBrowserEvent.map;
-    var extent = ol.extent.boundingExtent(
-        [this.startCoordinate, mapBrowserEvent.getCoordinate()]);
-    map.withFrozenRendering(function() {
-      // FIXME works for View2D only
-      var view = map.getView();
-      goog.asserts.assertInstanceof(view, ol.View2D);
-      var mapSize = /** @type {ol.Size} */ (map.getSize());
-      view.fitExtent(extent, mapSize);
-      // FIXME we should preserve rotation
-      view.setRotation(0);
-    });
-  }
-};
-
-
-/**
- * @inheritDoc
- */
-ol.interaction.DragZoom.prototype.handleDragStart =
-    function(mapBrowserEvent) {
-  var browserEvent = mapBrowserEvent.browserEvent;
-  if (browserEvent.isMouseActionButton() && this.condition_(mapBrowserEvent)) {
-    this.dragBox_ = new ol.control.DragBox({
-      startCoordinate: this.startCoordinate
-    });
-    this.dragBox_.setMap(mapBrowserEvent.map);
-    return true;
-  } else {
-    return false;
-  }
+ol.interaction.DragZoom.prototype.onBoxEnd = function() {
+  var map = this.getMap();
+  var view = map.getView();
+  goog.asserts.assert(!goog.isNull(view));
+  var extent = this.getGeometry().getExtent();
+  var center = ol.extent.getCenter(extent);
+  var size = map.getSize();
+  goog.asserts.assert(goog.isDef(size));
+  ol.interaction.Interaction.zoom(map, view,
+      view.getResolutionForExtent(extent, size),
+      center, ol.DRAGZOOM_ANIMATION_DURATION);
 };

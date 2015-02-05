@@ -1,4 +1,3 @@
-
 /**
  * An implementation of Google Maps' MVCArray.
  * @see https://developers.google.com/maps/documentation/javascript/reference
@@ -17,39 +16,47 @@ goog.require('ol.Object');
  * @enum {string}
  */
 ol.CollectionEventType = {
+  /**
+   * Triggered when an item is added to the collection.
+   * @event ol.CollectionEvent#add
+   * @api stable
+   */
   ADD: 'add',
+  /**
+   * Triggered when an item is removed from the collection.
+   * @event ol.CollectionEvent#remove
+   * @api stable
+   */
   REMOVE: 'remove'
 };
 
 
 
 /**
+ * @classdesc
+ * Events emitted by {@link ol.Collection} instances are instances of this
+ * type.
+ *
  * @constructor
  * @extends {goog.events.Event}
+ * @implements {oli.CollectionEvent}
  * @param {ol.CollectionEventType} type Type.
- * @param {*=} opt_elem Element.
+ * @param {*=} opt_element Element.
  * @param {Object=} opt_target Target.
  */
-ol.CollectionEvent = function(type, opt_elem, opt_target) {
+ol.CollectionEvent = function(type, opt_element, opt_target) {
 
   goog.base(this, type, opt_target);
 
   /**
-   * @private
+   * The element that is added to or removed from the collection.
    * @type {*}
+   * @api stable
    */
-  this.elem_ = opt_elem;
+  this.element = opt_element;
 
 };
 goog.inherits(ol.CollectionEvent, goog.events.Event);
-
-
-/**
- * @return {*} The element to which this event pertains.
- */
-ol.CollectionEvent.prototype.getElement = function() {
-  return this.elem_;
-};
 
 
 /**
@@ -62,10 +69,23 @@ ol.CollectionProperty = {
 
 
 /**
- * A mutable MVC Array.
+ * @classdesc
+ * An expanded version of standard JS Array, adding convenience methods for
+ * manipulation. Add and remove changes to the Collection trigger a Collection
+ * event. Note that this does not cover changes to the objects _within_ the
+ * Collection; they trigger events on the appropriate object, not on the
+ * Collection as a whole.
+ *
+ * Because a Collection is itself an {@link ol.Object}, it can be bound to any
+ * other Object or Collection such that a change in one will automatically be
+ * reflected in the other.
+ *
  * @constructor
  * @extends {ol.Object}
- * @param {Array=} opt_array Array.
+ * @fires ol.CollectionEvent
+ * @param {Array.<T>=} opt_array Array.
+ * @template T
+ * @api stable
  */
 ol.Collection = function(opt_array) {
 
@@ -73,7 +93,7 @@ ol.Collection = function(opt_array) {
 
   /**
    * @private
-   * @type {Array}
+   * @type {Array.<T>}
    */
   this.array_ = opt_array || [];
 
@@ -85,6 +105,7 @@ goog.inherits(ol.Collection, ol.Object);
 
 /**
  * Remove all elements from the collection.
+ * @api stable
  */
 ol.Collection.prototype.clear = function() {
   while (this.getLength() > 0) {
@@ -94,8 +115,9 @@ ol.Collection.prototype.clear = function() {
 
 
 /**
- * @param {Array} arr Array.
- * @return {ol.Collection} This collection.
+ * @param {Array.<T>} arr Array.
+ * @return {ol.Collection.<T>} This collection.
+ * @api stable
  */
 ol.Collection.prototype.extend = function(arr) {
   var i, ii;
@@ -108,14 +130,15 @@ ol.Collection.prototype.extend = function(arr) {
 
 /**
  * Iterate over each element, calling the provided callback.
- * @param {Function} f The function to call for every element. This function
- *     takes 3 arguments (the element, the index and the array). The return
- *     value is ignored.
- * @param {Object=} opt_obj The object to be used as the value of 'this'
- *     within f.
+ * @param {function(this: S, T, number, Array.<T>): *} f The function to call
+ *     for every element. This function takes 3 arguments (the element, the
+ *     index and the array). The return value is ignored.
+ * @param {S=} opt_this The object to use as `this` in `f`.
+ * @template S
+ * @api stable
  */
-ol.Collection.prototype.forEach = function(f, opt_obj) {
-  goog.array.forEach(this.array_, f, opt_obj);
+ol.Collection.prototype.forEach = function(f, opt_this) {
+  goog.array.forEach(this.array_, f, opt_this);
 };
 
 
@@ -124,7 +147,8 @@ ol.Collection.prototype.forEach = function(f, opt_obj) {
  * is mutated, no events will be dispatched by the collection, and the
  * collection's "length" property won't be in sync with the actual length
  * of the array.
- * @return {Array} Array.
+ * @return {Array.<T>} Array.
+ * @api stable
  */
 ol.Collection.prototype.getArray = function() {
   return this.array_;
@@ -134,16 +158,19 @@ ol.Collection.prototype.getArray = function() {
 /**
  * Get the element at the provided index.
  * @param {number} index Index.
- * @return {*} Element.
+ * @return {T} Element.
+ * @api stable
  */
-ol.Collection.prototype.getAt = function(index) {
+ol.Collection.prototype.item = function(index) {
   return this.array_[index];
 };
 
 
 /**
  * Get the length of this collection.
- * @return {number} Length.
+ * @return {number} The length of the array.
+ * @observable
+ * @api stable
  */
 ol.Collection.prototype.getLength = function() {
   return /** @type {number} */ (this.get(ol.CollectionProperty.LENGTH));
@@ -153,7 +180,8 @@ ol.Collection.prototype.getLength = function() {
 /**
  * Insert an element at the provided index.
  * @param {number} index Index.
- * @param {*} elem Element.
+ * @param {T} elem Element.
+ * @api stable
  */
 ol.Collection.prototype.insertAt = function(index, elem) {
   goog.array.insertAt(this.array_, elem, index);
@@ -164,8 +192,10 @@ ol.Collection.prototype.insertAt = function(index, elem) {
 
 
 /**
- * Remove the last element of the collection.
- * @return {*} Element.
+ * Remove the last element of the collection and return it.
+ * Return `undefined` if the collection is empty.
+ * @return {T|undefined} Element.
+ * @api stable
  */
 ol.Collection.prototype.pop = function() {
   return this.removeAt(this.getLength() - 1);
@@ -174,8 +204,9 @@ ol.Collection.prototype.pop = function() {
 
 /**
  * Insert the provided element at the end of the collection.
- * @param {*} elem Element.
+ * @param {T} elem Element.
  * @return {number} Length.
+ * @api stable
  */
 ol.Collection.prototype.push = function(elem) {
   var n = this.array_.length;
@@ -186,8 +217,9 @@ ol.Collection.prototype.push = function(elem) {
 
 /**
  * Removes the first occurence of elem from the collection.
- * @param {*} elem Element.
- * @return {*} The removed element or undefined if elem was not found.
+ * @param {T} elem Element.
+ * @return {T|undefined} The removed element or undefined if elem was not found.
+ * @api stable
  */
 ol.Collection.prototype.remove = function(elem) {
   var arr = this.array_;
@@ -202,9 +234,11 @@ ol.Collection.prototype.remove = function(elem) {
 
 
 /**
- * Remove the element at the provided index.
+ * Remove the element at the provided index and return it.
+ * Return `undefined` if the collection does not contain this index.
  * @param {number} index Index.
- * @return {*} Value.
+ * @return {T|undefined} Value.
+ * @api stable
  */
 ol.Collection.prototype.removeAt = function(index) {
   var prev = this.array_[index];
@@ -219,7 +253,8 @@ ol.Collection.prototype.removeAt = function(index) {
 /**
  * Set the element at the provided index.
  * @param {number} index Index.
- * @param {*} elem Element.
+ * @param {T} elem Element.
+ * @api stable
  */
 ol.Collection.prototype.setAt = function(index, elem) {
   var n = this.getLength();

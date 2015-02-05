@@ -10,6 +10,10 @@ goog.require('ol.TileCoord');
 goog.require('ol.TileLoadFunctionType');
 goog.require('ol.TileState');
 
+// 
+goog.require('goog.dom');
+goog.require('goog.dom.TagName');
+goog.require('ol.dom');
 
 
 /**
@@ -21,8 +25,7 @@ goog.require('ol.TileState');
  * @param {?string} crossOrigin Cross origin.
  * @param {ol.TileLoadFunctionType} tileLoadFunction Tile load function.
  */
-ol.ImageTile =
-    function(tileCoord, state, src, crossOrigin, tileLoadFunction) {
+ol.ImageTile = function(tileCoord, state, src, crossOrigin, tileLoadFunction) {
 
   goog.base(this, tileCoord, state);
 
@@ -61,12 +64,20 @@ ol.ImageTile =
    */
   this.tileLoadFunction_ = tileLoadFunction;
 
+  /** 
+   * @private
+   * @type {CanvasRenderingContext2D}
+   */
+
+  this.clipTileContext_ = null;
+
 };
 goog.inherits(ol.ImageTile, ol.Tile);
 
 
 /**
  * @inheritDoc
+ * @api
  */
 ol.ImageTile.prototype.getImage = function(opt_context) {
   if (goog.isDef(opt_context)) {
@@ -88,6 +99,21 @@ ol.ImageTile.prototype.getImage = function(opt_context) {
 
 
 /**
+ * Creates a Canvas Object of Tile Image and get pixel RGBA values of xy in image coordinates
+ * @param {Array} pixelXY
+ * @return {Uint8ClampedArray} Pixel Values per Band
+ * @public
+ */
+ol.ImageTile.prototype.getPixelValue = function(pixelXY) {
+  if(goog.isNull(this.clipTileContext_)){
+      this.clipTileContext_ = ol.dom.createCanvasContext2D(256,256);
+      this.clipTileContext_.drawImage(this.getImage(), 0, 0, 256, 256);
+  }
+  return this.clipTileContext_.getImageData(pixelXY[0], pixelXY[1], 1, 1).data;
+};
+      
+
+/**
  * @inheritDoc
  */
 ol.ImageTile.prototype.getKey = function() {
@@ -103,7 +129,7 @@ ol.ImageTile.prototype.getKey = function() {
 ol.ImageTile.prototype.handleImageError_ = function() {
   this.state = ol.TileState.ERROR;
   this.unlistenImage_();
-  this.dispatchChangeEvent();
+  this.changed();
 };
 
 
@@ -113,13 +139,20 @@ ol.ImageTile.prototype.handleImageError_ = function() {
  * @private
  */
 ol.ImageTile.prototype.handleImageLoad_ = function() {
+  if (ol.LEGACY_IE_SUPPORT && ol.IS_LEGACY_IE) {
+    if (!goog.isDef(this.image_.naturalWidth)) {
+      this.image_.naturalWidth = this.image_.width;
+      this.image_.naturalHeight = this.image_.height;
+    }
+  }
+
   if (this.image_.naturalWidth && this.image_.naturalHeight) {
     this.state = ol.TileState.LOADED;
   } else {
     this.state = ol.TileState.EMPTY;
   }
   this.unlistenImage_();
-  this.dispatchChangeEvent();
+  this.changed();
 };
 
 

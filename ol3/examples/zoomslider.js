@@ -1,8 +1,8 @@
 goog.require('ol.Map');
-goog.require('ol.View2D');
+goog.require('ol.View');
 goog.require('ol.control.ZoomSlider');
 goog.require('ol.layer.Tile');
-goog.require('ol.source.MapQuestOpenAerial');
+goog.require('ol.source.MapQuest');
 
 
 /**
@@ -14,14 +14,14 @@ goog.require('ol.source.MapQuestOpenAerial');
 var createMap = function(divId) {
   var source, layer, map, zoomslider, resolutions;
 
-  source = new ol.source.MapQuestOpenAerial();
+  source = new ol.source.MapQuest({layer: 'sat'});
   layer = new ol.layer.Tile({
     source: source
   });
   map = new ol.Map({
     layers: [layer],
     target: divId,
-    view: new ol.View2D({
+    view: new ol.View({
       center: [0, 0],
       zoom: 2
     })
