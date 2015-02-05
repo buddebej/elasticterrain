@@ -1,7 +1,7 @@
 Open Terrain Explorer
 =========
 
-This is based on [ol3dem](http://github.com/buddebej/ol3dem/) an experimental fork of OpenLayers 3.1.1 to render digital elevation models using the integrated webgl functionality.
+This is based on [ol3-dem](http://github.com/buddebej/ol3-dem/) an experimental fork of OpenLayers 3.1.1 to render digital elevation models using the integrated webgl functionality.
 
 Run the example with (a sample tileset will be added soon):
 
