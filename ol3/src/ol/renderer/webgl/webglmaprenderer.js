@@ -167,7 +167,7 @@ ol.renderer.webgl.Map = function(container, map) {
           var tileSize = /** @type {number} */ (element[3]);
           var tileGutter = /** @type {number} */ (element[4]);
           this.bindTileTexture(
-              tile, tileSize, tileGutter, goog.webgl.LINEAR, goog.webgl.LINEAR);
+              tile, tileSize, tileGutter, goog.webgl.NEAREST, goog.webgl.NEAREST);
         }
       }, this);
 

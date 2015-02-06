@@ -205,7 +205,7 @@ var Ol3demUi = function(map) {
           },
           preloadLayers = function(){
                 $.each(layers, function(val, obj) {
-                  obj.setPreload(8);
+                  obj.setPreload(0);
                 });  
           };    
 

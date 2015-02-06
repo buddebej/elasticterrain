@@ -129,9 +129,9 @@ ol.renderer.webgl.Layer.prototype.bindFramebuffer =
         framebufferDimension, framebufferDimension, 0, goog.webgl.RGBA,
         goog.webgl.UNSIGNED_BYTE, null);
     gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER,
-        goog.webgl.LINEAR);
+        goog.webgl.NEAREST);
     gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER,
-        goog.webgl.LINEAR);
+        goog.webgl.NEAREST);
 
     var framebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(goog.webgl.FRAMEBUFFER, framebuffer);
