@@ -306,11 +306,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
       var extent;
       this.timeoutCounter_++;
 
-  // avoid gaps on framebuffer edge when using high plan oblique inclinations 
-      var padding = {x: 0, y: 0};
-      padding.y = (tileDemLayer.getObliqueInclination() < 60) ? 300*(1-tileDemLayer.getObliqueInclination()/90)+Math.max(z-9,0)*350 : 0;
-      padding.y = (tileDemLayer.getTerrainInteraction()) ? 300 : padding.y;
-      padding.x = (tileDemLayer.getTerrainInteraction()) ? 300 : 0;
+      // increase tile extent 
+      var padding = {x: 768, y: 768}; 
  
       if (tileResolution == viewState.resolution) {
           center = this.snapCenterToPixel(center, tileResolution, [frameState.size[0]-padding.x,frameState.size[1]-padding.y]);    
@@ -321,7 +318,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
       var tileRange = tileGrid.getTileRangeForExtentAndResolution(extent, tileResolution);
       var framebufferExtent;
-
+      
   if (!goog.isNull(this.renderedTileRange_) && this.renderedTileRange_.equals(tileRange) && this.renderedRevision_ == tileSource.getRevision()) {
   // DO NOTHING, RE-RENDERING NOT NEEDED
       framebufferExtent = this.renderedFramebufferExtent_;
