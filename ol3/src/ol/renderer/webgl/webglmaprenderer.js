@@ -97,7 +97,7 @@ ol.renderer.webgl.Map = function(container, map) {
    */
   this.gl_ = ol.webgl.getContext(this.canvas_, {
     antialias: true,
-    depth: false,
+    depth: true,
     failIfMajorPerformanceCaveat: true,
     preserveDrawingBuffer: false,
     stencil: true
@@ -462,6 +462,8 @@ ol.renderer.webgl.Map.prototype.initializeGL_ = function() {
   gl.enable(goog.webgl.DEPTH_TEST);  
   gl.depthRange(0.0,1.0);                             
   gl.depthFunc(goog.webgl.LEQUAL);   
+  // https://www.khronos.org/webgl/public-mailing-list/archives/1010/msg00009.html
+  gl.pixelStorei(goog.webgl.UNPACK_COLORSPACE_CONVERSION_WEBGL, goog.webgl.NONE);
 };
 
 

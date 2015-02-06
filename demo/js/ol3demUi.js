@@ -209,8 +209,6 @@ var Ol3demUi = function(map) {
                 });  
           };    
 
-      // TODO: REMOVE
-      //ol3dem.setOverlayTiles(ol3dem.overlayers[0]);
       hideAllOtherOverlayers(ol3dem);
       preloadLayers();
 
@@ -238,10 +236,12 @@ var Ol3demUi = function(map) {
       if (ol3dem.getHillShading()) {
         ol3dem.setHillShading(false);
         checkbox.prop('checked', false);
+        ol3dem.redraw();
         $('.shadingControls').hide('blind', 300);
       } else {
         ol3dem.setHillShading(true);
         checkbox.prop('checked', true);
+        ol3dem.redraw();        
         $('.shadingControls').show('blind', 300);
       }
       renderMap();

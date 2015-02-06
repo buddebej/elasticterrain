@@ -12,17 +12,14 @@ goog.require('ol.easing');
  */
 ol.animation.spring = function() {
   var start =  goog.now();
-  var duration = 4000;
+  var duration = 2000;
 
   var spring = function(shearing){
-
     if ( typeof spring.currentVelocity == 'undefined' ) {
         spring.currentVelocity = {x:0,y:0};
-    }
-    
-    var frictionForce = 0.20;
-    var springCoefficient = 0.10;
-
+    }    
+    var frictionForce = 0.25;
+    var springCoefficient = 0.15;
     var springLength = {x:0.0,y:0.0};
     var friction = 1.0 - frictionForce;
     var distance = Math.sqrt(shearing.x * shearing.x + shearing.y * shearing.y);
@@ -56,21 +53,14 @@ ol.animation.spring = function() {
           frameState.viewHints[ol.ViewHint.ANIMATING] += 1;
           return true;
         } else if (frameState.time < start + duration) { // change condition to shearing=0 .. then exit
-  
           if(frameState.index%2 === 0){
             spring(ol3dem.getTerrainShearing());
             ol3dem.redraw();
           }
-
           frameState.animate = true;    
           frameState.viewHints[ol.ViewHint.ANIMATING] += 1;       
-
           return true;
         } else {
-          // TODO: Remove
-          ol3dem.setTerrainShearing({x:0,y:0});
-          ol3dem.redraw();
-          console.log('animation end');
           return false;
         }
       });
