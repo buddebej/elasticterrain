@@ -214,6 +214,12 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    */
   this.tileGrid_ = null;
 
+   /**
+   * @public
+   * @type {number}
+   */
+  this.maxShearing_ = 5.0;
+
   /**
    * @public
    * @param {Array} xy in Mercator 
@@ -370,25 +376,26 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
               map.getInteractions().insertAt(3,this.terrainInteraction_);       
             } 
             this.terrainInteraction_.setActive(true);
-            panInteraction.setActive(false);
+            panInteraction.setActive(false);    
+            var sf = tileDemLayer.getTerrainShearing();
+            var sx = (sf.x === 0)? 0 : goog.math.clamp(-sf.x/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);
+            var sy = (sf.y === 0)? 0 : goog.math.clamp(-sf.y/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);   
+            // u_terrainShearing: Terrain Interaction Shearing Coordinates
+            gl.uniform2f(this.locations_.u_terrainShearing, sx*Math.cos(viewState.rotation)-sy*Math.sin(viewState.rotation), 
+                                                            sx*Math.sin(viewState.rotation)+sy*Math.cos(viewState.rotation)); 
           }else{
             // disable terrain interaction + enable panning
             if(this.terrainInteraction_.getActive()){
               panInteraction.setActive(true);
               this.terrainInteraction_.setActive(false);
             }
+            gl.uniform2f(this.locations_.u_terrainShearing, 0, 0); 
           }
 
-          var shearingFactor = tileDemLayer.getTerrainShearing();
-          var transformShearing = function(shearingFactor){
-            return goog.math.clamp(-shearingFactor,-4.5,4.5);
-          };
+
       // SHADER ARGUMENTS
           // u_terrainInteraction: Is Terrain Interaction active?
           gl.uniform1f(this.locations_.u_terrainInteraction, tileDemLayer.getTerrainInteraction() === true ? 1.0 : 0.0);
-          // u_terrainShearing: Terrain Interaction Shearing Coordinates
-          gl.uniform2f(this.locations_.u_terrainShearing, transformShearing(shearingFactor.x/z), transformShearing(shearingFactor.y/z)); 
-
           // u_overlayActive: Is overlay active?
           gl.uniform1f(this.locations_.u_overlayActive, this.overlay.Active === true ? 1.0 : 0.0);
           // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
