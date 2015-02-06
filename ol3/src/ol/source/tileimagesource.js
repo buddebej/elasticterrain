@@ -84,7 +84,7 @@ ol.source.TileImage.defaultTileLoadFunction = function(imageTile, src) {
   var tileCoord = imageTile.tileCoord;
   var z = tileCoord[0];
 
-  if(z>11 && goog.string.contains(src,'ol3dem')){
+  if(z>11 && goog.string.contains(src,'eudem')){
     
     var isEven = function (n) {
           n = Number(n);
