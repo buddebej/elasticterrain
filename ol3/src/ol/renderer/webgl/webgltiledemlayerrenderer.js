@@ -240,7 +240,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
       if(this.renderedTileRange_.contains(tc)){     
         tileXY[0] = Math.floor(((xy[0]-tileExtent[0]) / (tileExtent[2] - tileExtent[0]))*256); 
         tileXY[1] = 256-Math.floor(((xy[1]-tileExtent[1]) / (tileExtent[3] - tileExtent[1]))*256); 
-        elevation = this.decodeElevation(this.tileCache_.get(xyzKey).getPixelValue(tileXY))
+        elevation = this.decodeElevation(this.tileCache_.get(xyzKey).getPixelValue(tileXY));
       }
       return elevation;
     } else {
@@ -369,11 +369,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             if(map.getInteractions().getArray().indexOf(this.terrainInteraction_)<0){
               map.getInteractions().insertAt(3,this.terrainInteraction_);       
             } 
-            // enable terrain interaction + disable panning
-            if(panInteraction.getActive()){
-              this.terrainInteraction_.setActive(true);
-              panInteraction.setActive(false);
-            }
+            this.terrainInteraction_.setActive(true);
+            panInteraction.setActive(false);
           }else{
             // disable terrain interaction + enable panning
             if(this.terrainInteraction_.getActive()){
@@ -382,17 +379,15 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             }
           }
 
-          var xs = tileDemLayer.getTerrainShearing().x,ys = tileDemLayer.getTerrainShearing().y;
-          if(xs !== 0.0 || ys !== 0.0){
-            xs=goog.math.clamp(1-xs*0.029,-4.0,4.0);
-            ys=goog.math.clamp(1-ys*0.029,-4.0,4.0);
-          } 
-
+          var shearingFactor = tileDemLayer.getTerrainShearing();
+          var transformShearing = function(shearingFactor){
+            return goog.math.clamp(-shearingFactor,-4.5,4.5);
+          };
       // SHADER ARGUMENTS
           // u_terrainInteraction: Is Terrain Interaction active?
           gl.uniform1f(this.locations_.u_terrainInteraction, tileDemLayer.getTerrainInteraction() === true ? 1.0 : 0.0);
           // u_terrainShearing: Terrain Interaction Shearing Coordinates
-          gl.uniform2f(this.locations_.u_terrainShearing, xs, ys); 
+          gl.uniform2f(this.locations_.u_terrainShearing, transformShearing(shearingFactor.x/z), transformShearing(shearingFactor.y/z)); 
 
           // u_overlayActive: Is overlay active?
           gl.uniform1f(this.locations_.u_overlayActive, this.overlay.Active === true ? 1.0 : 0.0);
