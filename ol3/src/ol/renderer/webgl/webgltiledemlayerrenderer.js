@@ -150,17 +150,6 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
                  };
 
   /**
-   * Interaction for Wiggling Mountains / Interactive Terrain
-   * @private
-   * @type {ol.interaction.DragPanDem}  
-   * Kinetic Parameter:
-   * decay Rate of decay (must be negative).
-   * minVelocity Minimum velocity (pixels/millisecond).
-   * delay Delay to consider to calculate the kinetic initial values (milliseconds).   
-   */  
-  this.terrainInteraction_ = new ol.interaction.DragPanDem({kinetic: new ol.Kinetic(-0.005, 0.005, 200)});
-
-  /**
    * @private
    * @type {Uint8Array}
    */
@@ -200,7 +189,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @private
    * @type {number}
    */
-  this.timeoutCounterMax_ = 200;
+  this.timeoutCounterMax_ = 150;
 
    /**
    * @public
@@ -218,7 +207,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @public
    * @type {number}
    */
-  this.maxShearing_ = 5.0;
+  this.maxShearing_ = 4.0;
 
   /**
    * @public
@@ -313,8 +302,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
       this.timeoutCounter_++;
 
       // increase tile extent 
-      var padding = {x: 768, y: 768}; 
- 
+      var padding = {x: 256, y: 256}; 
       if (tileResolution == viewState.resolution) {
           center = this.snapCenterToPixel(center, tileResolution, [frameState.size[0]-padding.x,frameState.size[1]-padding.y]);    
           extent = ol.extent.getForViewAndSize(center, tileResolution, viewState.rotation, [frameState.size[0]+padding.x,frameState.size[1]+padding.y]);    
@@ -368,30 +356,16 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 this.overlay.Active =false;
             }
 
-      // TERRAIN INTERACTION
-          var panInteraction = map.getInteractions().getArray()[2];
-          if(tileDemLayer.getTerrainInteraction()){
-            // add terrain interaction control
-            if(map.getInteractions().getArray().indexOf(this.terrainInteraction_)<0){
-              map.getInteractions().insertAt(3,this.terrainInteraction_);       
-            } 
-            this.terrainInteraction_.setActive(true);
-            panInteraction.setActive(false);    
-            var sf = tileDemLayer.getTerrainShearing();
-            var sx = (sf.x === 0)? 0 : goog.math.clamp(-sf.x/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);
-            var sy = (sf.y === 0)? 0 : goog.math.clamp(-sf.y/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);   
-            // u_terrainShearing: Terrain Interaction Shearing Coordinates
-            gl.uniform2f(this.locations_.u_terrainShearing, sx*Math.cos(viewState.rotation)-sy*Math.sin(viewState.rotation), 
-                                                            sx*Math.sin(viewState.rotation)+sy*Math.cos(viewState.rotation)); 
-          }else{
-            // disable terrain interaction + enable panning
-            if(this.terrainInteraction_.getActive()){
-              panInteraction.setActive(true);
-              this.terrainInteraction_.setActive(false);
-            }
-            gl.uniform2f(this.locations_.u_terrainShearing, 0, 0); 
-          }
-
+      // TERRAIN INTERACTION 
+          var shearingFactor = [0.0,0.0];
+          var sf = tileDemLayer.getTerrainShearing();
+          var dir = (sf.z > 2000) ? -1 : 1;
+          var shearX = (sf.x === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(dir*sf.x/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);
+          var shearY = (sf.y === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(dir*sf.y/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);  
+              shearingFactor = [shearX*Math.cos(viewState.rotation)-shearY*Math.sin(viewState.rotation),
+                                shearX*Math.sin(viewState.rotation)+shearY*Math.cos(viewState.rotation)]; 
+          // u_terrainShearing: Terrain Interaction Shearing Coordinates
+          gl.uniform2f(this.locations_.u_terrainShearing, shearingFactor[0], shearingFactor[1]); 
 
       // SHADER ARGUMENTS
           // u_terrainInteraction: Is Terrain Interaction active?
@@ -588,6 +562,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 }
             } else {
             // RENDER TILES WITHOUT OVERLAY
+
                 for (x = tileRange.minX; x <= tileRange.maxX; ++x) {
                   for (y = tileRange.minY; y <= tileRange.maxY; ++y) {
                     tile = tileSource.getTile(z, x, y, pixelRatio, projection);
@@ -633,14 +608,12 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                   }
               }               
             }
-  // CHECK IF EVERYTHING IS RENDERED
+  // CHECK IF EVERYTHING IS LOADED
       if (allTilesLoaded || this.timeoutCounter_ > this.timeoutCounterMax_) {
           this.renderedTileRange_ = tileRange;
           this.renderedFramebufferExtent_ = framebufferExtent;
           this.renderedRevision_ = tileSource.getRevision();
-          if(this.timeoutCounter_ > this.timeoutCounterMax_){
-            console.log('Loading of tiles timed out.');
-          }
+          console.assert(this.timeoutCounter_ < this.timeoutCounterMax_, 'Loading of tiles timed out.');
           this.timeoutCounter_ = 0;
         } else {   
           this.renderedTileRange_ = null;

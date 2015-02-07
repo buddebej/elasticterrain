@@ -59,8 +59,7 @@ ol.interaction.DragPanDem = function(opt_options) {
    * @private
    * @type {ol.events.ConditionType}
    */
-  this.condition_ = goog.isDef(options.condition) ?
-      options.condition : ol.events.condition.noModifierKeys;
+  this.condition_ =  ol.events.condition.shiftKeyOnly;
 
   /**
    * @private
@@ -104,12 +103,28 @@ ol.interaction.DragPanDem.handleUpEvent_ = function(mapBrowserEvent) {
     if (!this.noKinetic_ && this.kinetic_) {
       this.kineticPreRenderFn_ = this.kinetic_.explicitShearing();
       map.beforeRender(this.kineticPreRenderFn_);  
+
+      var distance = this.kinetic_.getDistance();
+      var angle = this.kinetic_.getAngle();
+      var center = view.getCenter();
+      goog.asserts.assert(goog.isDef(center));
+      var centerpx = map.getPixelFromCoordinate(center);
+      var dest = map.getCoordinateFromPixel([
+        centerpx[0] - distance * Math.cos(angle),
+        centerpx[1] - distance * Math.sin(angle)
+      ]);
+
+      console.log(distance,angle,center,dest);
+
+      dest = view.constrainCenter(dest);
+      view.setCenter(dest);
+
     } 
     view.setHint(ol.ViewHint.INTERACTING, -1);
     map.render(); 
     return false;
   } else {
-    console.log('this.targetPointers.length more than 0');
+    console.table('this.targetPointers.length more than 0');
     this.dragStartPosition_ = null;
     return true;
   }

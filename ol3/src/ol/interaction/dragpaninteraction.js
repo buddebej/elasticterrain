@@ -117,6 +117,9 @@ ol.interaction.DragPan.handleUpEvent_ = function(mapBrowserEvent) {
         ]);
         dest = view.constrainCenter(dest);
         view.setCenter(dest);
+        
+        console.log(distance,angle,center,dest);
+
       }
       view.setHint(ol.ViewHint.INTERACTING, -1);
       map.render();

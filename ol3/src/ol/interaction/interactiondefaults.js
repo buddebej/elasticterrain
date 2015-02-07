@@ -47,11 +47,11 @@ ol.interaction.defaults = function(opt_options) {
 
   var kinetic = new ol.Kinetic(-0.005, 0.05, 100);
 
-  var altShiftDragRotate = goog.isDef(options.altShiftDragRotate) ?
-      options.altShiftDragRotate : true;
-  if (altShiftDragRotate) {
-    interactions.push(new ol.interaction.DragRotate());
-  }
+  // var altShiftDragRotate = goog.isDef(options.altShiftDragRotate) ?
+  //     options.altShiftDragRotate : true;
+  // if (altShiftDragRotate) {
+  //   interactions.push(new ol.interaction.DragRotate());
+  // }
 
   var doubleClickZoom = goog.isDef(options.doubleClickZoom) ?
       options.doubleClickZoom : true;
@@ -62,13 +62,18 @@ ol.interaction.defaults = function(opt_options) {
     }));
   }
 
+  // dragPanDem includes Terrain Interaction with shearing
+  interactions.push(new ol.interaction.DragPanDem({
+      kinetic: kinetic
+    }));
+
   var dragPan = goog.isDef(options.dragPan) ?
       options.dragPan : true;
   if (dragPan) {
     interactions.push(new ol.interaction.DragPan({
       kinetic: kinetic
     }));
-  }
+  }  
 
   var pinchRotate = goog.isDef(options.pinchRotate) ?
       options.pinchRotate : true;
@@ -84,15 +89,15 @@ ol.interaction.defaults = function(opt_options) {
     }));
   }
 
-  var keyboard = goog.isDef(options.keyboard) ?
-      options.keyboard : true;
-  if (keyboard) {
-    interactions.push(new ol.interaction.KeyboardPan());
-    interactions.push(new ol.interaction.KeyboardZoom({
-      delta: options.zoomDelta,
-      duration: options.zoomDuration
-    }));
-  }
+  // var keyboard = goog.isDef(options.keyboard) ?
+  //     options.keyboard : true;
+  // if (keyboard) {
+  //   interactions.push(new ol.interaction.KeyboardPan());
+  //   interactions.push(new ol.interaction.KeyboardZoom({
+  //     delta: options.zoomDelta,
+  //     duration: options.zoomDuration
+  //   }));
+  // }
 
   var mouseWheelZoom = goog.isDef(options.mouseWheelZoom) ?
       options.mouseWheelZoom : true;
@@ -102,11 +107,11 @@ ol.interaction.defaults = function(opt_options) {
     }));
   }
 
-  var shiftDragZoom = goog.isDef(options.shiftDragZoom) ?
-      options.shiftDragZoom : true;
-  if (shiftDragZoom) {
-    interactions.push(new ol.interaction.DragZoom());
-  }
+  // var shiftDragZoom = goog.isDef(options.shiftDragZoom) ?
+  //     options.shiftDragZoom : true;
+  // if (shiftDragZoom) {
+  //   interactions.push(new ol.interaction.DragZoom());
+  // }
 
   return interactions;
 

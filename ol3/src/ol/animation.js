@@ -18,8 +18,8 @@ ol.animation.spring = function() {
     if ( typeof spring.currentVelocity == 'undefined' ) {
         spring.currentVelocity = {x:0,y:0};
     }    
-    var frictionForce = 0.25;
-    var springCoefficient = 0.15;
+    var frictionForce = 0.15;
+    var springCoefficient = 0.10;
     var springLength = {x:0.0,y:0.0};
     var friction = 1.0 - frictionForce;
     var distance = Math.sqrt(shearing.x * shearing.x + shearing.y * shearing.y);

@@ -20,10 +20,11 @@ var Ol3demUi = function(map) {
         'lightAzimuth' : 225.0,
         'lightZenith' : 45.0,   
         'maxElevation' : 4900,
-        'resolution' : 30,
+        'resolution' : 15,
         'testing' : false,        
         'obliqueInclination' : 50.0,
-        'waterBodies' : true
+        'waterBodies' : true,
+        'terrainInteraction' : true
     };
 
     $('#colorScale .scaleMin').text(ui.option.colorScale[0]);
@@ -34,6 +35,7 @@ var Ol3demUi = function(map) {
     $('.t_HillShading input').prop('checked', ui.option.hillShade);    
     $('.t_Testing input').prop('checked', ui.option.testing);
     $('.t_WaterBodies input').prop('checked', ui.option.waterBodies);
+    $('.t_Interaction input').prop('checked', ui.option.terrainInteraction);
 
     ol3dem.setAmbientLight(ui.option.ambientLight / 100.0);
     ol3dem.setColorScale(ui.option.colorScale);
@@ -44,6 +46,7 @@ var Ol3demUi = function(map) {
     ol3dem.setTesting(ui.option.testing);
     ol3dem.setObliqueInclination(ui.option.obliqueInclination);
     ol3dem.setWaterBodies(ui.option.waterBodies);
+    ol3dem.setTerrainInteraction(ui.option.terrainInteraction);
 
 
     var renderMap = function() {
@@ -274,21 +277,8 @@ var Ol3demUi = function(map) {
         ol3dem.setTesting(true);
         checkbox.prop('checked', true);
       }
-      renderMap();
+      //renderMap();
     });
-
-
-    var initInteraction =  function(){
-        ol3dem.view.setRotation(0);
-        ol3dem.setObliqueInclination(90.0);       
-        ol3dem.setResolution(0.12);        
-        // ol3dem.view.setCenter(ol.proj.transform([6.458238, 44.47898], 'EPSG:4326', 'EPSG:3857'));
-        // ol3dem.view.setZoom(11);
-        // renderMap();
-      };
-
-        // ol3dem.setTerrainInteraction(true);
-        // initInteraction();
 
     // switch to activate testing mode
     $('.t_Interaction').click(function() {
@@ -298,7 +288,6 @@ var Ol3demUi = function(map) {
         checkbox.prop('checked', false);
       } else {
         ol3dem.setTerrainInteraction(true);
-        initInteraction();
         checkbox.prop('checked', true);
       }
     });    
