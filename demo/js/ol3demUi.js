@@ -17,7 +17,7 @@ var Ol3demUi = function(map) {
         'ambientLight' : 0,
         'colorScale' : [0, 3000],        
         'hillShade' : true,
-        'lightAzimuth' : 225.0,
+        'lightAzimuth' : 340.0,
         'lightZenith' : 45.0,   
         'maxElevation' : 4900,
         'resolution' : 15,

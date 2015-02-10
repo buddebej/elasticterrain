@@ -6,56 +6,106 @@ goog.require('ol.coordinate');
 goog.require('ol.easing');
 
 
+
+var shearPanSpring = function(demLayer){
+      var shearingX = demLayer.getTerrainShearing().x;
+      var shearingY = demLayer.getTerrainShearing().y;
+
+      var frictionForce = 0.10;
+      var springCoefficient = 0.15;
+      var springLength = {x:0.0,y:0.0};
+      var friction = 1.0 - frictionForce;
+      var distance = Math.sqrt(shearingX * shearingX + shearingY * shearingY);
+      var acceleration = {x:0.0,y:0.0};
+
+      if ( typeof shearPanSpring.currentVelocity == 'undefined' ) {
+          shearPanSpring.currentVelocity = {x:0,y:0};
+      }
+
+      acceleration.x = (shearingX - springLength.x) * springCoefficient;
+      acceleration.y = (shearingY - springLength.y) * springCoefficient;
+
+      // apply frictionForce and add acceleration
+      shearPanSpring.currentVelocity.x = (shearPanSpring.currentVelocity.x * friction)+acceleration.x;
+      shearPanSpring.currentVelocity.y = (shearPanSpring.currentVelocity.y * friction)+acceleration.y;
+
+      if(Math.abs(shearPanSpring.currentVelocity.x) < 0.0001) shearPanSpring.currentVelocity.x = 0;
+      if(Math.abs(shearPanSpring.currentVelocity.y) < 0.0001) shearPanSpring.currentVelocity.y = 0;
+
+      // apply deltaShearing to current spring position
+      shearingX=shearingX-shearPanSpring.currentVelocity.x;
+      shearingY=shearingY-shearPanSpring.currentVelocity.y;
+
+      return {x:shearingX, y:shearingY, z:demLayer.getTerrainShearing().z};
+};
+
+
 /**
  * @return {ol.PreRenderFunction} Pre-render function.
  * @api
  */
-ol.animation.spring = function() {
+ol.animation.hybridShearing = function(demLayer, destinationCenter, currentCenter) {
   var start =  goog.now();
-  var duration = 2000;
-
-  var spring = function(shearing){
-    if ( typeof spring.currentVelocity == 'undefined' ) {
-        spring.currentVelocity = {x:0,y:0};
-    }    
-    var frictionForce = 0.15;
-    var springCoefficient = 0.10;
-    var springLength = {x:0.0,y:0.0};
-    var friction = 1.0 - frictionForce;
-    var distance = Math.sqrt(shearing.x * shearing.x + shearing.y * shearing.y);
-    var acceleration = {x:0.0,y:0.0};
-
-    acceleration.x = (shearing.x - springLength.x) * springCoefficient;
-    acceleration.y = (shearing.y - springLength.y) * springCoefficient;
-
-    // apply frictionForce and add acceleration
-    spring.currentVelocity.x = (spring.currentVelocity.x * friction)+acceleration.x;
-    spring.currentVelocity.y = (spring.currentVelocity.y * friction)+acceleration.y;
-
-    if(Math.abs(spring.currentVelocity.x) < 0.0001) spring.currentVelocity.x = 0;
-    if(Math.abs(spring.currentVelocity.y) < 0.0001) spring.currentVelocity.y = 0;
-
-    // apply deltaShearing to current spring position
-    shearing.x=shearing.x-spring.currentVelocity.x;
-    shearing.y=shearing.y-spring.currentVelocity.y;
-
-    return shearing;
-  };
+  var duration = 1500;
+  var panEasing = ol.easing.easeOut;
   return (
       /**
        * @param {ol.Map} map Map.
        * @param {?olx.FrameState} frameState Frame state.
        */
       function(map, frameState) {
-        var ol3dem=/** @type {ol.layer.TileDem} */(map.getLayers().getArray()[map.getLayers().getArray().length-1]);
+        var view = map.getView();
+      
         if (frameState.time < start) {
           frameState.animate = true;
           frameState.viewHints[ol.ViewHint.ANIMATING] += 1;
           return true;
-        } else if (frameState.time < start + duration) { // change condition to shearing=0 .. then exit
+        } else if (frameState.time < start + duration) { 
+          if(frameState.index%1 === 0){
+
+            // panning
+            var deltaPan = goog.math.clamp(panEasing((frameState.time - start) / 200),0,1.0);  
+
+            var center = [currentCenter[0]-(currentCenter[0]-destinationCenter[0])*deltaPan,
+                          currentCenter[1]-(currentCenter[1]-destinationCenter[1])*deltaPan];
+
+            view.setCenter(center);
+
+             // terrain shearing
+            demLayer.setTerrainShearing(shearPanSpring(demLayer));
+            demLayer.redraw();
+          }
+          frameState.animate = true;    
+          frameState.viewHints[ol.ViewHint.ANIMATING] += 1;       
+          return true;
+        } else {
+          return false;
+        }
+      });
+};
+
+/**
+ * @return {ol.PreRenderFunction} Pre-render function.
+ * @api
+ */
+ol.animation.staticShearing = function(demLayer) {
+  var start =  goog.now();
+  var duration = 2000;
+  return (
+      /**
+       * @param {ol.Map} map Map.
+       * @param {?olx.FrameState} frameState Frame state.
+       */
+      function(map, frameState) {
+        if (frameState.time < start) {
+          frameState.animate = true;
+          frameState.viewHints[ol.ViewHint.ANIMATING] += 1;
+          return true;
+        } else if (frameState.time < start + duration) { 
           if(frameState.index%2 === 0){
-            spring(ol3dem.getTerrainShearing());
-            ol3dem.redraw();
+            // terrain shearing
+            demLayer.setTerrainShearing(shearPanSpring(demLayer));
+            demLayer.redraw();
           }
           frameState.animate = true;    
           frameState.viewHints[ol.ViewHint.ANIMATING] += 1;       

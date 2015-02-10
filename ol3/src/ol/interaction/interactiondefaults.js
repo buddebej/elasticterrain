@@ -4,6 +4,7 @@ goog.require('ol.Collection');
 goog.require('ol.Kinetic');
 goog.require('ol.interaction.DoubleClickZoom');
 goog.require('ol.interaction.DragPan');
+goog.require('ol.interaction.DragShear'); // terrain shearing interaction
 goog.require('ol.interaction.DragRotate');
 goog.require('ol.interaction.DragZoom');
 goog.require('ol.interaction.KeyboardPan');
@@ -62,10 +63,9 @@ ol.interaction.defaults = function(opt_options) {
     }));
   }
 
-  // dragPanDem includes Terrain Interaction with shearing
-  interactions.push(new ol.interaction.DragPanDem({
-      kinetic: kinetic
-    }));
+  // DragShear includes Terrain Interaction with shearing
+  interactions.push(new ol.interaction.DragShear());
+   
 
   var dragPan = goog.isDef(options.dragPan) ?
       options.dragPan : true;

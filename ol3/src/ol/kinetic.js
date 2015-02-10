@@ -134,14 +134,6 @@ ol.Kinetic.prototype.pan = function(source) {
 };
 
 
-
-/**
- * @return {ol.PreRenderFunction} Pre-render function for kinetic animation.
- */
-ol.Kinetic.prototype.explicitShearing = function() {
-  return ol.animation.spring();
-};
-
 /**
  * @private
  * @return {number} Duration of animation (milliseconds).

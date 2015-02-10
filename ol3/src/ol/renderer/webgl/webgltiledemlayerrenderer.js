@@ -206,7 +206,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @public
    * @type {number}
    */
-  this.maxShearing_ = 6.0;
+  this.maxShearing_ = 3.6;
 
   /**
    * @public
@@ -350,7 +350,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
       // TERRAIN INTERACTION 
           var shearingFactor = [0.0,0.0];
           var sf = tileDemLayer.getTerrainShearing();
-          var dir = -1;//(sf.z > 2000) ? -1 : 1;
+          var dir = (sf.z > 2000) ? -1 : 1;
           var shearX = (sf.x === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(dir*sf.x/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);
           var shearY = (sf.y === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(dir*sf.y/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);  
               shearingFactor = [shearX*Math.cos(viewState.rotation)-shearY*Math.sin(viewState.rotation),

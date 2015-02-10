@@ -70,8 +70,7 @@ goog.inherits(ol.interaction.DragPan, ol.interaction.Pointer);
  */
 ol.interaction.DragPan.handleDragEvent_ = function(mapBrowserEvent) {
     goog.asserts.assert(this.targetPointers.length >= 1);
-    var centroid =
-        ol.interaction.Pointer.centroid(this.targetPointers);
+    var centroid = ol.interaction.Pointer.centroid(this.targetPointers);
     if (this.kinetic_) {
       this.kinetic_.update(centroid[0], centroid[1]);
     }
@@ -117,9 +116,6 @@ ol.interaction.DragPan.handleUpEvent_ = function(mapBrowserEvent) {
         ]);
         dest = view.constrainCenter(dest);
         view.setCenter(dest);
-        
-        console.log(distance,angle,center,dest);
-
       }
       view.setHint(ol.ViewHint.INTERACTING, -1);
       map.render();
