@@ -19,7 +19,6 @@ goog.provide('ol.renderer.webgl.TileDemLayer');
     goog.require('ol.tilecoord');
     goog.require('ol.tilegrid.TileGrid');
     goog.require('ol.webgl.Buffer');
-    goog.require('ol.interaction.DragPanDem');
 
 /**
  * @classdesc
@@ -189,7 +188,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @private
    * @type {number}
    */
-  this.timeoutCounterMax_ = 150;
+  this.timeoutCounterMax_ = 200;
 
    /**
    * @public
@@ -207,7 +206,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @public
    * @type {number}
    */
-  this.maxShearing_ = 4.0;
+  this.maxShearing_ = 6.0;
 
   /**
    * @public
@@ -222,32 +221,24 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
   /**
    * @public
    * @param {Array} xy in Mercator 
-   * @param {number} z Zoomlevel
+   * @param {number|undefined} z Zoomlevel
    * @return {number|null}
    */
   ol.renderer.webgl.TileDemLayer.prototype.getElevation = function(xy,z) { 
-    if(!goog.isNull(this.renderedTileRange_)){
-      var tc = this.getTileCoord(xy,z);
+      var tc = this.getTileCoord(xy,((!goog.isDef(z))? 1 : z));
       var xyzKey = ol.tilecoord.getKeyZXY(tc[0],tc[1],tc[2]);
       var tileExtent = this.tileGrid_.getTileCoordExtent(tc); // minX, minY, maxX, maxY
       var tileXY = [0,0];
       var elevation = 0;
-      if(this.renderedTileRange_.contains(tc)){     
-        tileXY[0] = Math.floor(((xy[0]-tileExtent[0]) / (tileExtent[2] - tileExtent[0]))*256); 
-        tileXY[1] = 256-Math.floor(((xy[1]-tileExtent[1]) / (tileExtent[3] - tileExtent[1]))*256); 
-        elevation = this.decodeElevation(this.tileCache_.get(xyzKey).getPixelValue(tileXY));
-      }
+      tileXY[0] = Math.floor(((xy[0]-tileExtent[0]) / (tileExtent[2] - tileExtent[0]))*256); 
+      tileXY[1] = 256-Math.floor(((xy[1]-tileExtent[1]) / (tileExtent[3] - tileExtent[1]))*256); 
+      elevation = this.decodeElevation(this.tileCache_.get(xyzKey).getPixelValue(tileXY));
       return elevation;
-    } else {
-      return null;
-    }
   };
   goog.exportProperty(
       ol.renderer.webgl.TileDemLayer.prototype,
       'getElevation',
       ol.renderer.webgl.TileDemLayer.prototype.getElevation);
-
-
 };
 
 goog.inherits(ol.renderer.webgl.TileDemLayer, ol.renderer.webgl.Layer);
@@ -359,7 +350,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
       // TERRAIN INTERACTION 
           var shearingFactor = [0.0,0.0];
           var sf = tileDemLayer.getTerrainShearing();
-          var dir = (sf.z > 2000) ? -1 : 1;
+          var dir = -1;//(sf.z > 2000) ? -1 : 1;
           var shearX = (sf.x === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(dir*sf.x/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);
           var shearY = (sf.y === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(dir*sf.y/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);  
               shearingFactor = [shearX*Math.cos(viewState.rotation)-shearY*Math.sin(viewState.rotation),
