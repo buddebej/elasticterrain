@@ -1,7 +1,7 @@
 goog.provide('ol.interaction.DragShear');
 
 goog.require('goog.asserts');
-goog.require('ol.animation');
+goog.require('ol.animation.dem');
 goog.require('ol.Pixel');
 goog.require('ol.PreRenderFunction');
 goog.require('ol.ViewHint');
@@ -86,7 +86,7 @@ ol.interaction.DragShear.handleDragEvent_ = function(mapBrowserEvent) {
         var panDestination = map.getCoordinateFromPixel([currentCenterPx[0]+deltaX,
                                                          currentCenterPx[1]-deltaY]);
 
-        this.shearingAnimation_ = ol.animation.hybridShearing(this.demLayer_,panDestination,currentCenter);
+        this.shearingAnimation_ = ol.animation.dem.hybridShearing(this.demLayer_,panDestination,currentCenter);
 
         map.beforeRender(this.shearingAnimation_);  
         map.render(); 
@@ -107,7 +107,7 @@ ol.interaction.DragShear.handleUpEvent_ = function(mapBrowserEvent) {
     var map = mapBrowserEvent.map;
     var view = map.getView();
     if(!goog.isNull(this.dragStartPosition_)){
-        this.shearingAnimation_ = ol.animation.staticShearing(this.demLayer_);
+        this.shearingAnimation_ = ol.animation.dem.staticShearing(this.demLayer_);
         map.beforeRender(this.shearingAnimation_);  
         this.dragStartPosition_ = null;
     }
