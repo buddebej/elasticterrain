@@ -350,9 +350,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
       // TERRAIN INTERACTION 
           var shearingFactor = [0.0,0.0];
           var sf = tileDemLayer.getTerrainShearing();
-          var dir = (sf.z > 2000) ? -1 : 1;
-          var shearX = (sf.x === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(dir*sf.x/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);
-          var shearY = (sf.y === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(dir*sf.y/(sf.z/tileResolution),-this.maxShearing_,this.maxShearing_);  
+
+          var shearX = (sf.x === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(sf.x,-this.maxShearing_,this.maxShearing_);
+          var shearY = (sf.y === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(sf.y,-this.maxShearing_,this.maxShearing_);  
+              
               shearingFactor = [shearX*Math.cos(viewState.rotation)-shearY*Math.sin(viewState.rotation),
                                 shearX*Math.sin(viewState.rotation)+shearY*Math.cos(viewState.rotation)]; 
           // u_terrainShearing: Terrain Interaction Shearing Coordinates
@@ -377,11 +378,12 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           // u_hillShading: pass flag to activate hillShading
           gl.uniform1f(this.locations_.u_hillShading, tileDemLayer.getHillShading() === true ? 1.0 : 0.0);
           // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
+          console.log(tileDemLayer.getLightAzimuth());
           var zenithRad = goog.math.toRadians(90.0-tileDemLayer.getLightZenith()),
-               azimuthRad = goog.math.toRadians(tileDemLayer.getLightAzimuth())+viewState.rotation,
-               lightZ = Math.cos(zenithRad),
-               lightX = Math.sin(zenithRad) * Math.cos(azimuthRad),
-               lightY = Math.sin(zenithRad) * Math.sin(azimuthRad);
+              azimuthRad = goog.math.toRadians(tileDemLayer.getLightAzimuth())+viewState.rotation,
+              lightZ = Math.cos(zenithRad),
+              lightY = Math.sin(zenithRad) * Math.cos(azimuthRad),
+              lightX = Math.sin(zenithRad) * Math.sin(azimuthRad);
           gl.uniform3f(this.locations_.u_light, lightX, lightY, lightZ);
           // u_ambient_light: pass intensity for an ambient light source
           gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());        
