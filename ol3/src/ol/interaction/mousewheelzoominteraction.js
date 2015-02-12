@@ -80,6 +80,7 @@ ol.interaction.MouseWheelZoom.handleEvent = function(mapBrowserEvent) {
 
     if (!goog.isDef(this.startTime_)) {
       this.startTime_ = goog.now();
+      map.getView().setHint(ol.ViewHint.INTERACTING, 1); // starts block shearing during zooming
     }
 
     var duration = ol.MOUSEWHEELZOOM_TIMEOUT_DURATION;
@@ -108,6 +109,7 @@ ol.interaction.MouseWheelZoom.prototype.doZoom_ = function(map) {
   goog.asserts.assert(!goog.isNull(view));
 
   map.render();
+  map.getView().setHint(ol.ViewHint.INTERACTING, -1); // stops block shearing during zooming
   ol.interaction.Interaction.zoomByDelta(map, view, -delta, this.lastAnchor_,
       this.duration_);
 

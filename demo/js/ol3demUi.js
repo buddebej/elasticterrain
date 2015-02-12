@@ -18,21 +18,21 @@ var Ol3demUi = function(map) {
         console.log(transformed_coordinate,elevation+' meters');
     });
 
-    optionsShearStatic =    {threshold: 0.01, 
-                             springCoefficient: 0.1,
-                             frictionForce: 0.1,
-                             duration: 1500,
-                             keypress: ol.events.condition.shiftKeyOnly,
-                             minZoom: 9,
-                             map: map};
+    optionsShearStatic =      {threshold: 0.01, 
+                               springCoefficient: 0.1,
+                               frictionForce: 0.1,
+                               duration: 1500,
+                               keypress: ol.events.condition.shiftKeyOnly,
+                               minZoom: 9,
+                               map: map};
 
-    optionsShearIntegrated ={threshold: 0.1, 
-                             springCoefficient: 0.1,
-                             springLength: 0.0,
-                             hybridShearingRadiusPx: 70.0, // radius in pixel
-                             frictionForce: 0.1,              
-                             minZoom: 9,
-                             map: map};
+    optionsShearIntegrated =  {threshold: 0.1, 
+                               springCoefficient: 0.1,
+                               frictionForce: 0.1,              
+                               springLength: 0.0,
+                               hybridShearingRadiusPx: 70.0, // radius in pixel
+                               minZoom: 9,
+                               map: map};
 
     map.addInteraction(new ol.interaction.DragShearStatic(optionsShearStatic));
     map.addInteraction(new ol.interaction.DragShearIntegrated(optionsShearIntegrated));

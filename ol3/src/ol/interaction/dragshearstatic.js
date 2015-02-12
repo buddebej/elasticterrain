@@ -13,22 +13,25 @@ goog.require('ol.interaction.Pointer');
  *
  * @constructor
  * @extends {ol.interaction.Pointer}
- * @param {Object=} opt_options Options.
+ * @param {Object.<string, number|ol.Map>} options 
  * @api stable
  */
-ol.interaction.DragShearStatic = function(opt_options) {
+ol.interaction.DragShearStatic = function(options) {
   goog.base(this, {
     handleDownEvent: ol.interaction.DragShearStatic.handleDownEvent_,
     handleDragEvent: ol.interaction.DragShearStatic.handleDragEvent_,
     handleUpEvent: ol.interaction.DragShearStatic.handleUpEvent_
   });
+
+  goog.asserts.assertInstanceof(options.map, ol.Map, 'dragShearStatic expects map object');
+  goog.asserts.assert(goog.isDef(options.threshold));
+  goog.asserts.assert(goog.isDef(options.springCoefficient));
+  goog.asserts.assert(goog.isDef(options.frictionForce));
+  goog.asserts.assert(goog.isDef(options.minZoom));
+  goog.asserts.assert(goog.isDef(options.duration) && options.duration>0, 'dragShearStatic duration must be > 0');
   
-  /**
-   * Terrain Interactions Options
-   * @private
-   * @type {Object.<string, number|boolean>} 
-   */  
-  this.options = goog.isDef(opt_options) ? opt_options : {}; // todo add default options!
+  /** @type {Object.<string, number|ol.Map>} */  
+  this.options = options;
 
   /** @type {ol.Map} */
   this.map = this.options.map;
@@ -39,8 +42,11 @@ ol.interaction.DragShearStatic = function(opt_options) {
   /** @type {ol.layer.TileDem} */
   this.demLayer =  /** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
 
-  /** @type {boolean} */
+  /** @type {ol.events.ConditionType} */
   this.condition = goog.isDef(this.options.keypress) ? this.options.keypress : ol.events.condition.noModifierKeys;
+
+  /** @type {number} */
+  this.minZoom = this.options.minZoom;
 
   /** @type {ol.Pixel} */
   this.startDragPositionPx = [0,0];
@@ -56,7 +62,7 @@ ol.interaction.DragShearStatic = function(opt_options) {
 
   /**
    * Animates shearing & panning according to current currentDragPosition
-   * @private
+   * @notypecheck   
    */
   ol.interaction.DragShearStatic.prototype.animation = function(){
     var o = this.options;
@@ -118,7 +124,7 @@ goog.inherits(ol.interaction.DragShearStatic, ol.interaction.Pointer);
  * @private
  */
 ol.interaction.DragShearStatic.handleDragEvent_ = function(mapBrowserEvent) {
-  if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
+  if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent) && this.minZoom <= this.view.getZoom()) {
     goog.asserts.assert(this.targetPointers.length >= 1); 
     this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);  
       
@@ -145,7 +151,6 @@ ol.interaction.DragShearStatic.handleUpEvent_ = function(mapBrowserEvent) {
       this.animationFn = this.animation();
       this.map.beforeRender(this.animationFn); 
       this.map.render();
-
     return true;
   } else{
     return false;
@@ -160,14 +165,9 @@ ol.interaction.DragShearStatic.handleUpEvent_ = function(mapBrowserEvent) {
  * @private
  */
 ol.interaction.DragShearStatic.handleDownEvent_ = function(mapBrowserEvent) {
-  if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
+  if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent) && this.minZoom <= this.view.getZoom()) {
 
-      if(goog.isNull(this.map)){
-        this.map = mapBrowserEvent.map;
-        this.view = this.map.getView();
-        this.demLayer=/** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
-      }
-
+      // stop old animation if present
       if (!goog.isNull(this.animationFn) && this.map.removePreRenderFunction(this.animationFn)) {
         this.animationFn = null;
       }
