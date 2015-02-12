@@ -4,7 +4,10 @@ goog.require('ol.Collection');
 goog.require('ol.Kinetic');
 goog.require('ol.interaction.DoubleClickZoom');
 goog.require('ol.interaction.DragPan');
-goog.require('ol.interaction.DragShear'); // terrain shearing interaction
+
+goog.require('ol.interaction.DragShearIntegrated'); // terrain shearing interaction
+goog.require('ol.interaction.DragShearStatic'); // terrain shearing interaction
+
 goog.require('ol.interaction.DragRotate');
 goog.require('ol.interaction.DragZoom');
 goog.require('ol.interaction.KeyboardPan');
@@ -63,15 +66,34 @@ ol.interaction.defaults = function(opt_options) {
     }));
   }
 
-  // DragShear includes Terrain Interaction with shearing
-  interactions.push(new ol.interaction.DragShear());
-   
+  // SHEARING INTERACTIONS
+  var DragShearStatic = {threshold: 0.01, 
+                         springCoefficient: 0.1,
+                         springLength: 0.0,
+                         maxSpringLength: 0.0,
+                         frictionForce: 0.18,
+                         useNonZeroSpring: true,
+                         duration: 1000,
+                         condition: ol.events.condition.shiftKeyOnly
+                       };
+  interactions.push(new ol.interaction.DragShearStatic(DragShearStatic));
+
+  var DragShearIntegrated = {threshold: 0.1, 
+                             springCoefficient: 0.1,
+                             springLength: 0.0,
+                             maxSpringLength: 0.0,
+                             frictionForce: 0.18,
+                             useNonZeroSpring: true,
+                             condition: ol.events.condition.noModifierKeys
+                            };
+  interactions.push(new ol.interaction.DragShearIntegrated(DragShearIntegrated));
+
 
   var dragPan = goog.isDef(options.dragPan) ?
       options.dragPan : true;
   if (dragPan) {
     interactions.push(new ol.interaction.DragPan({
-      kinetic: kinetic
+      kinetic: kinetic, condition: ol.events.condition.altKeyOnly
     }));
   }  
 

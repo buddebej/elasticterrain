@@ -378,7 +378,6 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           // u_hillShading: pass flag to activate hillShading
           gl.uniform1f(this.locations_.u_hillShading, tileDemLayer.getHillShading() === true ? 1.0 : 0.0);
           // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
-          console.log(tileDemLayer.getLightAzimuth());
           var zenithRad = goog.math.toRadians(90.0-tileDemLayer.getLightZenith()),
               azimuthRad = goog.math.toRadians(tileDemLayer.getLightAzimuth())+viewState.rotation,
               lightZ = Math.cos(zenithRad),

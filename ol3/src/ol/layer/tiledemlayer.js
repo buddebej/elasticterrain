@@ -57,7 +57,7 @@ ol.layer.TileDem = function(opt_options) {
   this.setColorScale(goog.isDef(options.colorScale) ? options.colorScale : [0.0,1.0]);  
   this.setHillShading(goog.isDef(options.hillShading) ? options.hillShading : true);
   this.setTerrainInteraction(goog.isDef(options.terrainInteraction) ? options.terrainInteraction : false);
-  this.setTerrainShearing(goog.isDef(options.terrainShearing) ? options.terrainShearing : {x : 0.0, y : 0.0, z: 0.0});   
+  this.setTerrainShearing(goog.isDef(options.terrainShearing) ? options.terrainShearing : {x : 0.0, y : 0.0});   
   this.setObliqueInclination(goog.isDef(options.obliqueInclination) ? options.obliqueInclination : 90.0);
   this.setLightAzimuth(goog.isDef(options.lightAzimuth) ? options.lightAzimuth : 225.0);
   this.setLightZenith(goog.isDef(options.lightZenith) ? options.lightZenith : 45.0);
