@@ -30,14 +30,17 @@ ol.interaction.DragShearStatic = function(opt_options) {
    */  
   this.options = goog.isDef(opt_options) ? opt_options : {}; // todo add default options!
 
-  /**
-   * @private
-   * @type {ol.events.ConditionType}
-   */
-  this.condition = goog.isDef(this.options.condition) ? this.options.condition : ol.events.condition.noModifierKeys;
+  /** @type {ol.Map} */
+  this.map = this.options.map;
+
+  /** @type {ol.View} */
+  this.view = this.map.getView();
 
   /** @type {ol.layer.TileDem} */
-  this.demLayer =  null;
+  this.demLayer =  /** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
+
+  /** @type {boolean} */
+  this.condition = goog.isDef(this.options.keypress) ? this.options.keypress : ol.events.condition.noModifierKeys;
 
   /** @type {ol.Pixel} */
   this.startDragPositionPx = [0,0];
@@ -47,12 +50,6 @@ ol.interaction.DragShearStatic = function(opt_options) {
 
   /** @type {ol.Pixel} */
   this.currentDragPositionPx = [0,0];
-
-  /** @type {ol.Map} */
-  this.map = null;
-
-  /** @type {ol.View} */
-  this.view = null;
 
   /** @type {?ol.PreRenderFunction} */
   this.animationFn = null;

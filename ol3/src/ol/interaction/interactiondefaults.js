@@ -51,11 +51,11 @@ ol.interaction.defaults = function(opt_options) {
 
   var kinetic = new ol.Kinetic(-0.005, 0.05, 100);
 
-  // var altShiftDragRotate = goog.isDef(options.altShiftDragRotate) ?
-  //     options.altShiftDragRotate : true;
-  // if (altShiftDragRotate) {
-  //   interactions.push(new ol.interaction.DragRotate());
-  // }
+  var altShiftDragRotate = goog.isDef(options.altShiftDragRotate) ?
+      options.altShiftDragRotate : true;
+  if (altShiftDragRotate) {
+    interactions.push(new ol.interaction.DragRotate());
+  }
 
   var doubleClickZoom = goog.isDef(options.doubleClickZoom) ?
       options.doubleClickZoom : true;
@@ -65,25 +65,6 @@ ol.interaction.defaults = function(opt_options) {
       duration: options.zoomDuration
     }));
   }
-
-  // SHEARING INTERACTIONS
-  var DragShearStatic = {threshold: 0.01, 
-                         springCoefficient: 0.1,
-                         frictionForce: 0.1,
-                         duration: 1500,
-                         condition: ol.events.condition.shiftKeyOnly
-                       };
-  interactions.push(new ol.interaction.DragShearStatic(DragShearStatic));
-
-  var DragShearIntegrated = {threshold: 0.1, 
-                             springCoefficient: 0.1,
-                             springLength: 0.0,
-                             hybridShearingRadiusPx: 70.0, // radius in pixel
-                             frictionForce: 0.18,              
-                             condition: ol.events.condition.noModifierKeys
-                            };
-  interactions.push(new ol.interaction.DragShearIntegrated(DragShearIntegrated));
-
 
   var dragPan = goog.isDef(options.dragPan) ?
       options.dragPan : true;

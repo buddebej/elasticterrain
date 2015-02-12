@@ -2,7 +2,7 @@ $(document).ready(function() {
     'use strict';
     if (webgl_detect()) {
 
-        var dem, osm, stamen, bing, debug, vector, ol3DemMap, ol3demUi;
+        var dem, osm, stamen, bing, debug, ol3DemMap, ol3demUi;
 
         dem = new ol.layer.TileDem({
             source: new ol.source.XYZ({
@@ -62,12 +62,6 @@ $(document).ready(function() {
 
         ol3demUi = new Ol3demUi(ol3DemMap);
 
-        ol3DemMap.on('click', function(evt){
-            var coord = evt.coordinate;
-            var transformed_coordinate = ol.proj.transform(coord, "EPSG:3857", "EPSG:4326");
-            var elevation = ol3DemMap.getRenderer().getLayerRenderer(dem).getElevation(coord,ol3DemMap.getView().getZoom());
-            console.log(transformed_coordinate,elevation+' meters');
-        });
 
     } else {
         $('body').append('<div class="webglMissing"><p><span class="title">WebGL Not Supported!</span><br> WebGL is required for this application, and your Web browser does not support WebGL. Google Chrome or Firefox are recommended browsers with WebGL support. Click <a href="http://www.browserleaks.com/webgl" target="_blank">here</a> to check the WebGL specifications of your browser.</p></div>');

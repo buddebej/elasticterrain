@@ -30,19 +30,22 @@ ol.interaction.DragShearIntegrated = function(opt_options) {
    */  
   this.options = goog.isDef(opt_options) ? opt_options : {}; // todo add default options!
 
-  /**
-   * @private
-   * @type {ol.events.ConditionType}
-   */
-  this.condition = goog.isDef(this.options.condition) ? this.options.condition : ol.events.condition.noModifierKeys;
+  /** @type {ol.Map} */
+  this.map = this.options.map;
+
+  /** @type {ol.View} */
+  this.view = this.map.getView();
 
   /** @type {ol.layer.TileDem} */
-  this.demLayer =  null;
+  this.demLayer =  /** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
+
+  /** @type {boolean} */
+  this.condition = goog.isDef(this.options.keypress) ? this.options.keypress : ol.events.condition.noModifierKeys;
 
   /** @type {ol.Pixel} */
   this.startDragPositionPx = [0,0];
 
-  /** @type {number} */
+  /** @type {number|null} */
   this.startDragElevation = 0;
 
   /** @type {number} */
@@ -61,16 +64,10 @@ ol.interaction.DragShearIntegrated = function(opt_options) {
   this.currentCenter = [0,0];  
 
   /** @type {ol.Pixel} */
-  this.currentChange = [1,1];
+  this.currentChange = [0,0];
 
   /** @type {ol.Pixel} */
   this.currentDragPositionPx = [0,0];
-
-  /** @type {ol.Map} */
-  this.map = null;
-
-  /** @type {ol.View} */
-  this.view = null;
 
   /**
    * Animates shearing & panning according to current currentDragPosition
@@ -216,11 +213,11 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
 ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) {
   if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
       
-      if(goog.isNull(this.map)){
-        this.map = mapBrowserEvent.map;
-        this.view = this.map.getView();
-        this.demLayer=/** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
-      }
+      // if(goog.isNull(this.map)){
+      //   this.map = mapBrowserEvent.map;
+      //   this.view = this.map.getView();
+      //   this.demLayer=/** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
+      // }
 
       this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
       this.startDragElevation = /** @type {ol.renderer.webgl.TileDemLayer} */(this.map.getRenderer().getLayerRenderer(this.demLayer)).getElevation(mapBrowserEvent.coordinate,this.view.getZoom());

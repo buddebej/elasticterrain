@@ -5,11 +5,37 @@ var Ol3demUi = function(map) {
 
     var ui = this, 
         layers = map.getLayers().getArray(),
-        ol3dem;
+        ol3dem, optionsShearStatic, optionsShearIntegrated;
 
     ol3dem = layers[layers.length-1];
     ol3dem.overlayers = $.extend({}, layers.slice(0,-1));
-    ol3dem.view = map.getView(),    
+    ol3dem.view = map.getView();    
+
+    map.on('click', function(evt){
+        var coord = evt.coordinate;
+        var transformed_coordinate = ol.proj.transform(coord, "EPSG:3857", "EPSG:4326");
+        var elevation = map.getRenderer().getLayerRenderer(ol3dem).getElevation(coord,ol3dem.view.getZoom());
+        console.log(transformed_coordinate,elevation+' meters');
+    });
+
+    optionsShearStatic =    {threshold: 0.01, 
+                             springCoefficient: 0.1,
+                             frictionForce: 0.1,
+                             duration: 1500,
+                             keypress: ol.events.condition.shiftKeyOnly,
+                             minZoom: 9,
+                             map: map};
+
+    optionsShearIntegrated ={threshold: 0.1, 
+                             springCoefficient: 0.1,
+                             springLength: 0.0,
+                             hybridShearingRadiusPx: 70.0, // radius in pixel
+                             frictionForce: 0.1,              
+                             minZoom: 9,
+                             map: map};
+
+    map.addInteraction(new ol.interaction.DragShearStatic(optionsShearStatic));
+    map.addInteraction(new ol.interaction.DragShearIntegrated(optionsShearIntegrated));
 
     // initial options for the ui
     ui.option = {
@@ -47,7 +73,6 @@ var Ol3demUi = function(map) {
     ol3dem.setObliqueInclination(ui.option.obliqueInclination);
     ol3dem.setWaterBodies(ui.option.waterBodies);
     ol3dem.setTerrainInteraction(ui.option.terrainInteraction);
-
 
     var renderMap = function() {
       ol3dem.redraw();
