@@ -68,7 +68,7 @@ ol.interaction.defaults = function(opt_options) {
 
   // SHEARING INTERACTIONS
   var DragShearStatic = {threshold: 0.01, 
-                         springCoefficient: 0.2,
+                         springCoefficient: 0.1,
                          springLength: 0.0,
                          maxSpringLength: 0.0,
                          frictionForce: 0.1,

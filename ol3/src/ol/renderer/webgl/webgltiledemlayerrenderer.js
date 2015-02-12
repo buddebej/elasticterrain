@@ -348,16 +348,11 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             }
 
       // TERRAIN INTERACTION 
-          var shearingFactor = [0.0,0.0];
           var sf = tileDemLayer.getTerrainShearing();
-
-          var shearX = (sf.x === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(sf.x,-this.maxShearing_,this.maxShearing_);
-          var shearY = (sf.y === 0 || goog.isNull(sf.z))? 0 : goog.math.clamp(sf.y,-this.maxShearing_,this.maxShearing_);  
-              
-              shearingFactor = [shearX*Math.cos(viewState.rotation)-shearY*Math.sin(viewState.rotation),
-                                shearX*Math.sin(viewState.rotation)+shearY*Math.cos(viewState.rotation)]; 
-          // u_terrainShearing: Terrain Interaction Shearing Coordinates
-          gl.uniform2f(this.locations_.u_terrainShearing, shearingFactor[0], shearingFactor[1]); 
+          var shearX = (sf.x === 0)? 0 : goog.math.clamp(sf.x,-this.maxShearing_,this.maxShearing_);
+          var shearY = (sf.y === 0)? 0 : goog.math.clamp(sf.y,-this.maxShearing_,this.maxShearing_);             
+          // gl.uniform2f(this.locations_.u_terrainShearing, shearingFactor[0], shearingFactor[1]); 
+          gl.uniform2f(this.locations_.u_terrainShearing, shearX, shearY); 
 
       // SHADER ARGUMENTS
           // u_terrainInteraction: Is Terrain Interaction active?

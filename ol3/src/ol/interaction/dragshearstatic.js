@@ -54,6 +54,9 @@ ol.interaction.DragShearStatic = function(opt_options) {
   /** @type {ol.View} */
   this.view = null;
 
+  /** @type {?ol.PreRenderFunction} */
+  this.animationFn = null;
+
   /**
    * Animates shearing & panning according to current currentDragPosition
    * @private
@@ -88,8 +91,8 @@ ol.interaction.DragShearStatic = function(opt_options) {
 
           self.currentChangeXY = [(self.currentChangeXY[0] * friction)+accelerationXY[0],
                                   (self.currentChangeXY[1] * friction)+accelerationXY[1]];
-          if(Math.abs(self.currentChangeXY[0]) < 0.0001) self.currentChangeXY[0] = 0;
-          if(Math.abs(self.currentChangeXY[1]) < 0.0001) self.currentChangeXY[1] = 0;
+          if(Math.abs(self.currentChangeXY[0]) < o.threshold) self.currentChangeXY[0] = 0;
+          if(Math.abs(self.currentChangeXY[1]) < o.threshold) self.currentChangeXY[1] = 0;
 
           shearingXY=[shearingXY[0]-self.currentChangeXY[0],
                       shearingXY[1]-self.currentChangeXY[1]];
@@ -106,10 +109,7 @@ ol.interaction.DragShearStatic = function(opt_options) {
         }
     };
     return staticSpring;
-
   };
-
- 
 };
 
 goog.inherits(ol.interaction.DragShearStatic, ol.interaction.Pointer);
@@ -127,7 +127,11 @@ ol.interaction.DragShearStatic.handleDragEvent_ = function(mapBrowserEvent) {
       
     var deltaX = (this.currentDragPositionPx[0] - this.startDragPositionPx[0])/(this.startDragElevation/this.view.getResolution());
     var deltaY = (this.startDragPositionPx[1] - this.currentDragPositionPx[1])/(this.startDragElevation/this.view.getResolution());
-    this.demLayer.setTerrainShearing({x:deltaX,y:deltaY});
+    var rotation = this.view.getState().rotation;
+    var shearingFactor = [deltaX*Math.cos(rotation)-deltaY*Math.sin(rotation),
+                          deltaX*Math.sin(rotation)+deltaY*Math.cos(rotation)]; 
+
+    this.demLayer.setTerrainShearing({x:shearingFactor[0],y:shearingFactor[1]});
     this.demLayer.redraw();
   }
 };
@@ -141,8 +145,8 @@ ol.interaction.DragShearStatic.handleDragEvent_ = function(mapBrowserEvent) {
  */
 ol.interaction.DragShearStatic.handleUpEvent_ = function(mapBrowserEvent) {
   if (this.targetPointers.length === 0) {  
-      var animation = this.animation();
-      this.map.beforeRender(animation); 
+      this.animationFn = this.animation();
+      this.map.beforeRender(this.animationFn); 
       this.map.render();
 
     return true;
@@ -165,6 +169,10 @@ ol.interaction.DragShearStatic.handleDownEvent_ = function(mapBrowserEvent) {
         this.map = mapBrowserEvent.map;
         this.view = this.map.getView();
         this.demLayer=/** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
+      }
+
+      if (!goog.isNull(this.animationFn) && this.map.removePreRenderFunction(this.animationFn)) {
+        this.animationFn = null;
       }
 
       this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
