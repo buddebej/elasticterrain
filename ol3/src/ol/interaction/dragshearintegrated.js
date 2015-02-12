@@ -13,7 +13,7 @@ goog.require('ol.interaction.Pointer');
  *
  * @constructor
  * @extends {ol.interaction.Pointer}
-* @param {olx.interaction.DragShearIntegrated=} opt_options Options.
+ * @param {Object=} opt_options Options.
  * @api stable
  */
 ol.interaction.DragShearIntegrated = function(opt_options) {
@@ -62,10 +62,9 @@ ol.interaction.DragShearIntegrated = function(opt_options) {
 
   /**
    * Animates shearing & panning according to current currentDragPosition
-   * @param {number} time
    * @private
    */
-  ol.interaction.DragShearIntegrated.prototype.animation = function(time){
+  ol.interaction.DragShearIntegrated.prototype.animation = function(){
     var o = this.options;
 
     var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
@@ -140,21 +139,20 @@ goog.inherits(ol.interaction.DragShearIntegrated, ol.interaction.Pointer);
 ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) {
   if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
     goog.asserts.assert(this.targetPointers.length >= 1);
-  this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);   
-  this.lastDragTime = goog.now();
-  this.animationDelay.start(); 
+    this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);   
+    this.animationDelay.start(); 
 
-  if(this.options.useNonZeroSpring){
-    var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
-    var startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx);
-    var currentCenter = [this.view.getCenter()[0],this.view.getCenter()[1]];
-    var animatingPosition = [startDragPosition[0] - (currentCenter[0] - this.startCenter[0]),
-                             startDragPosition[1] - (currentCenter[1] - this.startCenter[1])];
-    var distanceX = currentDragPosition[0] - animatingPosition[0];
-    var distanceY = currentDragPosition[1] - animatingPosition[1];
-    var distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY); 
-    this.options.springLength = Math.min(this.options.maxSpringLength, distance);
-  }
+    if(this.options.useNonZeroSpring){
+      var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
+      var startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx);
+      var currentCenter = [this.view.getCenter()[0],this.view.getCenter()[1]];
+      var animatingPosition = [startDragPosition[0] - (currentCenter[0] - this.startCenter[0]),
+                               startDragPosition[1] - (currentCenter[1] - this.startCenter[1])];
+      var distanceX = currentDragPosition[0] - animatingPosition[0];
+      var distanceY = currentDragPosition[1] - animatingPosition[1];
+      var distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY); 
+      this.options.springLength = Math.min(this.options.maxSpringLength, distance);
+    }
 }
 };
 
@@ -172,7 +170,6 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
   } else{
     return false;
   }
-  console.log(this.targetPointers.length);
 };
 
 

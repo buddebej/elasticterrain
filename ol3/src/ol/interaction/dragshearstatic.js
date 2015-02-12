@@ -13,7 +13,7 @@ goog.require('ol.interaction.Pointer');
  *
  * @constructor
  * @extends {ol.interaction.Pointer}
- * @param {olx.interaction.DragShearStatic=} opt_options Options.
+ * @param {Object=} opt_options Options.
  * @api stable
  */
 ol.interaction.DragShearStatic = function(opt_options) {
