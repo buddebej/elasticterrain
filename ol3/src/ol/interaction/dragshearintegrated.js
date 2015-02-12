@@ -6,6 +6,7 @@ goog.require('ol.Pixel');
 goog.require('ol.coordinate');
 goog.require('ol.events.condition');
 goog.require('ol.interaction.Pointer');
+goog.require('ol.ViewHint');
 
 /**
  * @classdesc
@@ -156,7 +157,7 @@ ol.interaction.DragShearIntegrated = function(options) {
 
     } else {
 
-      // restore shearing to 0 after other interaction like zooming or rotation
+      // restore shearing to 0 if other interaction like zooming or rotation is active
       if(this.view.getHints()[ol.ViewHint.INTERACTING]){
         this.demLayer.setTerrainShearing({x:0,y:0});
         this.demLayer.redraw();

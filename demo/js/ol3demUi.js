@@ -288,9 +288,16 @@ var Ol3demUi = function(map) {
       'bgColor': '#000000',
       'change': function(v) {
         ol3dem.view.setRotation(toRadians(toStep(v)));
+        if(!ol3dem.view.getHints()[ol.ViewHint.INTERACTING]){
+          ol3dem.view.setHint(ol.ViewHint.INTERACTING, 1); // starts block shearing during zooming
+        }
         renderMap();
-      }
+      },
+      'release' : function (v) { 
+        ol3dem.view.setHint(ol.ViewHint.INTERACTING, -1); // stops block shearing during zooming
+      } 
     });
+
 
     // switch to activate testing mode
     $('.t_Testing').click(function() {
