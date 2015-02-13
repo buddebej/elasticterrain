@@ -30,6 +30,7 @@ var Ol3demUi = function(map) {
                                frictionForce: 0.12,              
                                springLength: 0.0,
                                hybridShearingRadiusPx: 70.0, // radius in pixel
+                               keypress : ol.events.condition.noModifierKeys,
                                minZoom: 9,
                                map: map};
 
@@ -290,13 +291,13 @@ var Ol3demUi = function(map) {
       'bgColor': '#000000',
       'change': function(v) {
         ol3dem.view.setRotation(toRadians(toStep(v)));
-        if(!ol3dem.view.getHints()[ol.ViewHint.INTERACTING]){
-          ol3dem.view.setHint(ol.ViewHint.INTERACTING, 1); // starts block shearing during zooming
-        }
+        // if(!ol3dem.view.getHints()[ol.ViewHint.INTERACTING]){
+          // ol3dem.view.setHint(ol.ViewHint.INTERACTING, 1); // starts block shearing during zooming
+        // }
         renderMap();
       },
       'release' : function (v) { 
-          ol3dem.view.setHint(ol.ViewHint.INTERACTING, -1); // stops block shearing during zooming
+          // ol3dem.view.setHint(ol.ViewHint.INTERACTING, -1); // stops block shearing during zooming
       } 
     });
 

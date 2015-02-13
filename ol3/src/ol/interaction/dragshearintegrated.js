@@ -8,13 +8,24 @@ goog.require('ol.events.condition');
 goog.require('ol.interaction.Pointer');
 goog.require('ol.ViewHint');
 
+/** @typedef {{map:ol.Map,
+               threshold:number,
+               springCoefficient:number,
+               frictionForce:number,
+               minZoom:number,
+               springLength:number, 
+               hybridShearingRadiusPx: number,
+               keypress: ol.events.ConditionType}} */  
+
+ol.interaction.DragShearIntegratedOptions;
+
 /**
  * @classdesc
  * Terrain Interaction DragShearIntegrated
  *
  * @constructor
  * @extends {ol.interaction.Pointer}
- * @param {Object.<string, number|ol.Map>} options 
+ * @param {ol.interaction.DragShearIntegratedOptions} options 
  * @api stable
  */
 ol.interaction.DragShearIntegrated = function(options) {
@@ -33,7 +44,7 @@ ol.interaction.DragShearIntegrated = function(options) {
   goog.asserts.assert(goog.isDef(options.springLength));
   goog.asserts.assert(goog.isDef(options.hybridShearingRadiusPx)); 
 
-  /** @type {Object.<string, number|ol.Map>} */  
+  /** @type {ol.interaction.DragShearIntegratedOptions} */  
   this.options = options;
 
   /** @type {ol.Map} */
@@ -46,7 +57,7 @@ ol.interaction.DragShearIntegrated = function(options) {
   this.demLayer =  /** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
 
   /** @type {ol.events.ConditionType} */
-  this.condition = goog.isDef(this.options.keypress) ? this.options.keypress : ol.events.condition.noModifierKeys;
+  this.condition = goog.isDef(this.options['keypress']) ? this.options['keypress'] : ol.events.condition.noModifierKeys;
 
   /** @type {number} */
   this.minZoom = this.options.minZoom;
@@ -80,11 +91,8 @@ ol.interaction.DragShearIntegrated = function(options) {
 
   /**
    * Animates shearing & panning according to current currentDragPosition
-   * @notypecheck   
    */
   ol.interaction.DragShearIntegrated.prototype.animation = function(){
-    var o = this.options;
-    
     var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
     var startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx);
     var startCenter = this.startCenter;
@@ -102,25 +110,24 @@ ol.interaction.DragShearIntegrated = function(options) {
     var distanceXY = getDistance(this.currentCenter);
     var distance = Math.sqrt(distanceXY[0] * distanceXY[0] + distanceXY[1] * distanceXY[1]);
 
-    var springLengthXY = [distanceXY[0] * o.springLength/distance,
-                          distanceXY[1] * o.springLength/distance];
+    var springLengthXY = [distanceXY[0] * this.options['springLength']/distance,
+                          distanceXY[1] * this.options['springLength']/distance];
 
     if(isNaN(springLengthXY[0])) springLengthXY[0] = 0;
     if(isNaN(springLengthXY[1])) springLengthXY[1] = 0;
-    
-    var accelerationXY = [(distanceXY[0] - springLengthXY[0]) * o.springCoefficient,
-                          (distanceXY[1] - springLengthXY[1]) * o.springCoefficient];
+    var accelerationXY = [(distanceXY[0] - springLengthXY[0]) * this.options['springCoefficient'],
+                          (distanceXY[1] - springLengthXY[1]) * this.options['springCoefficient']];
 
-    var friction = (1-o.frictionForce);
+    var friction = (1-this.options['frictionForce']);
     this.currentChange = [this.currentChange[0]*friction+accelerationXY[0],
                           this.currentChange[1]*friction+accelerationXY[1]];
 
     // set change value to zero when not changing anymore significantly
-    if(Math.abs(this.currentChange[0]) < o.threshold) this.currentChange[0] = 0;
-    if(Math.abs(this.currentChange[1]) < o.threshold) this.currentChange[1] = 0;
+    if(Math.abs(this.currentChange[0]) < this.options['threshold']) this.currentChange[0] = 0;
+    if(Math.abs(this.currentChange[1]) < this.options['threshold']) this.currentChange[1] = 0;
 
 
-    var animationActive = (Math.abs(this.currentChange[0]) > o.threshold && Math.abs(this.currentChange[1]) > o.threshold);
+    var animationActive = (Math.abs(this.currentChange[0]) > this.options['threshold'] && Math.abs(this.currentChange[1]) > this.options['threshold']);
     var hybridShearingActive = (Math.abs(springLengthXY[0]) > 0 && Math.abs(springLengthXY[1]) > 0); 
     var otherInteractionActive = (this.view.getHints()[ol.ViewHint.INTERACTING]); // other active interaction like zooming or rotation
 
@@ -183,7 +190,6 @@ ol.interaction.DragShearIntegrated = function(options) {
     }
   };
 
-
   /**
    * @private
    * @type {goog.async.AnimationDelay}
@@ -198,7 +204,6 @@ goog.inherits(ol.interaction.DragShearIntegrated, ol.interaction.Pointer);
 /**
  * @param {ol.MapBrowserPointerEvent} mapBrowserEvent Event.
  * @this {ol.interaction.DragShearIntegrated}
- * @notypecheck   
  */
 ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) {
   if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {

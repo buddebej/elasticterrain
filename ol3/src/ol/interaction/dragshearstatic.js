@@ -7,13 +7,23 @@ goog.require('ol.coordinate');
 goog.require('ol.events.condition');
 goog.require('ol.interaction.Pointer');
 
+/** @typedef {{map:ol.Map,
+               threshold:number,
+               springCoefficient:number,
+               frictionForce:number,
+               minZoom:number,
+               duration:number, 
+               keypress: ol.events.ConditionType}} */  
+
+ol.interaction.DragShearStaticOptions;
+
 /**
  * @classdesc
  * Terrain Interaction DragShearStatic
  *
  * @constructor
  * @extends {ol.interaction.Pointer}
- * @param {Object.<string, number|ol.Map>} options 
+ * @param {ol.interaction.DragShearStaticOptions} options 
  * @api stable
  */
 ol.interaction.DragShearStatic = function(options) {
@@ -29,8 +39,9 @@ ol.interaction.DragShearStatic = function(options) {
   goog.asserts.assert(goog.isDef(options.frictionForce));
   goog.asserts.assert(goog.isDef(options.minZoom));
   goog.asserts.assert(goog.isDef(options.duration) && options.duration>0, 'dragShearStatic duration must be > 0');
-  
-  /** @type {Object.<string, number|ol.Map>} */  
+   
+
+  /** @type {ol.interaction.DragShearStaticOptions} */
   this.options = options;
 
   /** @type {ol.Map} */
@@ -43,7 +54,7 @@ ol.interaction.DragShearStatic = function(options) {
   this.demLayer =  /** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
 
   /** @type {ol.events.ConditionType} */
-  this.condition = goog.isDef(this.options.keypress) ? this.options.keypress : ol.events.condition.noModifierKeys;
+  this.condition = goog.isDef(this.options['keypress']) ? this.options['keypress'] : ol.events.condition.noModifierKeys;
 
   /** @type {number} */
   this.minZoom = this.options.minZoom;
@@ -62,12 +73,12 @@ ol.interaction.DragShearStatic = function(options) {
 
   /**
    * Animates shearing & panning according to current currentDragPosition
-   * @notypecheck   
+   * @param {ol.interaction.DragShearStaticOptions} options
    */
-  ol.interaction.DragShearStatic.prototype.animation = function(){
-    var o = this.options;
+  ol.interaction.DragShearStatic.prototype.animation = function(options){
     var start =  goog.now();
     var demLayer = this.demLayer;
+    var o = options;
       /**
        * @param {ol.Map} map Map.
        * @param {?olx.FrameState} frameState Frame state.
@@ -77,11 +88,11 @@ ol.interaction.DragShearStatic = function(options) {
           frameState.animate = true;
           frameState.viewHints[ol.ViewHint.ANIMATING] += 1;
           return true;
-        } else if (frameState.time < start + o.duration) {      
+        } else if (frameState.time < start + o['duration']) {      
 
           var self = staticSpring;
-          var friction = 1.0 - o.frictionForce;
-          var springCoefficient = o.springCoefficient;
+          var friction = 1.0 - o['frictionForce'];
+          var springCoefficient = o['springCoefficient'];
           var shearingXY = [demLayer.getTerrainShearing().x,demLayer.getTerrainShearing().y];
           var distance = Math.sqrt(shearingXY[0] * shearingXY[0] + shearingXY[1] * shearingXY[1]);
 
@@ -94,8 +105,8 @@ ol.interaction.DragShearStatic = function(options) {
 
           self.currentChangeXY = [(self.currentChangeXY[0] * friction)+accelerationXY[0],
                                   (self.currentChangeXY[1] * friction)+accelerationXY[1]];
-          if(Math.abs(self.currentChangeXY[0]) < o.threshold) self.currentChangeXY[0] = 0;
-          if(Math.abs(self.currentChangeXY[1]) < o.threshold) self.currentChangeXY[1] = 0;
+          if(Math.abs(self.currentChangeXY[0]) < o['threshold']) self.currentChangeXY[0] = 0;
+          if(Math.abs(self.currentChangeXY[1]) < o['threshold']) self.currentChangeXY[1] = 0;
 
           shearingXY=[shearingXY[0]-self.currentChangeXY[0],
                       shearingXY[1]-self.currentChangeXY[1]];
@@ -148,7 +159,7 @@ ol.interaction.DragShearStatic.handleDragEvent_ = function(mapBrowserEvent) {
  */
 ol.interaction.DragShearStatic.handleUpEvent_ = function(mapBrowserEvent) {
   if (this.targetPointers.length === 0) {  
-      this.animationFn = this.animation();
+      this.animationFn = this.animation(this.options);
       this.map.beforeRender(this.animationFn); 
       this.map.render();
     return true;
