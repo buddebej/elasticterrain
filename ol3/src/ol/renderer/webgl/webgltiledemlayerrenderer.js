@@ -206,7 +206,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @public
    * @type {number}
    */
-  this.maxShearing_ = 3.0;
+  this.maxShearing_ = 6.0;
 
   /**
    * @public
@@ -347,23 +347,28 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 this.overlay.Active =false;
             }
 
-      // TERRAIN INTERACTION 
-          var sf = tileDemLayer.getTerrainShearing();
-          var shearX = (sf.x === 0)? 0 : goog.math.clamp(sf.x,-this.maxShearing_,this.maxShearing_);
-          var shearY = (sf.y === 0)? 0 : goog.math.clamp(sf.y,-this.maxShearing_,this.maxShearing_);             
-          // gl.uniform2f(this.locations_.u_terrainShearing, shearingFactor[0], shearingFactor[1]); 
-          gl.uniform2f(this.locations_.u_terrainShearing, shearX, shearY); 
-
-      // SHADER ARGUMENTS
-          // u_terrainInteraction: Is Terrain Interaction active?
-          gl.uniform1f(this.locations_.u_terrainInteraction, tileDemLayer.getTerrainInteraction() === true ? 1.0 : 0.0);
-          // u_overlayActive: Is overlay active?
-          gl.uniform1f(this.locations_.u_overlayActive, this.overlay.Active === true ? 1.0 : 0.0);
+      // TERRAIN SHEARING
+          var shearX, shearY, shearingFactor;
+          if(tileDemLayer.getTerrainInteraction()){
+            // from current terrain interaction
+            shearingFactor = tileDemLayer.getTerrainShearing();     
+            shearX = goog.math.clamp(shearingFactor.x,-this.maxShearing_,this.maxShearing_);
+            shearY = goog.math.clamp(shearingFactor.y,-this.maxShearing_,this.maxShearing_);             
+          } else {
+            // from obliqueInclination angle and current rotation
+            shearingFactor = 1.0 / Math.tan(goog.math.toRadians(tileDemLayer.getObliqueInclination()));
+            shearX = shearingFactor*Math.sin(-viewState.rotation);
+            shearY = shearingFactor*Math.cos(-viewState.rotation);      
+          }
+          
+          // u_scaleFactor: factors for plan oblique shearing
+          gl.uniform2f(this.locations_.u_scaleFactor, shearX, shearY); 
           // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
-          gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, z));
-          // u_scaleFactor: compute direction for oblique Shifting from current rotation and obliqueInclination Angle
-          var scaleFactor = 1.0 / Math.tan(goog.math.toRadians(tileDemLayer.getObliqueInclination()));
-          gl.uniform2f(this.locations_.u_scaleFactor, scaleFactor*Math.sin(-viewState.rotation), scaleFactor*Math.cos(-viewState.rotation));
+          gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, z));  
+
+      // FRAGMENT SHADER PARAMETER
+          // u_overlayActive: Is overlay active?
+          gl.uniform1f(this.locations_.u_overlayActive, this.overlay.Active === true ? 1.0 : 0.0);    
           // u_colorScale: pass colorScale factor to adapt color ramp dynamically
           gl.uniform2f(this.locations_.u_colorScale, tileDemLayer.getColorScale()[0],tileDemLayer.getColorScale()[1]); 
           // u_waterBodies: pass waterBodies to toggle rendering of inland waterBodies
@@ -600,7 +605,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           this.renderedTileRange_ = tileRange;
           this.renderedFramebufferExtent_ = framebufferExtent;
           this.renderedRevision_ = tileSource.getRevision();
-          console.assert(this.timeoutCounter_ < this.timeoutCounterMax_, 'Loading of tiles timed out.');
+          goog.asserts.assert(this.timeoutCounter_ < this.timeoutCounterMax_, 'Loading of tiles timed out.');
           this.timeoutCounter_ = 0;
         } else {   
           this.renderedTileRange_ = null;

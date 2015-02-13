@@ -28,7 +28,7 @@ ol.renderer.webgl.tiledemlayer.shader.Fragment.DEBUG_SOURCE = 'precision highp f
  * @const
  * @type {string}
  */
-ol.renderer.webgl.tiledemlayer.shader.Fragment.OPTIMIZED_SOURCE = 'precision highp float;uniform sampler2D a;uniform float b;varying vec2 c;float decodeElevation(in vec4 colorChannels){float elevationM=((colorChannels.r*255.0+(colorChannels.g*255.0)*256.0)-11000.0)/10.0;return elevationM;}uniform sampler2D i;uniform sampler2D j;uniform bool k;uniform vec2 l;uniform bool m;uniform bool n;uniform vec3 o;uniform float p;uniform bool q;const float MAX_ELEVATION=4900.0;const highp float CELLSIZE=0.00390625;void main(void){vec2 m_texCoord=c;if(m_texCoord.y<=CELLSIZE){m_texCoord=vec2(m_texCoord.x,m_texCoord.y+CELLSIZE);}if(m_texCoord.x>=1.0-CELLSIZE){m_texCoord=vec2(m_texCoord.x-0.8*CELLSIZE,m_texCoord.y);}vec3 neighbourRight=vec3(m_texCoord.x+CELLSIZE,1.0-m_texCoord.y,0.0);vec3 neighbourBelow=vec3(m_texCoord.x,1.0-m_texCoord.y+CELLSIZE,0.0);float absElevation=decodeElevation(texture2D(a,m_texCoord.xy));neighbourRight.z=decodeElevation(texture2D(a,vec2(m_texCoord.x+CELLSIZE,m_texCoord.y)));neighbourBelow.z=decodeElevation(texture2D(a,vec2(m_texCoord.x,m_texCoord.y-CELLSIZE)));vec3 currentV=vec3(m_texCoord.x*b,(1.0-m_texCoord.y)*b,absElevation);vec4 fragColor=vec4(0.0,0.0,0.0,0.0);if(k){fragColor=texture2D(j,m_texCoord);}else{float colorMin=l.x/MAX_ELEVATION;float colorMax=l.y/MAX_ELEVATION;float relativeElevation=absElevation/MAX_ELEVATION;if(relativeElevation<=colorMin){relativeElevation=0.0;}else if(relativeElevation>=colorMax){relativeElevation=1.0;}else{relativeElevation=(relativeElevation-colorMin)/(colorMax-colorMin);}fragColor=abs(texture2D(i,vec2(0.5,relativeElevation)));if(currentV.z==absElevation&&neighbourRight.z==absElevation&&neighbourBelow.z==absElevation){if(absElevation<=0.0){fragColor=vec4(0.5058823529,0.7725490196,0.8470588235,1.0);}else if(m){fragColor=vec4(0.5058823529,0.7725490196,0.8470588235,1.0);}}}if(n){neighbourRight.xy*=b;neighbourBelow.xy*=b;vec3 normal=normalize(cross(neighbourRight-currentV,neighbourBelow-currentV));float hillShade=clamp(p*1.0+max(dot(normal,normalize(o)),0.0),0.0,1.0);vec4 hillShadeC=vec4(hillShade,hillShade,hillShade,1.0);float hillShadeD=clamp(hillShade,0.2,1.0);vec4 hillShadeA=vec4(hillShadeD,hillShadeD,hillShadeD,1.0);float hillShadeL=clamp(hillShade,0.1,0.4);vec4 hillShadeB=vec4(hillShadeL,hillShadeL,hillShadeL,1.0);vec4 zero=vec4(0,0,0,0);vec4 one=vec4(1.0,1.0,1.0,1.0);vec4 two=vec4(2.0,2.0,2.0,2.0);gl_FragColor=hillShadeC*fragColor;}else{gl_FragColor=fragColor;}if(q){float lineWidth=3.0*CELLSIZE;if(m_texCoord.x>=1.0-lineWidth){gl_FragColor=vec4(0.0,0.0,1.0,1.0);}if(m_texCoord.x<=lineWidth){gl_FragColor=vec4(1.0,0.0,0.0,1.0);}if(m_texCoord.y<=lineWidth){gl_FragColor=vec4(0.0,1.0,0.0,1.0);}if(m_texCoord.y>=1.0-lineWidth){gl_FragColor=vec4(0.0,0.5,0.5,1.0);}if(mod(m_texCoord.x,65.0*CELLSIZE)<CELLSIZE){gl_FragColor=vec4(0.9,0.9,0.9,0.1);}if(mod(m_texCoord.y,65.0*CELLSIZE)<CELLSIZE){gl_FragColor=vec4(0.9,0.9,0.9,0.1);}}}';
+ol.renderer.webgl.tiledemlayer.shader.Fragment.OPTIMIZED_SOURCE = 'precision highp float;uniform sampler2D a;uniform float b;varying vec2 c;float decodeElevation(in vec4 colorChannels){float elevationM=((colorChannels.r*255.0+(colorChannels.g*255.0)*256.0)-11000.0)/10.0;return elevationM;}uniform sampler2D g;uniform sampler2D h;uniform bool i;uniform vec2 j;uniform bool k;uniform bool l;uniform vec3 m;uniform float n;uniform bool o;const float MAX_ELEVATION=4900.0;const highp float CELLSIZE=0.00390625;void main(void){vec2 m_texCoord=c;if(m_texCoord.y<=CELLSIZE){m_texCoord=vec2(m_texCoord.x,m_texCoord.y+CELLSIZE);}if(m_texCoord.x>=1.0-CELLSIZE){m_texCoord=vec2(m_texCoord.x-0.8*CELLSIZE,m_texCoord.y);}vec3 neighbourRight=vec3(m_texCoord.x+CELLSIZE,1.0-m_texCoord.y,0.0);vec3 neighbourBelow=vec3(m_texCoord.x,1.0-m_texCoord.y+CELLSIZE,0.0);float absElevation=decodeElevation(texture2D(a,m_texCoord.xy));neighbourRight.z=decodeElevation(texture2D(a,vec2(m_texCoord.x+CELLSIZE,m_texCoord.y)));neighbourBelow.z=decodeElevation(texture2D(a,vec2(m_texCoord.x,m_texCoord.y-CELLSIZE)));vec3 currentV=vec3(m_texCoord.x*b,(1.0-m_texCoord.y)*b,absElevation);vec4 fragColor=vec4(0.0,0.0,0.0,0.0);if(i){fragColor=texture2D(h,m_texCoord);}else{float colorMin=j.x/MAX_ELEVATION;float colorMax=j.y/MAX_ELEVATION;float relativeElevation=absElevation/MAX_ELEVATION;if(relativeElevation<=colorMin){relativeElevation=0.0;}else if(relativeElevation>=colorMax){relativeElevation=1.0;}else{relativeElevation=(relativeElevation-colorMin)/(colorMax-colorMin);}fragColor=abs(texture2D(g,vec2(0.5,relativeElevation)));if(currentV.z==absElevation&&neighbourRight.z==absElevation&&neighbourBelow.z==absElevation){if(absElevation<=0.0){fragColor=vec4(0.5058823529,0.7725490196,0.8470588235,1.0);}else if(k){fragColor=vec4(0.5058823529,0.7725490196,0.8470588235,1.0);}}}if(l){neighbourRight.xy*=b;neighbourBelow.xy*=b;vec3 normal=normalize(cross(neighbourRight-currentV,neighbourBelow-currentV));float hillShade=clamp(n*1.0+max(dot(normal,normalize(m)),0.0),0.0,1.0);vec4 hillShadeC=vec4(hillShade,hillShade,hillShade,1.0);float hillShadeD=clamp(hillShade,0.2,1.0);vec4 hillShadeA=vec4(hillShadeD,hillShadeD,hillShadeD,1.0);float hillShadeL=clamp(hillShade,0.1,0.4);vec4 hillShadeB=vec4(hillShadeL,hillShadeL,hillShadeL,1.0);vec4 zero=vec4(0,0,0,0);vec4 one=vec4(1.0,1.0,1.0,1.0);vec4 two=vec4(2.0,2.0,2.0,2.0);gl_FragColor=hillShadeC*fragColor;}else{gl_FragColor=fragColor;}if(o){float lineWidth=3.0*CELLSIZE;if(m_texCoord.x>=1.0-lineWidth){gl_FragColor=vec4(0.0,0.0,1.0,1.0);}if(m_texCoord.x<=lineWidth){gl_FragColor=vec4(1.0,0.0,0.0,1.0);}if(m_texCoord.y<=lineWidth){gl_FragColor=vec4(0.0,1.0,0.0,1.0);}if(m_texCoord.y>=1.0-lineWidth){gl_FragColor=vec4(0.0,0.5,0.5,1.0);}if(mod(m_texCoord.x,65.0*CELLSIZE)<CELLSIZE){gl_FragColor=vec4(0.9,0.9,0.9,0.1);}if(mod(m_texCoord.y,65.0*CELLSIZE)<CELLSIZE){gl_FragColor=vec4(0.9,0.9,0.9,0.1);}}}';
 
 
 /**
@@ -57,14 +57,14 @@ goog.addSingletonGetter(ol.renderer.webgl.tiledemlayer.shader.Vertex);
  * @const
  * @type {string}
  */
-ol.renderer.webgl.tiledemlayer.shader.Vertex.DEBUG_SOURCE = '\n// texture with encoded elevation values\nuniform sampler2D u_texture;\n\n// length of one tile in meter at equator\nuniform float u_tileSizeM;\n\n// temporary values for transfer to fragment shader\nvarying vec2 v_texCoord;\n\nfloat decodeElevation(in vec4 colorChannels) {\n\t// decode input data elevation value\n \tfloat elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)/10.0;\n    return elevationM;\n}\n\n\n// vertex coordinates for computed mesh\nattribute vec2 a_position;\n\n// open layers tile structure\nuniform vec4 u_tileOffset;\n\n// current scale factor for plan oblique rendering\nuniform vec2 u_scaleFactor;\n\n// flag for terrain interaction mode\nuniform bool u_terrainInteraction;\n\n// current coordinates for terrain shearing \nuniform vec2 u_terrainShearing;\n\n\nvoid main(void) { \n\n\t// Orientation of coordinate system in vertex shader:\n\t// y\n\t// ^ \n\t// |\n\t// |\n\t// ------>\tx\n\n    // pass current vertex coordinates to fragment shader\n    v_texCoord = a_position;\n    \n    // compute y-flipped texture coordinates for further processing in fragment-shader\n    v_texCoord.y = 1.0 - v_texCoord.y;\n\n    // read and decode elevation for current vertex\n    float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy));\n    \n    // shift vertex positions by given scale factor (dependend of the plan oblique inclination)\n    // direction of shift is always the top of the screen so it has to be adapted when the map view is rotated\n    // z value has to be inverted to get a left handed coordinate system and to make the depth test work\n    vec4 vertexPosition = vec4(0.0,0.0,0.0,0.0);\n\n    if(u_terrainInteraction){\n        vertexPosition = vec4((a_position+(absElevation * u_terrainShearing.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 1.0-abs(absElevation/u_tileSizeM), 1.0);\n    } else {\n        vertexPosition = vec4((a_position+(absElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 1.0-abs(absElevation/u_tileSizeM), 1.0);\n    }\n\n\n\tgl_Position = vertexPosition;\n}\n\n';
+ol.renderer.webgl.tiledemlayer.shader.Vertex.DEBUG_SOURCE = '\n// texture with encoded elevation values\nuniform sampler2D u_texture;\n\n// length of one tile in meter at equator\nuniform float u_tileSizeM;\n\n// temporary values for transfer to fragment shader\nvarying vec2 v_texCoord;\n\nfloat decodeElevation(in vec4 colorChannels) {\n\t// decode input data elevation value\n \tfloat elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)/10.0;\n    return elevationM;\n}\n\n\n// vertex coordinates for computed mesh\nattribute vec2 a_position;\n\n// open layers tile structure\nuniform vec4 u_tileOffset;\n\n// current scale factor for plan oblique rendering\nuniform vec2 u_scaleFactor;\n\nvoid main(void) { \n\n\t// Orientation of coordinate system in vertex shader:\n\t// y\n\t// ^ \n\t// |\n\t// |\n\t// ------>\tx\n\n    // pass current vertex coordinates to fragment shader\n    v_texCoord = a_position;\n    \n    // compute y-flipped texture coordinates for further processing in fragment-shader\n    v_texCoord.y = 1.0 - v_texCoord.y;\n\n    // read and decode elevation for current vertex\n    float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy));\n    \n    // shift vertex positions by given scale factor (dependend of the plan oblique inclination)\n    // direction of shift is always the top of the screen so it has to be adapted when the map view is rotated\n    // z value has to be inverted to get a left handed coordinate system and to make the depth test work\n    vec4 vertexPosition = vec4(0.0,0.0,0.0,0.0);\n  \n    vertexPosition = vec4((a_position+(absElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 1.0-abs(absElevation/u_tileSizeM), 1.0);\n\n\tgl_Position = vertexPosition;\n}\n\n';
 
 
 /**
  * @const
  * @type {string}
  */
-ol.renderer.webgl.tiledemlayer.shader.Vertex.OPTIMIZED_SOURCE = 'uniform sampler2D a;uniform float b;varying vec2 c;float decodeElevation(in vec4 colorChannels){float elevationM=((colorChannels.r*255.0+(colorChannels.g*255.0)*256.0)-11000.0)/10.0;return elevationM;}attribute vec2 d;uniform vec4 e;uniform vec2 f;uniform bool g;uniform vec2 h;void main(void){c=d;c.y=1.0-c.y;float absElevation=decodeElevation(texture2D(a,c.xy));vec4 vertexPosition=vec4(0.0,0.0,0.0,0.0);if(g){vertexPosition=vec4((d+(absElevation*h.xy)/b)*e.xy+e.zw,1.0-abs(absElevation/b),1.0);}else{vertexPosition=vec4((d+(absElevation*f.xy)/b)*e.xy+e.zw,1.0-abs(absElevation/b),1.0);}gl_Position=vertexPosition;}';
+ol.renderer.webgl.tiledemlayer.shader.Vertex.OPTIMIZED_SOURCE = 'uniform sampler2D a;uniform float b;varying vec2 c;float decodeElevation(in vec4 colorChannels){float elevationM=((colorChannels.r*255.0+(colorChannels.g*255.0)*256.0)-11000.0)/10.0;return elevationM;}attribute vec2 d;uniform vec4 e;uniform vec2 f;void main(void){c=d;c.y=1.0-c.y;float absElevation=decodeElevation(texture2D(a,c.xy));vec4 vertexPosition=vec4(0.0,0.0,0.0,0.0);vertexPosition=vec4((d+(absElevation*f.xy)/b)*e.xy+e.zw,1.0-abs(absElevation/b),1.0);gl_Position=vertexPosition;}';
 
 
 /**
@@ -89,43 +89,43 @@ ol.renderer.webgl.tiledemlayer.shader.Locations = function(gl, program) {
    * @type {WebGLUniformLocation}
    */
   this.u_ambient_light = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_ambient_light' : 'p');
+      program, goog.DEBUG ? 'u_ambient_light' : 'n');
 
   /**
    * @type {WebGLUniformLocation}
    */
   this.u_colorRamp = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_colorRamp' : 'i');
+      program, goog.DEBUG ? 'u_colorRamp' : 'g');
 
   /**
    * @type {WebGLUniformLocation}
    */
   this.u_colorScale = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_colorScale' : 'l');
+      program, goog.DEBUG ? 'u_colorScale' : 'j');
 
   /**
    * @type {WebGLUniformLocation}
    */
   this.u_hillShading = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_hillShading' : 'n');
+      program, goog.DEBUG ? 'u_hillShading' : 'l');
 
   /**
    * @type {WebGLUniformLocation}
    */
   this.u_light = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_light' : 'o');
+      program, goog.DEBUG ? 'u_light' : 'm');
 
   /**
    * @type {WebGLUniformLocation}
    */
   this.u_overlayActive = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_overlayActive' : 'k');
+      program, goog.DEBUG ? 'u_overlayActive' : 'i');
 
   /**
    * @type {WebGLUniformLocation}
    */
   this.u_overlayTexture = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_overlayTexture' : 'j');
+      program, goog.DEBUG ? 'u_overlayTexture' : 'h');
 
   /**
    * @type {WebGLUniformLocation}
@@ -136,20 +136,8 @@ ol.renderer.webgl.tiledemlayer.shader.Locations = function(gl, program) {
   /**
    * @type {WebGLUniformLocation}
    */
-  this.u_terrainInteraction = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_terrainInteraction' : 'g');
-
-  /**
-   * @type {WebGLUniformLocation}
-   */
-  this.u_terrainShearing = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_terrainShearing' : 'h');
-
-  /**
-   * @type {WebGLUniformLocation}
-   */
   this.u_testing = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_testing' : 'q');
+      program, goog.DEBUG ? 'u_testing' : 'o');
 
   /**
    * @type {WebGLUniformLocation}
@@ -173,7 +161,7 @@ ol.renderer.webgl.tiledemlayer.shader.Locations = function(gl, program) {
    * @type {WebGLUniformLocation}
    */
   this.u_waterBodies = gl.getUniformLocation(
-      program, goog.DEBUG ? 'u_waterBodies' : 'm');
+      program, goog.DEBUG ? 'u_waterBodies' : 'k');
 
   /**
    * @type {number}
