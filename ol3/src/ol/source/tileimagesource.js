@@ -108,7 +108,7 @@ ol.source.TileImage.defaultTileLoadFunction = function(imageTile, src) {
     if(!isEven(x) && isEven(y)){q=2;}
     if(isEven(x) && !isEven(y)){q=3;}
     if(!isEven(x) && !isEven(y)){q=4;}
-    imageTile.q = q;
+    imageTile['q'] = q;
 
   }
   imageTile.getImage().src = src;

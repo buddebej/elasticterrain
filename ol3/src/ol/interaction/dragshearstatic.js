@@ -65,6 +65,15 @@ ol.interaction.DragShearStatic = function(options) {
   /** @type {null|number} */
   this.startDragElevation = 0;
 
+  /** @type {number} */
+  this.maxElevation = 3000;
+
+  /** @type {number} */
+  this.minElevation = 0;
+
+  /** @type {number} */
+  this.criticalElevation = (this.maxElevation-this.minElevation)/2;
+
   /** @type {ol.Pixel} */
   this.currentDragPositionPx = [0,0];
 

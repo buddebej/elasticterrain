@@ -233,14 +233,14 @@ ol.renderer.webgl.Map.prototype.bindTileTexture =
       if(tile.hasOwnProperty('q')){
 
         var offset = {x:0,y:0}, qsize = tileSize/2; // = 128
-        if(tile.q==1){offset.x=0; offset.y=0;}
-        if(tile.q==2){offset.x=qsize; offset.y=0;}
-        if(tile.q==3){offset.x=0; offset.y=qsize;}
-        if(tile.q==4){offset.x=qsize; offset.y=qsize;}
-        clipTileCanvas.width = tileSize;
-        clipTileCanvas.height = tileSize;
-        this.clipTileCanvasSize_ = tileSize;
-        clipTileContext.drawImage(tile.getImage(), offset.x, offset.y, qsize, qsize, 0, 0, tileSize, tileSize);
+        if(tile['q']==1){offset.x=0; offset.y=0;}
+        if(tile['q']==2){offset.x=qsize; offset.y=0;}
+        if(tile['q']==3){offset.x=0; offset.y=qsize;}
+        if(tile['q']==4){offset.x=qsize; offset.y=qsize;}
+        clipTileCanvas.width = qsize;
+        clipTileCanvas.height = qsize;
+        this.clipTileCanvasSize_ = qsize;
+        clipTileContext.drawImage(tile.getImage(), offset.x, offset.y, qsize, qsize, 0, 0, qsize, qsize);
         gl.texImage2D(goog.webgl.TEXTURE_2D, 0,
           goog.webgl.RGBA, goog.webgl.RGBA,
           goog.webgl.UNSIGNED_BYTE, clipTileCanvas);
