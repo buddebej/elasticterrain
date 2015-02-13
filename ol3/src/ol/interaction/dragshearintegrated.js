@@ -87,20 +87,19 @@ ol.interaction.DragShearIntegrated = function(options) {
     
     var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
     var startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx);
-    var currentCenter = this.currentCenter;
     var startCenter = this.startCenter;
 
-    var getAnimatingPosition = function() {
-         return [startDragPosition[0] - (currentCenter[0] - startCenter[0]),
-                 startDragPosition[1] - (currentCenter[1] - startCenter[1])];
+    var getAnimatingPosition = function(cd) {
+         return [startDragPosition[0] - (cd[0] - startCenter[0]),
+                 startDragPosition[1] - (cd[1] - startCenter[1])];
     };
 
-    var getDistance = function(){
-        return [currentDragPosition[0] - getAnimatingPosition()[0],
-                currentDragPosition[1] - getAnimatingPosition()[1]];
+    var getDistance = function(cd){
+        return [currentDragPosition[0] - getAnimatingPosition(cd)[0],
+                currentDragPosition[1] - getAnimatingPosition(cd)[1]];
     };
 
-    var distanceXY = getDistance();
+    var distanceXY = getDistance(this.currentCenter);
     var distance = Math.sqrt(distanceXY[0] * distanceXY[0] + distanceXY[1] * distanceXY[1]);
 
     var springLengthXY = [distanceXY[0] * o.springLength/distance,
@@ -125,32 +124,49 @@ ol.interaction.DragShearIntegrated = function(options) {
     var hybridShearingActive = (Math.abs(springLengthXY[0]) > 0 && Math.abs(springLengthXY[1]) > 0); 
     var otherInteractionActive = (this.view.getHints()[ol.ViewHint.INTERACTING]); // other active interaction like zooming or rotation
 
-
     if((animationActive || (hybridShearingActive)) && !otherInteractionActive) {                
 
-        currentCenter[0] -= this.currentChange[0];
-        currentCenter[1] -= this.currentChange[1];
+        var newShearing = {}, newCenter = [];
 
-        distanceXY = getDistance(); 
+        if(this.startDragElevation > this.criticalElevation){   
+         // DRAG RELATIVE HIGH ELEVATIONS  
+            this.currentCenter[0] -= this.currentChange[0];
+            this.currentCenter[1] -= this.currentChange[1];
 
-        var newShearing = {x:(distanceXY[0]/this.startDragElevation), 
+            distanceXY = getDistance(this.currentCenter); 
+
+            newShearing = {x:(distanceXY[0]/this.startDragElevation), 
                            y:(distanceXY[1]/this.startDragElevation)};
 
-        var newCenter = [currentCenter[0],
-                         currentCenter[1]];
+          // limit base wiggling for lower zoom levels                 
+            if(this.view.getZoom() >= this.minZoom){
+              newCenter = [this.currentCenter[0],
+                           this.currentCenter[1]];
+            } else {
+              var zoomFactor = 1-(this.view.getZoom()/this.minZoom);
+              newCenter = [this.currentCenter[0] - distanceXY[0]*3*zoomFactor,
+                           this.currentCenter[1] - distanceXY[1]*3*zoomFactor];
+            }         
 
-        if(this.startDragElevation < this.criticalElevation){     
-               
+        } else {
+          // DRAG LOW HIGH ELEVATIONS  
+            this.currentCenter[0] -= this.currentChange[0];
+            this.currentCenter[1] -= this.currentChange[1];
+
+            distanceXY = getDistance(this.currentCenter); 
+
+            // invert elevation value
             newShearing = {x:(-distanceXY[0]/(this.maxElevation-this.startDragElevation)), 
                            y:(-distanceXY[1]/(this.maxElevation-this.startDragElevation))};   
             
-            newCenter = [newCenter[0] - distanceXY[0],
-                         newCenter[1] - distanceXY[1]];
+            // make low elevation point stay under cursor
+            newCenter = [this.currentCenter[0] - distanceXY[0],
+                         this.currentCenter[1] - distanceXY[1]];
         }
 
         this.view.setCenter(newCenter);   
-
         this.demLayer.setTerrainShearing(newShearing);
+
         this.demLayer.redraw();
 
         this.animationDelay.start();
@@ -185,7 +201,7 @@ goog.inherits(ol.interaction.DragShearIntegrated, ol.interaction.Pointer);
  * @notypecheck   
  */
 ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) {
-  if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent) && this.minZoom <= this.view.getZoom()) {
+  if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
     goog.asserts.assert(this.targetPointers.length >= 1);
     this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);   
     this.animationDelay.start(); 
@@ -227,7 +243,7 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
  * @private
  */
 ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) {
-  if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent) && this.minZoom <= this.view.getZoom()) {
+  if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
       this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
       this.startDragElevation = /** @type {ol.renderer.webgl.TileDemLayer} */(this.map.getRenderer().getLayerRenderer(this.demLayer)).getElevation(mapBrowserEvent.coordinate,this.view.getZoom());
       this.startCenter = [this.view.getCenter()[0],this.view.getCenter()[1]];

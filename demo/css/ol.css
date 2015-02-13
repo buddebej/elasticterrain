@@ -51,8 +51,8 @@
   left: .5em;
 }
 .ol-rotate {
-  top: .5em;
-  right: .5em;
+  top: 80px;
+  left: .5em;
   transition: opacity .25s;
 }
 .ol-rotate.ol-hidden {

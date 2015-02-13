@@ -2,7 +2,6 @@ var Ol3demUi = function(map) {
     'use strict';
 
     $('.controlBox').show();
-
     var ui = this, 
         layers = map.getLayers().getArray(),
         ol3dem, optionsShearStatic, optionsShearIntegrated;
@@ -23,12 +22,12 @@ var Ol3demUi = function(map) {
                                frictionForce: 0.1,
                                duration: 1500,
                                keypress: ol.events.condition.shiftKeyOnly,
-                               minZoom: 9,
+                               minZoom: 5,
                                map: map};
 
     optionsShearIntegrated =  {threshold: 0.1, 
                                springCoefficient: 0.1,
-                               frictionForce: 0.1,              
+                               frictionForce: 0.12,              
                                springLength: 0.0,
                                hybridShearingRadiusPx: 70.0, // radius in pixel
                                minZoom: 9,
@@ -61,7 +60,10 @@ var Ol3demUi = function(map) {
     $('.t_HillShading input').prop('checked', ui.option.hillShade);    
     $('.t_Testing input').prop('checked', ui.option.testing);
     $('.t_WaterBodies input').prop('checked', ui.option.waterBodies);
+    
     $('.t_Interaction input').prop('checked', ui.option.terrainInteraction);
+    $('.inclinationControls').hide();
+
 
     ol3dem.setAmbientLight(ui.option.ambientLight / 100.0);
     ol3dem.setColorScale(ui.option.colorScale);
@@ -294,8 +296,19 @@ var Ol3demUi = function(map) {
         renderMap();
       },
       'release' : function (v) { 
-        ol3dem.view.setHint(ol.ViewHint.INTERACTING, -1); // stops block shearing during zooming
+          ol3dem.view.setHint(ol.ViewHint.INTERACTING, -1); // stops block shearing during zooming
       } 
+    });
+
+    // update control tool rotateView when rotated with alt+shift+mouse ol interaction
+    map.on('postrender', function() {
+      var angle = ol3dem.view.getRotation();
+      if (angle < 0.0) {
+        angle = 360.0 - toDegrees(ol3dem.view.getRotation() % (2.0 * Math.PI));
+      } else {
+        angle = toDegrees(ol3dem.view.getRotation() % (2.0 * Math.PI));
+      }
+      $('.rotateView').val(angle).trigger('change');
     });
 
 
@@ -309,18 +322,20 @@ var Ol3demUi = function(map) {
         ol3dem.setTesting(true);
         checkbox.prop('checked', true);
       }
-      //renderMap();
+      renderMap();
     });
 
-    // switch to activate testing mode
+    // switch to activate terrain interactions
     $('.t_Interaction').click(function() {
       var checkbox = $('.t_Interaction input');
       if (ol3dem.getTerrainInteraction()) {
         ol3dem.setTerrainInteraction(false);
         checkbox.prop('checked', false);
+        $('.inclinationControls').show('blind', 300);
       } else {
         ol3dem.setTerrainInteraction(true);
         checkbox.prop('checked', true);
+        $('.inclinationControls').hide('blind', 300);
       }
     });    
 
