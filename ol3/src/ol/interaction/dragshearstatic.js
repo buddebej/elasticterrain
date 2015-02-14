@@ -146,10 +146,20 @@ goog.inherits(ol.interaction.DragShearStatic, ol.interaction.Pointer);
 ol.interaction.DragShearStatic.handleDragEvent_ = function(mapBrowserEvent) {
   if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent) && this.minZoom <= this.view.getZoom()) {
     goog.asserts.assert(this.targetPointers.length >= 1); 
-    this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);  
-      
-    var deltaX = (this.currentDragPositionPx[0] - this.startDragPositionPx[0])/(this.startDragElevation/this.view.getResolution());
-    var deltaY = (this.startDragPositionPx[1] - this.currentDragPositionPx[1])/(this.startDragElevation/this.view.getResolution());
+    this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers); 
+
+    var deltaX,deltaY;
+
+    if(this.startDragElevation > this.criticalElevation){
+      var relElevation = this.startDragElevation/this.view.getResolution();
+      deltaX = (this.currentDragPositionPx[0] - this.startDragPositionPx[0])/relElevation;
+      deltaY = (this.startDragPositionPx[1] - this.currentDragPositionPx[1])/relElevation;
+    } else {
+      var invertedElevation = (this.maxElevation-this.startDragElevation)/this.view.getResolution();
+      deltaX = -(this.currentDragPositionPx[0] - this.startDragPositionPx[0])/invertedElevation;
+      deltaY = -(this.startDragPositionPx[1] - this.currentDragPositionPx[1])/invertedElevation;
+    }
+    
     var rotation = this.view.getState().rotation;
     var shearingFactor = [deltaX*Math.cos(rotation)-deltaY*Math.sin(rotation),
                           deltaX*Math.sin(rotation)+deltaY*Math.cos(rotation)]; 
