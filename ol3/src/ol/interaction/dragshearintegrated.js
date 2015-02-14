@@ -89,8 +89,6 @@ ol.interaction.DragShearIntegrated = function(options) {
   /** @type {ol.Pixel} */
   this.currentDragPositionPx = [0,0];
 
-  /** @type {ol.Pixel} */
-  this.currentDragPosition = [0,0];
 
 
   /**
@@ -98,7 +96,6 @@ ol.interaction.DragShearIntegrated = function(options) {
    */
   ol.interaction.DragShearIntegrated.prototype.animation = function(){
     var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
-    this.currentDragPosition = currentDragPosition;
     var startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx);
     var startCenter = this.startCenter;
      
@@ -223,7 +220,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
     this.animationDelay.start(); 
 
     if(this.options['hybridShearingRadiusPx'] > 0.0){
-      var currentDragPosition = this.currentDragPosition;
+      var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
 
       var startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx);
       var animatingPosition = [startDragPosition[0] - (this.currentCenter[0] - this.startCenter[0]),

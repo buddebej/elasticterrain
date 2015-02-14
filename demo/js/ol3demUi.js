@@ -28,13 +28,15 @@ var Ol3demUi = function(map) {
     optionsShearIntegrated =  {threshold: 0.0001, 
                                springCoefficient: 0.1,
                                frictionForce: 0.12,              
-                               hybridShearingRadiusPx: 70.0, // radius in pixel
+                               hybridShearingRadiusPx: 150.0, // radius in pixel
                                keypress : ol.events.condition.noModifierKeys,
                                minZoom: 9,
                                map: map};
 
-    map.addInteraction(new ol.interaction.DragShearStatic(optionsShearStatic));
-    map.addInteraction(new ol.interaction.DragShearIntegrated(optionsShearIntegrated));
+    ol3dem.staticShearing = new ol.interaction.DragShearStatic(optionsShearStatic);
+    map.addInteraction(ol3dem.staticShearing);
+    ol3dem.integratedShearing =  new ol.interaction.DragShearIntegrated(optionsShearIntegrated);
+    map.addInteraction(ol3dem.integratedShearing);
 
     // initial options for the ui
     ui.option = {
@@ -290,13 +292,13 @@ var Ol3demUi = function(map) {
       'bgColor': '#000000',
       'change': function(v) {
         ol3dem.view.setRotation(toRadians(toStep(v)));
-        // if(!ol3dem.view.getHints()[ol.ViewHint.INTERACTING]){
-          // ol3dem.view.setHint(ol.ViewHint.INTERACTING, 1); // starts block shearing during zooming
-        // }
+        if(!ol3dem.view.getHints()[ol.ViewHint.INTERACTING]){
+          ol3dem.view.setHint(ol.ViewHint.INTERACTING, 1); // starts block shearing during zooming
+        }
         renderMap();
       },
       'release' : function (v) { 
-          // ol3dem.view.setHint(ol.ViewHint.INTERACTING, -1); // stops block shearing during zooming
+          ol3dem.view.setHint(ol.ViewHint.INTERACTING, -1); // stops block shearing during zooming
       } 
     });
 
@@ -330,14 +332,25 @@ var Ol3demUi = function(map) {
       var checkbox = $('.t_Interaction input');
       if (ol3dem.getTerrainInteraction()) {
         ol3dem.setTerrainInteraction(false);
+
+        ol3dem.staticShearing.setActive(false);
+        ol3dem.integratedShearing.setActive(false);
+
         checkbox.prop('checked', false);
         $('.inclinationControls').show('blind', 300);
       } else {
         ol3dem.setTerrainInteraction(true);
+
+        ol3dem.staticShearing.setActive(true);
+        ol3dem.integratedShearing.setActive(true);
+
         checkbox.prop('checked', true);
         $('.inclinationControls').hide('blind', 300);
       }
     });    
+
+
+
 
     //
     // EXPORT FUNCTIONALITY
