@@ -53,6 +53,9 @@ ol.interaction.DragShearStatic = function(options) {
   /** @type {ol.layer.TileDem} */
   this.demLayer =  /** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
 
+  /** @type {ol.renderer.webgl.TileDemLayer} */ 
+  this.demRenderer = /** @type {ol.renderer.webgl.TileDemLayer} */(this.map.getRenderer().getLayerRenderer(this.demLayer));
+
   /** @type {ol.events.ConditionType} */
   this.condition = goog.isDef(this.options['keypress']) ? this.options['keypress'] : ol.events.condition.noModifierKeys;
 
@@ -66,10 +69,10 @@ ol.interaction.DragShearStatic = function(options) {
   this.startDragElevation = 0;
 
   /** @type {number} */
-  this.maxElevation = 3000;
+  this.minElevation = this.demRenderer.getCurrentMinMax()[0];
 
   /** @type {number} */
-  this.minElevation = 0;
+  this.maxElevation = this.demRenderer.getCurrentMinMax()[1];
 
   /** @type {number} */
   this.criticalElevation = (this.maxElevation-this.minElevation)/2;
@@ -147,7 +150,9 @@ ol.interaction.DragShearStatic.handleDragEvent_ = function(mapBrowserEvent) {
   if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent) && this.minZoom <= this.view.getZoom()) {
     goog.asserts.assert(this.targetPointers.length >= 1); 
     this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers); 
-
+    this.minElevation = this.demRenderer.getCurrentMinMax()[0];
+    this.maxElevation = this.demRenderer.getCurrentMinMax()[1];
+    
     var deltaX,deltaY;
 
     if(this.startDragElevation > this.criticalElevation){
@@ -203,7 +208,7 @@ ol.interaction.DragShearStatic.handleDownEvent_ = function(mapBrowserEvent) {
       }
 
       this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
-      this.startDragElevation = /** @type {ol.renderer.webgl.TileDemLayer} */(this.map.getRenderer().getLayerRenderer(this.demLayer)).getElevation(mapBrowserEvent.coordinate,this.view.getZoom());
+      this.startDragElevation = this.demRenderer.getElevation(mapBrowserEvent.coordinate,this.view.getZoom());
       this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
       return true;
   } else {     

@@ -19,9 +19,10 @@ goog.require('ol.TileRange');
  * @constructor
  * @extends {ol.source.Tile}
  * @param {olx.source.TileImageOptions} options Image tile options.
+ * @param {boolean=} opt_isDem
  * @api
  */
-ol.source.TileImage = function(options) {
+ol.source.TileImage = function(options, opt_isDem) {
 
   goog.base(this, {
     attributions: options.attributions,
@@ -34,6 +35,12 @@ ol.source.TileImage = function(options) {
     tileGrid: options.tileGrid,
     tilePixelRatio: options.tilePixelRatio
   });
+
+  /**
+   * @protected
+   * @type {boolean}
+   */ 
+  this.isDemTileImage = (goog.isDef(opt_isDem)) ? opt_isDem : false;
 
   /**
    * @protected
@@ -65,8 +72,7 @@ ol.source.TileImage = function(options) {
 
   /**
    * @protected
-   * @type {function(new: ol.ImageTile, ol.TileCoord, ol.TileState, string,
-   *        ?string, ol.TileLoadFunctionType)}
+   * @type {function(new: ol.ImageTile, ol.TileCoord, ol.TileState, string, ?string, ol.TileLoadFunctionType, boolean)}
    */
   this.tileClass = goog.isDef(options.tileClass) ?
       options.tileClass : ol.ImageTile;
@@ -80,7 +86,6 @@ goog.inherits(ol.source.TileImage, ol.source.Tile);
  * @param {string} src Source.
  */
 ol.source.TileImage.defaultTileLoadFunction = function(imageTile, src) {
-
   var tileCoord = imageTile.tileCoord;
   var z = tileCoord[0];
 
@@ -109,9 +114,8 @@ ol.source.TileImage.defaultTileLoadFunction = function(imageTile, src) {
     if(isEven(x) && !isEven(y)){q=3;}
     if(!isEven(x) && !isEven(y)){q=4;}
     imageTile['q'] = q;
-
   }
-  imageTile.getImage().src = src;
+   imageTile.getImage().src = src;
 };
 
 
@@ -148,7 +152,8 @@ ol.source.TileImage.prototype.getTile =
         goog.isDef(tileUrl) ? ol.TileState.IDLE : ol.TileState.EMPTY,
         goog.isDef(tileUrl) ? tileUrl : '',
         this.crossOrigin,
-        this.tileLoadFunction);
+        this.tileLoadFunction,
+        this.isDemTileImage);
     this.tileCache.set(tileCoordKey, tile);
     return tile;
   }

@@ -53,6 +53,9 @@ ol.interaction.DragShearIntegrated = function(options) {
   /** @type {ol.layer.TileDem} */
   this.demLayer =  /** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[this.map.getLayers().getArray().length-1]);
 
+  /** @type {ol.renderer.webgl.TileDemLayer} */ 
+  this.demRenderer = /** @type {ol.renderer.webgl.TileDemLayer} */(this.map.getRenderer().getLayerRenderer(this.demLayer));
+
   /** @type {ol.events.ConditionType} */
   this.condition = goog.isDef(this.options['keypress']) ? this.options['keypress'] : ol.events.condition.noModifierKeys;
 
@@ -69,10 +72,10 @@ ol.interaction.DragShearIntegrated = function(options) {
   this.startDragElevation = 0;
 
   /** @type {number} */
-  this.maxElevation = 3000;
+  this.minElevation = this.demRenderer.getCurrentMinMax()[0];
 
   /** @type {number} */
-  this.minElevation = 0;
+  this.maxElevation = this.demRenderer.getCurrentMinMax()[1];
 
   /** @type {number} */
   this.criticalElevation = (this.maxElevation-this.minElevation)/2;
@@ -109,17 +112,12 @@ ol.interaction.DragShearIntegrated = function(options) {
     };
 
    
-    var getAnimatingPosition = function(cd) {
-         return [startDragPosition[0] - (cd[0] - startCenter[0]),
-                 startDragPosition[1] - (cd[1] - startCenter[1])];
-    };
+    var animatingPosition = [startDragPosition[0] - (this.currentCenter[0] - startCenter[0]),
+                             startDragPosition[1] - (this.currentCenter[1] - startCenter[1])];
 
-    var getDistance = function(cd){
-        return [currentDragPosition[0] - getAnimatingPosition(cd)[0],
-                currentDragPosition[1] - getAnimatingPosition(cd)[1]];
-    };
+    var distanceXY = [currentDragPosition[0] - animatingPosition[0],
+                      currentDragPosition[1] - animatingPosition[1]];
    
-    var distanceXY = getDistance(this.currentCenter);
     var distance = Math.sqrt(distanceXY[0] * distanceXY[0] + distanceXY[1] * distanceXY[1]);
 
     var springLengthXY = [distanceXY[0] * this.currentSpringLength/distance,
@@ -142,7 +140,12 @@ ol.interaction.DragShearIntegrated = function(options) {
     this.currentCenter[0] -= this.currentChange[0];
     this.currentCenter[1] -= this.currentChange[1];
 
-    distanceXY = getDistance(this.currentCenter); 
+    animatingPosition = [startDragPosition[0] - (this.currentCenter[0] - startCenter[0]),
+                         startDragPosition[1] - (this.currentCenter[1] - startCenter[1])];
+
+    distanceXY = [currentDragPosition[0] - animatingPosition[0],
+                  currentDragPosition[1] - animatingPosition[1]];
+   
 
     var animationActive = (Math.abs(this.currentChange[0]) > this.options['threshold'] && Math.abs(this.currentChange[1]) > this.options['threshold']);
     var hybridShearingActive = (Math.abs(springLengthXY[0]) > 0 && Math.abs(springLengthXY[1]) > 0); 
@@ -177,8 +180,8 @@ ol.interaction.DragShearIntegrated = function(options) {
                 -distanceXY[1]/(this.maxElevation-this.startDragElevation));   
       
             // make low elevation point stay under cursor
-            this.view.setCenter([this.currentCenter[0] - distanceXY[0],
-                                this.currentCenter[1] - distanceXY[1]]);
+            this.view.setCenter([this.currentCenter[0] - 2*distanceXY[0],
+                                 this.currentCenter[1] - 2*distanceXY[1]]);
         }
 
         this.animationDelay.start();
@@ -216,6 +219,8 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
     goog.asserts.assert(this.targetPointers.length >= 1);
     
     this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers); 
+    this.minElevation = this.demRenderer.getCurrentMinMax()[0];
+    this.maxElevation = this.demRenderer.getCurrentMinMax()[1];
 
     this.animationDelay.start(); 
 
@@ -264,10 +269,12 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
 ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) {
   if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
       this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
-      this.startDragElevation = /** @type {ol.renderer.webgl.TileDemLayer} */(this.map.getRenderer().getLayerRenderer(this.demLayer)).getElevation(mapBrowserEvent.coordinate,this.view.getZoom());
+      this.startDragElevation = this.demRenderer.getElevation(mapBrowserEvent.coordinate,this.view.getZoom());
       this.startCenter = [this.view.getCenter()[0],this.view.getCenter()[1]];
       this.currentCenter =[this.view.getCenter()[0],this.view.getCenter()[1]];
       this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
+
+      console.log('this elevation: ',this.startDragElevation,'\n local min: ',this.minElevation,'\n local max: ',this.maxElevation);
       return true;
   } else {     
       return false;

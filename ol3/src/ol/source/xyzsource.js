@@ -35,7 +35,7 @@ ol.source.XYZ = function(options) {
     tileLoadFunction: options.tileLoadFunction,
     tilePixelRatio: options.tilePixelRatio,
     tileUrlFunction: ol.TileUrlFunction.nullTileUrlFunction
-  });
+  }, (goog.isDef(options['dem'])) ? options['dem'] : false);
 
   /**
    * @private

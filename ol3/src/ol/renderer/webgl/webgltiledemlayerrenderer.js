@@ -19,6 +19,7 @@ goog.provide('ol.renderer.webgl.TileDemLayer');
     goog.require('ol.tilecoord');
     goog.require('ol.tilegrid.TileGrid');
     goog.require('ol.webgl.Buffer');
+    goog.require('ol.Elevation');
 
 /**
  * @classdesc
@@ -32,91 +33,6 @@ goog.provide('ol.renderer.webgl.TileDemLayer');
  */
 ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
   goog.base(this, mapRenderer, tileDemLayer);
-
-  /**
-   * VertexBuffer contains vertices: meshResolution * meshResolution
-   * IndexBuffer contains elements for vertexBuffer
-   * @private
-   * @return {Object.<string, ol.webgl.Buffer>} vertexBuffer, indexBuffer
-   */
-  ol.renderer.webgl.TileDemLayer.prototype.getTileMesh = function(meshResolution) {
-    var vb = [],
-      tb = [],
-      ib = [],
-      v = 0,
-      vertices = meshResolution, // number of vertices per edge
-      cellSize = 1 / (vertices - 1);
-    // rows
-    for (var x = 0; x < vertices; x += 1) {
-      // columns
-      for (var y = 0; y < vertices; y += 1) {
-        // vertex coordinates
-        vb.push(x * cellSize, y * cellSize);
-        // dont draw triangles beyond tile extend!      
-        if (x < vertices - 1 && y < vertices - 1) {
-          // two triangles
-          // v+vertices *\ * v+vertices+1
-          //          v * \* v+1
-          ib.push(v, v + vertices, v + 1, v + vertices, v + vertices + 1, v + 1);
-        }
-        v += 1;
-      }
-    }
-    return {
-      vertexBuffer: new ol.webgl.Buffer(vb),
-      indexBuffer: new ol.webgl.Buffer(ib)
-    };
-  };
-
-  /**
-   * Returns lookup texture with colorramp for hypsometric coloring
-   * @private
-   * @return {Uint8Array} .
-   */
-  ol.renderer.webgl.TileDemLayer.prototype.getColorRampTexture = function() {
-    var colors = new Array(
-      66, 120, 40, 255,
-      78, 129, 49, 255,
-      90, 138, 58, 255,
-      103, 147, 67, 255,
-      115, 156, 76, 255,
-      127, 165, 85, 255,
-      140, 174, 94, 255,
-      146, 175, 95, 255,
-      152, 176, 96, 255,
-      159, 178, 98, 255,
-      165, 179, 99, 255,
-      171, 181, 101, 255,
-      178, 182, 102, 255,
-      184, 184, 104, 255,
-      190, 185, 105, 255,
-      197, 187, 107, 255,
-      203, 188, 108, 255,
-      210, 190, 110, 255,
-      213, 195, 122, 255,
-      217, 200, 134, 255,
-      221, 205, 146, 255,
-      225, 211, 158, 255,
-      228, 216, 170, 255,
-      232, 222, 182, 255,
-      236, 227, 194, 255,
-      240, 233, 206, 255,
-      243, 238, 218, 255,
-      247, 244, 230, 255,
-      251, 249, 242, 255,
-      255, 255, 255, 255);
-    return new Uint8Array(colors);
-  };
-
-  /**
-   * Decode Elevation from Color Values 
-   * @private
-   * @return {number} elevationM Elevation in meters
-   */
-  ol.renderer.webgl.TileDemLayer.prototype.decodeElevation = function(rgba) {
-      var elevationM = ((rgba[0] + rgba[1]*256.0)-11000.0)/10.0;
-      return elevationM;
-  };
 
   /**
    * @private
@@ -190,55 +106,36 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    */
   this.timeoutCounterMax_ = 200;
 
-   /**
-   * @public
+  /**
+   * @private
    * @type {ol.TileCache}
    */
   this.tileCache_ = null;
 
-   /**
-   * @public
+  /**
+   * @private
    * @type {ol.tilegrid.TileGrid}
    */
   this.tileGrid_ = null;
 
-   /**
-   * @public
+  /**
+   * @private
    * @type {number}
    */
-  this.maxShearing_ = 4.0;
+  this.maxShearing_ = 4.5;
 
   /**
-   * @public
-   * @param {Array} xy in Mercator 
-   * @param {number} z Zoomlevel
-   * @return {ol.TileCoord}
+   * @private
+   * @type {number}
    */
-  ol.renderer.webgl.TileDemLayer.prototype.getTileCoord = function(xy,z) { 
-    return this.tileGrid_.getTileCoordForCoordAndZ(xy,z);
-  };
+  this.maxElevationInExtent = 0.0;
 
   /**
-   * @public
-   * @param {Array} xy in Mercator 
-   * @param {number|undefined} z Zoomlevel
-   * @return {number|null}
+   * @private
+   * @type {number}
    */
-  ol.renderer.webgl.TileDemLayer.prototype.getElevation = function(xy,z) { 
-      var tc = this.getTileCoord(xy,((!goog.isDef(z))? 1 : z));
-      var xyzKey = ol.tilecoord.getKeyZXY(tc[0],tc[1],tc[2]);
-      var tileExtent = this.tileGrid_.getTileCoordExtent(tc); // minX, minY, maxX, maxY
-      var tileXY = [0,0];
-      var elevation = 0;
-      tileXY[0] = Math.floor(((xy[0]-tileExtent[0]) / (tileExtent[2] - tileExtent[0]))*256); 
-      tileXY[1] = 256-Math.floor(((xy[1]-tileExtent[1]) / (tileExtent[3] - tileExtent[1]))*256); 
-      elevation = this.decodeElevation(this.tileCache_.get(xyzKey).getPixelValue(tileXY));
-      return elevation;
-  };
-  goog.exportProperty(
-      ol.renderer.webgl.TileDemLayer.prototype,
-      'getElevation',
-      ol.renderer.webgl.TileDemLayer.prototype.getElevation);
+  this.minElevationInExtent = 0.0;
+
 };
 
 goog.inherits(ol.renderer.webgl.TileDemLayer, ol.renderer.webgl.Layer);
@@ -260,6 +157,146 @@ ol.renderer.webgl.TileDemLayer.prototype.disposeInternal = function() {
 ol.renderer.webgl.TileDemLayer.prototype.handleWebGLContextLost = function() {
   goog.base(this, 'handleWebGLContextLost');
   this.locations_ = null;
+};
+
+/**
+ * @public
+ * @param {Array} xy in Mercator 
+ * @param {number} z Zoomlevel
+ * @return {ol.TileCoord}
+ */
+ol.renderer.webgl.TileDemLayer.prototype.getTileCoord = function(xy,z) { 
+  return this.tileGrid_.getTileCoordForCoordAndZ(xy,z);
+};
+
+/**
+ * @public
+ * @param {Array} xy in Mercator 
+ * @param {number|undefined} z Zoomlevel
+ * @return {number|null}
+ */
+ol.renderer.webgl.TileDemLayer.prototype.getElevation = function(xy,z) { 
+    var tc = this.getTileCoord(xy,((!goog.isDef(z))? 1 : z));
+    var xyzKey = ol.tilecoord.getKeyZXY(tc[0],tc[1],tc[2]);
+    var tileExtent = this.tileGrid_.getTileCoordExtent(tc); // minX, minY, maxX, maxY
+    var tileXY = [0,0];
+    var elevation = 0;
+    tileXY[0] = Math.floor(((xy[0]-tileExtent[0]) / (tileExtent[2] - tileExtent[0]))*256); 
+    tileXY[1] = 256-Math.floor(((xy[1]-tileExtent[1]) / (tileExtent[3] - tileExtent[1]))*256); 
+    elevation = ol.Elevation.decode(this.tileCache_.get(xyzKey).getPixelValue(tileXY));
+    return elevation;
+};
+goog.exportProperty(
+    ol.renderer.webgl.TileDemLayer.prototype,
+    'getElevation',
+    ol.renderer.webgl.TileDemLayer.prototype.getElevation);
+
+/**
+ * @public
+ * @return {Array} min max elevation of current extent
+ */
+ol.renderer.webgl.TileDemLayer.prototype.getCurrentMinMax = function() { 
+  return [this.minElevationInExtent,this.maxElevationInExtent];
+};
+goog.exportProperty(
+    ol.renderer.webgl.TileDemLayer.prototype,
+    'getCurrentMinMax',
+    ol.renderer.webgl.TileDemLayer.prototype.getCurrentMinMax);
+
+/**
+ * @private
+ * @param {Array} tileMinMax : min max elevation of a tile
+ */
+ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tileMinMax) { 
+  if(tileMinMax[0] < this.minElevationInExtent){
+    this.minElevationInExtent = tileMinMax[0];
+  }
+  if(tileMinMax[1] > this.maxElevationInExtent){
+    this.maxElevationInExtent = tileMinMax[1];
+  }
+};
+
+/**
+ * @private
+ */
+ol.renderer.webgl.TileDemLayer.prototype.resetCurrentMinMax = function() { 
+    this.minElevationInExtent = ol.Elevation.MAX;
+    this.maxElevationInExtent = 0.0;
+};
+
+/**
+ * VertexBuffer contains vertices: meshResolution * meshResolution
+ * IndexBuffer contains elements for vertexBuffer
+ * @private
+ * @return {Object.<string, ol.webgl.Buffer>} vertexBuffer, indexBuffer
+ */
+ol.renderer.webgl.TileDemLayer.prototype.getTileMesh = function(meshResolution) {
+  var vb = [],
+    tb = [],
+    ib = [],
+    v = 0,
+    vertices = meshResolution, // number of vertices per edge
+    cellSize = 1 / (vertices - 1);
+  // rows
+  for (var x = 0; x < vertices; x += 1) {
+    // columns
+    for (var y = 0; y < vertices; y += 1) {
+      // vertex coordinates
+      vb.push(x * cellSize, y * cellSize);
+      // dont draw triangles beyond tile extend!      
+      if (x < vertices - 1 && y < vertices - 1) {
+        // two triangles
+        // v+vertices *\ * v+vertices+1
+        //          v * \* v+1
+        ib.push(v, v + vertices, v + 1, v + vertices, v + vertices + 1, v + 1);
+      }
+      v += 1;
+    }
+  }
+  return {
+    vertexBuffer: new ol.webgl.Buffer(vb),
+    indexBuffer: new ol.webgl.Buffer(ib)
+  };
+};
+
+/**
+ * Returns lookup texture with colorramp for hypsometric coloring
+ * @private
+ * @return {Uint8Array} .
+ */
+ol.renderer.webgl.TileDemLayer.prototype.getColorRampTexture = function() {
+  var colors = new Array(
+    66, 120, 40, 255,
+    78, 129, 49, 255,
+    90, 138, 58, 255,
+    103, 147, 67, 255,
+    115, 156, 76, 255,
+    127, 165, 85, 255,
+    140, 174, 94, 255,
+    146, 175, 95, 255,
+    152, 176, 96, 255,
+    159, 178, 98, 255,
+    165, 179, 99, 255,
+    171, 181, 101, 255,
+    178, 182, 102, 255,
+    184, 184, 104, 255,
+    190, 185, 105, 255,
+    197, 187, 107, 255,
+    203, 188, 108, 255,
+    210, 190, 110, 255,
+    213, 195, 122, 255,
+    217, 200, 134, 255,
+    221, 205, 146, 255,
+    225, 211, 158, 255,
+    228, 216, 170, 255,
+    232, 222, 182, 255,
+    236, 227, 194, 255,
+    240, 233, 206, 255,
+    243, 238, 218, 255,
+    247, 244, 230, 255,
+    251, 249, 242, 255,
+    255, 255, 255, 255);
+  return new Uint8Array(colors);
 };
 
 /**
@@ -385,7 +422,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
               lightX = Math.sin(zenithRad) * Math.sin(azimuthRad);
           gl.uniform3f(this.locations_.u_light, lightX, lightY, lightZ);
           // u_ambient_light: pass intensity for an ambient light source
-          gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());        
+          gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());     
+     
+          gl.uniform1f(this.locations_.u_minElevation, this.minElevationInExtent);        
+          gl.uniform1f(this.locations_.u_maxElevation, this.maxElevationInExtent);        
 
       // COLORING
           // dont create color lookup when in overlay mode
@@ -478,6 +518,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
               gl.uniform4fv(renderer.locations_.u_tileOffset, u_tileOffset);
             };
 
+            this.resetCurrentMinMax();
           // CREATE TEXTURE QUEUE AND DRAW TILES
             if(this.overlay.Active) {  
             // RENDER TILES WITH OVERLAY
@@ -550,6 +591,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                         }
                         // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                         gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
+                        this.updateCurrentMinMax(tile.getMinMaxElevations());
                     }
                 }
             } else {
@@ -597,6 +639,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                       gl.uniform1i(this.locations_.u_texture, 0);        
                       // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                       gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
+                      this.updateCurrentMinMax(tile.getMinMaxElevations());
                   }
               }               
             }
@@ -607,6 +650,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           this.renderedRevision_ = tileSource.getRevision();
           goog.asserts.assert(this.timeoutCounter_ < this.timeoutCounterMax_, 'Loading of tiles timed out.');
           this.timeoutCounter_ = 0;
+
+          // console.log(this.minElevationInExtent,this.maxElevationInExtent);
+
         } else {   
           this.renderedTileRange_ = null;
           this.renderedFramebufferExtent_ = null;

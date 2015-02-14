@@ -82,10 +82,16 @@ uniform vec3 u_light;
 // intensity of ambient light
 uniform float u_ambient_light; 
 
+// min Elevation in current Extent
+uniform float u_minElevation; 
+
+// max Elevation in current Extent
+uniform float u_maxElevation; 
+
 // flag for testing mode
 uniform bool u_testing; 
 
-const float MAX_ELEVATION = 4900.0; // assumed to be the highest elevation in the eu-dem
+const float MAX_ELEVATION = 9000.0; // assumed to be the highest elevation in the eu-dem
 // mesh cellsize for tile resolution of 256x256 pixel
 const highp float CELLSIZE = 0.00390625; // =1.0/256.0
 
@@ -123,8 +129,8 @@ void main(void) {
     } else {
         // computation of hypsometric color
     	// scaling of color ramp
-    	float colorMin = u_colorScale.x/MAX_ELEVATION;
-    	float colorMax = u_colorScale.y/MAX_ELEVATION;
+    	float colorMin = u_minElevation/MAX_ELEVATION;
+    	float colorMax = u_maxElevation/MAX_ELEVATION;
     	float relativeElevation = absElevation/MAX_ELEVATION;
     	if(relativeElevation<=colorMin){
     		relativeElevation = 0.0;

@@ -9,11 +9,10 @@ goog.require('ol.Tile');
 goog.require('ol.TileCoord');
 goog.require('ol.TileLoadFunctionType');
 goog.require('ol.TileState');
-
-// 
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('ol.dom');
+goog.require('ol.Elevation');
 
 
 /**
@@ -24,9 +23,10 @@ goog.require('ol.dom');
  * @param {string} src Image source URI.
  * @param {?string} crossOrigin Cross origin.
  * @param {ol.TileLoadFunctionType} tileLoadFunction Tile load function.
+ * @param {boolean=} opt_isDemTileImage
  */
-ol.ImageTile = function(tileCoord, state, src, crossOrigin, tileLoadFunction) {
-
+ol.ImageTile = function(tileCoord, state, src, crossOrigin, tileLoadFunction, opt_isDemTileImage) {
+ 
   goog.base(this, tileCoord, state);
 
   /**
@@ -64,12 +64,31 @@ ol.ImageTile = function(tileCoord, state, src, crossOrigin, tileLoadFunction) {
    */
   this.tileLoadFunction_ = tileLoadFunction;
 
-  /** 
+  /**
    * @private
-   * @type {CanvasRenderingContext2D}
+   * @type {boolean}
    */
+  this.isDemTileImage = (opt_isDemTileImage) ? opt_isDemTileImage : false;
 
-  this.clipTileContext_ = null;
+  if(this.isDemTileImage){
+    /**
+     * @private
+     * @type {number}
+     */
+    this.maxElevation = 0;
+
+    /**
+     * @private
+     * @type {number}
+     */
+    this.minElevation = 0;
+
+    /** 
+     * @private
+     * @type {CanvasRenderingContext2D}
+     */
+    this.canvasContext_ = null;
+  }
 
 };
 goog.inherits(ol.ImageTile, ol.Tile);
@@ -99,19 +118,67 @@ ol.ImageTile.prototype.getImage = function(opt_context) {
 
 
 /**
- * Creates a Canvas Object of Tile Image and get pixel RGBA values of xy in image coordinates
+ * Get pixel RGBA values of xy in image coordinates
  * @param {Array} pixelXY
- * @return {Uint8ClampedArray} Pixel Values per Band
+ * @return {Uint8ClampedArray|null} Pixel Values per Band
  * @public
  */
 ol.ImageTile.prototype.getPixelValue = function(pixelXY) {
-  if(goog.isNull(this.clipTileContext_)){
-      this.clipTileContext_ = ol.dom.createCanvasContext2D(256,256);
-      this.clipTileContext_.drawImage(this.getImage(), 0, 0, 256, 256);
+  goog.asserts.assert(!goog.isNull(this.canvasContext_),'createCanvas Method must be invoked before a pixel value can be requested!');
+  if(!goog.isNull(this.canvasContext_)){
+    return this.canvasContext_.getImageData(pixelXY[0], pixelXY[1], 1, 1).data;
+  } else {
+    return null;
   }
-  return this.clipTileContext_.getImageData(pixelXY[0], pixelXY[1], 1, 1).data;
 };
       
+/**
+ * Creates a Canvas Object of Tile Image and get pixel RGBA values of xy in image coordinates
+ * @private
+ */      
+ol.ImageTile.prototype.createCanvas = function() {
+   if(goog.isNull(this.canvasContext_)){
+      this.canvasContext_ = ol.dom.createCanvasContext2D(this.image_.width,this.image_.height);
+      this.canvasContext_.drawImage(this.getImage(), 0, 0, this.image_.width, this.image_.height);
+   }
+};
+
+/**
+ * Compute min and max elevations in a dem tile and store the values
+ * @private
+ */
+ol.ImageTile.prototype.readMinMaxElevations = function() {
+  if(!goog.isNull(this.canvasContext_)){
+    var imageDataArray = this.canvasContext_.getImageData(0, 0, this.image_.width, this.image_.height).data;
+    var currentElevation;
+
+    this.minElevation = ol.Elevation.MAX;
+    for (var i = 0; i <= this.image_.width; i=i+4) {      
+          currentElevation = ol.Elevation.decode([imageDataArray[i],imageDataArray[i+1]]); // use red and green channel of every pixel
+
+          // if(imageDataArray[i]===0 || imageDataArray[i+1]===0){
+          //  console.log('empty val ',imageDataArray[i],imageDataArray[i+1],ol.decodeDemElevation([imageDataArray[i],imageDataArray[i+1]]));
+          // }
+
+          if(currentElevation > this.maxElevation){
+            this.maxElevation = currentElevation;
+          }
+          if(currentElevation < this.minElevation){
+            this.minElevation = currentElevation;
+          }        
+    }
+  }
+};
+
+/**
+ * Compute min and max elevations in a dem tile and store the values
+ * @return {Array}
+ * @public
+ */
+ol.ImageTile.prototype.getMinMaxElevations = function() {
+  return [this.minElevation,this.maxElevation];
+};
+
 
 /**
  * @inheritDoc
@@ -148,6 +215,12 @@ ol.ImageTile.prototype.handleImageLoad_ = function() {
 
   if (this.image_.naturalWidth && this.image_.naturalHeight) {
     this.state = ol.TileState.LOADED;
+
+    if(this.isDemTileImage){
+      this.createCanvas();
+      this.readMinMaxElevations();
+    }
+
   } else {
     this.state = ol.TileState.EMPTY;
   }
