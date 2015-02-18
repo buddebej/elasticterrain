@@ -13,7 +13,7 @@ goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('ol.dom');
 goog.require('ol.Elevation');
-
+goog.require('goog.async.Deferred');
 
 /**
  * @constructor
@@ -157,7 +157,7 @@ ol.ImageTile.prototype.readMinMaxElevations = function() {
           currentElevation = ol.Elevation.decode([imageDataArray[i],imageDataArray[i+1]]); // use red and green channel of every pixel
 
           // if(imageDataArray[i]===0 || imageDataArray[i+1]===0){
-          //  console.log('empty val ',imageDataArray[i],imageDataArray[i+1],ol.decodeDemElevation([imageDataArray[i],imageDataArray[i+1]]));
+          // console.log('empty val ',imageDataArray[i],imageDataArray[i+1],ol.decodeDemElevation([imageDataArray[i],imageDataArray[i+1]]));
           // }
 
           if(currentElevation > this.maxElevation){
@@ -216,9 +216,10 @@ ol.ImageTile.prototype.handleImageLoad_ = function() {
   if (this.image_.naturalWidth && this.image_.naturalHeight) {
     this.state = ol.TileState.LOADED;
 
-    if(this.isDemTileImage){
-      this.createCanvas();
-      this.readMinMaxElevations();
+    if(this.isDemTileImage){ 
+      var d = new goog.async.Deferred(undefined,this); 
+      d.addCallback(function() {this.createCanvas();this.readMinMaxElevations();});
+      d.callback() ;
     }
 
   } else {
