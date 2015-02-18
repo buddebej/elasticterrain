@@ -122,7 +122,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @private
    * @type {number}
    */
-  this.maxShearing_ = 4.5;
+  this.maxShearing_ = 5.5;
 
   /**
    * @private

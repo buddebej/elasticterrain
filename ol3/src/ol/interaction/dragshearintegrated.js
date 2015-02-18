@@ -72,13 +72,13 @@ ol.interaction.DragShearIntegrated = function(options) {
   this.startDragElevation = 0;
 
   /** @type {number} */
-  this.minElevation = this.demRenderer.getCurrentMinMax()[0];
+  this.minElevation = 0;
 
   /** @type {number} */
-  this.maxElevation = this.demRenderer.getCurrentMinMax()[1];
+  this.maxElevation = 0;
 
   /** @type {number} */
-  this.criticalElevation = (this.maxElevation-this.minElevation)/2;
+  this.criticalElevation = 0;
 
    /** @type {ol.Pixel} */
   this.startCenter = [0,0];
@@ -152,7 +152,6 @@ ol.interaction.DragShearIntegrated = function(options) {
     var otherInteractionActive = (this.view.getHints()[ol.ViewHint.INTERACTING]); // other active interaction like zooming or rotation
 
     if((animationActive || (hybridShearingActive)) && !otherInteractionActive) {                
-
         if(this.startDragElevation > this.criticalElevation){   
          // HIGH ELEVATIONS              
             shear(this,
@@ -174,14 +173,13 @@ ol.interaction.DragShearIntegrated = function(options) {
 
         } else {
           // LOW  ELEVATIONS  
-           
             shear(this,
                 -distanceXY[0]/(this.maxElevation-this.startDragElevation),
                 -distanceXY[1]/(this.maxElevation-this.startDragElevation));   
       
             // make low elevation point stay under cursor
-            this.view.setCenter([this.currentCenter[0] - 2*distanceXY[0],
-                                 this.currentCenter[1] - 2*distanceXY[1]]);
+            this.view.setCenter([this.currentCenter[0] - distanceXY[0],
+                                 this.currentCenter[1] - distanceXY[1]]);
         }
 
         this.animationDelay.start();
@@ -221,6 +219,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
     this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers); 
     this.minElevation = this.demRenderer.getCurrentMinMax()[0];
     this.maxElevation = this.demRenderer.getCurrentMinMax()[1];
+    this.criticalElevation = (this.maxElevation-this.minElevation)/2;
 
     this.animationDelay.start(); 
 
@@ -237,7 +236,8 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 
       if(distance >= this.options['hybridShearingRadiusPx']*this.view.getResolution()){
             this.currentSpringLength = 0; 
-      }
+            this.options['hybridShearingRadiusPx'] = 0;
+      } 
     }
 
 }
@@ -253,6 +253,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) { 
   if (this.targetPointers.length === 0) {  
     this.currentSpringLength = 0; 
+    this.options['hybridShearingRadiusPx'] = 70;
     return true;
   } else{
     return false;
@@ -274,7 +275,7 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
       this.currentCenter =[this.view.getCenter()[0],this.view.getCenter()[1]];
       this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
 
-      console.log('this elevation: ',this.startDragElevation,'\n local min: ',this.minElevation,'\n local max: ',this.maxElevation);
+      console.log('this elevation: ',this.startDragElevation,'\n local min: ',this.minElevation,'\n local ma:x ',this.maxElevation);
       return true;
   } else {     
       return false;

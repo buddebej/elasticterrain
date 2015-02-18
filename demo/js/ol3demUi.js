@@ -25,10 +25,10 @@ var Ol3demUi = function(map) {
                                minZoom: 5,
                                map: map};
 
-    optionsShearIntegrated =  {threshold: 0.0001, 
-                               springCoefficient: 0.1,
-                               frictionForce: 0.15,              
-                               hybridShearingRadiusPx: 0.0, // radius in pixel
+    optionsShearIntegrated =  {threshold: 0.001, 
+                               springCoefficient: 0.10,
+                               frictionForce: 0.25,              
+                               hybridShearingRadiusPx: 70.0, // radius in pixel
                                keypress : ol.events.condition.noModifierKeys,
                                minZoom: 9,
                                map: map};
