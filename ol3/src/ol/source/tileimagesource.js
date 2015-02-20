@@ -86,35 +86,6 @@ goog.inherits(ol.source.TileImage, ol.source.Tile);
  * @param {string} src Source.
  */
 ol.source.TileImage.defaultTileLoadFunction = function(imageTile, src) {
-  var tileCoord = imageTile.tileCoord;
-  var z = tileCoord[0];
-
-  if(z>11 && goog.string.contains(src,'eudem')){
-    
-    var isEven = function (n) {
-          n = Number(n);
-          return n === 0 || !!(n && !(n%2));
-         },
-        x = tileCoord[1], 
-        y = Math.abs(tileCoord[2]+1), 
-        q=0;
-
-    var zz = z, tileRange = ol.TileRange.createOrUpdate(0, x, 0, y, tileRange);
-    for (zz = z; zz >= 12; --zz) {
-      tileRange.minX = tileRange.maxX >>= 1;
-      tileRange.minY = tileRange.maxY >>= 1;
-    }
-
-    var oldcord = z+'/'+x+'/'+y;
-    var newcord = zz+'/'+tileRange.minX+'/'+Math.abs(tileRange.maxY);      
-    src = src.replace(oldcord,newcord);
-
-    if(isEven(x) && isEven(y)){q=1;}
-    if(!isEven(x) && isEven(y)){q=2;}
-    if(isEven(x) && !isEven(y)){q=3;}
-    if(!isEven(x) && !isEven(y)){q=4;}
-    imageTile['q'] = q;
-  }
    imageTile.getImage().src = src;
 };
 
