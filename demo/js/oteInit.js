@@ -2,7 +2,7 @@ $(document).ready(function() {
     'use strict';
     if (webgl_detect()) {
 
-        var dem, osm, stamen, bing, debug, ol3DemMap, ol3demUi;
+        var oteMap, oteUi, dem, osm, stamen, bing, debug;
 
         dem = new ol.layer.TileDem({
             source: new ol.source.XYZ({
@@ -10,6 +10,7 @@ $(document).ready(function() {
                     html: '<a href="http://www.eea.europa.eu/data-and-maps/data/eu-dem" target="_blank">Produced using Copernicus data and information funded by the European Union - EU-DEM layers</a>'
                 })],
                 url: '../demo/tiles/eudem/{z}/{x}/{y}.png',
+                // url: '../demo/tiles/sample/{z}/{x}/{y}.png',                
                 dem: true
             })
         });
@@ -48,7 +49,7 @@ $(document).ready(function() {
             })
           ];
 
-        ol3DemMap = new ol.Map({
+        oteMap = new ol.Map({
             controls: ol.control.defaults().extend([new ol.control.ScaleLine()]),
             target: 'map',
             renderer: 'webgl',
@@ -61,7 +62,7 @@ $(document).ready(function() {
                                 minZoom: 6})
         });
 
-        ol3demUi = new Ol3demUi(ol3DemMap);
+        oteUi = new OteUi(oteMap);
         
 
     } else {

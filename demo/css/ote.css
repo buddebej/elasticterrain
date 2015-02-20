@@ -1,0 +1,163 @@
+/* ====== map ======= */
+
+body {
+    background-color: #000000;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.map {
+    height: 100%;
+    position: absolute;
+    width: 100%;
+}
+
+.webglMissing{
+    margin:auto;
+    position: absolute;
+    width:100%;
+    height: 100%;
+    background: url('../img/ol3dem_preview.jpg');
+    background-size:cover;
+    background-repeat:no-repeat;
+    text-align: center;
+}
+.webglMissing p{
+    text-align: left;
+    margin:auto;
+    padding:5em;
+    border:#cccccc 4px solid;
+    margin-top: 10%;
+    width:20%;
+    background-color: #efefef;
+    opacity: 0.9;
+    font: 9pt Verdana;
+    line-height: 2em;
+}
+.webglMissing span{
+    font-font-weight: bolder;
+    font-size: 20pt;
+}
+
+.webglMissing a:link,a:visited,a:active {color:#000000;text-decoration: none; font-weight: bold;}     
+.webglMissing a:hover {color:#000000;text-decoration: underline;}  
+
+
+
+/* ====== gui ======= */
+
+.controlBox {
+    background-color: #ffffff;
+    opacity: 0.90;
+    right:1em;
+    top:1em;
+    position:fixed;
+    font: 8pt Verdana;
+    border:5px solid #e1e1e1;
+    display: none;
+    width: 180px;
+}
+.controlBox a:link,a:visited,a:active {color:#000000;text-decoration: none; font-weight: bold;}     
+.controlBox a:hover {color:#000000;text-decoration: underline;}  
+.controls{
+    padding: 0.4em;
+}
+.controlBoxHeader{
+    font: 7pt Verdana;
+    color:#666666;
+    background-color: #e1e1e1;
+    cursor: pointer;
+}
+.controlHeader {
+    height:22px;
+    background-color: #000000;
+}
+.controlHeader p {
+    margin:0;
+    padding:4px;
+    color:#ffffff;
+}
+.controlBody {
+    width:94%;
+    padding:3%;
+    padding-top:0;
+    margin-bottom:0.2em;
+}
+.controlBody p {
+    margin:0;
+    margin-top:0.4em;
+    padding:0;
+    line-height: 1.1em;
+}
+.controlBoxFooter {
+    font-size: 7pt;
+    background-color: #e1e1e1;
+    padding:0.5em;
+}    
+.controlBody span {
+    margin-top:3.9em;
+    padding:0;
+    font-size: 7pt;
+    color: #999999;
+}   
+.floatBox {
+    float:left;
+    width:70px;
+}
+.floatBoxWide {
+    margin-left: 1em;
+}
+.clearFloat {
+    clear:both;
+}
+
+.colorSlider {
+    margin-top:0.6em;
+    margin-bottom:0.2em;
+}
+.scaleMin {
+    width:50%;
+    float:left;
+    text-align:left;
+}
+.scaleMax {
+    width:50%;
+    float:left;
+    text-align:right;
+}
+.checkbox {
+    margin-top:0.5em;
+}
+.checkbox input {
+    padding:0;
+    margin:0;
+    vertical-align: middle;
+}
+.ui-slider-horizontal {
+    height:5px;
+    width:100%;
+}
+.ui-slider-horizontal .ui-slider-handle {
+    height:8px;
+    width:8px;
+}
+.icon{
+    display: inline-block;
+    vertical-align: middle;
+}
+.logo{
+    height:55px;
+} 
+.knob {
+    width:60px;
+    height:60px;
+    padding:5px;
+}
+select {
+    padding:0.1em;
+    border : 2px #999999 solid;
+    background-color: #ffffff;
+    font-size: 9pt;
+    width: 100%;
+}  
