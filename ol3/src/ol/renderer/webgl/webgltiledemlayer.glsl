@@ -44,6 +44,7 @@ void main(void) {
     // compute y-flipped texture coordinates for further processing in fragment-shader
     v_texCoord.y = 1.0 - v_texCoord.y;
 
+
     // read and decode elevation for current vertex
     float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy));
     
@@ -94,6 +95,7 @@ uniform bool u_testing;
 const float MAX_ELEVATION = 9000.0; // assumed to be the highest elevation in the eu-dem
 // mesh cellsize for tile resolution of 256x256 pixel
 const highp float CELLSIZE = 0.00390625; // =1.0/256.0
+const highp float RES = 0.00390625; // =1.0/256.0
 
 void main(void) {
   
@@ -103,22 +105,28 @@ void main(void) {
     // there would be a two pixel wide line visible.
     vec2 m_texCoord = v_texCoord;
 
-
-	if(m_texCoord.y <= CELLSIZE){ // southern border of tile
-		m_texCoord = vec2(m_texCoord.x,m_texCoord.y+CELLSIZE);
-	}
-	if(m_texCoord.x >= 1.0-CELLSIZE){ // eastern border of tile
-		m_texCoord = vec2(m_texCoord.x-0.8*CELLSIZE,m_texCoord.y);
-	}
-
-	// compute neighbouring vertices
-	vec3 neighbourRight = vec3(m_texCoord.x+CELLSIZE, 1.0 - m_texCoord.y,0.0);
-	vec3 neighbourBelow = vec3(m_texCoord.x, 1.0 - m_texCoord.y+CELLSIZE,0.0);
-    
-	// read encoded values from dem tile texture and decode elevation values
+    // read encoded values from dem tile texture and decode elevation values
     float absElevation = decodeElevation(texture2D(u_texture, m_texCoord.xy));
+
+    // compute neighbouring vertices
+    vec3 neighbourRight = vec3(m_texCoord.x+CELLSIZE, 1.0 - m_texCoord.y,0.0);
+    vec3 neighbourAbove = vec3(m_texCoord.x, 1.0 - m_texCoord.y+CELLSIZE,0.0);  
+
     neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)));
-    neighbourBelow.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)));
+    neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)));
+
+	if(m_texCoord.x >= 1.0-RES){ // eastern border of tile
+        // use neighbour LEFT
+        neighbourRight = vec3(m_texCoord.x-RES, 1.0 - m_texCoord.y,0.0);
+        neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-RES, m_texCoord.y)));
+	}
+
+    if(m_texCoord.y <= RES){ // northern border of tile
+        // use neighbour BELOW
+        neighbourAbove = vec3(m_texCoord.x, 1.0 - (m_texCoord.y+RES),0.0);
+        neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+RES)));
+    }
+	
   
 	// transform x and y to meter coordinates for normal computation and add elevation value
 	vec3 currentV = vec3(m_texCoord.x*u_tileSizeM,(1.0 - m_texCoord.y)*u_tileSizeM,absElevation);
@@ -143,7 +151,7 @@ void main(void) {
     	fragColor = abs(texture2D(u_colorRamp,vec2(0.5,relativeElevation)));
 
     	// color for water surfaces in flat terrain
-    	if(currentV.z == absElevation && neighbourRight.z == absElevation && neighbourBelow.z == absElevation){
+    	if(currentV.z == absElevation && neighbourRight.z == absElevation && neighbourAbove.z == absElevation){
     		
     		// sealevel (0.0m) or below (i.e. negative no data values)
     		if(absElevation <= 0.0){
@@ -166,10 +174,20 @@ void main(void) {
 	if(u_hillShading){
 		// transform to meter coordinates for normal computation
 		neighbourRight.xy *= u_tileSizeM;
-		neighbourBelow.xy *= u_tileSizeM;
+		neighbourAbove.xy *= u_tileSizeM;
 
 		// normal computation
-		vec3 normal = normalize(cross(neighbourRight -currentV,neighbourBelow-currentV));
+		vec3 normal = normalize(cross(neighbourRight-currentV,neighbourAbove-currentV));
+
+        if(m_texCoord.x >= 1.0-CELLSIZE){ // eastern border of tile
+             normal = normalize(cross(currentV-neighbourRight,neighbourAbove-currentV));
+        }
+
+        if(m_texCoord.y <= RES){ // northern border of tile
+             normal = normalize(cross(currentV-neighbourRight,neighbourAbove-currentV));
+        }
+
+
 
 		// compute hillShade with help of u_light and normal and blend hypsocolor with hillShade
 		float hillShade = clamp(u_ambient_light * 1.0+ max(dot(normal,normalize(u_light)),0.0),0.0,1.0);
