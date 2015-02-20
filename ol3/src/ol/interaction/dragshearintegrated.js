@@ -232,7 +232,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
       var distanceX = currentDragPosition[0] - animatingPosition[0];
       var distanceY = currentDragPosition[1] - animatingPosition[1];
       var distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-      this.currentSpringLength = Math.min(this.options.hybridShearingRadiusPx*this.view.getResolution(), distance);
+      this.currentSpringLength = Math.min(this.options['hybridShearingRadiusPx']*this.view.getResolution(), distance);
 
       if(distance >= this.options['hybridShearingRadiusPx']*this.view.getResolution()){
             this.currentSpringLength = 0; 
@@ -282,3 +282,41 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
   }
 };
 
+
+/**
+ * Is this interaction active?
+ * @return {boolean}
+ */
+ol.interaction.DragShearIntegrated.prototype.activeInteraction = function() {
+  if (!this.view.getHints()[ol.ViewHint.INTERACTING]) {
+    return true;
+  } else {
+    return false;
+  }
+};
+goog.exportProperty(
+    ol.interaction.DragShearIntegrated.prototype,
+    'activeInteraction',
+    ol.interaction.DragShearIntegrated.prototype.activeInteraction);
+
+/**
+ * Enable animations related this interaction
+ */
+ol.interaction.DragShearIntegrated.prototype.enable = function() {
+  this.view.setHint(ol.ViewHint.INTERACTING, -1);
+};
+goog.exportProperty(
+    ol.interaction.DragShearIntegrated.prototype,
+    'enable',
+    ol.interaction.DragShearIntegrated.prototype.enable);
+
+/**
+ * Disable animations related this interaction
+ */
+ol.interaction.DragShearIntegrated.prototype.disable = function() {
+  this.view.setHint(ol.ViewHint.INTERACTING, 1);
+};
+goog.exportProperty(
+    ol.interaction.DragShearIntegrated.prototype,
+    'disable',
+    ol.interaction.DragShearIntegrated.prototype.disable);
