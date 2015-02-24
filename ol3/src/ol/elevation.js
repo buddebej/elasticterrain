@@ -7,7 +7,7 @@ goog.provide('ol.Elevation');
  * @return {number} elevationM Elevation in meters
  */
 ol.Elevation.decode = function(rgba) {
-    var elevationM = ((rgba[0] + rgba[1]*256.0)-11000.0)/10.0;
+    var elevationM = ((rgba[0] + rgba[1]*256.0)-1000.0)/10.0;
     return elevationM;
 };
 
