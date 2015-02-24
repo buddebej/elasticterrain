@@ -36,7 +36,7 @@ ol.interaction.DragShearIntegrated = function(options) {
 
 
   /** @type {ol.interaction.DragShearIntegratedOptions} */  
-  this.options = undefined;
+  this.options;
   this.setOptions(options);
 
   /** @type {ol.Map} */
@@ -328,7 +328,6 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
   goog.asserts.assert(goog.isDef(options.minZoom));
   goog.asserts.assert(goog.isDef(options.hybridShearingRadiusPx)); 
 
-  /** @type {ol.interaction.DragShearIntegratedOptions} */  
   this.options = options;
 };
 goog.exportProperty(

@@ -31,18 +31,11 @@ ol.interaction.DragShearStatic = function(options) {
     handleDownEvent: ol.interaction.DragShearStatic.handleDownEvent_,
     handleDragEvent: ol.interaction.DragShearStatic.handleDragEvent_,
     handleUpEvent: ol.interaction.DragShearStatic.handleUpEvent_
-  });
-
-  goog.asserts.assertInstanceof(options.map, ol.Map, 'dragShearStatic expects map object');
-  goog.asserts.assert(goog.isDef(options.threshold));
-  goog.asserts.assert(goog.isDef(options.springCoefficient));
-  goog.asserts.assert(goog.isDef(options.frictionForce));
-  goog.asserts.assert(goog.isDef(options.minZoom));
-  goog.asserts.assert(goog.isDef(options.duration) && options.duration>0, 'dragShearStatic duration must be > 0');
-   
+  });  
 
   /** @type {ol.interaction.DragShearStaticOptions} */
-  this.options = options;
+  this.options;
+  this.setOptions(options);
 
   /** @type {ol.Map} */
   this.map = this.options.map;
@@ -217,3 +210,21 @@ ol.interaction.DragShearStatic.handleDownEvent_ = function(mapBrowserEvent) {
 };
 
 
+/**
+ * Set options
+ * @param {ol.interaction.DragShearStaticOptions} options 
+ */
+ol.interaction.DragShearStatic.prototype.setOptions = function(options) {
+  goog.asserts.assertInstanceof(options.map, ol.Map, 'dragShearStatic expects map object');
+  goog.asserts.assert(goog.isDef(options.threshold));
+  goog.asserts.assert(goog.isDef(options.springCoefficient));
+  goog.asserts.assert(goog.isDef(options.frictionForce));
+  goog.asserts.assert(goog.isDef(options.minZoom));
+  goog.asserts.assert(goog.isDef(options.duration) && options.duration>0, 'dragShearStatic duration must be > 0');
+   
+  this.options = options;
+};
+goog.exportProperty(
+    ol.interaction.DragShearStatic.prototype,
+    'setOptions',
+    ol.interaction.DragShearStatic.prototype.setOptions);
