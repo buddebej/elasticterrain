@@ -34,15 +34,10 @@ ol.interaction.DragShearIntegrated = function(options) {
     handleUpEvent: ol.interaction.DragShearIntegrated.handleUpEvent_
   });
 
-  goog.asserts.assertInstanceof(options.map, ol.Map, 'dragShearIntegrated expects map object');
-  goog.asserts.assert(goog.isDef(options.threshold));
-  goog.asserts.assert(goog.isDef(options.springCoefficient));
-  goog.asserts.assert(goog.isDef(options.frictionForce));
-  goog.asserts.assert(goog.isDef(options.minZoom));
-  goog.asserts.assert(goog.isDef(options.hybridShearingRadiusPx)); 
 
   /** @type {ol.interaction.DragShearIntegratedOptions} */  
-  this.options = options;
+  this.options = undefined;
+  this.setOptions(options);
 
   /** @type {ol.Map} */
   this.map = this.options.map;
@@ -320,3 +315,23 @@ goog.exportProperty(
     ol.interaction.DragShearIntegrated.prototype,
     'disable',
     ol.interaction.DragShearIntegrated.prototype.disable);
+
+/**
+ * Set options
+ * @param {ol.interaction.DragShearIntegratedOptions} options 
+ */
+ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
+  goog.asserts.assertInstanceof(options.map, ol.Map, 'dragShearIntegrated expects map object');
+  goog.asserts.assert(goog.isDef(options.threshold));
+  goog.asserts.assert(goog.isDef(options.springCoefficient));
+  goog.asserts.assert(goog.isDef(options.frictionForce));
+  goog.asserts.assert(goog.isDef(options.minZoom));
+  goog.asserts.assert(goog.isDef(options.hybridShearingRadiusPx)); 
+
+  /** @type {ol.interaction.DragShearIntegratedOptions} */  
+  this.options = options;
+};
+goog.exportProperty(
+    ol.interaction.DragShearIntegrated.prototype,
+    'setOptions',
+    ol.interaction.DragShearIntegrated.prototype.setOptions);
