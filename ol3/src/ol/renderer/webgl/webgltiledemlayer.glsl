@@ -95,7 +95,6 @@ uniform bool u_testing;
 const float MAX_ELEVATION = 9000.0; // assumed to be the highest elevation in the eu-dem
 // mesh cellsize for tile resolution of 256x256 pixel
 const highp float CELLSIZE = 0.00390625; // =1.0/256.0
-const highp float RES = 0.00390625; // =1.0/256.0
 
 void main(void) {
   
@@ -115,38 +114,39 @@ void main(void) {
     neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)));
     neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)));
 
-	if(m_texCoord.x >= 1.0-RES){ // eastern border of tile
+	if(m_texCoord.x >= 1.0-CELLSIZE){ // eastern border of tile
         // use neighbour LEFT
-        neighbourRight = vec3(m_texCoord.x-RES, 1.0 - m_texCoord.y,0.0);
-        neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-RES, m_texCoord.y)));
+        neighbourRight = vec3(m_texCoord.x-CELLSIZE, 1.0 - m_texCoord.y,0.0);
+        neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)));
 	}
 
-    if(m_texCoord.y <= RES){ // northern border of tile
+    if(m_texCoord.y <= CELLSIZE){ // northern border of tile
         // use neighbour BELOW
-        neighbourAbove = vec3(m_texCoord.x, 1.0 - (m_texCoord.y+RES),0.0);
-        neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+RES)));
+        neighbourAbove = vec3(m_texCoord.x, 1.0 - (m_texCoord.y+CELLSIZE),0.0);
+        neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)));
     }
 	
   
 	// transform x and y to meter coordinates for normal computation and add elevation value
 	vec3 currentV = vec3(m_texCoord.x*u_tileSizeM,(1.0 - m_texCoord.y)*u_tileSizeM,absElevation);
     
+    // overlay or hypsometric colors?
     vec4 fragColor = vec4(0.0,0.0,0.0,0.0);
     if(u_overlayActive){
          fragColor = texture2D(u_overlayTexture, m_texCoord);
     } else {
         // computation of hypsometric color
     	// scaling of color ramp
-    	float colorMin = u_minElevation/MAX_ELEVATION;
-    	float colorMax = u_maxElevation/MAX_ELEVATION;
-    	float relativeElevation = absElevation/MAX_ELEVATION;
-    	if(relativeElevation<=colorMin){
-    		relativeElevation = 0.0;
-    	} else if(relativeElevation>=colorMax){
-    		relativeElevation = 1.0;
-    	} else {
-    		relativeElevation = (relativeElevation - colorMin) / (colorMax - colorMin);
-    	}
+    	float elevationRange = u_maxElevation-u_minElevation;
+        float colorMin = u_colorScale.x/elevationRange;
+    	float colorMax = u_colorScale.y/elevationRange;
+
+    	float relativeElevation = absElevation/elevationRange;
+
+    	
+    	relativeElevation = (relativeElevation - colorMin) / (colorMax - colorMin);
+    	
+
     	// read corresponding value from color ramp texture
     	fragColor = abs(texture2D(u_colorRamp,vec2(0.5,relativeElevation)));
 
@@ -183,7 +183,7 @@ void main(void) {
              normal = normalize(cross(currentV-neighbourRight,neighbourAbove-currentV));
         }
 
-        if(m_texCoord.y <= RES){ // northern border of tile
+        if(m_texCoord.y <= CELLSIZE){ // northern border of tile
              normal = normalize(cross(currentV-neighbourRight,neighbourAbove-currentV));
         }
 

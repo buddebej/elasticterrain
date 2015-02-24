@@ -21,14 +21,14 @@ goog.addSingletonGetter(ol.renderer.webgl.tilelayer.shader.Fragment);
  * @const
  * @type {string}
  */
-ol.renderer.webgl.tilelayer.shader.Fragment.DEBUG_SOURCE = 'precision mediump float;\nvarying vec2 v_texCoord;\n\n\nuniform sampler2D u_texture;\n\nvoid main(void) {\n  gl_FragColor = texture2D(u_texture, v_texCoord);\n}\n';
+ol.renderer.webgl.tilelayer.shader.Fragment.DEBUG_SOURCE = 'precision highp float;\nvarying vec2 v_texCoord;\n\n\nuniform sampler2D u_texture;\n\nvoid main(void) {\n  gl_FragColor = texture2D(u_texture, v_texCoord);\n}\n';
 
 
 /**
  * @const
  * @type {string}
  */
-ol.renderer.webgl.tilelayer.shader.Fragment.OPTIMIZED_SOURCE = 'precision mediump float;varying vec2 a;uniform sampler2D e;void main(void){gl_FragColor=texture2D(e,a);}';
+ol.renderer.webgl.tilelayer.shader.Fragment.OPTIMIZED_SOURCE = 'precision highp float;varying vec2 a;uniform sampler2D e;void main(void){gl_FragColor=texture2D(e,a);}';
 
 
 /**
