@@ -9,6 +9,8 @@ var OteUi = function(map) {
     ote.view = map.getView();    
 
     // INIT GUI
+      ui.collapsed = true;
+
       ui.option = {
           'angleSteps' : 1.0,
           'ambientLight' : 0,
@@ -79,25 +81,70 @@ var OteUi = function(map) {
       };
 
     // HIDE & SHOW GUI BOX
-      // init
-      $('.controlBox').show();
+      var updateMapSize = function(){map.updateSize();};
+      var showControlBar = function(){
+        $( ".controlBar" ).show();
+        $( ".map" ).animate({width: $(document).width()-$(".controlBar").outerWidth()}, 
+                            {duration:300, 
+                             step:updateMapSize, 
+                             complete: function(){$(".controlBar").css('z-index', '100');} });
+        ui.collapsed = false;
+        $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
+      };
+      var hideControlBar = function(){
+        $( ".map" ).animate({width: '100%'}, 
+                            {duration:300, 
+                             step:updateMapSize, 
+                             complete: function(){$(".controlBar").hide();                                                                                              $(".controlBar").css('z-index', '-100');}});
+        ui.collapsed = true;
+        $('#controlButton').html('<i class="fa fa-cog"></i>');
+      };  
 
-      // minimize + maximize
-      $('.controlBoxHeader').click(function() {
-        if ($('.controls').is(':visible')) {
-          $('.controls').hide('blind', 300, function() {
-            $('.controlBoxHeader .ui-icon-title').text('Show Controls');
-            $('.controlBoxHeader .ui-icon').removeClass('ui-icon-minusthick');
-            $('.controlBoxHeader .ui-icon').addClass('ui-icon-plusthick');
-          });
+      var toggleControlBar = function(){
+        if (ui.collapsed) {
+          showControlBar();
         } else {
-          $('.controls').show('blind', 300, function() {
-            $('.controlBoxHeader .ui-icon-title').text('Hide Controls');
-            $('.controlBoxHeader .ui-icon').removeClass('ui-icon-plusthick');
-            $('.controlBoxHeader .ui-icon').addClass('ui-icon-minusthick');            
-          });
+          hideControlBar();
         }
+      }; 
+
+      $(".map").css('z-index', '100');
+      ui.ShowControlBar = function(opt_options) {
+        var options = opt_options || {};
+
+        var anchor = document.createElement('button');
+        anchor.href = '#rotate-north';
+        anchor.innerHTML = '<i class="fa fa-cog"></i>';
+        anchor.id = 'controlButton';
+
+        var this_ = this;
+        var handleShowControlBar = function(e) {
+          e.preventDefault();  
+          toggleControlBar();
+        };
+
+        anchor.addEventListener('click', handleShowControlBar, false);
+        anchor.addEventListener('touchstart', handleShowControlBar, false);
+
+        var element = document.createElement('div');
+        element.className = 'showControlBar ol-control ol-unselectable';
+        element.appendChild(anchor);
+
+        ol.control.Control.call(this, {
+          element: element,
+          target: options.target
+        });
+      };
+      ol.inherits(ui.ShowControlBar, ol.control.Control);
+      map.addControl(new ui.ShowControlBar());
+
+      $(window).on('resize', function(){
+        if(!ui.collapsed){
+           $( ".map" ).width($(document).width()-$(".controlBar").outerWidth());
+           updateMapSize();
+        } 
       });
+      
 
     // INTERACTIONS & SHEARING
       ote.optionsShearStatic =      {threshold: 0.01, 

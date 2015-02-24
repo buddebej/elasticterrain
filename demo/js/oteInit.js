@@ -50,7 +50,7 @@ $(document).ready(function() {
           ];
 
         oteMap = new ol.Map({
-            controls: ol.control.defaults().extend([new ol.control.ScaleLine()]),
+            controls: ol.control.defaults({attribution:false}).extend([new ol.control.ScaleLine()]),
             target: 'map',
             renderer: 'webgl',
             layers: [osm, stamen, bing, dem], // base dem has always to be the last added layer

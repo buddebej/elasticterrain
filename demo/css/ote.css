@@ -1,16 +1,47 @@
-/* ====== map ======= */
-
 body {
-    background-color: #000000;
+    background-color: #111111;
     margin: 0;
     padding: 0;
     height: 100%;
 }
 
+.container {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    overflow:hidden;
+}
+
+.controlBar {
+    height: 100%;
+    width: 300px;
+    right:0;
+    /*float:right;*/
+    position:absolute;
+    padding: 10px;
+    background-color: #333333;
+    -moz-box-shadow:    inset 0 0 10px #000000;
+    -webkit-box-shadow: inset 0 0 10px #000000;
+    box-shadow:         inset 0 0 10px #000000;
+    color: #ffffff;
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 8pt;
+    display:none;
+}
+
+.showControlBar {
+    top: .5em;
+    right: .5em;
+    position: absolute;
+    background: rgba(255,255,255,0.4);
+    border-radius: 4px;
+    padding: 2px;
+}
+
 .map {
     height: 100%;
-    position: absolute;
     width: 100%;
+    position:absolute;
 }
 
 .webglMissing{
@@ -60,9 +91,7 @@ body {
 }
 .controlBox a:link,a:visited,a:active {color:#000000;text-decoration: none; font-weight: bold;}     
 .controlBox a:hover {color:#000000;text-decoration: underline;}  
-.controls{
-    padding: 0.4em;
-}
+
 .controlBoxHeader{
     font: 7pt Verdana;
     color:#666666;
