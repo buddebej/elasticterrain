@@ -57,9 +57,9 @@ $(document).ready(function() {
             // renderer: exampleNS.getRendererFromQueryString(),
             // layers: debug,
             view: new ol.View({ center: ol.proj.transform([7.754974, 46.375803], 'EPSG:4326', 'EPSG:3857'), // alps
-                                zoom: 10,
-                                maxZoom: 12,
-                                minZoom: 6})
+                                zoom: 6,
+                                maxZoom: 11,
+                                minZoom: 0})
         });
 
         oteUi = new OteUi(oteMap);

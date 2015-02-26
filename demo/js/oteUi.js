@@ -13,17 +13,20 @@ var OteUi = function(map) {
 
       ui.option = {
           'angleSteps' : 1.0,
-          'ambientLight' : 0,
+          'ambientLight' : 10,
           'colorScale' : [0, 3000],        
           'hillShade' : true,
           'lightAzimuth' : 315.0,
-          'lightZenith' : 45.0,   
+          'lightZenith' : 65.0,   
           'maxElevation' : 4900,
-          'resolution' : 15,
+          'resolution' : 20,
           'testing' : false,        
           'obliqueInclination' : 50.0,
           'waterBodies' : true,
-          'terrainInteraction' : true
+          'terrainInteraction' : true,
+          knobfg: '#4479E3',
+          knobbg: '#666',
+          knobdata: '#4479E3'
       };
 
       // update gui
@@ -32,10 +35,10 @@ var OteUi = function(map) {
       $('.inclination').val(ui.option.obliqueInclination);
       $('.lightAzimuth').val(ui.option.lightAzimuth);
       $('.lightZenith').val(ui.option.lightZenith);
-      $('.t_HillShading input').prop('checked', ui.option.hillShade);    
-      $('.t_Testing input').prop('checked', ui.option.testing);
-      $('.t_WaterBodies input').prop('checked', ui.option.waterBodies);
-      $('.t_Interaction input').prop('checked', ui.option.terrainInteraction);
+      $('.t_HillShading').prop('checked', ui.option.hillShade);    
+      $('.t_Testing').prop('checked', ui.option.testing);
+      $('.t_WaterBodies').prop('checked', ui.option.waterBodies);
+      $('.t_Interaction').prop('checked', ui.option.terrainInteraction);
       $('.inclinationControls').hide();
 
       // update engine
@@ -103,8 +106,10 @@ var OteUi = function(map) {
       var toggleControlBar = function(){
         if (ui.collapsed) {
           showControlBar();
+          ui.Indicator.hide();
         } else {
           hideControlBar();
+          ui.Indicator.show();
         }
       }; 
 
@@ -155,10 +160,11 @@ var OteUi = function(map) {
                                  minZoom: 5,
                                  map: map};
 
-      ote.optionsShearIntegrated =  {threshold: 0.001, 
+      ote.optionsShearIntegrated =  {threshold: 0.01, 
                                  springCoefficient: 0.10,
                                  frictionForce: 0.20,              
-                                 hybridShearingRadiusPx: 70.0, // radius in pixel
+                                 maxInnerShearingPx: 5.0, // radius in pixel
+                                 maxOuterShearingPx: 70.0, // radius in pixel                                 
                                  keypress : ol.events.condition.noModifierKeys,
                                  minZoom: 9,
                                  map: map};
@@ -169,13 +175,19 @@ var OteUi = function(map) {
       ote.integratedShearing =  new ol.interaction.DragShearIntegrated(ote.optionsShearIntegrated);
       map.addInteraction(ote.integratedShearing);
 
+      // ote.optionsShearStatic.duration = 2500;
+      // ote.optionsShearStatic.frictionForce = 0.04;
+      // ote.staticShearing.setOptions(ote.optionsShearStatic);
+
     // COORDINATE AND ELEVATION INDICATOR
-      map.on('click', function(evt){
-        var coord = evt.coordinate;
-        var transformed_coordinate = ol.proj.transform(coord, "EPSG:3857", "EPSG:4326");
-        var elevation = map.getRenderer().getLayerRenderer(ote).getElevation(coord,ote.view.getZoom());
-        console.log(transformed_coordinate,elevation+' meters');
-      });
+      ui.Indicator = new ol.control.MousePositionDem(ote,{
+        coordinateFormat: ol.coordinate.createStringXY(4),
+        projection: 'EPSG:4326',
+        undefinedHTML: '&nbsp;'
+      }
+      );
+
+      map.addControl(ui.Indicator);
 
     // PLAN OBLIQUE 
       // set inclination for planoblique relief
@@ -192,8 +204,9 @@ var OteUi = function(map) {
         'angleArc': 90,
         'cursor': 5,
         'displayInput': false,
-        'bgColor': '#000000',
-        'fgColor': '#888888',
+        'fgColor': ui.option.knobfg,
+        'bgColor': ui.option.knobbg,
+        'data-fgColor' : ui.option.knobdata,
         'change': function(v) {
           ote.setObliqueInclination(v);
           renderMap();
@@ -266,8 +279,9 @@ var OteUi = function(map) {
         'step': ui.option.angleSteps,
         'thickness': '.3',
         'readOnly': false,
-        'fgColor': '#888888',
-        'bgColor': '#000000',
+        'fgColor': ui.option.knobfg,
+        'bgColor': ui.option.knobbg,
+        'data-fgColor' : ui.option.knobdata,        
         'change': function(v) {
           ote.setLightAzimuth(toStep(v));
           renderMap();
@@ -287,8 +301,9 @@ var OteUi = function(map) {
         'angleArc': 90,
         'cursor': 5,
         'displayInput': false,
-        'bgColor': '#000000',
-        'fgColor': '#888888',
+        'bgColor': ui.option.knobbg,
+        'fgColor': ui.option.knobfg,
+        'data-fgColor' : ui.option.knobdata,        
         'change': function(v) {
           ote.setLightZenith(toStep(v));
           renderMap();
@@ -347,8 +362,9 @@ var OteUi = function(map) {
           'step': ui.option.angleSteps,
           'thickness': '.3',
           'readOnly': false,        
-          'fgColor': '#888888',
-          'bgColor': '#000000',
+          'fgColor': ui.option.knobfg,
+          'bgColor': ui.option.knobbg,
+          'data-fgColor' : ui.option.knobdata,
           'change': function(v) {
             ote.view.setRotation(toRadians(toStep(v)));
             if(ote.integratedShearing.activeInteraction()){
@@ -396,7 +412,10 @@ var OteUi = function(map) {
           ote.integratedShearing.setActive(false);
 
           checkbox.prop('checked', false);
+
+          $('.shearingControls').hide('blind', 300);                    
           $('.inclinationControls').show('blind', 300);
+
         } else {
           ote.setTerrainInteraction(true);
 
@@ -404,7 +423,10 @@ var OteUi = function(map) {
           ote.integratedShearing.setActive(true);
 
           checkbox.prop('checked', true);
+
+          $('.shearingControls').show('blind', 300);                    
           $('.inclinationControls').hide('blind', 300);
+
         }
       });    
 

@@ -16,9 +16,7 @@ body {
     height: 100%;
     width: 300px;
     right:0;
-    /*float:right;*/
     position:absolute;
-    padding: 10px;
     background-color: #333333;
     -moz-box-shadow:    inset 0 0 10px #000000;
     -webkit-box-shadow: inset 0 0 10px #000000;
@@ -43,6 +41,181 @@ body {
     width: 100%;
     position:absolute;
 }
+
+.indicator {
+  padding:4px;
+  width: auto;
+  min-width:170px;
+  text-align: center;
+  background: rgba(0,60,136,0.4);
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 8pt;  
+  right: 8px;
+  bottom: 8px;
+  position: absolute; 
+  color: #fff;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.control{
+    margin:0;
+    padding:0;
+    padding-left: 5px;
+}
+
+.controlHeader {
+    color:#ffffff;
+    background-color: #000000;
+    vertical-align: middle;
+    display: block;
+    padding:6px;
+    margin:0;
+    margin-bottom:3px;
+    margin-top:3px;
+
+}
+
+.controlBody {
+    padding-left: 10px;
+    padding-right: 10px;    
+    margin:0;
+}
+
+
+
+.floatBox {
+    float:left;
+    width:70px;
+}
+.floatBoxWide {
+    margin-left: 1em;
+}
+.clearFloat {
+    clear:both;
+}
+
+.colorSlider {
+    margin-top:0.6em;
+    margin-bottom:0.2em;
+}
+.scaleMin {
+    width:50%;
+    float:left;
+    text-align:left;
+}
+.scaleMax {
+    width:50%;
+    float:left;
+    text-align:right;
+}
+
+.checkboxLabel {
+    padding:4px;
+    display: block;
+    vertical-align: middle;
+} 
+
+.checkbox {
+    margin-top: 15px;
+    clear:both;
+} 
+
+.ui-slider-horizontal {
+    height:6px;
+    width:90%;
+}
+
+.ui-slider-range { background: #ccc; }
+
+.ui-slider-horizontal {
+    height:6px;
+}
+
+.ui-slider-horizontal .ui-slider-handle {
+    height:13px;
+    width:7px;
+    border-radius: 2px;
+    background: #4479E3;
+}
+
+.icon{
+    display: inline-block;
+    vertical-align: middle;
+}
+.logo{
+    height:55px;
+} 
+.knob {
+    width:60px;
+    height:60px;
+    padding:5px;
+}
+
+select {
+    padding:0.1em;
+    border : 2px #999999 solid;
+    background-color: #ffffff;
+    font-size: 9pt;
+    width: 100%;
+}  
+
+.onoffswitch {
+    position: relative; width: 55px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+    float:left;
+    margin-right:5px;
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #666666; border-radius: 5px;
+}
+.onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    -moz-transition: margin 0.3s ease-in 0s; -webkit-transition: margin 0.3s ease-in 0s;
+    -o-transition: margin 0.3s ease-in 0s; transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 15px; padding: 0; line-height: 15px;
+    font-size: 10px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+    content: "ON";
+    padding-left: 7px;
+    background-color: #4479E3; color: #FFFFFF;
+}
+.onoffswitch-inner:after {
+    content: "OFF";
+    padding-right: 7px;
+    background-color: #F8F8F8; color: #666666;
+    text-align: right;
+}
+.onoffswitch-switch {
+    display: block; width: 17px; margin: 0px;
+    background: #FFFFFF;
+    border: 2px solid #666666; border-radius: 5px;
+    position: absolute; top: 0; bottom: 0; right: 34px;
+    -moz-transition: all 0.3s ease-in 0s; -webkit-transition: all 0.3s ease-in 0s;
+    -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s; 
+    background-image: -moz-linear-gradient(center top, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 100%);
+    background-image: -webkit-linear-gradient(center top, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 100%);
+    background-image: -o-linear-gradient(center top, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 100%);
+    background-image: linear-gradient(center top, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 100%);
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px; 
+}
+
+
 
 .webglMissing{
     margin:auto;
@@ -73,120 +246,3 @@ body {
 
 .webglMissing a:link,a:visited,a:active {color:#000000;text-decoration: none; font-weight: bold;}     
 .webglMissing a:hover {color:#000000;text-decoration: underline;}  
-
-
-
-/* ====== gui ======= */
-
-.controlBox {
-    background-color: #ffffff;
-    opacity: 0.90;
-    right:1em;
-    top:1em;
-    position:fixed;
-    font: 8pt Verdana;
-    border:5px solid #e1e1e1;
-    display: none;
-    width: 180px;
-}
-.controlBox a:link,a:visited,a:active {color:#000000;text-decoration: none; font-weight: bold;}     
-.controlBox a:hover {color:#000000;text-decoration: underline;}  
-
-.controlBoxHeader{
-    font: 7pt Verdana;
-    color:#666666;
-    background-color: #e1e1e1;
-    cursor: pointer;
-}
-.controlHeader {
-    height:22px;
-    background-color: #000000;
-}
-.controlHeader p {
-    margin:0;
-    padding:4px;
-    color:#ffffff;
-}
-.controlBody {
-    width:94%;
-    padding:3%;
-    padding-top:0;
-    margin-bottom:0.2em;
-}
-.controlBody p {
-    margin:0;
-    margin-top:0.4em;
-    padding:0;
-    line-height: 1.1em;
-}
-.controlBoxFooter {
-    font-size: 7pt;
-    background-color: #e1e1e1;
-    padding:0.5em;
-}    
-.controlBody span {
-    margin-top:3.9em;
-    padding:0;
-    font-size: 7pt;
-    color: #999999;
-}   
-.floatBox {
-    float:left;
-    width:70px;
-}
-.floatBoxWide {
-    margin-left: 1em;
-}
-.clearFloat {
-    clear:both;
-}
-
-.colorSlider {
-    margin-top:0.6em;
-    margin-bottom:0.2em;
-}
-.scaleMin {
-    width:50%;
-    float:left;
-    text-align:left;
-}
-.scaleMax {
-    width:50%;
-    float:left;
-    text-align:right;
-}
-.checkbox {
-    margin-top:0.5em;
-}
-.checkbox input {
-    padding:0;
-    margin:0;
-    vertical-align: middle;
-}
-.ui-slider-horizontal {
-    height:5px;
-    width:100%;
-}
-.ui-slider-horizontal .ui-slider-handle {
-    height:8px;
-    width:8px;
-}
-.icon{
-    display: inline-block;
-    vertical-align: middle;
-}
-.logo{
-    height:55px;
-} 
-.knob {
-    width:60px;
-    height:60px;
-    padding:5px;
-}
-select {
-    padding:0.1em;
-    border : 2px #999999 solid;
-    background-color: #ffffff;
-    font-size: 9pt;
-    width: 100%;
-}  
