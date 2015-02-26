@@ -755,10 +755,7 @@ ol.Map.prototype.getPixelFromCoordinate = function(coordinate) {
 ol.Map.prototype.getRenderer = function() {
   return this.renderer_;
 };
-goog.exportProperty(
-    ol.Map.prototype,
-    'getRenderer',
-    ol.Map.prototype.getRenderer);
+
 
 /**
  * Get the size of this map.

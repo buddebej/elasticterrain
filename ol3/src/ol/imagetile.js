@@ -120,15 +120,14 @@ ol.ImageTile.prototype.getImage = function(opt_context) {
 /**
  * Get pixel RGBA values of xy in image coordinates
  * @param {Array} pixelXY
- * @return {Uint8ClampedArray|null} Pixel Values per Band
+ * @return {Uint8ClampedArray|Array} Pixel Values per Band
  * @public
  */
 ol.ImageTile.prototype.getPixelValue = function(pixelXY) {
-  goog.asserts.assert(!goog.isNull(this.canvasContext_),'createCanvas Method must be invoked before a pixel value can be requested!');
   if(!goog.isNull(this.canvasContext_)){
     return this.canvasContext_.getImageData(pixelXY[0], pixelXY[1], 1, 1).data;
   } else {
-    return null;
+    return [0,0];
   }
 };
       
