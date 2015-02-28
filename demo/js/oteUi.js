@@ -24,7 +24,7 @@ var OteUi = function(map) {
           'obliqueInclination' : 50.0,
           'waterBodies' : true,
           'terrainInteraction' : true,
-          knobcolor: '#4479E3',
+          'knobcolor': '#4479E3',
       };
 
       // update gui
@@ -170,31 +170,27 @@ var OteUi = function(map) {
 
     // INTERACTIONS & SHEARING
       ote.optionsShearStatic =      {threshold: 0.01, 
-                                 springCoefficient: 0.1,
-                                 frictionForce: 0.1,
-                                 duration: 1500,
-                                 keypress: ol.events.condition.shiftKeyOnly,
-                                 minZoom: 5,
-                                 map: map};
+                                     springCoefficient: 0.1,
+                                     frictionForce: 0.1,
+                                     duration: 1500,
+                                     keypress: ol.events.condition.shiftKeyOnly,
+                                     minZoom: 5,
+                                     map: map};
 
       ote.optionsShearIntegrated =  {threshold: 0.01, 
-                                 springCoefficient: 0.10,
-                                 frictionForce: 0.20,              
-                                 maxInnerShearingPx: 5.0, // radius in pixel
-                                 maxOuterShearingPx: 70.0, // radius in pixel                                 
-                                 keypress : ol.events.condition.noModifierKeys,
-                                 minZoom: 9,
-                                 map: map};
+                                     springCoefficient: 0.10,
+                                     frictionForce: 0.20,              
+                                     maxInnerShearingPx: 5.0, // radius in pixel
+                                     maxOuterShearingPx: 70.0, // radius in pixel                                 
+                                     keypress : ol.events.condition.noModifierKeys,
+                                     minZoom: 9,
+                                     map: map};
 
       ote.staticShearing = new ol.interaction.DragShearStatic(ote.optionsShearStatic);
       map.addInteraction(ote.staticShearing);
 
       ote.integratedShearing =  new ol.interaction.DragShearIntegrated(ote.optionsShearIntegrated);
       map.addInteraction(ote.integratedShearing);
-
-      // ote.optionsShearStatic.duration = 2500;
-      // ote.optionsShearStatic.frictionForce = 0.04;
-      // ote.staticShearing.setOptions(ote.optionsShearStatic);
 
        // switch to activate terrain interactions
       $('.t_Interaction').click(function() {
@@ -227,33 +223,33 @@ var OteUi = function(map) {
       $('.springCoefficientSlider').slider({
         min: 0,
         max: 100,
-        value: 50,
+        value: ote.optionsShearIntegrated.springCoefficient*100.0,
         slide: function(event, ui) {
-    
+            ote.optionsShearIntegrated.springCoefficient = ui.value/100.0;
         }
       });
       $('.springFrictionSlider').slider({
         min: 0,
         max: 100,
-        value: 50,
+        value: ote.optionsShearIntegrated.frictionForce*100.0,
         slide: function(event, ui) {
-    
+            ote.optionsShearIntegrated.frictionForce = ui.value/100.0;
         }
       });
       $('.springInnerRadiusSlider').slider({
         min: 0,
         max: 100,
-        value: 50,
+        value: ote.optionsShearIntegrated.maxInnerShearingPx,
         slide: function(event, ui) {
-    
+            ote.optionsShearIntegrated.maxInnerShearingPx = ui.value;
         }
       });
      $('.springOuterRadiusSlider').slider({
         min: 0,
         max: 100,
-        value: 50,
+        value: ote.optionsShearIntegrated.maxOuterShearingPx,
         slide: function(event, ui) {
-    
+            ote.optionsShearIntegrated.maxOuterShearingPx = ui.value;
         }
       });      
 
@@ -353,6 +349,7 @@ var OteUi = function(map) {
         'step': ui.option.angleSteps, 
         'fgColor': ui.option.knobcolor,
         'width' : 60,
+        'height': 60,
         'thickness' : 0.25,
         'cursor': 20,
         'data-skin':'tron',

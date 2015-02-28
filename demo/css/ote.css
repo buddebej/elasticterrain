@@ -25,6 +25,7 @@ body {
     font-family: Verdana, Geneva, sans-serif;
     font-size: 8pt;
     display:none;
+    overflow:auto;
 }
 
 .showControlBar {
@@ -151,7 +152,6 @@ body {
 
 .knob {
     width:60px;
-    height:60px;
 }
 
 .selectTexture {

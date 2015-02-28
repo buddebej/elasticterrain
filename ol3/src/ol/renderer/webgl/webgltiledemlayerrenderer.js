@@ -122,7 +122,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @private
    * @type {number}
    */
-  this.maxShearing_ = 5.5;
+  this.maxShearing_ = 500.5;
 
   /**
    * @private
@@ -648,11 +648,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           this.renderedTileRange_ = tileRange;
           this.renderedFramebufferExtent_ = framebufferExtent;
           this.renderedRevision_ = tileSource.getRevision();
-          goog.asserts.assert(this.timeoutCounter_ < this.timeoutCounterMax_, 'Loading of tiles timed out.');
+          // goog.asserts.assert(this.timeoutCounter_ < this.timeoutCounterMax_, 'Loading of tiles timed out.');
           this.timeoutCounter_ = 0;
-
-          // console.log(this.minElevationInExtent,this.maxElevationInExtent);
-
         } else {   
           this.renderedTileRange_ = null;
           this.renderedFramebufferExtent_ = null;

@@ -14,7 +14,7 @@ varying vec2 v_texCoord;
 
 float decodeElevation(in vec4 colorChannels) {
 	// decode input data elevation value
- 	float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)/10.0;
+ 	float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0);
     return elevationM;
 }
 
@@ -46,12 +46,12 @@ void main(void) {
 
 
     // read and decode elevation for current vertex
-    float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy));
+    float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy))/10.0;
     
     // shift vertex positions by given scale factor (dependend of the plan oblique inclination)
     // direction of shift is always the top of the screen so it has to be adapted when the map view is rotated
     // z value has to be inverted to get a left handed coordinate system and to make the depth test work
-    vec4 vertexPosition = vec4(0.0,0.0,0.0,0.0);
+    vec4 vertexPosition;
   
     vertexPosition = vec4((a_position+(absElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 1.0-abs(absElevation/u_tileSizeM), 1.0);
 
@@ -215,13 +215,13 @@ void main(void) {
 
         // hard light mixing
         // if(fragColor.x < 0.5 || fragColor.y < 0.5 || fragColor.z < 0.5){
-        //     gl_FragColor = two * fragColor * hillShadeV;
+        //     gl_FragColor = two * fragColor * hillShadeC;
         // } else {
-        //     gl_FragColor = one-two*(one-fragColor)*(one-hillShadeV);
+        //     gl_FragColor = one-two*(one-fragColor)*(one-hillShadeC);
         // }
        
         //screen
-        //gl_FragColor = one-(one-hillShade)*(one-fragColor);
+        // gl_FragColor = one-(one-hillShadeC)*(one-fragColor);
 
         // multiply mixing
         //gl_FragColor = (fragColor * hillShadeA)*(one-(one-hillShadeB)*(one-fragColor));
