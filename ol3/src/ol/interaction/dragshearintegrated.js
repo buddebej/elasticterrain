@@ -89,7 +89,7 @@ ol.interaction.DragShearIntegrated = function(options) {
   this.currentDragPositionPx = [0,0];
 
   /** @type {number} */
-  this.maxOuterShearingPx = 0;
+  this.maxOuterShearingPx;
 
   /**
    * Animates shearing & panning according to current currentDragPosition
@@ -98,11 +98,8 @@ ol.interaction.DragShearIntegrated = function(options) {
     var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
     var startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx);
     var startCenter = this.startCenter;
-     
-    var shift = function(self,shiftX,shiftY){
-      self.view.setCenter([self.startCenter[0]-shiftX,self.startCenter[1]-shiftY]);
-    },
 
+    var
     shear = function(self,shearX,shearY){
         var shearLength=getDistance(shearX,shearY);
         var meterPerPixel = self.view.getResolution();
@@ -160,25 +157,24 @@ ol.interaction.DragShearIntegrated = function(options) {
 
     if((animationActive || (hybridShearingActive)) && !otherInteractionActive) {                
         if(this.startDragElevation > this.criticalElevation){   
-         // HIGH ELEVATIONS    
-  this.view.setCenter([this.currentCenter[0],
-                                this.currentCenter[1]]);
-                   
+         // HIGH ELEVATIONS                       
             shear(this,
                 distanceXY[0]/this.startDragElevation,
                 distanceXY[1]/this.startDragElevation);  
 
-          
+            this.view.setCenter([this.currentCenter[0],
+                                this.currentCenter[1]]);
 
-          // // limit base wiggling for lower zoom levels                 
-          //   if(this.view.getZoom() >= this.minZoom){
-          //     newCenter = [this.currentCenter[0],
-          //                  this.currentCenter[1]];
-          //   } else {
-          //     var zoomFactor = 1-(this.view.getZoom()/this.minZoom);
-          //     newCenter = [this.currentCenter[0] - distanceXY[0]*3*zoomFactor,
-          //                  this.currentCenter[1] - distanceXY[1]*3*zoomFactor];
-          //   }         
+          
+          // limit base wiggling for lower zoom levels                 
+            // if(this.view.getZoom() >= this.minZoom){
+            //   this.view.setCenter([this.currentCenter[0],
+            //                        this.currentCenter[1]]);
+            // } else {
+            //   var zoomFactor = (this.minZoom/this.view.getZoom());
+            //    this.view.setCenter([this.currentCenter[0] - distanceXY[0]*zoomFactor,
+            //                        this.currentCenter[1] - distanceXY[1]*zoomFactor]);
+            // }         
 
         } else {
           // LOW  ELEVATIONS  
@@ -232,7 +228,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 
     this.animationDelay.start(); 
 
-    if(this.maxOuterShearingPx > 0.0){
+    if(this.options['maxOuterShearingPx'] > 0.0){
       var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
 
       var startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx);
@@ -241,11 +237,11 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
       var distanceX = currentDragPosition[0] - animatingPosition[0];
       var distanceY = currentDragPosition[1] - animatingPosition[1];
       var distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-      this.currentSpringLength = Math.min(this.maxOuterShearingPx*this.view.getResolution(), distance);
+      this.currentSpringLength = Math.min(this.options['maxOuterShearingPx']*this.view.getResolution(), distance);
 
-      if(distance >= this.maxOuterShearingPx*this.view.getResolution()){
+      if(distance >= this.options['maxOuterShearingPx']*this.view.getResolution()){
             this.currentSpringLength = 0; 
-            this.maxOuterShearingPx = 0;
+            this.options['maxOuterShearingPx'] = 0;
       } 
     }
 
@@ -262,7 +258,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) { 
   if (this.targetPointers.length === 0) {  
     this.currentSpringLength = 0; 
-    this.maxOuterShearingPx = this.options['maxOuterShearingPx'];
+    this.options['maxOuterShearingPx'] = this.maxOuterShearingPx;
     return true;
   } else{
     return false;
@@ -283,6 +279,7 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
       this.startCenter = [this.view.getCenter()[0],this.view.getCenter()[1]];
       this.currentCenter =[this.view.getCenter()[0],this.view.getCenter()[1]];
       this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
+      this.maxOuterShearingPx=this.options['maxOuterShearingPx'];
 
       // console.log('this elevation: ',this.startDragElevation,'\n local min: ',this.minElevation,'\n local ma:x ',this.maxElevation);
       return true;
@@ -291,22 +288,6 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
   }
 };
 
-
-/**
- * Is this interaction active?
- * @return {boolean}
- */
-ol.interaction.DragShearIntegrated.prototype.activeInteraction = function() {
-  if (!this.view.getHints()[ol.ViewHint.INTERACTING]) {
-    return true;
-  } else {
-    return false;
-  }
-};
-goog.exportProperty(
-    ol.interaction.DragShearIntegrated.prototype,
-    'activeInteraction',
-    ol.interaction.DragShearIntegrated.prototype.activeInteraction);
 
 /**
  * Enable animations related this interaction
@@ -323,6 +304,7 @@ goog.exportProperty(
  * Disable animations related this interaction
  */
 ol.interaction.DragShearIntegrated.prototype.disable = function() {
+  if (!this.view.getHints()[ol.ViewHint.INTERACTING])  
   this.view.setHint(ol.ViewHint.INTERACTING, 1);
 };
 goog.exportProperty(
@@ -343,7 +325,6 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
   goog.asserts.assert(goog.isDef(options.maxInnerShearingPx));   
   goog.asserts.assert(goog.isDef(options.maxOuterShearingPx)); 
   this.options = options;
-  this.maxOuterShearingPx = this.options['maxOuterShearingPx'];
 };
 goog.exportProperty(
     ol.interaction.DragShearIntegrated.prototype,

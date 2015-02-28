@@ -24,9 +24,7 @@ var OteUi = function(map) {
           'obliqueInclination' : 50.0,
           'waterBodies' : true,
           'terrainInteraction' : true,
-          knobfg: '#4479E3',
-          knobbg: '#666',
-          knobdata: '#4479E3'
+          knobcolor: '#4479E3',
       };
 
       // update gui
@@ -81,6 +79,25 @@ var OteUi = function(map) {
       },
       toDegrees = function(a) {
         return Math.abs(a) * 180 / Math.PI;
+      },
+      knobBorder = function () {
+            if(this.$.data('skin') == 'tron') {
+                var a = this.angle(this.cv), sa = this.startAngle, sat = this.startAngle, ea, eat = sat + a;
+                this.g.lineWidth = this.lineWidth;
+                if(this.o.cursor){
+                    sat = eat - 0.3;eat = eat + 0.3;
+                }
+                this.g.beginPath();
+                this.g.strokeStyle = true ? this.o.fgColor : this.fgColor ;
+                this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false);
+                this.g.stroke();
+                this.g.lineWidth = 2;
+                this.g.beginPath();
+                this.g.strokeStyle = this.o.fgColor;
+                this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
+                this.g.stroke();
+                return false;
+            }
       };
 
     // HIDE & SHOW GUI BOX
@@ -179,6 +196,67 @@ var OteUi = function(map) {
       // ote.optionsShearStatic.frictionForce = 0.04;
       // ote.staticShearing.setOptions(ote.optionsShearStatic);
 
+       // switch to activate terrain interactions
+      $('.t_Interaction').click(function() {
+        var checkbox = $('.t_Interaction input');
+        if (ote.getTerrainInteraction()) {
+          ote.setTerrainInteraction(false);
+
+          ote.staticShearing.setActive(false);
+          ote.integratedShearing.setActive(false);
+
+          checkbox.prop('checked', false);
+
+          $('.shearingControls').hide('blind', 300);                    
+          $('.inclinationControls').show('blind', 300);
+
+        } else {
+          ote.setTerrainInteraction(true);
+
+          ote.staticShearing.setActive(true);
+          ote.integratedShearing.setActive(true);
+
+          checkbox.prop('checked', true);
+
+          $('.shearingControls').show('blind', 300);                    
+          $('.inclinationControls').hide('blind', 300);
+
+        }
+      });    
+
+      $('.springCoefficientSlider').slider({
+        min: 0,
+        max: 100,
+        value: 50,
+        slide: function(event, ui) {
+    
+        }
+      });
+      $('.springFrictionSlider').slider({
+        min: 0,
+        max: 100,
+        value: 50,
+        slide: function(event, ui) {
+    
+        }
+      });
+      $('.springInnerRadiusSlider').slider({
+        min: 0,
+        max: 100,
+        value: 50,
+        slide: function(event, ui) {
+    
+        }
+      });
+     $('.springOuterRadiusSlider').slider({
+        min: 0,
+        max: 100,
+        value: 50,
+        slide: function(event, ui) {
+    
+        }
+      });      
+
     // COORDINATE AND ELEVATION INDICATOR
       ui.Indicator = new ol.control.MousePositionDem(ote,{
         coordinateFormat: ol.coordinate.createStringXY(4),
@@ -202,11 +280,10 @@ var OteUi = function(map) {
         'readOnly': false,
         'angleOffset': -90,
         'angleArc': 90,
-        'cursor': 5,
+        'cursor': 8,
         'displayInput': false,
-        'fgColor': ui.option.knobfg,
-        'bgColor': ui.option.knobbg,
-        'data-fgColor' : ui.option.knobdata,
+        'fgColor': ui.option.knobcolor,
+        'draw' : knobBorder,        
         'change': function(v) {
           ote.setObliqueInclination(v);
           renderMap();
@@ -270,18 +347,19 @@ var OteUi = function(map) {
         renderMap();
       });
 
-      // set azimuth to compute direction of light
       $('.lightAzimuth').knob({
-        'width': 60,
-        'height': 60,
         'max': 360,
         'min': 0,
-        'step': ui.option.angleSteps,
-        'thickness': '.3',
-        'readOnly': false,
-        'fgColor': ui.option.knobfg,
-        'bgColor': ui.option.knobbg,
-        'data-fgColor' : ui.option.knobdata,        
+        'step': ui.option.angleSteps, 
+        'fgColor': ui.option.knobcolor,
+        'width' : 60,
+        'thickness' : 0.25,
+        'cursor': 20,
+        'data-skin':'tron',
+        'displayInput' : 'true',
+        'draw': function () {
+                $(this.i).val(this.cv + '°'); //Puts a percent after values
+        },
         'change': function(v) {
           ote.setLightAzimuth(toStep(v));
           renderMap();
@@ -299,11 +377,10 @@ var OteUi = function(map) {
         'readOnly': false,        
         'angleOffset': -90,
         'angleArc': 90,
-        'cursor': 5,
+        'cursor': 8,
         'displayInput': false,
-        'bgColor': ui.option.knobbg,
-        'fgColor': ui.option.knobfg,
-        'data-fgColor' : ui.option.knobdata,        
+        'fgColor': ui.option.knobcolor,
+        'draw' : knobBorder,
         'change': function(v) {
           ote.setLightZenith(toStep(v));
           renderMap();
@@ -320,6 +397,28 @@ var OteUi = function(map) {
           renderMap();
         }
       });
+
+      // slider to adjust the intensity of an ambient light
+      $('.opacitySlider').slider({
+        min: -100,
+        max: 100,
+        value: ui.option.ambientLight,
+        slide: function(event, ui) {
+          ote.setAmbientLight(ui.value / 200.0);
+          renderMap();
+        }
+      });  
+
+      // slider to adjust the intensity of an ambient light
+      $('.exaggerationSlider').slider({
+        min: -100,
+        max: 100,
+        value: ui.option.ambientLight,
+        slide: function(event, ui) {
+          ote.setAmbientLight(ui.value / 200.0);
+          renderMap();
+        }
+      });    
 
     // OVERLAY TILES SELECT
       // find available overlayers and populate dropdown menu
@@ -353,27 +452,27 @@ var OteUi = function(map) {
       }
 
     // ROTATION
-        // knob for rotation angle
+
+        $('.rotationControls').hide();
+        $('.rotationControlsHeader').click(function(){$('.rotationControls').toggle('blind', 300);});
+  
         $('.rotateView').knob({
           'width': 60,
-          'height': 60,
           'max': 360,
           'min': 0,
           'step': ui.option.angleSteps,
-          'thickness': '.3',
-          'readOnly': false,        
-          'fgColor': ui.option.knobfg,
-          'bgColor': ui.option.knobbg,
-          'data-fgColor' : ui.option.knobdata,
+          'thickness': '.25',
+          'fgColor': ui.option.knobcolor,
+          'draw': function () {
+                $(this.i).val(this.cv + '°'); //Puts a percent after values
+           },
           'change': function(v) {
             ote.view.setRotation(toRadians(toStep(v)));
-            if(ote.integratedShearing.activeInteraction()){
-              ote.integratedShearing.disable(); // disable shearing during rotation
-            }
+            ote.integratedShearing.disable(); // disable shearing during rotation
             renderMap();
           },
           'release' : function (v) { 
-              ote.integratedShearing.enable(); // enable shearing during rotation
+            ote.integratedShearing.enable(); // enable shearing during rotation
           } 
         });
 
@@ -389,7 +488,9 @@ var OteUi = function(map) {
         });
 
     // TEST & DEBUG
-      // switch to activate testing mode
+      $('.debugControls').hide();
+      $('.debugControlsHeader').click(function(){$('.debugControls').toggle('blind', 300);});
+     
       $('.t_Testing').click(function() {
         var checkbox = $('.t_Testing input');
         if (ote.getTesting()) {
@@ -402,33 +503,6 @@ var OteUi = function(map) {
         renderMap();
       });
 
-      // switch to activate terrain interactions
-      $('.t_Interaction').click(function() {
-        var checkbox = $('.t_Interaction input');
-        if (ote.getTerrainInteraction()) {
-          ote.setTerrainInteraction(false);
-
-          ote.staticShearing.setActive(false);
-          ote.integratedShearing.setActive(false);
-
-          checkbox.prop('checked', false);
-
-          $('.shearingControls').hide('blind', 300);                    
-          $('.inclinationControls').show('blind', 300);
-
-        } else {
-          ote.setTerrainInteraction(true);
-
-          ote.staticShearing.setActive(true);
-          ote.integratedShearing.setActive(true);
-
-          checkbox.prop('checked', true);
-
-          $('.shearingControls').show('blind', 300);                    
-          $('.inclinationControls').hide('blind', 300);
-
-        }
-      });    
 
 
     //

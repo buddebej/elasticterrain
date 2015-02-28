@@ -59,7 +59,7 @@ $(document).ready(function() {
             view: new ol.View({ center: ol.proj.transform([7.754974, 46.375803], 'EPSG:4326', 'EPSG:3857'), // alps
                                 zoom: 6,
                                 maxZoom: 11,
-                                minZoom: 0})
+                                minZoom: 4})
         });
 
         oteUi = new OteUi(oteMap);

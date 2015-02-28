@@ -14,7 +14,7 @@ body {
 
 .controlBar {
     height: 100%;
-    width: 300px;
+    width: 310px;
     right:0;
     position:absolute;
     background-color: #333333;
@@ -39,6 +39,7 @@ body {
 .map {
     height: 100%;
     width: 100%;
+    /*width: 60%;*/
     position:absolute;
 }
 
@@ -61,40 +62,46 @@ body {
 }
 
 .control{
-    margin:0;
+    margin-top:10px;
     padding:0;
     padding-left: 5px;
+    text-align:center;
 }
 
 .controlHeader {
     color:#ffffff;
-    background-color: #000000;
+    background-color: #111111;
     vertical-align: middle;
-    display: block;
-    padding:6px;
-    margin:0;
-    margin-bottom:3px;
-    margin-top:3px;
-
+    height:17px;
+    padding:10px;
+    text-align:left;
 }
 
 .controlBody {
     padding-left: 10px;
     padding-right: 10px;    
     margin:0;
+    text-align:left;    
 }
-
 
 
 .floatBox {
     float:left;
-    width:70px;
+    width:75px;
 }
 .floatBoxWide {
     margin-left: 1em;
 }
 .clearFloat {
     clear:both;
+}
+
+.floatRight {
+    float: right;
+}
+
+.pointer{
+    cursor: pointer;
 }
 
 .colorSlider {
@@ -112,61 +119,63 @@ body {
     text-align:right;
 }
 
-.checkboxLabel {
-    padding:4px;
-    display: block;
+.floatingSlider {
+    float:right;
+    margin-top: 2px;
+}
+
+.vcenter{
     vertical-align: middle;
-} 
+    padding-top:8px;
+    padding-bottom:8px;    
+}
 
-.checkbox {
-    margin-top: 15px;
-    clear:both;
-} 
+.knobLabel{
+    margin-top:7px;
+    margin-bottom:4px;
+    color: #888;
+}
 
 .ui-slider-horizontal {
     height:6px;
-    width:90%;
+    width:140px;
+    text-align:center;
 }
-
-.ui-slider-range { background: #ccc; }
-
-.ui-slider-horizontal {
-    height:6px;
-}
-
 .ui-slider-horizontal .ui-slider-handle {
     height:13px;
     width:7px;
     border-radius: 2px;
     background: #4479E3;
 }
+.ui-slider-range { background: #ccc; }
 
-.icon{
-    display: inline-block;
-    vertical-align: middle;
-}
-.logo{
-    height:55px;
-} 
 .knob {
     width:60px;
     height:60px;
-    padding:5px;
 }
 
-select {
+.selectTexture {
     padding:0.1em;
-    border : 2px #999999 solid;
-    background-color: #ffffff;
+    border : 2px #444 solid;
+    background-color: #111;
+    color: #fff;
     font-size: 9pt;
-    width: 100%;
+    width: 70%;
 }  
 
+.switchBox{
+    margin-bottom: 12px;
+    margin-top: 8px;
+}
+.switchlabel{
+    padding:4px;
+    vertical-align: middle;
+}
+
 .onoffswitch {
-    position: relative; width: 55px;
+    position: relative; 
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
-    float:left;
-    margin-right:5px;
+    float:right;
 }
 .onoffswitch-checkbox {
     display: none;

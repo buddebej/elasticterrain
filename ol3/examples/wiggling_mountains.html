@@ -28,7 +28,7 @@
             <div class="control inclinationControls">
                 <p class="controlHeader"><i class="fa fa-area-chart"></i> Plan Oblique Relief</p>        
                 <div class="controlBody">
-                    <p>Inclination</p>
+                    <p class="knobLabel">Inclination</p>
                     <div class="knob">
                         <input type="text" class="inclination" data-cursor=true>
                     </div>
@@ -41,17 +41,13 @@
                     <select class="selectTexture">
                         <option value="dem">Hypsometric Colors</option>
                     </select>
-
-                    <div class="colorControls">
-                        <p><i class="fa fa-eyedropper"></i> Scale of Color Ramp (m)</p>
-                        <div class="colorSlider"></div>
-                        <div id="colorScale">
-                            <div class="scaleMin"></div>
-                            <div class="scaleMax"></div>
-                            <div class="clearFloat"></div>
+                   
+                    <div class="colorControls">                        
+                        <div class="vcenter">
+                                <i class="fa fa-eyedropper"></i> Scale of Color Ramp
+                                <div class="colorSlider floatingSlider"></div>
                         </div>
-
-                        <div class="checkbox">
+                        <div class="switchBox">
                             <div class="onoffswitch">
                                 <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_WaterBodies" id="switchWaterbodies">
                                 <label class="onoffswitch-label" for="switchWaterbodies">
@@ -66,31 +62,8 @@
             </div>
 
             <div class="control">
-                <p class="controlHeader"><i class="fa fa-paint-brush"></i> Shading</p>
-                <div class="controlBody">
-                    <div class="shadingControls">
-                        <div class="floatBox">
-                            <p>Zenith (&deg;)</p>
-                            <div class="knob">
-                                <input type="text" class="lightZenith" data-cursor=true>
-                            </div>
-                        </div>
-                        <div class="floatBox">
-                            <p>Azimuth (&deg;)</p>
-                            <div class="knob">
-                                <input type="text" class="lightAzimuth" data-cursor=true>
-                            </div>
-                        </div>
-                        <div class="clearFloat"></div>
-                        <p>Ambient Light</p>
-                        <div class="ambientLightSlider"></div>
-                        <div id="ambientLight">
-                            <div class="scaleMin">-</div>
-                            <div class="scaleMax">+</div>
-                            <div class="clearFloat"></div>
-                        </div>
-                    </div>
-                    <div class="checkbox">
+                
+                <div class="controlHeader">
                         <div class="onoffswitch">
                             <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_HillShading" id="switchShading">
                             <label class="onoffswitch-label" for="switchShading">
@@ -98,50 +71,49 @@
                                 <span class="onoffswitch-switch"></span>
                             </label>
                         </div>
-                        <span class="checkboxLabel">Compute Shading.</span>
-                    </div>
+                        <div class="switchlabel"><i class="fa fa-paint-brush"></i> Shading</div>
                 </div>
-            </div>
 
-            <div class="control">
-                <p class="controlHeader"><i class="fa fa-repeat"></i> Map Rotation</p>
-                <p>0&deg; is North</p>
-                <div class="controlBody">        
-                    <div class="floatBox">
-                        <div class="knob">
-                            <input type="text" class="rotateView" data-cursor=true>
-                        </div>
-                    </div>
-                    <div class="floatBox floatBoxWide">
-                        <span>Or press Alt+Shift and drag map with mouse to rotate.
-                    </div>
-                    <div class="clearFloat"></div>
-                </div>
-            </div>
-
-            <div class="control">
-                <p class="controlHeader"><i class="fa fa-lightbulb-o"></i> Wiggling Mountains</p>
                 <div class="controlBody">
-
-                    <div class="shearingControls">   
-                        <p> Spring Coefficiant</p>
-                        <div class="resolutionSlider"></div>
-                        <div id="resolution">
-                            <div class="scaleMin">0</div>
-                            <div class="scaleMax">0.5</div>
-                            <div class="clearFloat"></div>
+                    <div class="shadingControls">
+                        <div class="floatBox">
+                            <p class="knobLabel">Zenith</p>
+                            <div class="knob">
+                                <input class="lightZenith" value="35"></input>
+                            </div>
                         </div>
 
-                        <p> Friction Force</p>
-                        <div class="resolutionSlider"></div>
-                        <div id="resolution">
-                            <div class="scaleMin">0</div>
-                            <div class="scaleMax">0.5</div>
-                            <div class="clearFloat"></div>
-                        </div>        
-                    </div>
+                        <div class="floatBox">
+                            <p class="knobLabel">Azimuth</p>
+                            <div class="knob">
+                                <input class="lightAzimuth" value="35"></input>
+                            </div>
+                        </div>
+           
+                        <div class="clearFloat"></div>
 
-                    <div class="checkbox">
+                        <div class="vcenter">
+                            Ambient Light
+                            <div class="ambientLightSlider floatingSlider"></div>
+                        </div>
+
+                        <div class="vcenter">
+                            Opacity
+                            <div class="opacitySlider floatingSlider"></div>
+                        </div>
+
+                        <div class="vcenter">
+                            Vertical Exaggeration
+                            <div class="exaggerationSlider floatingSlider"></div>
+                        </div>
+                        
+                    </div>
+                   
+                </div>
+            </div>
+
+            <div class="control">
+                <div class="controlHeader">
                         <div class="onoffswitch">
                             <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_Interaction" id="switchInteraction">
                             <label class="onoffswitch-label" for="switchInteraction">
@@ -149,16 +121,42 @@
                                 <span class="onoffswitch-switch"></span>
                             </label>
                         </div>
-                        <span class="checkboxLabel">Wiggling.</span>
+                        <div class="switchlabel"><i class="fa fa-lightbulb-o"></i> Wiggling Mountains</div>
+                </div>
+
+                <div class="controlBody">
+                    <div class="shearingControls">
+                        <div class="vcenter">
+                            Spring Coefficient
+                            <div class="springCoefficientSlider floatingSlider"></div>
+                        </div>
+
+                        <div class="vcenter">
+                            Friction Force
+                            <div class="springFrictionSlider floatingSlider"></div>
+                        </div>
+
+                        <div class="vcenter">
+                            Sticky Shearing
+                            <div class="springInnerRadiusSlider floatingSlider"></div>
+                        </div>
+
+                        <div class="vcenter">
+                            Sticky Panning
+                            <div class="springOuterRadiusSlider floatingSlider"></div>
+                        </div>
+
                     </div>
                 </div>
             </div>
 
             <div class="control">
-                <p class="controlHeader"><i class="fa fa-wrench"></i> Debug</p>
-                <div class="controlBody">
-        
-                    <div class="checkbox">
+                <div class="controlHeader debugControlsHeader pointer">
+                        <div><i class="fa fa fa-wrench"></i> Debug</div>
+                </div>
+                
+                <div class="controlBody debugControls">    
+                    <div class="switchBox">
                         <div class="onoffswitch">
                             <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_Testing" id="switchTesting">
                             <label class="onoffswitch-label" for="switchTesting">
@@ -169,15 +167,23 @@
                         <span class="checkboxLabel">Debug mode.</span>
                     </div>
 
-
-                    <p><i class="fa fa-connectdevelop"></i> Resolution of Mesh (%)</p>
-                    <div class="resolutionSlider"></div>
-                    <div id="resolution">
-                        <div class="scaleMin">1</div>
-                        <div class="scaleMax">100</div>
-                        <div class="clearFloat"></div>
+                    <div class="vcenter">
+                        <i class="fa fa-connectdevelop"></i> Model Resolution
+                        <div class="resolutionSlider floatingSlider"></div>
                     </div>
-                    <span>Lower resolutions increase rendering speed.</span>
+
+                </div>
+            </div>
+
+            <div class="control">
+                <div class="controlHeader rotationControlsHeader pointer">
+                        <div><i class="fa fa-repeat"></i> Map Rotation</div>
+                </div>
+                <div class="controlBody rotationControls"> 
+                        <p class="knobLabel">Rotate Map</p>
+                        <div class="knob">
+                            <input type="text" class="rotateView" data-cursor=true>
+                        </div>
                 </div>
             </div>
 
@@ -185,7 +191,6 @@
 
         <div id="map" class="map"></div>
     </div>
-
     <div style="display:none;">
         <h4 id="title">Wiggling Mountains.</h4><p id="shortdesc">Renders digital elevation models.</p><div id="tags">terrain, elevation, webgl, dem, planoblique, wiggling mountains</div>
     </div>
