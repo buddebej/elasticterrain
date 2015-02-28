@@ -102,7 +102,7 @@ ol.interaction.DragShearIntegrated = function(options) {
     var
     shear = function(self,shearX,shearY){
 
-        if(self.options['maxOuterShearingPx'] > 0.0){
+        if(self.maxOuterShearingPx > 0.0){
           var shearLength=getDistance(shearX,shearY);
           var meterPerPixel = self.view.getResolution();
           if((meterPerPixel*shearLength)>(meterPerPixel*self.options['maxInnerShearingPx'])){
@@ -110,6 +110,7 @@ ol.interaction.DragShearIntegrated = function(options) {
             shearY = (shearY/shearLength)*self.options['maxInnerShearingPx'];
           }
         }
+
         self.demLayer.setTerrainShearing({x:shearX,y:shearY});
         self.demLayer.redraw();
     },
@@ -231,7 +232,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 
     this.animationDelay.start(); 
 
-    if(this.options['maxOuterShearingPx'] > 0.0){
+    if(this.maxOuterShearingPx > 0.0){
       var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx);
 
       var startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx);
@@ -261,7 +262,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) { 
   if (this.targetPointers.length === 0) {  
 
-    if(this.options['maxOuterShearingPx'] > 0.0){
+    if(this.maxOuterShearingPx > 0.0){
       this.currentSpringLength = 0; 
       this.options['maxOuterShearingPx'] = this.maxOuterShearingPx;
     }
