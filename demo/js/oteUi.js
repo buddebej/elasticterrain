@@ -17,7 +17,7 @@ var OteUi = function(map) {
           'colorScale' : [0, 3000],        
           'hillShading' : true,
           'hillShadingOpacity' : 1.0,
-          'hillShadingExaggeration' : 1.0,          
+          'hillShadingExaggeration' : 0.7,          
           'lightAzimuth' : 315.0,
           'lightZenith' : 65.0,   
           'maxElevation' : 4900,
@@ -453,7 +453,6 @@ var OteUi = function(map) {
       }
 
     // ROTATION
-
         $('.rotationControls').hide();
         $('.rotationControlsHeader').click(function(){$('.rotationControls').toggle('blind', 300);});
   
