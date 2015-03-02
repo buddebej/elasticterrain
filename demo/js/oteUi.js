@@ -15,7 +15,9 @@ var OteUi = function(map) {
           'angleSteps' : 1.0,
           'ambientLight' : 10,
           'colorScale' : [0, 3000],        
-          'hillShade' : true,
+          'hillShading' : true,
+          'hillShadingOpacity' : 1.0,
+          'hillShadingExaggeration' : 1.0,          
           'lightAzimuth' : 315.0,
           'lightZenith' : 65.0,   
           'maxElevation' : 4900,
@@ -33,7 +35,7 @@ var OteUi = function(map) {
       $('.inclination').val(ui.option.obliqueInclination);
       $('.lightAzimuth').val(ui.option.lightAzimuth);
       $('.lightZenith').val(ui.option.lightZenith);
-      $('.t_HillShading').prop('checked', ui.option.hillShade);    
+      $('.t_HillShading').prop('checked', ui.option.hillShading);    
       $('.t_Testing').prop('checked', ui.option.testing);
       $('.t_WaterBodies').prop('checked', ui.option.waterBodies);
       $('.t_Interaction').prop('checked', ui.option.terrainInteraction);
@@ -42,7 +44,9 @@ var OteUi = function(map) {
       // update engine
       ote.setAmbientLight(ui.option.ambientLight / 100.0);
       ote.setColorScale(ui.option.colorScale);
-      ote.setHillShading(ui.option.hillShade);    
+      ote.setHillShading(ui.option.hillShading);    
+      ote.setHillShadingOpacity(ui.option.hillShadingOpacity);    
+      ote.setHillShadingExaggeration(ui.option.hillShadingExaggeration);          
       ote.setLightAzimuth(ui.option.lightAzimuth);
       ote.setLightZenith(ui.option.lightZenith);
       ote.setResolution(ui.option.resolution / 100.0); 
@@ -397,22 +401,22 @@ var OteUi = function(map) {
 
       // slider to adjust the intensity of an ambient light
       $('.opacitySlider').slider({
-        min: -100,
+        min: 0,
         max: 100,
-        value: ui.option.ambientLight,
+        value: ui.option.hillShadingOpacity*100.0,
         slide: function(event, ui) {
-          ote.setAmbientLight(ui.value / 200.0);
+          ote.setHillShadingOpacity(ui.value / 100.0);
           renderMap();
         }
       });  
 
       // slider to adjust the intensity of an ambient light
       $('.exaggerationSlider').slider({
-        min: -100,
+        min: 0,
         max: 100,
-        value: ui.option.ambientLight,
+        value: ui.option.hillShadingExaggeration*100.0,
         slide: function(event, ui) {
-          ote.setAmbientLight(ui.value / 200.0);
+          ote.setHillShadingExaggeration(ui.value / 100.0);
           renderMap();
         }
       });    

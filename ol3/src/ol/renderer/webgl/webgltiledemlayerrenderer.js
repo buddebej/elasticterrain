@@ -414,6 +414,11 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
           // u_hillShading: pass flag to activate hillShading
           gl.uniform1f(this.locations_.u_hillShading, tileDemLayer.getHillShading() === true ? 1.0 : 0.0);
+          // u_hillShadingOpacity: pass hillShadingOpacity
+          gl.uniform1f(this.locations_.u_hillShadingOpacity, tileDemLayer.getHillShadingOpacity());
+          // u_hillShadingExaggeration: pass hillShadingExaggeration
+          gl.uniform1f(this.locations_.u_hillShadingExaggeration, tileDemLayer.getHillShadingExaggeration());     
+
           // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
           var zenithRad = goog.math.toRadians(90.0-tileDemLayer.getLightZenith()),
               azimuthRad = goog.math.toRadians(tileDemLayer.getLightAzimuth())+viewState.rotation,
@@ -423,7 +428,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           gl.uniform3f(this.locations_.u_light, lightX, lightY, lightZ);
           // u_ambient_light: pass intensity for an ambient light source
           gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());     
-     
+      console.log(tileDemLayer.getHillShadingExaggeration());
           gl.uniform1f(this.locations_.u_minElevation, this.minElevationInExtent);        
           gl.uniform1f(this.locations_.u_maxElevation, this.maxElevationInExtent);        
 

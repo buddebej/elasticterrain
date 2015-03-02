@@ -12,9 +12,9 @@ uniform float u_tileSizeM;
 // temporary values for transfer to fragment shader
 varying vec2 v_texCoord;
 
-float decodeElevation(in vec4 colorChannels) {
+float decodeElevation(in vec4 colorChannels, in float exaggeration) {
 	// decode input data elevation value
- 	float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0);
+ 	float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)/(10.0*1.0);
     return elevationM;
 }
 
@@ -46,7 +46,7 @@ void main(void) {
 
 
     // read and decode elevation for current vertex
-    float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy))/10.0;
+    float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy),1.0);
     
     // shift vertex positions by given scale factor (dependend of the plan oblique inclination)
     // direction of shift is always the top of the screen so it has to be adapted when the map view is rotated
@@ -74,8 +74,14 @@ uniform vec2 u_colorScale;
 // flag for coloring inland waterbodies
 uniform bool u_waterBodies; 
 
-// flag for coloring inland waterbodies
+// flag hillShading
 uniform bool u_hillShading; 
+
+// hillShading Opacity for Blending
+uniform float u_hillShadingOpacity; 
+
+// hillShading Exaggeration
+uniform float u_hillShadingExaggeration; 
 
 // direction of light source
 uniform vec3 u_light; 
@@ -105,25 +111,25 @@ void main(void) {
     vec2 m_texCoord = v_texCoord;
 
     // read encoded values from dem tile texture and decode elevation values
-    float absElevation = decodeElevation(texture2D(u_texture, m_texCoord.xy));
+    float absElevation = decodeElevation(texture2D(u_texture, m_texCoord.xy),u_hillShadingExaggeration);
 
     // compute neighbouring vertices
     vec3 neighbourRight = vec3(m_texCoord.x+CELLSIZE, 1.0 - m_texCoord.y,0.0);
     vec3 neighbourAbove = vec3(m_texCoord.x, 1.0 - m_texCoord.y+CELLSIZE,0.0);  
 
-    neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)));
-    neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)));
+    neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)),u_hillShadingExaggeration);
+    neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)),u_hillShadingExaggeration);
 
 	if(m_texCoord.x >= 1.0-CELLSIZE){ // eastern border of tile
         // use neighbour LEFT
         neighbourRight = vec3(m_texCoord.x-CELLSIZE, 1.0 - m_texCoord.y,0.0);
-        neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)));
+        neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)),u_hillShadingExaggeration);
 	}
 
     if(m_texCoord.y <= CELLSIZE){ // northern border of tile
         // use neighbour BELOW
         neighbourAbove = vec3(m_texCoord.x, 1.0 - (m_texCoord.y+CELLSIZE),0.0);
-        neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)));
+        neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)),u_hillShadingExaggeration);
     }
 	
   
