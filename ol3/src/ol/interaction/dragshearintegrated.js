@@ -137,14 +137,18 @@ ol.interaction.DragShearIntegrated = function(options) {
 
     if(isNaN(springLengthXY[0])) springLengthXY[0] = 0;
     if(isNaN(springLengthXY[1])) springLengthXY[1] = 0;
+
     var currentTime = new Date();
     var dTsec = this.lastRenderTime !== null ? (currentTime.getTime() - this.lastRenderTime.getTime()) / 1000 : 1/50;
     this.lastRenderTime = currentTime;
+    console.log(dTsec);
     // FIXME: passed springCoefficient paramter should be 50 times larger 
-    var k = this.options['springCoefficient'] * 50;
+    var k = this.options['springCoefficient'] * 60;
     var accelerationXY = [(distanceXY[0] - springLengthXY[0]) * k * dTsec,
                           (distanceXY[1] - springLengthXY[1]) * k * dTsec];
-    var friction = (1-this.options['frictionForce']);
+
+    var friction = (1-this.options['frictionForce']) * dTsec * 60.0;
+
     this.currentChange = [this.currentChange[0]*friction+accelerationXY[0],
                           this.currentChange[1]*friction+accelerationXY[1]];
 
