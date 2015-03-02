@@ -89,7 +89,7 @@ ol.interaction.DragShearIntegrated = function(options) {
   this.currentDragPositionPx = [0,0];
 
   /** @type {number} */
-  this.maxOuterShearingPx = 100;
+  this.maxOuterShearingPx;
   
   /** @type {Date} 
    * Time when last rendering occured. Used to measure FPS and adjust shearing speed accordingly. */
@@ -296,8 +296,7 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
       this.startCenter = [this.view.getCenter()[0],this.view.getCenter()[1]];
       this.currentCenter =[this.view.getCenter()[0],this.view.getCenter()[1]];
       this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
-      this.maxOuterShearingPx = this.options.maxOuterShearingPx;
-	  // console.log('this elevation: ',this.startDragElevation,'\n local min: ',this.minElevation,'\n local ma:x ',this.maxElevation);
+      this.maxOuterShearingPx = this.options['maxOuterShearingPx'];
       return true;
   } else {     
       return false;
