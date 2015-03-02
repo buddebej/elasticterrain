@@ -89,7 +89,11 @@ ol.interaction.DragShearIntegrated = function(options) {
   this.currentDragPositionPx = [0,0];
 
   /** @type {number} */
-  this.maxOuterShearingPx;
+  this.maxOuterShearingPx = 100;
+  
+  /** @type {Date} 
+   * Time when last rendering occured. Used to measure FPS and adjust shearing speed accordingly. */
+  this.lastRenderTime = null;
 
   /**
    * Animates shearing & panning according to current currentDragPosition
@@ -129,9 +133,13 @@ ol.interaction.DragShearIntegrated = function(options) {
 
     if(isNaN(springLengthXY[0])) springLengthXY[0] = 0;
     if(isNaN(springLengthXY[1])) springLengthXY[1] = 0;
-    var accelerationXY = [(distanceXY[0] - springLengthXY[0]) * this.options['springCoefficient'],
-                          (distanceXY[1] - springLengthXY[1]) * this.options['springCoefficient']];
-                          // accelerationXY * deltaT for framerate adaptation
+    var currentTime = new Date();
+    var dTsec = this.lastRenderTime !== null ? (currentTime.getTime() - this.lastRenderTime.getTime()) / 1000 : 1/50;
+    this.lastRenderTime = currentTime;
+    // FIXME: passed springCoefficient paramter should be 50 times larger 
+    var k = this.options['springCoefficient'] * 50;
+    var accelerationXY = [(distanceXY[0] - springLengthXY[0]) * k * dTsec,
+                          (distanceXY[1] - springLengthXY[1]) * k * dTsec];
     var friction = (1-this.options['frictionForce']);
     this.currentChange = [this.currentChange[0]*friction+accelerationXY[0],
                           this.currentChange[1]*friction+accelerationXY[1]];
@@ -197,7 +205,8 @@ ol.interaction.DragShearIntegrated = function(options) {
         this.demLayer.redraw();
       }
 
-      this.animationDelay.stop(); 
+      this.animationDelay.stop();
+      this.lastRenderTime = null;
     }
   };
 
@@ -279,9 +288,8 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
       this.startCenter = [this.view.getCenter()[0],this.view.getCenter()[1]];
       this.currentCenter =[this.view.getCenter()[0],this.view.getCenter()[1]];
       this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
-      this.maxOuterShearingPx=this.options['maxOuterShearingPx'];
-
-      // console.log('this elevation: ',this.startDragElevation,'\n local min: ',this.minElevation,'\n local ma:x ',this.maxElevation);
+      this.maxOuterShearingPx = this.options.maxOuterShearingPx;
+	  // console.log('this elevation: ',this.startDragElevation,'\n local min: ',this.minElevation,'\n local ma:x ',this.maxElevation);
       return true;
   } else {     
       return false;
