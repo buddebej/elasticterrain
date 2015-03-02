@@ -9,8 +9,8 @@ $(document).ready(function() {
                 attributions: [new ol.Attribution({
                     html: '<a href="http://www.eea.europa.eu/data-and-maps/data/eu-dem" target="_blank">Produced using Copernicus data and information funded by the European Union - EU-DEM layers</a>'
                 })],
-                url: 'http://buddebej.de/tiles/eudem/tiles/{z}/{x}/{y}.png',
-                // url: '../demo/tiles/sample/{z}/{x}/{y}.png',                
+                // url: 'http://buddebej.de/tiles/eudem/tiles/{z}/{x}/{y}.png',
+                url: '../demo/tiles/sample/{z}/{x}/{y}.png',                
                 dem: true
             })
         });
