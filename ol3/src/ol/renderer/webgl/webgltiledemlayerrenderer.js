@@ -598,11 +598,12 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                             tile = tilesToDraw[tileKey];
                             gl.activeTexture(goog.webgl.TEXTURE0);
                             mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                            gl.uniform1i(this.locations_.u_texture, 0);        
-                        }
-                        // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
-                        gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                        this.updateCurrentMinMax(tile.getMinMaxElevations());
+                            gl.uniform1i(this.locations_.u_texture, 0);  
+
+                            // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
+                            gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
+                            this.updateCurrentMinMax(tile.getMinMaxElevations());      
+                        }                       
                     }
                 }
             } else {
