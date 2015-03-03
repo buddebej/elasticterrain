@@ -29,6 +29,9 @@ uniform vec4 u_tileOffset;
 // current shearing factor
 uniform vec2 u_scaleFactor;
 
+// current depth depends on zoomlevel
+uniform float u_z;
+
 void main(void) { 
 
     // Orientation of coordinate system in vertex shader:
@@ -51,7 +54,7 @@ void main(void) {
     // direction of shift is always the top of the screen so it has to be adapted when the map view is rotated
     // z value has to be inverted to get a left handed coordinate system and to make the depth test work
     gl_Position = vec4((a_position+(absElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
-                        1.0-abs(absElevation/u_tileSizeM), 
+                        (u_z-abs(absElevation/u_tileSizeM)), 
                         1.0);
 }
 
