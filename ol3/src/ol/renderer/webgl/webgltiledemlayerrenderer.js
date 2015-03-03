@@ -119,10 +119,11 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
   this.tileGrid_ = null;
 
   /**
+   * Max Zoomlevel of DEM Layer
    * @private
    * @type {number}
    */
-  this.maxShearing_ = 500.5;
+  this.maxZoom_ = 11;
 
   /**
    * @private
@@ -312,6 +313,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
       var tileDemLayer = this.getLayer();
       goog.asserts.assertInstanceof(tileDemLayer, ol.layer.TileDem);
       var tileSource = tileDemLayer.getSource();
+
       if(goog.isNull(this.tileCache_)){
         this.tileCache_ = /** @type {ol.source.TileImage} */(tileSource).tileCache;
       }
@@ -389,8 +391,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           if(tileDemLayer.getTerrainInteraction()){
             // from current terrain interaction
             shearingFactor = tileDemLayer.getTerrainShearing();     
-            shearX = goog.math.clamp(shearingFactor.x,-this.maxShearing_,this.maxShearing_);
-            shearY = goog.math.clamp(shearingFactor.y,-this.maxShearing_,this.maxShearing_);             
+            shearX = shearingFactor.x;
+            shearY = shearingFactor.y;             
           } else {
             // from obliqueInclination angle and current rotation
             shearingFactor = 1.0 / Math.tan(goog.math.toRadians(tileDemLayer.getObliqueInclination()));
@@ -417,7 +419,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           // u_hillShadingOpacity: pass hillShadingOpacity
           gl.uniform1f(this.locations_.u_hillShadingOpacity, tileDemLayer.getHillShadingOpacity());
           // u_hillShadingExaggeration: pass hillShadingExaggeration
-          gl.uniform1f(this.locations_.u_hillShadingExaggeration, tileDemLayer.getHillShadingExaggeration());     
+          gl.uniform1f(this.locations_.u_hsExaggeration, goog.math.clamp(tileDemLayer.getHillShadingExaggeration(),0.0,0.95));     
 
           // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
           var zenithRad = goog.math.toRadians(90.0-tileDemLayer.getLightZenith()),
@@ -428,7 +430,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           gl.uniform3f(this.locations_.u_light, lightX, lightY, lightZ);
           // u_ambient_light: pass intensity for an ambient light source
           gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());     
-      console.log(tileDemLayer.getHillShadingExaggeration());
+                    
           gl.uniform1f(this.locations_.u_minElevation, this.minElevationInExtent);        
           gl.uniform1f(this.locations_.u_maxElevation, this.maxElevationInExtent);        
 
@@ -582,6 +584,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     // iterate through tile queue: bind texture (+overlay), draw triangles
                     for (tileKey in overlayTilesToDraw) {               
                         overlayTile = overlayTilesToDraw[tileKey];  
+
+                        // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
+                        gl.uniform1f(this.locations_.u_z, 1.0-(zs[i]/this.maxZoom_));  
+                      
                         // determine offset for each tile in target framebuffer
                         defUniformOffset(overlayTile, this);                
                         gl.activeTexture(goog.webgl.TEXTURE2);
@@ -634,6 +640,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                    // iterate through tile queue
                   for (tileKey in tilesToDraw) {     
                       tile = tilesToDraw[tileKey];   
+
+                      // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
+                      gl.uniform1f(this.locations_.u_z, 1.0-(zs[i]/this.maxZoom_));  
+
                       // determine offset for each tile in target framebuffer
                       defUniformOffset(tile, this);
                       goog.vec.Vec4.setFromValues(u_tileOffset, sx, sy, tx, ty);
