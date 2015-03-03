@@ -431,7 +431,7 @@ var OteUi = function(map) {
 
         // init layers  
         hideAllOtherOverlayers(ote);
-        setLayerPreload(0);
+        setLayerPreload(5);
 
         // on change
         $('.selectTexture').change(function(){
