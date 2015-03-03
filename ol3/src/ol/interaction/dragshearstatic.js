@@ -159,8 +159,8 @@ ol.interaction.DragShearStatic.handleDragEvent_ = function(mapBrowserEvent) {
     }
     
     var rotation = this.view.getState().rotation;
-    var shearingFactor = [deltaX*Math.cos(rotation)-deltaY*Math.sin(rotation),
-                          deltaX*Math.sin(rotation)+deltaY*Math.cos(rotation)]; 
+    var shearingFactor = [goog.math.clamp(deltaX*Math.cos(rotation)-deltaY*Math.sin(rotation),0.0,5.0),
+                          goog.math.clamp(deltaX*Math.sin(rotation)+deltaY*Math.cos(rotation),0.0,5.0)]; 
 
     this.demLayer.setTerrainShearing({x:shearingFactor[0],y:shearingFactor[1]});
     this.demLayer.redraw();
