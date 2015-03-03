@@ -191,27 +191,27 @@ void main(void) {
             }
 
             // compute hillShade with help of u_light and normal and blend hypsocolor with hillShade
-            float hillShade = clamp(u_ambient_light * 1.0+ max(dot(normal,normalize(u_light)),0.0),0.0,1.0);
+            float hillShade = clamp(u_ambient_light * 1.0+ max(dot(normal,normalize(u_light)),0.0),1.0-u_hillShadingOpacity,1.0);
             vec4 hillShadeC = vec4(hillShade,hillShade,hillShade,1.0);
 
 
-            float hillShadeD = clamp(hillShade,0.2,1.0);
-            vec4 hillShadeA = vec4(hillShadeD,hillShadeD,hillShadeD,1.0);
+            // float hillShadeD = clamp(hillShade,0.2,1.0);
+            // vec4 hillShadeA = vec4(hillShadeD,hillShadeD,hillShadeD,1.0);
 
-            float hillShadeL = clamp(hillShade,0.1,0.4);
-            vec4 hillShadeB = vec4(hillShadeL,hillShadeL,hillShadeL,1.0);
+            // float hillShadeL = clamp(hillShade,0.1,0.4);
+            // vec4 hillShadeB = vec4(hillShadeL,hillShadeL,hillShadeL,1.0);
      
-            vec4 zero = vec4(0,0,0,0);
-            vec4 one = vec4(1.0,1.0,1.0,1.0);
-            vec4 two = vec4(2.0,2.0,2.0,2.0);
+            // vec4 zero = vec4(0,0,0,0);
+            // vec4 one = vec4(1.0,1.0,1.0,1.0);
+            // vec4 two = vec4(2.0,2.0,2.0,2.0);
 
             //https://en.wikipedia.org/wiki/Blend_modes
 
             //overlay mixing
             // if(hillShade < 0.5){
-            //     gl_FragColor = two * hillShadeV * fragColor;
+            //     gl_FragColor = two * hillShadeC * fragColor;
             // } else {
-            //     gl_FragColor = one-two*(one-hillShadeV)*(one-fragColor);
+            //     gl_FragColor = one-two*(one-hillShadeC)*(one-fragColor);
             // }
 
             // hard light mixing
@@ -225,8 +225,8 @@ void main(void) {
             // gl_FragColor = one-(one-hillShadeC)*(one-fragColor);
 
             // multiply mixing
-            //gl_FragColor = (fragColor * hillShadeA)*(one-(one-hillShadeB)*(one-fragColor));
-            //gl_FragColor = (one-(one-hillShadeB)*(one-hillShadeA))*fragColor;
+            // gl_FragColor = (fragColor * hillShadeA)*(one-(one-hillShadeB)*(one-fragColor));
+            // gl_FragColor = (one-(one-hillShadeB)*(one-hillShadeA))*fragColor;
 
 
             gl_FragColor = hillShadeC*fragColor;
