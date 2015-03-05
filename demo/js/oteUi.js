@@ -173,19 +173,21 @@ var OteUi = function(map) {
       
 
     // INTERACTIONS & SHEARING
-      ote.optionsShearStatic =      {threshold: 0.01, 
-                                     springCoefficient: 0.1,
-                                     frictionForce: 0.1,
+      ote.optionsShearStatic =      {threshold: 0.333, // in pixel
+                                     springCoefficient: 0.08,
+                                     frictionForce: 0.17,
+                                     staticShearFadeOutAnimationSpeed: 1.5,
                                      duration: 1500,
                                      keypress: ol.events.condition.shiftKeyOnly,
                                      minZoom: 5,
                                      map: map};
 
-      ote.optionsShearIntegrated =  {threshold: 0.01, 
-                                     springCoefficient: 0.10,
-                                     frictionForce: 0.20,              
-                                     maxInnerShearingPx: 5.0, // radius in pixel
-                                     maxOuterShearingPx: 70.0, // radius in pixel                                 
+      ote.optionsShearIntegrated =  {threshold: 0.333, // in pixel
+                                     springCoefficient: 0.08,
+                                     frictionForce: 0.17,              
+                                     maxInnerShearingPx: 40.0, // radius in pixel
+                                     maxOuterShearingPx: 80.0, // radius in pixel
+                                     staticShearFadeOutAnimationSpeed: 1.5,
                                      keypress : ol.events.condition.noModifierKeys,
                                      minZoom: 9,
                                      map: map};
