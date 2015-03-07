@@ -324,7 +324,6 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
   console.log("wiggling threshold", this.options['threshold']);
   console.log("spring constant", this.options['springCoefficient']);
   console.log("velocity friction coefficient", this.options['frictionForce']);
-  console.log("max shearing", this.options['maxShearingPx']);
 
   var minMax,
       mapCenter;
