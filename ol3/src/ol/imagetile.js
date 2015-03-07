@@ -150,22 +150,20 @@ ol.ImageTile.prototype.readMinMaxElevations = function() {
   if(!goog.isNull(this.canvasContext_)){
     var imageDataArray = this.canvasContext_.getImageData(0, 0, this.image_.width, this.image_.height).data;
     var currentElevation;
+    var max = 0, min = ol.Elevation.MAX;
 
-    this.minElevation = ol.Elevation.MAX;
-    for (var i = 0; i <= this.image_.width; i=i+4) {      
+    for (var i = 0; i <= Math.pow(this.image_.width,2); i=i+4) {      
           currentElevation = ol.Elevation.decode([imageDataArray[i],imageDataArray[i+1]]); // use red and green channel of every pixel
-
-          // if(imageDataArray[i]===0 || imageDataArray[i+1]===0){
-          // console.log('empty val ',imageDataArray[i],imageDataArray[i+1],ol.decodeDemElevation([imageDataArray[i],imageDataArray[i+1]]));
-          // }
-
-          if(currentElevation > this.maxElevation){
-            this.maxElevation = currentElevation;
+          
+          if(currentElevation > max){
+            max = currentElevation;
           }
-          if(currentElevation < this.minElevation){
-            this.minElevation = currentElevation;
+          if(currentElevation < min){
+            min = currentElevation;
           }        
     }
+    this.minElevation=min;
+    this.maxElevation=max;
   }
 };
 
