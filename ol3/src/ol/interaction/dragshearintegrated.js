@@ -332,7 +332,7 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
     minMax = this.demRenderer.getCurrentMinMax();
     this.minElevation = minMax[0];
     this.maxElevation = minMax[1];
-    this.criticalElevation = (this.maxElevation - this.minElevation) / 2;
+    this.criticalElevation = this.minElevation + (this.maxElevation - this.minElevation) / 2;
 
     mapCenter = this.view.getCenter();
     this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
