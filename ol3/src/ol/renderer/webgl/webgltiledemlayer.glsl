@@ -9,12 +9,18 @@ uniform sampler2D u_texture;
 // length of one tile in meter at equator
 uniform float u_tileSizeM;
 
+// min Elevation in current Extent
+uniform float u_minElevation; 
+
+// max Elevation in current Extent
+uniform float u_maxElevation;
+
 // temporary variable for coord transfer to fragment shader
 varying vec2 v_texCoord;
 
 // decodes input data elevation value and apply exaggeration
 float decodeElevation(in vec4 colorChannels, in float exaggeration) {
-    float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)/(10.0*exaggeration);
+    float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)*clamp(exaggeration*10.0,1.0,1.0);
     return elevationM;
 }
 
@@ -48,12 +54,12 @@ void main(void) {
     v_texCoord.y = 1.0 - v_texCoord.y;
 
     // read and decode elevation for current vertex
-    float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy),1.0);
+    float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy),0.0);
+    float nElevation = u_maxElevation*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation);
     
-    // shift vertex positions by given scale factor (dependend of the plan oblique inclination)
-    // direction of shift is always the top of the screen so it has to be adapted when the map view is rotated
+    // shift vertex positions by given shearing factors
     // z value has to be inverted to get a left handed coordinate system and to make the depth test work
-    gl_Position = vec4((a_position+(absElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
+    gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
                         (u_z-abs(absElevation/u_tileSizeM)), 
                         1.0);
 }
@@ -92,16 +98,10 @@ uniform float u_hillShadingOpacity;
 uniform float u_hsExaggeration; 
 
 // intensity of ambient light
-uniform float u_ambient_light; 
+uniform float u_ambient_light;    
 
-// min Elevation in current Extent
-uniform float u_minElevation; 
-
-// max Elevation in current Extent
-uniform float u_maxElevation;     
-
-// assumed to be the highest elevation in the model
-const float MAX_ELEVATION = 9000.0; 
+// highest elevation in the model
+const float MAX_ELEVATION = 8800.0; 
 
 // cellsize for tile resolution of 256x256 pixel = 1.0/256.0
 const highp float CELLSIZE = 0.00390625; 
@@ -110,32 +110,31 @@ void main(void) {
   
     // read elevations from current cell and neighbours
         vec2 m_texCoord = v_texCoord;
-        float exaggerationFactor = 1.0-u_hsExaggeration;
 
         // read and decode elevation values from tile texture
-        float absElevation = decodeElevation(texture2D(u_texture, m_texCoord.xy),1.0);
+        float absElevation = decodeElevation(texture2D(u_texture, m_texCoord.xy),0.0);
 
         // read and decode exaggerated elevation values from tile texture
-        float absElevationEx = decodeElevation(texture2D(u_texture, m_texCoord.xy),exaggerationFactor);
+        float absElevationEx = decodeElevation(texture2D(u_texture, m_texCoord.xy),u_hsExaggeration);
 
         // compute neighbouring vertices
             vec3 neighbourRight = vec3(m_texCoord.x+CELLSIZE, 1.0 - m_texCoord.y,0.0);
             vec3 neighbourAbove = vec3(m_texCoord.x, 1.0 - m_texCoord.y+CELLSIZE,0.0);  
 
-            neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)),exaggerationFactor);
-            neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)),exaggerationFactor);
+            neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)),u_hsExaggeration);
+            neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)),u_hsExaggeration);
 
             // hack to avoid artifacts in tile borders
                 if(m_texCoord.x >= 1.0-CELLSIZE){ // eastern border of tile
                     // use neighbour LEFT
                     neighbourRight = vec3(m_texCoord.x-CELLSIZE, 1.0 - m_texCoord.y,0.0);
-                    neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)),exaggerationFactor);
+                    neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)),u_hsExaggeration);
                 }
 
                 if(m_texCoord.y <= CELLSIZE){ // northern border of tile
                     // use neighbour BELOW
                     neighbourAbove = vec3(m_texCoord.x, 1.0 - (m_texCoord.y+CELLSIZE),0.0);
-                    neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)),exaggerationFactor);
+                    neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)),u_hsExaggeration);
                 }
           
     // texture
@@ -241,7 +240,16 @@ void main(void) {
 
     // testing mode
         if(u_testing){
-            float lineWidth = 3.0 * CELLSIZE;
+
+            float criticalEl = u_minElevation + (u_maxElevation - u_minElevation) / 2.0;
+            if(absElevation > criticalEl){
+                gl_FragColor = gl_FragColor+vec4(1.0,0.0,0.0,1.0);
+            }
+            if(absElevation < criticalEl){
+                gl_FragColor = gl_FragColor+vec4(0.0,0.5,0.5,1.0);
+            }
+
+            float lineWidth = 2.0 * CELLSIZE;
             if(m_texCoord.x >= 1.0-lineWidth){
                 gl_FragColor = vec4(0.0,0.0,1.0,1.0);
             }
@@ -260,5 +268,6 @@ void main(void) {
             if(mod(m_texCoord.y,65.0*CELLSIZE) < CELLSIZE){
                gl_FragColor = vec4(0.9,0.9,0.9,0.1);
             }
+          
         }
 }

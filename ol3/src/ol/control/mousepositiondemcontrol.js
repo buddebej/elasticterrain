@@ -292,6 +292,10 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
       elevation = Math.round(/** @type {ol.renderer.webgl.TileDemLayer} */(map.getRenderer().getLayerRenderer(this.demLayer_)).getElevation(coordinate,map.getView().getZoom()));
       elevation = ' : <b>'+ elevation + '</b> meters';
       this.transform_(coordinate, coordinate);  
+      // flip lon lat to lat lon
+      var tmp = coordinate[0];
+      coordinate[0]=coordinate[1];
+      coordinate[1]=tmp;
       var stringifyFunc = ol.coordinate.createStringXY(2);
       html = stringifyFunc(coordinate);
     } 

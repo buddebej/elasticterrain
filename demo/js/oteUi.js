@@ -14,13 +14,13 @@ var OteUi = function(map) {
       ui.option = {
           'angleSteps' : 1.0,
           'ambientLight' : 0,
-          'colorScale' : [0, 3000],        
+          'colorScale' : [0, 8000],        
           'hillShading' : true,
           'hillShadingOpacity' : 1.0,
           'hillShadingExaggeration' : 0.0,          
           'lightAzimuth' : 315.0,
           'lightZenith' : 50.0,   
-          'maxElevation' : 4900,
+          'maxElevation' : 8600,
           'resolution' : 20,
           'testing' : false,        
           'obliqueInclination' : 50.0,
@@ -173,7 +173,7 @@ var OteUi = function(map) {
       
 
     // INTERACTIONS & SHEARING
-      ote.optionsShearStatic =      {threshold: 0.01, 
+      ote.optionsShearStatic =      {threshold: 0.01, // in pixel
                                      springCoefficient: 0.1,
                                      frictionForce: 0.1,
                                      duration: 1500,
@@ -181,11 +181,12 @@ var OteUi = function(map) {
                                      minZoom: 5,
                                      map: map};
 
-      ote.optionsShearIntegrated =  {threshold: 0.01, 
-                                     springCoefficient: 0.10,
-                                     frictionForce: 0.20,              
-                                     maxInnerShearingPx: 5.0, // radius in pixel
-                                     maxOuterShearingPx: 70.0, // radius in pixel                                 
+      ote.optionsShearIntegrated =  {threshold: 0.333, // in pixel
+                                     springCoefficient: 0.08,
+                                     frictionForce: 0.17,              
+                                     maxInnerShearingPx: 40.0, // radius in pixel
+                                     maxOuterShearingPx: 80.0, // radius in pixel
+                                     staticShearFadeOutAnimationSpeed: 1.5,
                                      keypress : ol.events.condition.noModifierKeys,
                                      minZoom: 9,
                                      map: map};
