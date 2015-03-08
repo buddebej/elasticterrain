@@ -419,7 +419,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           // u_hillShadingOpacity: pass hillShadingOpacity
           gl.uniform1f(this.locations_.u_hillShadingOpacity, tileDemLayer.getHillShadingOpacity());
           // u_hillShadingExaggeration: pass hillShadingExaggeration
-          gl.uniform1f(this.locations_.u_hsExaggeration, goog.math.clamp(tileDemLayer.getHillShadingExaggeration(),0.0,0.95));     
+          gl.uniform1f(this.locations_.u_hsExaggeration, tileDemLayer.getHillShadingExaggeration());     
 
           // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
           var zenithRad = goog.math.toRadians(90.0-tileDemLayer.getLightZenith()),

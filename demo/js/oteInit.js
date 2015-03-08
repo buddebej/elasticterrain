@@ -9,7 +9,7 @@ $(document).ready(function() {
                 attributions: [new ol.Attribution({
                     html: '<a href="http://www.eea.europa.eu/data-and-maps/data/eu-dem" target="_blank">Produced using Copernicus data and information funded by the European Union - EU-DEM layers</a>'
                 })],
-                url: 'http://buddebej.de/tiles/eudem/tiles/{z}/{x}/{y}.png',
+                url: 'http://buddebej.de/tiles/world/{z}/{x}/{y}.png',
                 // url: '../demo/tiles/eudem/{z}/{x}/{y}.png',                
                 dem: true
             })
@@ -57,9 +57,9 @@ $(document).ready(function() {
             // renderer: exampleNS.getRendererFromQueryString(),
             // layers: debug,
             view: new ol.View({ center: ol.proj.transform([7.754974, 46.375803], 'EPSG:4326', 'EPSG:3857'), // alps
-                                zoom: 10,
+                                zoom: 3,
                                 maxZoom: 11,
-                                minZoom: 6})
+                                minZoom: 1})
         });
 
         oteUi = new OteUi(oteMap);
