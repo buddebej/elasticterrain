@@ -20,7 +20,7 @@ varying vec2 v_texCoord;
 
 // decodes input data elevation value and apply exaggeration
 float decodeElevation(in vec4 colorChannels, in float exaggeration) {
-    float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)*clamp(exaggeration*10.0,1.0,1.0);
+    float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)* max(exaggeration*10.0,1.0);
     return elevationM;
 }
 
@@ -193,7 +193,11 @@ void main(void) {
             }
 
             // compute hillShade with help of u_light and normal and blend hypsocolor with hillShade
-            float hillShade = clamp(u_ambient_light * 1.0+ max(dot(normal,normalize(u_light)),0.0),1.0-u_hillShadingOpacity,1.0);
+            float hillShade = clamp(u_ambient_light * 1.0+ max(dot(normal,normalize(u_light)),0.0),0.0/*-u_hillShadingOpacity*/,1.0);
+            //hillShade = u_hillShadingOpacity + (1.0 - u_hillShadingOpacity) * hillShade;
+            hillShade = pow(hillShade, 1.0 / (1.0 + u_hillShadingOpacity * 2.0));
+            // avoid black shadows
+            hillShade = max(hillShade, 0.25);
             vec4 hillShadeC = vec4(hillShade,hillShade,hillShade,1.0);
 
 

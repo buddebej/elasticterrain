@@ -134,7 +134,7 @@ ol.interaction.DragShearIntegrated = function(options) {
 		currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx),
 		// position of drag start [meters]
 		    startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx),
-		// position of point that is animated [meters]
+		// position of point that is animated [meters]. Compensate for shifted map center.
 		    animatingPositionX = startDragPosition[0] - (this.currentCenter[0] - this.startCenter[0]),
 		    animatingPositionY = startDragPosition[1] - (this.currentCenter[1] - this.startCenter[1]);
 

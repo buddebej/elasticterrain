@@ -13,11 +13,11 @@ var OteUi = function(map) {
 
       ui.option = {
           'angleSteps' : 1.0,
-          'ambientLight' : 0,
+          'ambientLight' : 0.1,
           'colorScale' : [0, 8000],        
           'hillShading' : true,
-          'hillShadingOpacity' : 1.0,
-          'hillShadingExaggeration' : 0.0,          
+          'hillShadingOpacity' : 0.2,
+          'hillShadingExaggeration' : 0.2,          
           'lightAzimuth' : 315.0,
           'lightZenith' : 50.0,   
           'maxElevation' : 8600,
