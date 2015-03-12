@@ -104,7 +104,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @private
    * @type {number}
    */
-  this.timeoutCounterMax_ = 200;
+  this.timeoutCounterMax_ = 250;
 
   /**
    * @private
@@ -572,6 +572,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     }
                   }
                   
+                  // Overlay tiles get loaded first. The corresponding dem tiles are loaded accordingly.
                   zs = goog.array.map(goog.object.getKeys(overlayTilesToDrawByZ), Number);
                   goog.array.sort(zs);
                   for (i = 0, ii = zs.length; i < ii; ++i) {
@@ -594,15 +595,17 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                         mapRenderer.bindTileTexture(overlayTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
                         gl.uniform1i(this.locations_.u_overlayTexture, 2);  
 
+                        // draw only when dem tile is available
                         if(tilesToDraw.hasOwnProperty(tileKey)){
                             tile = tilesToDraw[tileKey];
                             gl.activeTexture(goog.webgl.TEXTURE0);
                             mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
                             gl.uniform1i(this.locations_.u_texture, 0);        
+                        
+                            // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
+                            gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
+                            this.updateCurrentMinMax(tile.getMinMaxElevations());
                         }
-                        // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
-                        gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                        this.updateCurrentMinMax(tile.getMinMaxElevations());
                     }
                 }
             } else {
@@ -658,7 +661,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                   }
               }               
             }
-  // CHECK IF EVERYTHING IS LOADED
+  // TEST IF EVERYTHING IS LOADED
       if (allTilesLoaded || this.timeoutCounter_ > this.timeoutCounterMax_) {
           this.renderedTileRange_ = tileRange;
           this.renderedFramebufferExtent_ = framebufferExtent;
