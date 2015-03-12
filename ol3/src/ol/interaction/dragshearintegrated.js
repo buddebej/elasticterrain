@@ -16,14 +16,8 @@ goog.require('ol.ViewHint');
  maxInnerShearingPx: number,
  maxOuterShearingPx: number,
  keypress: ol.events.ConditionType}} */
+ol.interaction.DragShearIntegratedOptions;
 
-ol.interaction.DragShearIntegratedOptions
-
-// FIXME is this the right place for these constants?
-var NO_SHEARING = 0,
-    STATIC_SHEARING = 1,
-    HYBRID_SHEARING = 2,
-    ANIMATION_AFTER_STATIC_SHEARING = 3;
 
 /**
  * @classdesc
@@ -41,8 +35,19 @@ ol.interaction.DragShearIntegrated = function(options) {
 		handleUpEvent : ol.interaction.DragShearIntegrated.handleUpEvent_
 	});
 
+  /**
+   * Shearing Interaction State
+   * @enum {number}
+   */
+  ol.interaction.State = {
+    NO_SHEARING: 0,
+    STATIC_SHEARING: 1,
+    HYBRID_SHEARING: 2,
+    ANIMATION_AFTER_STATIC_SHEARING: 3
+  };
+
 	/** @type {ol.interaction.DragShearIntegratedOptions} */
-	this.options
+	this.options;
 	this.setOptions(options);
 
 	/** @type {ol.Map} */
@@ -85,7 +90,6 @@ ol.interaction.DragShearIntegrated = function(options) {
 	this.startCenter = [0, 0];
 
 	/** @type {ol.Pixel} */
-	// FIXME why is this needed? could we use this.view.getCenter() instead?
 	this.currentCenter = [0, 0];
 
 	/** @type {number}
@@ -101,7 +105,6 @@ ol.interaction.DragShearIntegrated = function(options) {
 	/** @type {ol.Pixel} */
 	this.currentDragPositionPx = [0, 0];
 
-	// FIXME is the type annotation correct?
 	/** @type {Date}
 	 * Time when last rendering occured. Used to measure FPS and adjust shearing speed accordingly. */
 	this.lastRenderTime = null;
@@ -115,15 +118,22 @@ ol.interaction.DragShearIntegrated = function(options) {
 	this.distanceY = 0;
 
 	/** @type {number} */
-	this.shearingStatus = NO_SHEARING;
+	this.shearingStatus = ol.interaction.State.NO_SHEARING;
 
-	function shear(self, shearX, shearY) {
-		self.demLayer.setTerrainShearing({
-			x : shearX,
-			y : shearY
-		});
-		self.demLayer.redraw();
-	}
+
+  /**
+   * Apply shearing to model and trigger rendering
+   * @param {number} shearX
+   * @param {number} shearY   
+   * @this {ol.interaction.DragShearIntegrated}
+   */
+  ol.interaction.DragShearIntegrated.prototype.shear = function(shearX, shearY) {
+    this.demLayer.setTerrainShearing({
+      x : shearX,
+      y : shearY
+    });
+    this.demLayer.redraw();
+  };
 
 	/**
 	 * Animates shearing & panning according to currentDragPositionPx
@@ -143,7 +153,7 @@ ol.interaction.DragShearIntegrated = function(options) {
 		// shear. The annimation wiggles the mountains back to the start drag position. There
 		// are no drag events during this animation that would adjust currentDragPositionPx, so we
 		// use the previous distanceX and distanceY during the animation.
-		if (this.shearingStatus !== ANIMATION_AFTER_STATIC_SHEARING) {
+		if (this.shearingStatus !== ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
 			this.distanceX = currentDragPosition[0] - animatingPositionX;
 			this.distanceY = currentDragPosition[1] - animatingPositionY;
 		}
@@ -173,7 +183,7 @@ ol.interaction.DragShearIntegrated = function(options) {
 		this.vx_t_1 = vx_t0;
 		this.vy_t_1 = vy_t0;
 
-		if (this.shearingStatus === ANIMATION_AFTER_STATIC_SHEARING) {
+		if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
 			// map center is not moved during animation following static shearing
 			dx *= this.options['staticShearFadeOutAnimationSpeed'];
 			dy *= this.options['staticShearFadeOutAnimationSpeed'];
@@ -197,8 +207,8 @@ ol.interaction.DragShearIntegrated = function(options) {
 		    vTol = dTol / dTsec,
 		// minimum acceleration
 		    aTol = vTol / dTsec / 100, // 100 is an empirical factor
-		    stopAnimation = this.shearingStatus !== STATIC_SHEARING && a < aTol && v < vTol;
-		//if (this.shearingStatus === ANIMATION_AFTER_STATIC_SHEARING) {
+		    stopAnimation = this.shearingStatus !== ol.interaction.State.STATIC_SHEARING && a < aTol && v < vTol;
+		//if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
 		//	console.log("FPS", Math.round(1 / dTsec), "v", Math.round(v), "\tvTol", Math.round(vTol), "\ta", Math.round(a), "\taTol", Math.round(aTol));
 		//}
 
@@ -216,21 +226,15 @@ ol.interaction.DragShearIntegrated = function(options) {
 			this.lastRenderTime = null;
 			this.distanceX = this.distanceY = 0;
 			this.vx_t_1 = this.vy_t_1 = 0;
-			this.shearingStatus = NO_SHEARING;
-			// restore shearing to 0
-			// FIXME comment - what are the two following calls doing?
-			this.demLayer.setTerrainShearing({
-				x : 0,
-				y : 0
-			});
-			this.demLayer.redraw();
+      this.shear(0,0);            
+			this.shearingStatus = ol.interaction.State.NO_SHEARING;
 		} else {
 			// compute shearing distance
 			var shearX = this.distanceX,
 			    shearY = this.distanceY;
 
 			// if pointer is between the inner and the outer circle, limit shearing to the radius of the inner circle.
-			if (this.shearingStatus === STATIC_SHEARING) {
+			if (this.shearingStatus === ol.interaction.State.STATIC_SHEARING) {
 				var shearLength = Math.sqrt(this.distanceX * this.distanceX + this.distanceY * this.distanceY);
 				if (shearLength > this.options['maxInnerShearingPx'] * this.view.getResolution()) {
 					shearX = (this.distanceX / shearLength) * this.options['maxInnerShearingPx'] * this.view.getResolution();
@@ -240,13 +244,13 @@ ol.interaction.DragShearIntegrated = function(options) {
 
 			if (this.startDragElevation > this.criticalElevation) {
 				// high elevations
-				shear(this, shearX / this.startDragElevation, shearY / this.startDragElevation);
-				if ((Math.abs(dx) > dTol || Math.abs(dy) > dTol) && this.shearingStatus !== ANIMATION_AFTER_STATIC_SHEARING) {
+				this.shear(shearX / this.startDragElevation, shearY / this.startDragElevation);
+				if ((Math.abs(dx) > dTol || Math.abs(dy) > dTol) && this.shearingStatus !== ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
 					this.view.setCenter([this.currentCenter[0], this.currentCenter[1]]);
 				}
 			} else {
 				// low elevations
-				shear(this, -shearX / (this.maxElevation - this.startDragElevation), -shearY / (this.maxElevation - this.startDragElevation));
+				this.shear(-shearX / (this.maxElevation - this.startDragElevation), -shearY / (this.maxElevation - this.startDragElevation));
 				// make low elevation point stay under cursor
 				// FIXME add similar test as for high elevations and only call setCenter if necessary?
 				this.view.setCenter([this.currentCenter[0] - this.distanceX, this.currentCenter[1] - this.distanceY]);
@@ -278,7 +282,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 
 		this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
 
-		if (this.shearingStatus === STATIC_SHEARING) {
+		if (this.shearingStatus === ol.interaction.State.STATIC_SHEARING) {
 			// position of drag start in meters
 			var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx),
 			    startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx),
@@ -297,7 +301,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 			// switch from static shearing to hybrid shearing if the pointer is leaving the outer circle.
 			if (distance >= maxOuterShearingMeters) {
 				this.springLength = 0;
-				this.shearingStatus = HYBRID_SHEARING;
+				this.shearingStatus = ol.interaction.State.HYBRID_SHEARING;
 			}
 		}
 		this.animationDelay.start();
@@ -312,8 +316,8 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
  */
 ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
 	if (this.targetPointers.length === 0) {
-		if (this.shearingStatus === STATIC_SHEARING) {
-			this.shearingStatus = ANIMATION_AFTER_STATIC_SHEARING;
+		if (this.shearingStatus === ol.interaction.State.STATIC_SHEARING) {
+			this.shearingStatus = ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING;
 			this.springLength = 0;
 		}
 		return true;
@@ -349,7 +353,7 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
 		this.startCenter = [mapCenter[0], mapCenter[1]];
 		this.currentCenter = [mapCenter[0], mapCenter[1]];
 		this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
-		this.shearingStatus = STATIC_SHEARING;
+		this.shearingStatus = ol.interaction.State.STATIC_SHEARING;
 		this.animationDelay.stop();
 		this.lastRenderTime = null;
 		this.distanceX = this.distanceY = 0;
