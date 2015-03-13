@@ -12,6 +12,13 @@ body {
     overflow:hidden;
 }
 
+.map {
+    height: 100%;
+    width: 100%;
+    z-index: 100;
+    position:absolute;
+}
+
 .controlBar {
     height: 100%;
     width: 310px;
@@ -26,6 +33,12 @@ body {
     font-size: 8pt;
     display:none;
     overflow:auto;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .showControlBar {
@@ -35,13 +48,6 @@ body {
     background: rgba(255,255,255,0.4);
     border-radius: 4px;
     padding: 2px;
-}
-
-.map {
-    height: 100%;
-    width: 100%;
-    /*width: 60%;*/
-    position:absolute;
 }
 
 .indicator {
@@ -77,6 +83,7 @@ body {
     height:17px;
     padding:10px;
     text-align:left;
+    cursor: pointer;
 }
 
 .controlBody {
@@ -91,19 +98,9 @@ body {
     float:left;
     width:75px;
 }
-.floatBoxWide {
-    margin-left: 1em;
-}
+
 .clearFloat {
     clear:both;
-}
-
-.floatRight {
-    float: right;
-}
-
-.pointer{
-    cursor: pointer;
 }
 
 .colorSlider {
@@ -128,6 +125,10 @@ body {
     color: #888;
 }
 
+.knob {
+    width:60px;
+}
+
 .ui-slider-horizontal {
     height:6px;
     width:130px;
@@ -140,10 +141,6 @@ body {
     background: #4479E3;
 }
 .ui-slider-range { background: #ccc; }
-
-.knob {
-    width:60px;
-}
 
 .selectTexture {
     padding:0.1em;

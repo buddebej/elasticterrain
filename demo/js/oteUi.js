@@ -8,54 +8,88 @@ var OteUi = function(map) {
     ote.overlayers = $.extend({}, ote.layers.slice(0,-1));
     ote.view = map.getView();    
 
-    // INIT GUI
-      ui.collapsed = true;
-
-      ui.option = {
-          'angleSteps' : 1.0,
-          'ambientLight' : 0.1,
-          'colorScale' : [0, 8000],        
-          'hillShading' : true,
-          'hillShadingOpacity' : 0.2,
-          'hillShadingExaggeration' : 0.2,          
-          'lightAzimuth' : 315.0,
-          'lightZenith' : 50.0,   
-          'maxElevation' : 8600,
-          'resolution' : 20,
-          'testing' : false,        
-          'obliqueInclination' : 50.0,
-          'waterBodies' : true,
-          'terrainInteraction' : true,
-          'knobcolor': '#4479E3',
+    // INIT   
+      ui.options = {
+          dom: $('.controlBar'),
+          knobcolor: '#4479E3',
+          collapsed : false
       };
 
-      // update gui
-      $('#colorScale .scaleMin').text(ui.option.colorScale[0]);
-      $('#colorScale .scaleMax').text(ui.option.colorScale[1]);
-      $('.inclination').val(ui.option.obliqueInclination);
-      $('.lightAzimuth').val(ui.option.lightAzimuth);
-      $('.lightZenith').val(ui.option.lightZenith);
-      $('.t_HillShading').prop('checked', ui.option.hillShading);    
-      $('.t_Testing').prop('checked', ui.option.testing);
-      $('.t_WaterBodies').prop('checked', ui.option.waterBodies);
-      $('.t_Interaction').prop('checked', ui.option.terrainInteraction);
-      $('.inclinationControls').hide();
+      // state of controls
+      ui.controls = {
+          inclination: {enabled: false, collapsed: false},
+          texture: {enabled: true, collapsed: false}, 
+          shading: {enabled: true, collapsed: false},
+          shearing: {enabled: true, collapsed: false},
+          debug: { enabled: true, collapsed: true},
+          rotation: {enabled: true, collapsed: true}      
+      };
 
-      // update engine
-      ote.setAmbientLight(ui.option.ambientLight / 100.0);
-      ote.setColorScale(ui.option.colorScale);
-      ote.setHillShading(ui.option.hillShading);    
-      ote.setHillShadingOpacity(ui.option.hillShadingOpacity);    
-      ote.setHillShadingExaggeration(ui.option.hillShadingExaggeration);          
-      ote.setLightAzimuth(ui.option.lightAzimuth);
-      ote.setLightZenith(ui.option.lightZenith);
-      ote.setResolution(ui.option.resolution / 100.0); 
-      ote.setTesting(ui.option.testing);
-      ote.setObliqueInclination(ui.option.obliqueInclination);
-      ote.setWaterBodies(ui.option.waterBodies);
-      ote.setTerrainInteraction(ui.option.terrainInteraction);
+      ui.init = {
+          angleSteps : 1.0,
+          ambientLight : 0.1,
+          colorScale : [0, 8000],    
+          criticalElevationThreshold : 0.5,        
+          hillShading : true,
+          hillShadingOpacity : 0.2,
+          hillShadingExaggeration : 0.2,          
+          lightAzimuth : 315.0,
+          lightZenith : 50.0,   
+          maxElevation : 8600,
+          resolution : 20,
+          testing : false,        
+          obliqueInclination : 50.0,
+          waterBodies : true,
+          terrainInteraction : true,
+      };
 
-    // HELPER TOOLS
+      // init controls  
+      $.each(ui.controls, function(key, val) {
+          var className = '.'+key;
+          ui.controls[key].cont = $(className);
+          ui.controls[key].head = $(className+' .controlHeader');
+          ui.controls[key].body = $(className+' .controlBody');
+
+          if(val.collapsed){
+            val.body.hide();
+          } else {
+            val.body.show();
+          }
+          if(val.enabled){
+            val.cont.show();
+          } else {
+            val.cont.hide();
+          }
+          // hide controls when clicked on header (ignore clicks on onoffswitch)
+          val.head.click(function(e){ if(!$(e.target).hasClass('onoffswitch-checkbox')){val.body.toggle('blind', 300);}});       
+      });
+
+      // init control values
+      $('#colorScale .scaleMin').text(ui.init.colorScale[0]);
+      $('#colorScale .scaleMax').text(ui.init.colorScale[1]);
+      $('.inclinationKnob').val(ui.init.obliqueInclination);
+      $('.lightAzimuth').val(ui.init.lightAzimuth);
+      $('.lightZenith').val(ui.init.lightZenith);
+      $('.t_HillShading').prop('checked', ui.init.hillShading);    
+      $('.t_Testing').prop('checked', ui.init.testing);
+      $('.t_WaterBodies').prop('checked', ui.init.waterBodies);
+      $('.t_Interaction').prop('checked', ui.init.terrainInteraction);
+
+      // init map values
+      ote.setAmbientLight(ui.init.ambientLight / 100.0);
+      ote.setColorScale(ui.init.colorScale);
+      ote.setHillShading(ui.init.hillShading);    
+      ote.setHillShadingOpacity(ui.init.hillShadingOpacity);    
+      ote.setHillShadingExaggeration(ui.init.hillShadingExaggeration);          
+      ote.setLightAzimuth(ui.init.lightAzimuth);
+      ote.setLightZenith(ui.init.lightZenith);
+      ote.setResolution(ui.init.resolution / 100.0); 
+      ote.setTesting(ui.init.testing);
+      ote.setObliqueInclination(ui.init.obliqueInclination);
+      ote.setWaterBodies(ui.init.waterBodies);
+      ote.setTerrainInteraction(ui.init.terrainInteraction);
+
+    // HELPER FUNCTIONS
       var renderMap = function() {
         ote.redraw();
       },
@@ -71,11 +105,11 @@ var OteUi = function(map) {
       },
       // round given number to closest step
       toStep = function(n) {
-        var rest = n % ui.option.angleSteps;
-        if (rest <= (ui.option.angleSteps / 2)) {
+        var rest = n % ui.init.angleSteps;
+        if (rest <= (ui.init.angleSteps / 2)) {
           return n - rest;
         } else {
-          return n + ui.option.angleSteps - rest;
+          return n + ui.init.angleSteps - rest;
         }
       },
       toRadians = function(a) {
@@ -83,100 +117,9 @@ var OteUi = function(map) {
       },
       toDegrees = function(a) {
         return Math.abs(a) * 180 / Math.PI;
-      },
-      knobBorder = function () {
-            if(this.$.data('skin') == 'tron') {
-                var a = this.angle(this.cv), sa = this.startAngle, sat = this.startAngle, ea, eat = sat + a;
-                this.g.lineWidth = this.lineWidth;
-                if(this.o.cursor){
-                    sat = eat - 0.3;eat = eat + 0.3;
-                }
-                this.g.beginPath();
-                this.g.strokeStyle = true ? this.o.fgColor : this.fgColor ;
-                this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false);
-                this.g.stroke();
-                this.g.lineWidth = 2;
-                this.g.beginPath();
-                this.g.strokeStyle = this.o.fgColor;
-                this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
-                this.g.stroke();
-                return false;
-            }
-      };
-
-    // HIDE & SHOW GUI BOX
-      var updateMapSize = function(){map.updateSize();};
-      var showControlBar = function(){
-        $( ".controlBar" ).show();
-        $( ".map" ).animate({width: $(document).width()-$(".controlBar").outerWidth()}, 
-                            {duration:300, 
-                             step:updateMapSize, 
-                             complete: function(){$(".controlBar").css('z-index', '100');} });
-        ui.collapsed = false;
-        $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
-      };
-      var hideControlBar = function(){
-        $( ".map" ).animate({width: '100%'}, 
-                            {duration:300, 
-                             step:updateMapSize, 
-                             complete: function(){$(".controlBar").hide();                                                                                              $(".controlBar").css('z-index', '-100');}});
-        ui.collapsed = true;
-        $('#controlButton').html('<i class="fa fa-cog"></i>');
-      };  
-
-      var toggleControlBar = function(){
-        if (ui.collapsed) {
-          showControlBar();
-          ui.Indicator.hide();
-        } else {
-          hideControlBar();
-          ui.Indicator.show();
-        }
-      }; 
-
-      $(".map").css('z-index', '100');
-      ui.ShowControlBar = function(opt_options) {
-        var options = opt_options || {};
-
-        var anchor = document.createElement('button');
-        anchor.href = '#rotate-north';
-        anchor.innerHTML = '<i class="fa fa-cog"></i>';
-        anchor.id = 'controlButton';
-
-        var this_ = this;
-        var handleShowControlBar = function(e) {
-          e.preventDefault();  
-          toggleControlBar();
-        };
-
-        anchor.addEventListener('click', handleShowControlBar, false);
-        anchor.addEventListener('touchstart', handleShowControlBar, false);
-
-        var element = document.createElement('div');
-        element.className = 'showControlBar ol-control ol-unselectable';
-        element.appendChild(anchor);
-
-        ol.control.Control.call(this, {
-          element: element,
-          target: options.target
-        });
-      };
-      ol.inherits(ui.ShowControlBar, ol.control.Control);
-      map.addControl(new ui.ShowControlBar());
-
-      $(window).on('resize', function(){
-        if(!ui.collapsed){
-           $( ".map" ).width($(document).width()-$(".controlBar").outerWidth());
-           updateMapSize();
-        } 
-      });
-      
+      };     
 
     // INTERACTIONS & SHEARING
-
-      // hide controls when clicked on header (ignore clicks on onoffswitch)
-      $('.shearing .controlHeader').click(function(e){ if(!$(e.target).hasClass('onoffswitch-checkbox')){$('.shearing .controlBody').toggle('blind', 300);}});
-
       ote.optionsShearStatic =      {threshold: 0.01, // in pixel
                                      springCoefficient: 0.1,
                                      frictionForce: 0.1,
@@ -191,7 +134,7 @@ var OteUi = function(map) {
                                      maxInnerShearingPx: 40.0, // radius in pixel
                                      maxOuterShearingPx: 80.0, // radius in pixel
                                      staticShearFadeOutAnimationSpeed: 1.5,
-                                     criticalElevationThreshold: 0.5,
+                                     criticalElevationThreshold: ui.init.criticalElevationThreshold,
                                      keypress : ol.events.condition.noModifierKeys,
                                      minZoom: 9,
                                      map: map};
@@ -202,31 +145,23 @@ var OteUi = function(map) {
       ote.integratedShearing =  new ol.interaction.DragShearIntegrated(ote.optionsShearIntegrated);
       map.addInteraction(ote.integratedShearing);
 
-       // switch to activate terrain interactions
+      // switch to activate terrain interactions
       $('.t_Interaction').click(function() {
         var checkbox = $('.t_Interaction input');
         if (ote.getTerrainInteraction()) {
           ote.setTerrainInteraction(false);
-
           ote.staticShearing.setActive(false);
           ote.integratedShearing.setActive(false);
-
           checkbox.prop('checked', false);
-
-          $('.shearing .controlBody').hide('blind', 300);                    
-          $('.inclinationControls').show('blind', 300);
-
+          ui.controls.shearing.body.hide('blind', 300);                    
+          ui.controls.inclination.cont.show('blind', 300);
         } else {
           ote.setTerrainInteraction(true);
-
           ote.staticShearing.setActive(true);
           ote.integratedShearing.setActive(true);
-
           checkbox.prop('checked', true);
-
-          $('.shearing .controlBody').show('blind', 300);                    
-          $('.inclinationControls').hide('blind', 300);
-
+          ui.controls.shearing.body.show('blind', 300);                    
+          ui.controls.inclination.cont.hide('blind', 300);
         }
       });    
 
@@ -274,45 +209,37 @@ var OteUi = function(map) {
       $('.criticalElevationSlider').slider({
         min: 0,
         max: 100,
-        value: 0.5*100,
+        value: ui.init.criticalElevationThreshold*100,
         slide: function(event, ui) {
             var normval = ui.value/100.0;
             ote.optionsShearIntegrated.criticalElevationThreshold = normval;
             // pass to shader for debug view
             ote.setCriticalElevationThreshold(normval); 
             if(ote.getTesting()){
-              ote.redraw();
+              renderMap();
             }
         }
       });           
 
     // COORDINATE AND ELEVATION INDICATOR
-      ui.Indicator = new ol.control.MousePositionDem(ote,{
-        coordinateFormat: ol.coordinate.createStringXY(4),
-        projection: 'EPSG:4326',
-        undefinedHTML: '&nbsp;'
-      }
-      );
-
-      map.addControl(ui.Indicator);
+        map.addControl(new ol.control.MousePositionDem(ote));
 
     // PLAN OBLIQUE 
       // set inclination for planoblique relief
-      $('.inclination').knob({
+      $('.inclinationKnob').knob({
         'width': 110,
         'height': 70,
         'max': 90,
         'min': 10,
-        'value': ui.option.inclination,
-        'step': ui.option.angleSteps,
+        'value': ui.init.inclination,
+        'step': ui.init.angleSteps,
         'thickness': '.15',
         'readOnly': false,
         'angleOffset': -90,
         'angleArc': 90,
         'cursor': 8,
         'displayInput': false,
-        'fgColor': ui.option.knobcolor,
-        'draw' : knobBorder,        
+        'fgColor': ui.options.knobcolor,
         'change': function(v) {
           ote.setObliqueInclination(v);
           renderMap();
@@ -323,8 +250,8 @@ var OteUi = function(map) {
       // slider to stretch hypsometric colors  
       $('.colorSlider').slider({
         min: 0,
-        max: ui.option.maxElevation,
-        values: ui.option.colorScale,
+        max: ui.init.maxElevation,
+        values: ui.init.colorScale,
         range: true,
         slide: function(event, ui) {
           ote.setColorScale(ui.values);
@@ -347,36 +274,20 @@ var OteUi = function(map) {
         renderMap();
       });
 
-    // RESOLUTION SLIDER
-      $('.resolutionSlider').slider({
-        min: 1,
-        max: 100,
-        value: ui.option.resolution,
-        slide: function(event, ui) {
-          ote.setResolution(ui.value / 100.0);
-          renderMap();
-        }
-      });
-
     // SHADING
-
-      // hide controls when clicked on header (ignore clicks on onoffswitch)
-      $('.shading .controlHeader').click(function(e){ if(!$(e.target).hasClass('onoffswitch-checkbox')){$('.shading .controlBody').toggle('blind', 300);}});
-
-
       //  turn shading on / off
       $('.t_HillShading').click(function() {
         var checkbox = $('.t_HillShading input');
         if (ote.getHillShading()) {
           ote.setHillShading(false);
           checkbox.prop('checked', false);
-          ote.redraw();
-          $('shading .controlBody').hide('blind', 300);
+          renderMap();
+          ui.controls.shading.body.hide('blind', 300);
         } else {
           ote.setHillShading(true);
           checkbox.prop('checked', true);
-          ote.redraw();        
-          $('shading .controlBody').show('blind', 300);
+          renderMap();        
+          ui.controls.shading.body.show('blind', 300);
         }
         renderMap();
       });
@@ -384,8 +295,8 @@ var OteUi = function(map) {
       $('.lightAzimuth').knob({
         'max': 360,
         'min': 0,
-        'step': ui.option.angleSteps, 
-        'fgColor': ui.option.knobcolor,
+        'step': ui.init.angleSteps, 
+        'fgColor': ui.options.knobcolor,
         'width' : 60,
         'height': 60,
         'thickness' : 0.25,
@@ -407,15 +318,14 @@ var OteUi = function(map) {
         'height': 70,
         'max': 90,
         'min': 0,
-        'step': ui.option.angleSteps,
+        'step': ui.init.angleSteps,
         'thickness': '.15',
         'readOnly': false,        
         'angleOffset': -90,
         'angleArc': 90,
         'cursor': 8,
         'displayInput': false,
-        'fgColor': ui.option.knobcolor,
-        'draw' : knobBorder,
+        'fgColor': ui.options.knobcolor,
         'change': function(v) {
           ote.setLightZenith(toStep(v));
           renderMap();
@@ -426,7 +336,7 @@ var OteUi = function(map) {
       $('.ambientLightSlider').slider({
         min: -100,
         max: 100,
-        value: ui.option.ambientLight,
+        value: ui.init.ambientLight,
         slide: function(event, ui) {
           ote.setAmbientLight(ui.value / 200.0);
           renderMap();
@@ -437,7 +347,7 @@ var OteUi = function(map) {
       $('.opacitySlider').slider({
         min: 0,
         max: 100,
-        value: ui.option.hillShadingOpacity*100.0,
+        value: ui.init.hillShadingOpacity*100.0,
         slide: function(event, ui) {
           ote.setHillShadingOpacity(ui.value / 100.0);
           renderMap();
@@ -448,7 +358,7 @@ var OteUi = function(map) {
       $('.exaggerationSlider').slider({
         min: 0,
         max: 100,
-        value: ui.option.hillShadingExaggeration*100.0,
+        value: ui.init.hillShadingExaggeration*100.0,
         slide: function(event, ui) {
           ote.setHillShadingExaggeration(ui.value / 100.0);
           renderMap();
@@ -456,12 +366,9 @@ var OteUi = function(map) {
       });    
 
     // OVERLAY TILES SELECT
-      // hide controls
-      $('.textureControlsHeader').click(function(){$('.textureControls').toggle('blind', 300);});
-
       // find available overlayers and populate dropdown menu
       if(ote.layers.length>0){
-        $('.textureControls').show();
+        ui.controls.texture.body.show();
         $.each(ote.overlayers, function(val, obj) {
               $('.selectTexture').append( $('<option></option>').val(val).html(obj.t));
         }); 
@@ -486,20 +393,17 @@ var OteUi = function(map) {
             } 
         });
       } else{
-        $('.textureControls').hide();
+        ui.controls.texture.body.hide();
       }
 
-    // ROTATION
-        $('.rotationControls').hide();
-        $('.rotationControlsHeader').click(function(){$('.rotationControls').toggle('blind', 300);});
-  
+    // ROTATION 
         $('.rotateView').knob({
           'width': 60,
           'max': 360,
           'min': 0,
-          'step': ui.option.angleSteps,
+          'step': ui.init.angleSteps,
           'thickness': '.25',
-          'fgColor': ui.option.knobcolor,
+          'fgColor': ui.options.knobcolor,
           'draw': function () {
                 $(this.i).val(this.cv + '°'); //Puts a percent after values
            },
@@ -524,10 +428,7 @@ var OteUi = function(map) {
           $('.rotateView').val(angle).trigger('change');
         });
 
-    // TEST & DEBUG
-      $('.debugControls').hide();
-      $('.debugControlsHeader').click(function(){$('.debugControls').toggle('blind', 300);});
-     
+    // TEST & DEBUG    
       $('.t_Testing').click(function() {
         var checkbox = $('.t_Testing input');
         if (ote.getTesting()) {
@@ -540,11 +441,84 @@ var OteUi = function(map) {
         renderMap();
       });
 
+      // change resolution of rendered tiles
+      $('.resolutionSlider').slider({
+        min: 1,
+        max: 100,
+        value: ui.init.resolution,
+        slide: function(event, ui) {
+          ote.setResolution(ui.value / 100.0);
+          renderMap();
+        }
+      });
 
+    // HIDE & SHOW GUI BOX
+      var updateMapSize = function(){map.updateSize();};
+      var showControlBar = function(){
+        ui.options.dom.show();
+        $('.map').animate({width: $(document).width()-ui.options.dom.outerWidth()}, 
+                            {duration:300, 
+                             step:updateMapSize, 
+                             complete: function(){ui.options.dom.css('z-index', '100');} });
+        ui.options.collapsed = false;
+        $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
+      };
+      var hideControlBar = function(){
+        $('.map').animate({width: '100%'}, 
+                            {duration:300, 
+                             step:updateMapSize, 
+                             complete: function(){
+                              ui.options.dom.hide();                                                                                              
+                              ui.options.dom.css('z-index', '-100');}
+                             });
+        ui.options.collapsed = true;
+        $('#controlButton').html('<i class="fa fa-cog"></i>');
+      };  
+      var toggleControlBar = function(){
+        if (ui.options.collapsed) {
+          showControlBar();
+          ui.Indicator.hide();
+        } else {
+          hideControlBar();
+          ui.Indicator.show();
+        }
+      }; 
+      ui.ShowControlBar = function() {
+        var anchor = document.createElement('button');
+        anchor.innerHTML = '<i class="fa fa-cog"></i>';
+        anchor.id = 'controlButton';
+        var handleShowControlBar = function(e) {
+          e.preventDefault();  
+          toggleControlBar();
+        };
+        anchor.addEventListener('click', handleShowControlBar, false);
+        anchor.addEventListener('touchstart', handleShowControlBar, false);
+        var element = document.createElement('div');
+        element.className = 'showControlBar ol-control ol-unselectable';
+        element.appendChild(anchor);
+        ol.control.Control.call(this, {
+          element: element,
+        });
+      };
+      ol.inherits(ui.ShowControlBar, ol.control.Control);
+      map.addControl(new ui.ShowControlBar());
 
-    //
+      $(window).on('resize', function(){
+        if(!ui.options.collapsed){
+           $('.map').width($(document).width()-ui.options.dom.outerWidth());
+           updateMapSize();
+        } 
+      });
+      
+      // init control bar
+      if (!ui.options.collapsed) {
+        ui.options.dom.show();
+        $('.map').width($(document).width()-ui.options.dom.outerWidth()); 
+        updateMapSize();
+        $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
+      }
+
     // EXPORT FUNCTIONALITY
-    //
         // export functionality, causes memory problems in chrome
         // preserveDrawingBuffer has to be true for canvas (webglmaprenderer.js)
         // add following lines to ui

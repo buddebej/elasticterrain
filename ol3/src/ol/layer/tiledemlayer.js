@@ -162,17 +162,17 @@ goog.exportProperty(
 
 
 /**
- * @param {number} criticalElevationThreshold.
+ * @param {number} critElevationThres
  */
-ol.layer.TileDem.prototype.setCriticalElevationThreshold = function(criticalElevationThreshold) {
-  this.set(ol.layer.TileDemProperty.CRITICAL_ELEVATION, criticalElevationThreshold);
+ol.layer.TileDem.prototype.setCriticalElevationThreshold = function(critElevationThres) {
+  this.set(ol.layer.TileDemProperty.CRITICAL_ELEVATION, critElevationThres);
 };
 goog.exportProperty(
   ol.layer.TileDem.prototype,
   'setCriticalElevationThreshold',
   ol.layer.TileDem.prototype.setCriticalElevationThreshold);
 /**
- * @return {number} criticalElevationThreshold.
+ * @return {number}
  */
 ol.layer.TileDem.prototype.getCriticalElevationThreshold = function() {
   return /** @type {number} */ (
