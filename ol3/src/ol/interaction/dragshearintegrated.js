@@ -15,6 +15,8 @@ goog.require('ol.ViewHint');
  minZoom:number,
  maxInnerShearingPx: number,
  maxOuterShearingPx: number,
+ staticShearFadeOutAnimationSpeed: number,
+ criticalElevationThreshold: number,
  keypress: ol.events.ConditionType}} */
 ol.interaction.DragShearIntegratedOptions;
 
@@ -76,6 +78,9 @@ ol.interaction.DragShearIntegrated = function(options) {
 
 	/** @type {number|null} */
 	this.startDragElevation = 0;
+
+  /** @type {number} */
+  this.criticalElevationThreshold = this.options.criticalElevationThreshold;
 
 	/** @type {number} */
 	this.minElevation = 0;
@@ -345,8 +350,9 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
 		minMax = this.demRenderer.getCurrentMinMax();
 		this.minElevation = minMax[0];
 		this.maxElevation = minMax[1];
-		this.criticalElevation = (this.maxElevation - this.minElevation) / 2;
-
+    // critical elevation value to seperate minima and maxima
+		this.criticalElevation = this.minElevation + (this.maxElevation - this.minElevation) * this.options['criticalElevationThreshold'];
+    console.log('critical elevation threshold ' + this.options['criticalElevationThreshold']);
 		mapCenter = this.view.getCenter();
 		this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
 		this.startDragElevation = this.demRenderer.getElevation(mapBrowserEvent.coordinate, this.view.getZoom());
@@ -393,6 +399,8 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
 	goog.asserts.assert(goog.isDef(options.minZoom));
 	goog.asserts.assert(goog.isDef(options.maxInnerShearingPx));
 	goog.asserts.assert(goog.isDef(options.maxOuterShearingPx));
+  goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
+  goog.asserts.assert(goog.isDef(options.criticalElevationThreshold));
 	this.options = options;
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);

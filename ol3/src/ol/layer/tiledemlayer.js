@@ -11,6 +11,7 @@ ol.layer.TileDemProperty = {
   AMBIENT_LIGHT: 'ambientLight',
   COLOR_RAMP: 'colorRamp',
   COLOR_SCALE: 'colorScale',  
+  CRITICAL_ELEVATION: 'criticalElevation',    
   HILL_SHADING : 'hillShading',
   HILL_SHADING_OPACITY : 'hillShadingOpacity',
   HILL_SHADING_EXAGGERATION : 'hillShadingExaggeration',  
@@ -57,6 +58,7 @@ ol.layer.TileDem = function(opt_options) {
   this.setAmbientLight(goog.isDef(options.ambientLight) ? options.ambientLight : 0.0);
   this.setColorRamp(goog.isDef(options.colorRamp) ? options.colorRamp : {});  
   this.setColorScale(goog.isDef(options.colorScale) ? options.colorScale : [0.0,1.0]);  
+  this.setCriticalElevationThreshold(goog.isDef(options.criticalElevation) ? options.criticalElevation : 0.5);  
   this.setHillShading(goog.isDef(options.hillShading) ? options.hillShading : true);
   this.setHillShadingOpacity(goog.isDef(options.hillShadingOpacity) ? options.hillShadingOpacity : 1.0);
   this.setHillShadingExaggeration(goog.isDef(options.hillShadingExaggeration) ? options.hillShadingExaggeration : 0.0);  
@@ -156,6 +158,31 @@ goog.exportProperty(
   ol.layer.TileDem.prototype,
   'getColorRamp',
   ol.layer.TileDem.prototype.getColorRamp);
+
+
+
+/**
+ * @param {number} criticalElevationThreshold.
+ */
+ol.layer.TileDem.prototype.setCriticalElevationThreshold = function(criticalElevationThreshold) {
+  this.set(ol.layer.TileDemProperty.CRITICAL_ELEVATION, criticalElevationThreshold);
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'setCriticalElevationThreshold',
+  ol.layer.TileDem.prototype.setCriticalElevationThreshold);
+/**
+ * @return {number} criticalElevationThreshold.
+ */
+ol.layer.TileDem.prototype.getCriticalElevationThreshold = function() {
+  return /** @type {number} */ (
+    this.get(ol.layer.TileDemProperty.CRITICAL_ELEVATION));
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'getCriticalElevationThreshold',
+  ol.layer.TileDem.prototype.getCriticalElevationThreshold);
+
 
 
 

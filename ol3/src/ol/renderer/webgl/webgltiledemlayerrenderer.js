@@ -412,14 +412,17 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           gl.uniform2f(this.locations_.u_colorScale, tileDemLayer.getColorScale()[0],tileDemLayer.getColorScale()[1]); 
           // u_waterBodies: pass waterBodies to toggle rendering of inland waterBodies
           gl.uniform1f(this.locations_.u_waterBodies, tileDemLayer.getWaterBodies() === true ? 1.0 : 0.0);
-          // u_testing: pass flag to activate testing mode
-          gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
           // u_hillShading: pass flag to activate hillShading
           gl.uniform1f(this.locations_.u_hillShading, tileDemLayer.getHillShading() === true ? 1.0 : 0.0);
           // u_hillShadingOpacity: pass hillShadingOpacity
           gl.uniform1f(this.locations_.u_hillShadingOpacity, tileDemLayer.getHillShadingOpacity());
-          // u_hillShadingExaggeration: pass hillShadingExaggeration
+          // u_hsExaggeration: pass hillShadingExaggeration
           gl.uniform1f(this.locations_.u_hsExaggeration, tileDemLayer.getHillShadingExaggeration());     
+
+          // u_testing: pass flag to activate testing mode
+          gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
+          // u_critElThreshold: pass hillShadingExaggeration
+          gl.uniform1f(this.locations_.u_critElThreshold, tileDemLayer.getCriticalElevationThreshold());    
 
           // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
           var zenithRad = goog.math.toRadians(90.0-tileDemLayer.getLightZenith()),

@@ -100,6 +100,9 @@ uniform float u_hsExaggeration;
 // intensity of ambient light
 uniform float u_ambient_light;    
 
+// critical elevation threshold
+uniform float u_critElThreshold;  
+
 // highest elevation in the model
 const float MAX_ELEVATION = 8800.0; 
 
@@ -245,7 +248,7 @@ void main(void) {
     // testing mode
         if(u_testing){
 
-            float criticalEl = u_minElevation + (u_maxElevation - u_minElevation) / 2.0;
+            float criticalEl = u_minElevation + (u_maxElevation - u_minElevation) * u_critElThreshold;
             if(absElevation > criticalEl){
                 gl_FragColor = gl_FragColor+vec4(1.0,0.0,0.0,1.0);
             }

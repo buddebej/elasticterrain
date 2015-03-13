@@ -187,6 +187,7 @@ var OteUi = function(map) {
                                      maxInnerShearingPx: 40.0, // radius in pixel
                                      maxOuterShearingPx: 80.0, // radius in pixel
                                      staticShearFadeOutAnimationSpeed: 1.5,
+                                     criticalElevationThreshold: 0.5,
                                      keypress : ol.events.condition.noModifierKeys,
                                      minZoom: 9,
                                      map: map};
@@ -225,20 +226,29 @@ var OteUi = function(map) {
         }
       });    
 
+      var sliderRange = 50.0;
       $('.springCoefficientSlider').slider({
         min: 0,
-        max: 100,
-        value: ote.optionsShearIntegrated.springCoefficient*100.0,
+        max: sliderRange,
+        value: ote.optionsShearIntegrated.springCoefficient*sliderRange,
         slide: function(event, ui) {
-            ote.optionsShearIntegrated.springCoefficient = ui.value/100.0;
+            ote.optionsShearIntegrated.springCoefficient = ui.value/sliderRange;
         }
       });
+      $('.springFadeoutSlider').slider({
+        min: 0,
+        max: sliderRange,
+        value: ote.optionsShearIntegrated.staticShearFadeOutAnimationSpeed*sliderRange,
+        slide: function(event, ui) {
+            ote.optionsShearIntegrated.staticShearFadeOutAnimationSpeed = ui.value/sliderRange*2;
+        }
+      });      
       $('.springFrictionSlider').slider({
         min: 0,
-        max: 100,
-        value: ote.optionsShearIntegrated.frictionForce*100.0,
+        max: sliderRange,
+        value: ote.optionsShearIntegrated.frictionForce*sliderRange,
         slide: function(event, ui) {
-            ote.optionsShearIntegrated.frictionForce = ui.value/100.0;
+            ote.optionsShearIntegrated.frictionForce = ui.value/sliderRange;
         }
       });
       $('.springInnerRadiusSlider').slider({
@@ -257,6 +267,20 @@ var OteUi = function(map) {
             ote.optionsShearIntegrated.maxOuterShearingPx = ui.value;
         }
       });      
+      $('.criticalElevationSlider').slider({
+        min: 0,
+        max: 100,
+        value: 0.5*100,
+        slide: function(event, ui) {
+            var normval = ui.value/100.0;
+            ote.optionsShearIntegrated.criticalElevationThreshold = normval;
+            // pass to shader for debug view
+            ote.setCriticalElevationThreshold(normval); 
+            if(ote.getTesting()){
+              ote.redraw();
+            }
+        }
+      });           
 
     // COORDINATE AND ELEVATION INDICATOR
       ui.Indicator = new ol.control.MousePositionDem(ote,{
