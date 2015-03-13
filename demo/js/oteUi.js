@@ -173,6 +173,10 @@ var OteUi = function(map) {
       
 
     // INTERACTIONS & SHEARING
+
+      // hide controls when clicked on header (ignore clicks on onoffswitch)
+      $('.shearing .controlHeader').click(function(e){ if(!$(e.target).hasClass('onoffswitch-checkbox')){$('.shearing .controlBody').toggle('blind', 300);}});
+
       ote.optionsShearStatic =      {threshold: 0.01, // in pixel
                                      springCoefficient: 0.1,
                                      frictionForce: 0.1,
@@ -209,7 +213,7 @@ var OteUi = function(map) {
 
           checkbox.prop('checked', false);
 
-          $('.shearingControls').hide('blind', 300);                    
+          $('.shearing .controlBody').hide('blind', 300);                    
           $('.inclinationControls').show('blind', 300);
 
         } else {
@@ -220,7 +224,7 @@ var OteUi = function(map) {
 
           checkbox.prop('checked', true);
 
-          $('.shearingControls').show('blind', 300);                    
+          $('.shearing .controlBody').show('blind', 300);                    
           $('.inclinationControls').hide('blind', 300);
 
         }
@@ -355,6 +359,11 @@ var OteUi = function(map) {
       });
 
     // SHADING
+
+      // hide controls when clicked on header (ignore clicks on onoffswitch)
+      $('.shading .controlHeader').click(function(e){ if(!$(e.target).hasClass('onoffswitch-checkbox')){$('.shading .controlBody').toggle('blind', 300);}});
+
+
       //  turn shading on / off
       $('.t_HillShading').click(function() {
         var checkbox = $('.t_HillShading input');
@@ -362,12 +371,12 @@ var OteUi = function(map) {
           ote.setHillShading(false);
           checkbox.prop('checked', false);
           ote.redraw();
-          $('.shadingControls').hide('blind', 300);
+          $('shading .controlBody').hide('blind', 300);
         } else {
           ote.setHillShading(true);
           checkbox.prop('checked', true);
           ote.redraw();        
-          $('.shadingControls').show('blind', 300);
+          $('shading .controlBody').show('blind', 300);
         }
         renderMap();
       });
@@ -447,6 +456,9 @@ var OteUi = function(map) {
       });    
 
     // OVERLAY TILES SELECT
+      // hide controls
+      $('.textureControlsHeader').click(function(){$('.textureControls').toggle('blind', 300);});
+
       // find available overlayers and populate dropdown menu
       if(ote.layers.length>0){
         $('.textureControls').show();

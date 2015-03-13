@@ -43,7 +43,7 @@ ol.control.MousePositionDem = function(demLayer, opt_options) {
   var options = goog.isDef(opt_options) ? opt_options : {};
   
   var className = goog.isDef(options.className) ?
-      options.className : 'indicator ol-control ol-unselectable';
+      options.className : 'indicator ol-unselectable';
 
   var element = goog.dom.createDom(goog.dom.TagName.DIV, className);
 
@@ -185,8 +185,8 @@ ol.control.MousePositionDem.prototype.handleMouseMove = function(browserEvent) {
  * hides indicator div
  */
 ol.control.MousePositionDem.prototype.hide = function() {
-    if(this.element.className !== ' indicator ol-control ol-unselectable hidden')
-    this.element.className = ' indicator ol-control ol-unselectable hidden';
+    if(this.element.className !== 'indicator ol-unselectable hidden')
+    this.element.className = 'indicator ol-unselectable hidden';
 };
 goog.exportProperty(
     ol.control.MousePositionDem.prototype,
@@ -197,8 +197,8 @@ goog.exportProperty(
  * shows indicator div
  */
 ol.control.MousePositionDem.prototype.show = function() {
-    if(this.element.className !== ' indicator ol-control ol-unselectable')  
-    this.element.className = ' indicator ol-control ol-unselectable';
+    if(this.element.className !== 'indicator ol-unselectable')  
+    this.element.className = 'indicator ol-unselectable';
 };
 goog.exportProperty(
     ol.control.MousePositionDem.prototype,

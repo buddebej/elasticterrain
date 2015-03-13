@@ -49,13 +49,14 @@ body {
   width: auto;
   min-width:170px;
   text-align: center;
-  background: rgba(0,60,136,0.4);
+  background: rgba(0,60,136,0.6);
   font-family: Verdana, Geneva, sans-serif;
   font-size: 8pt;  
   right: 8px;
   bottom: 8px;
   position: absolute; 
-  color: #fff;
+  color: #eee;
+  -webkit-tap-highlight-color: none;
 }
 
 .hidden {
@@ -109,16 +110,6 @@ body {
     margin-top:0.6em;
     margin-bottom:0.2em;
 }
-.scaleMin {
-    width:50%;
-    float:left;
-    text-align:left;
-}
-.scaleMax {
-    width:50%;
-    float:left;
-    text-align:right;
-}
 
 .floatingSlider {
     float:right;
@@ -161,6 +152,7 @@ body {
     color: #fff;
     font-size: 9pt;
     width: 70%;
+    margin-top: 0.5em;
 }  
 
 .switchBox{
