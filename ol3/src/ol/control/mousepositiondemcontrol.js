@@ -235,8 +235,12 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
  
       // transform decimal coordinates to lat lon expressed by degrees and minutes : 47°22′N 8°33′E
       var decimalDegToDegMin = function(d, lng){
-          // FIXME : If user pans further then 180 E or W the ol-coordinates will increase to values > 180. 
-          // This causes problems and leads to wrong coordinate values in the indictator
+          // If user pans further then 180E or 180W adapt d
+          if(lng){
+            while(Math.abs(d)>180){
+              d=d-360;
+            }
+          }
           var coord = {
               dir : d<0?lng?'W':'S':lng?'E':'N',
               deg : 0|(d<0?d=-d:d),
