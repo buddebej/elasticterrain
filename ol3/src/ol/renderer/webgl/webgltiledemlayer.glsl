@@ -20,7 +20,7 @@ varying vec2 v_texCoord;
 
 // decodes input data elevation value and apply exaggeration
 float decodeElevation(in vec4 colorChannels, in float exaggeration) {
-    float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)*clamp(exaggeration*10.0,1.0,1.0);
+    float elevationM = ((colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0)* max(exaggeration*10.0,1.0);
     return elevationM;
 }
 
@@ -100,6 +100,9 @@ uniform float u_hsExaggeration;
 // intensity of ambient light
 uniform float u_ambient_light;    
 
+// critical elevation threshold
+uniform float u_critElThreshold;  
+
 // highest elevation in the model
 const float MAX_ELEVATION = 8800.0; 
 
@@ -118,29 +121,35 @@ void main(void) {
         float absElevationEx = decodeElevation(texture2D(u_texture, m_texCoord.xy),u_hsExaggeration);
 
         // compute neighbouring vertices
-            vec3 neighbourRight = vec3(m_texCoord.x+CELLSIZE, 1.0 - m_texCoord.y,0.0);
-            vec3 neighbourAbove = vec3(m_texCoord.x, 1.0 - m_texCoord.y+CELLSIZE,0.0);  
 
-            neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)),u_hsExaggeration);
-            neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)),u_hsExaggeration);
+            // set spatial coordinates of neighbors
+            vec3 neighborRight = vec3(m_texCoord.x+CELLSIZE, 1.0 - m_texCoord.y,0.0);
+            vec3 neighborLeft = vec3(m_texCoord.x-CELLSIZE, 1.0 - m_texCoord.y,0.0);
+            vec3 neighborAbove = vec3(m_texCoord.x, 1.0 - m_texCoord.y+CELLSIZE,0.0);  
+            vec3 neighborBelow = vec3(m_texCoord.x, 1.0 - (m_texCoord.y+CELLSIZE),0.0);
 
-            // hack to avoid artifacts in tile borders
-                if(m_texCoord.x >= 1.0-CELLSIZE){ // eastern border of tile
-                    // use neighbour LEFT
-                    neighbourRight = vec3(m_texCoord.x-CELLSIZE, 1.0 - m_texCoord.y,0.0);
-                    neighbourRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)),u_hsExaggeration);
-                }
+            // read elevation values
+            neighborRight.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)),u_hsExaggeration);
+            neighborLeft.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)),u_hsExaggeration);
+            neighborAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)),u_hsExaggeration);
+            neighborBelow.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)),u_hsExaggeration);          
 
-                if(m_texCoord.y <= CELLSIZE){ // northern border of tile
-                    // use neighbour BELOW
-                    neighbourAbove = vec3(m_texCoord.x, 1.0 - (m_texCoord.y+CELLSIZE),0.0);
-                    neighbourAbove.z = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)),u_hsExaggeration);
-                }
+            vec3 neighborA = neighborRight;
+            vec3 neighborB = neighborAbove;
+
+            // hide artifacts in tile borders
+            if(m_texCoord.x >= 1.0-CELLSIZE){ // eastern border of tile
+                neighborA = neighborLeft;
+            }
+            if(m_texCoord.y <= CELLSIZE){ // northern border of tile
+                neighborB = neighborBelow;
+            }
           
     // texture
         vec4 fragColor;
+
         if(u_overlayActive){
-             // use overlay color
+             // use overlay map color
              fragColor = texture2D(u_overlayTexture, m_texCoord);
         } else {
             // computation of hypsometric color
@@ -154,22 +163,24 @@ void main(void) {
                 // read corresponding value from color ramp texture
                 fragColor = abs(texture2D(u_colorRamp,vec2(0.5,relativeElevation)));
 
+                float n01 = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y+CELLSIZE)),u_hsExaggeration);
+                float n02 = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)),u_hsExaggeration);
+                float n03 = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y-CELLSIZE)),u_hsExaggeration);
+                float n04 = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)),u_hsExaggeration);                 
+
                 // color for water surfaces in flat terrain
-                if(neighbourRight.z == absElevationEx && neighbourAbove.z == absElevationEx){
-                    
+                if(n01 == absElevationEx && n02 == absElevationEx && n03 == absElevationEx && n04 == absElevationEx && neighborRight.z == absElevationEx && neighborLeft.z == absElevationEx && neighborAbove.z == absElevationEx && neighborBelow.z == absElevationEx){
+
+                    vec4 waterBlue = vec4(0.5058823529,0.7725490196,0.8470588235,1.0);
+
                     // sealevel (0.0m) or below (i.e. negative no data values)
                     if(absElevation <= 0.0){
-                        fragColor = vec4(0.5058823529,0.7725490196,0.8470588235,1.0);   // set color to blue
+                        fragColor = waterBlue;   // set color to blue
 
                     // if not on sea-level and inland waterBody flag is true    
                     } else if(u_waterBodies) {
-
                         // doublecheck if this pixel really belongs to a larger surface with help of remaining two neighbours
-                        //vec3 neighbourAbove = vec3(v_texCoord.x,v_texCoord.y-CELLSIZE/2.0,0.0);  
-                        //vec3 neighbourLeft = vec3(v_texCoord.x+CELLSIZE/2.0,v_texCoord.y,0.0);  
-                        //if(decodeElevation(texture2D(u_texture, neighbourAbove.xy)) == absElevation && decodeElevation(texture2D(u_texture, neighbourLeft.xy)) == absElevation){
-                            fragColor = vec4(0.5058823529,0.7725490196,0.8470588235,1.0);   // set color to blue
-                        //}
+                        fragColor = waterBlue;   // set color to blue
                     }
                 } 
         }
@@ -178,60 +189,27 @@ void main(void) {
         if(u_hillShading){
             // transform to meter coordinates for normal computation
             vec3 currentV = vec3(m_texCoord.x*u_tileSizeM,(1.0 - m_texCoord.y)*u_tileSizeM,absElevationEx);
-            neighbourRight.xy *= u_tileSizeM;
-            neighbourAbove.xy *= u_tileSizeM;
+            neighborA.xy *= u_tileSizeM;
+            neighborB.xy *= u_tileSizeM;
 
             // normal computation
-            vec3 normal = normalize(cross(neighbourRight-currentV,neighbourAbove-currentV));
+            vec3 normal = normalize(cross(neighborA-currentV,neighborB-currentV));
 
             if(m_texCoord.x >= 1.0-CELLSIZE){ // eastern border of tile
-                 normal = normalize(cross(currentV-neighbourRight,neighbourAbove-currentV));
+                 normal = normalize(cross(currentV-neighborA,neighborB-currentV));
             }
 
             if(m_texCoord.y <= CELLSIZE){ // northern border of tile
-                 normal = normalize(cross(currentV-neighbourRight,neighbourAbove-currentV));
+                 normal = normalize(cross(currentV-neighborA,neighborB-currentV));
             }
 
             // compute hillShade with help of u_light and normal and blend hypsocolor with hillShade
-            float hillShade = clamp(u_ambient_light * 1.0+ max(dot(normal,normalize(u_light)),0.0),1.0-u_hillShadingOpacity,1.0);
-            vec4 hillShadeC = vec4(hillShade,hillShade,hillShade,1.0);
-
-
-            // float hillShadeD = clamp(hillShade,0.2,1.0);
-            // vec4 hillShadeA = vec4(hillShadeD,hillShadeD,hillShadeD,1.0);
-
-            // float hillShadeL = clamp(hillShade,0.1,0.4);
-            // vec4 hillShadeB = vec4(hillShadeL,hillShadeL,hillShadeL,1.0);
-     
-            // vec4 zero = vec4(0,0,0,0);
-            // vec4 one = vec4(1.0,1.0,1.0,1.0);
-            // vec4 two = vec4(2.0,2.0,2.0,2.0);
-
-            //https://en.wikipedia.org/wiki/Blend_modes
-
-            //overlay mixing
-            // if(hillShade < 0.5){
-            //     gl_FragColor = two * hillShadeC * fragColor;
-            // } else {
-            //     gl_FragColor = one-two*(one-hillShadeC)*(one-fragColor);
-            // }
-
-            // hard light mixing
-            // if(fragColor.x < 0.5 || fragColor.y < 0.5 || fragColor.z < 0.5){
-            //     gl_FragColor = two * fragColor * hillShadeC;
-            // } else {
-            //     gl_FragColor = one-two*(one-fragColor)*(one-hillShadeC);
-            // }
-           
-            //screen
-            // gl_FragColor = one-(one-hillShadeC)*(one-fragColor);
-
-            // multiply mixing
-            // gl_FragColor = (fragColor * hillShadeA)*(one-(one-hillShadeB)*(one-fragColor));
-            // gl_FragColor = (one-(one-hillShadeB)*(one-hillShadeA))*fragColor;
-
-
-            gl_FragColor = hillShadeC*fragColor;
+            float hillShade = clamp(u_ambient_light * 1.0+ max(dot(normal,normalize(u_light)),0.0),0.0/*-u_hillShadingOpacity*/,1.0);
+            //hillShade = u_hillShadingOpacity + (1.0 - u_hillShadingOpacity) * hillShade;
+            hillShade = pow(hillShade, 1.0 / (1.0 + u_hillShadingOpacity * 2.0));
+            // avoid black shadows
+            hillShade = max(hillShade, 0.25);
+            gl_FragColor = vec4(hillShade,hillShade,hillShade,1.0)*fragColor;
 
         } else {
             // apply hypsometric color without hillshading
@@ -241,7 +219,7 @@ void main(void) {
     // testing mode
         if(u_testing){
 
-            float criticalEl = u_minElevation + (u_maxElevation - u_minElevation) / 2.0;
+            float criticalEl = u_minElevation + (u_maxElevation - u_minElevation) * u_critElThreshold;
             if(absElevation > criticalEl){
                 gl_FragColor = gl_FragColor+vec4(1.0,0.0,0.0,1.0);
             }

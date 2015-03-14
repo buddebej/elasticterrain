@@ -191,7 +191,14 @@ ol.ImageTile.prototype.getKey = function() {
  * @private
  */
 ol.ImageTile.prototype.handleImageError_ = function() {
-  this.state = ol.TileState.ERROR;
+  if(this.isDemTileImage){
+    // load blank no data tiles if tile belongs to elevation model
+    this.src_ = 'data/blank.png';
+    this.tileLoadFunction_(this, this.src_);
+    this.state = ol.TileState.LOADED;
+  } else {
+    this.state = ol.TileState.ERROR;
+  }
   this.unlistenImage_();
   this.changed();
 };
@@ -213,7 +220,9 @@ ol.ImageTile.prototype.handleImageLoad_ = function() {
   if (this.image_.naturalWidth && this.image_.naturalHeight) {
     this.state = ol.TileState.LOADED;
 
+    // test if loaded tile belongs to a elevation model
     if(this.isDemTileImage){ 
+      // decode elevations and compute statistics asynchronously
       var d = new goog.async.Deferred(undefined,this); 
       d.addCallback(function() {this.createCanvas();this.readMinMaxElevations();});
       d.callback() ;

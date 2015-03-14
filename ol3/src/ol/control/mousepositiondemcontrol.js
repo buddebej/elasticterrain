@@ -6,7 +6,6 @@ goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
-goog.require('ol.CoordinateFormatType');
 goog.require('ol.coordinate');
 goog.require('ol.Object');
 goog.require('ol.Pixel');
@@ -20,10 +19,8 @@ goog.require('ol.proj.Projection');
  * @enum {string}
  */
 ol.control.MousePositionDemProperty = {
-  PROJECTION: 'projection',
-  COORDINATE_FORMAT: 'coordinateFormat'
+  PROJECTION: 'projection'
 };
-
 
 
 /**
@@ -36,36 +33,23 @@ ol.control.MousePositionDemProperty = {
  * @constructor
  * @extends {ol.control.Control}
  * @param {ol.layer.TileDem} demLayer  
- * @param {olx.control.MousePositionOptions=} opt_options Mouse position
  * @api stable
  */
-ol.control.MousePositionDem = function(demLayer, opt_options) {
-  var options = goog.isDef(opt_options) ? opt_options : {};
+ol.control.MousePositionDem = function(demLayer) {
   
-  var className = goog.isDef(options.className) ?
-      options.className : 'indicator ol-control ol-unselectable';
+  var className = 'indicator ol-unselectable';
 
   var element = goog.dom.createDom(goog.dom.TagName.DIV, className);
 
-  var render = goog.isDef(options.render) ?
-      options.render : ol.control.MousePositionDem.render;
+  var render = ol.control.MousePositionDem.render;
 
   goog.base(this, {
     element: element,
-    render: render,
-    target: options.target
+    render: render
   });
 
-  goog.events.listen(this,
-      ol.Object.getChangeEventType(ol.control.MousePositionDemProperty.PROJECTION),
-      this.handleProjectionChanged_, false, this);
-
-  if (goog.isDef(options.coordinateFormat)) {
-    this.setCoordinateFormat(options.coordinateFormat);
-  }
-  if (goog.isDef(options.projection)) {
-    this.setProjection(ol.proj.get(options.projection));
-  }
+  
+  this.setProjection(ol.proj.get('EPSG:4326'));
 
   /**
    * @private
@@ -77,8 +61,7 @@ ol.control.MousePositionDem = function(demLayer, opt_options) {
    * @private
    * @type {string}
    */
-  this.undefinedHTML_ = goog.isDef(options.undefinedHTML) ?
-      options.undefinedHTML : '';
+  this.undefinedHTML_ = '';
 
   /**
    * @private
@@ -128,31 +111,6 @@ ol.control.MousePositionDem.render = function(mapEvent) {
   this.updateHTML_(this.lastMouseMovePixel_);
 };
 
-
-/**
- * @private
- */
-ol.control.MousePositionDem.prototype.handleProjectionChanged_ = function() {
-  this.transform_ = null;
-};
-
-
-/**
- * @return {ol.CoordinateFormatType|undefined} The format to render the current
- *     position in.
- * @observable
- * @api stable
- */
-ol.control.MousePositionDem.prototype.getCoordinateFormat = function() {
-  return /** @type {ol.CoordinateFormatType|undefined} */ (
-      this.get(ol.control.MousePositionDemProperty.COORDINATE_FORMAT));
-};
-goog.exportProperty(
-    ol.control.MousePositionDem.prototype,
-    'getCoordinateFormat',
-    ol.control.MousePositionDem.prototype.getCoordinateFormat);
-
-
 /**
  * @return {ol.proj.Projection|undefined} The projection to report mouse
  *     position in.
@@ -185,8 +143,8 @@ ol.control.MousePositionDem.prototype.handleMouseMove = function(browserEvent) {
  * hides indicator div
  */
 ol.control.MousePositionDem.prototype.hide = function() {
-    if(this.element.className !== ' indicator ol-control ol-unselectable hidden')
-    this.element.className = ' indicator ol-control ol-unselectable hidden';
+    if(this.element.className !== 'indicator ol-unselectable hidden')
+    this.element.className = 'indicator ol-unselectable hidden';
 };
 goog.exportProperty(
     ol.control.MousePositionDem.prototype,
@@ -197,8 +155,8 @@ goog.exportProperty(
  * shows indicator div
  */
 ol.control.MousePositionDem.prototype.show = function() {
-    if(this.element.className !== ' indicator ol-control ol-unselectable')  
-    this.element.className = ' indicator ol-control ol-unselectable';
+    if(this.element.className !== 'indicator ol-unselectable')  
+    this.element.className = 'indicator ol-unselectable';
 };
 goog.exportProperty(
     ol.control.MousePositionDem.prototype,
@@ -237,21 +195,6 @@ ol.control.MousePositionDem.prototype.setMap = function(map) {
 
 
 /**
- * @param {ol.CoordinateFormatType} format The format to render the current
- *     position in.
- * @observable
- * @api stable
- */
-ol.control.MousePositionDem.prototype.setCoordinateFormat = function(format) {
-  this.set(ol.control.MousePositionDemProperty.COORDINATE_FORMAT, format);
-};
-goog.exportProperty(
-    ol.control.MousePositionDem.prototype,
-    'setCoordinateFormat',
-    ol.control.MousePositionDem.prototype.setCoordinateFormat);
-
-
-/**
  * @param {ol.proj.Projection} projection The projection to report mouse
  *     position in.
  * @observable
@@ -260,10 +203,6 @@ goog.exportProperty(
 ol.control.MousePositionDem.prototype.setProjection = function(projection) {
   this.set(ol.control.MousePositionDemProperty.PROJECTION, projection);
 };
-goog.exportProperty(
-    ol.control.MousePositionDem.prototype,
-    'setProjection',
-    ol.control.MousePositionDem.prototype.setProjection);
 
 
 /**
@@ -273,7 +212,7 @@ goog.exportProperty(
 ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
   var html = this.undefinedHTML_;
   var elevation = '';
-
+  var latlon = '';
 
   if (!goog.isNull(pixel) && !goog.isNull(this.mapProjection_)) {
     if (goog.isNull(this.transform_)) {
@@ -290,18 +229,32 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
 
     if (!goog.isNull(coordinate)) {
       elevation = Math.round(/** @type {ol.renderer.webgl.TileDemLayer} */(map.getRenderer().getLayerRenderer(this.demLayer_)).getElevation(coordinate,map.getView().getZoom()));
-      elevation = ' : <b>'+ elevation + '</b> meters';
+      elevation = (elevation === -11000) ? '' : elevation + ' m, ';
+
       this.transform_(coordinate, coordinate);  
-      // flip lon lat to lat lon
-      var tmp = coordinate[0];
-      coordinate[0]=coordinate[1];
-      coordinate[1]=tmp;
-      var stringifyFunc = ol.coordinate.createStringXY(2);
-      html = stringifyFunc(coordinate);
+ 
+      // transform decimal coordinates to lat lon expressed by degrees and minutes : 47°22′N 8°33′E
+      var decimalDegToDegMin = function(d, lng){
+          // If user pans further then 180E or 180W adapt d
+          if(lng){
+            while(Math.abs(d)>180){
+              d=d-360;
+            }
+          }
+          var coord = {
+              dir : d<0?lng?'W':'S':lng?'E':'N',
+              deg : 0|(d<0?d=-d:d),
+              min : 0|d%1*60
+          };
+          return coord.deg+'°'+coord.min+'′'+coord.dir;
+      };
+   
+      latlon = decimalDegToDegMin(coordinate[1],false) + '  ' + decimalDegToDegMin(coordinate[0],true);
+      html = elevation + latlon;
     } 
   }
   if (!goog.isDef(this.renderedHTML_) || html != this.renderedHTML_) {
-    this.element.innerHTML = html+elevation;
+    this.element.innerHTML = html;
     this.renderedHTML_ = html;
   }
 };

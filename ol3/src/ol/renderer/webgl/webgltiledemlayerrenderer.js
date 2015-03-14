@@ -104,7 +104,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @private
    * @type {number}
    */
-  this.timeoutCounterMax_ = 200;
+  this.timeoutCounterMax_ = 250;
 
   /**
    * @private
@@ -412,14 +412,17 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           gl.uniform2f(this.locations_.u_colorScale, tileDemLayer.getColorScale()[0],tileDemLayer.getColorScale()[1]); 
           // u_waterBodies: pass waterBodies to toggle rendering of inland waterBodies
           gl.uniform1f(this.locations_.u_waterBodies, tileDemLayer.getWaterBodies() === true ? 1.0 : 0.0);
-          // u_testing: pass flag to activate testing mode
-          gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
           // u_hillShading: pass flag to activate hillShading
           gl.uniform1f(this.locations_.u_hillShading, tileDemLayer.getHillShading() === true ? 1.0 : 0.0);
           // u_hillShadingOpacity: pass hillShadingOpacity
           gl.uniform1f(this.locations_.u_hillShadingOpacity, tileDemLayer.getHillShadingOpacity());
-          // u_hillShadingExaggeration: pass hillShadingExaggeration
+          // u_hsExaggeration: pass hillShadingExaggeration
           gl.uniform1f(this.locations_.u_hsExaggeration, tileDemLayer.getHillShadingExaggeration());     
+
+          // u_testing: pass flag to activate testing mode
+          gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
+          // u_critElThreshold: pass hillShadingExaggeration
+          gl.uniform1f(this.locations_.u_critElThreshold, tileDemLayer.getCriticalElevationThreshold());    
 
           // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
           var zenithRad = goog.math.toRadians(90.0-tileDemLayer.getLightZenith()),
@@ -572,6 +575,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     }
                   }
                   
+                  // Overlay tiles get loaded first. The corresponding dem tiles are loaded accordingly.
                   zs = goog.array.map(goog.object.getKeys(overlayTilesToDrawByZ), Number);
                   goog.array.sort(zs);
                   for (i = 0, ii = zs.length; i < ii; ++i) {
@@ -585,27 +589,26 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     for (tileKey in overlayTilesToDraw) {               
                         overlayTile = overlayTilesToDraw[tileKey];  
 
-                        // draw only if dem tile is loaded
+                        // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
+                        gl.uniform1f(this.locations_.u_z, 1.0-(zs[i]/this.maxZoom_));  
+                      
+                        // determine offset for each tile in target framebuffer
+                        defUniformOffset(overlayTile, this);                
+                        gl.activeTexture(goog.webgl.TEXTURE2);
+                        mapRenderer.bindTileTexture(overlayTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                        gl.uniform1i(this.locations_.u_overlayTexture, 2);  
+
+                        // draw only when dem tile is available
                         if(tilesToDraw.hasOwnProperty(tileKey)){
-
-                          // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
-                          gl.uniform1f(this.locations_.u_z, 1.0-(zs[i]/this.maxZoom_));  
+                            tile = tilesToDraw[tileKey];
+                            gl.activeTexture(goog.webgl.TEXTURE0);
+                            mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                            gl.uniform1i(this.locations_.u_texture, 0);        
                         
-                          // determine offset for each tile in target framebuffer
-                          defUniformOffset(overlayTile, this);                
-                          gl.activeTexture(goog.webgl.TEXTURE2);
-                          mapRenderer.bindTileTexture(overlayTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                          gl.uniform1i(this.locations_.u_overlayTexture, 2);  
-
-                          tile = tilesToDraw[tileKey];
-                          gl.activeTexture(goog.webgl.TEXTURE0);
-                          mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                          gl.uniform1i(this.locations_.u_texture, 0);  
-
-                          // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
-                          gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                          this.updateCurrentMinMax(tile.getMinMaxElevations());      
-                        }                       
+                            // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
+                            gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
+                            this.updateCurrentMinMax(tile.getMinMaxElevations());
+                        }
                     }
                 }
             } else {
@@ -661,7 +664,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                   }
               }               
             }
-  // CHECK IF EVERYTHING IS LOADED
+  // TEST IF EVERYTHING IS LOADED
       if (allTilesLoaded || this.timeoutCounter_ > this.timeoutCounterMax_) {
           this.renderedTileRange_ = tileRange;
           this.renderedFramebufferExtent_ = framebufferExtent;

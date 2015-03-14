@@ -25,43 +25,45 @@
     <div class="container">
         <div class="controlBar">
 
-            <div class="control inclinationControls">
+            <div class="control inclination">
                 <p class="controlHeader"><i class="fa fa-area-chart"></i> Plan Oblique Relief</p>        
                 <div class="controlBody">
                     <p class="knobLabel">Inclination</p>
                     <div class="knob">
-                        <input type="text" class="inclination" data-cursor=true>
+                        <input type="text" class="inclinationKnob" data-cursor=true>
                     </div>
                 </div>
             </div>
 
-            <div class="control">
-                <p class="controlHeader"><i class="fa fa-picture-o"></i> Texture</p>
-                <div class="controlBody">
-                    <select class="selectTexture">
-                        <option value="dem">Hypsometric Colors</option>
-                    </select>
-                   
-                    <div class="colorControls">                        
-                        <div class="vcenter">
-                                <i class="fa fa-eyedropper"></i> Scale of Color Ramp
-                                <div class="colorSlider floatingSlider"></div>
-                        </div>
-                        <div class="switchBox">
-                            <div class="onoffswitch">
-                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_WaterBodies" id="switchWaterbodies">
-                                <label class="onoffswitch-label" for="switchWaterbodies">
-                                    <span class="onoffswitch-inner"></span>
-                                    <span class="onoffswitch-switch"></span>
-                                </label>
+            <div class="control texture">
+                    <div class="controlHeader">
+                        <div><i class="fa fa-picture-o"></i> Map</div>
+                    </div>
+                    <div class="controlBody">
+                        <select class="selectTexture">
+                            <option value="dem">Hypsometric Colors</option>
+                        </select>
+                       
+                        <div class="colorControls">                        
+                            <div class="vcenter">
+                                    <i class="fa fa-eyedropper"></i> Scale of Color Ramp
+                                    <div class="colorSlider floatingSlider"></div>
                             </div>
-                            <span class="checkboxLabel">Detect Water Bodies.</span>
+                            <div class="switchBox">
+                                <div class="onoffswitch">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_WaterBodies" id="switchWaterbodies">
+                                    <label class="onoffswitch-label" for="switchWaterbodies">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                                <span class="checkboxLabel">Detect Water Bodies.</span>
+                            </div>
                         </div>
                     </div>
-                </div>
             </div>
 
-            <div class="control">
+            <div class="control shading">
                 
                 <div class="controlHeader">
                         <div class="onoffswitch">
@@ -75,7 +77,6 @@
                 </div>
 
                 <div class="controlBody">
-                    <div class="shadingControls">
                         <div class="floatBox">
                             <p class="knobLabel">Zenith</p>
                             <div class="knob">
@@ -105,57 +106,61 @@
                         <div class="vcenter">
                             Vertical Exaggeration
                             <div class="exaggerationSlider floatingSlider"></div>
-                        </div>
-                        
-                    </div>
-                   
+                        </div>                   
                 </div>
             </div>
 
-            <div class="control">
+            <div class="control shearing">
+                    <div class="controlHeader">
+                            <div class="onoffswitch">
+                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_Interaction" id="switchInteraction">
+                                <label class="onoffswitch-label" for="switchInteraction">
+                                    <span class="onoffswitch-inner"></span>
+                                    <span class="onoffswitch-switch"></span>
+                                </label>
+                            </div>
+                            <div class="switchlabel"><i class="fa fa-lightbulb-o"></i> Wiggling Mountains</div>
+                    </div>
+
+                    <div class="controlBody">
+                            <div class="vcenter">
+                                Spring Coefficient
+                                <div class="springCoefficientSlider floatingSlider"></div>
+                            </div>
+
+                            <div class="vcenter">
+                                Static Shearing Fadeout
+                                <div class="springFadeoutSlider floatingSlider"></div>
+                            </div>
+
+                            <div class="vcenter">
+                                Friction Force
+                                <div class="springFrictionSlider floatingSlider"></div>
+                            </div>
+
+                            <div class="vcenter">
+                                Sticky Shearing
+                                <div class="springInnerRadiusSlider floatingSlider"></div>
+                            </div>
+
+                            <div class="vcenter">
+                                Sticky Panning
+                                <div class="springOuterRadiusSlider floatingSlider"></div>
+                            </div>
+
+                            <div class="vcenter">
+                                Critical Elevation
+                                <div class="criticalElevationSlider floatingSlider"></div>
+                            </div>                        
+                    </div>
+            </div>
+
+            <div class="control debug">
                 <div class="controlHeader">
-                        <div class="onoffswitch">
-                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_Interaction" id="switchInteraction">
-                            <label class="onoffswitch-label" for="switchInteraction">
-                                <span class="onoffswitch-inner"></span>
-                                <span class="onoffswitch-switch"></span>
-                            </label>
-                        </div>
-                        <div class="switchlabel"><i class="fa fa-lightbulb-o"></i> Wiggling Mountains</div>
-                </div>
-
-                <div class="controlBody">
-                    <div class="shearingControls">
-                        <div class="vcenter">
-                            Spring Coefficient
-                            <div class="springCoefficientSlider floatingSlider"></div>
-                        </div>
-
-                        <div class="vcenter">
-                            Friction Force
-                            <div class="springFrictionSlider floatingSlider"></div>
-                        </div>
-
-                        <div class="vcenter">
-                            Sticky Shearing
-                            <div class="springInnerRadiusSlider floatingSlider"></div>
-                        </div>
-
-                        <div class="vcenter">
-                            Sticky Panning
-                            <div class="springOuterRadiusSlider floatingSlider"></div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class="control">
-                <div class="controlHeader debugControlsHeader pointer">
                         <div><i class="fa fa fa-wrench"></i> Debug</div>
                 </div>
                 
-                <div class="controlBody debugControls">    
+                <div class="controlBody">    
                     <div class="switchBox">
                         <div class="onoffswitch">
                             <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_Testing" id="switchTesting">
@@ -175,11 +180,11 @@
                 </div>
             </div>
 
-            <div class="control">
-                <div class="controlHeader rotationControlsHeader pointer">
+            <div class="control rotation">
+                <div class="controlHeader ">
                         <div><i class="fa fa-repeat"></i> Map Rotation</div>
                 </div>
-                <div class="controlBody rotationControls"> 
+                <div class="controlBody"> 
                         <p class="knobLabel">Rotate Map</p>
                         <div class="knob">
                             <input type="text" class="rotateView" data-cursor=true>

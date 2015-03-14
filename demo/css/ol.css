@@ -22,6 +22,8 @@
   text-align: center;
   margin: 1px;
   padding: 0px 2px;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 8pt;    
 }
 .ol-unsupported {
   display: none;
