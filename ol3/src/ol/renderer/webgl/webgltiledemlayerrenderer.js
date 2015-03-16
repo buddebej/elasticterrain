@@ -586,20 +586,23 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                       tilesToDraw = overlayTilesToDraw;
                     }                    
                     // iterate through tile queue: bind texture (+overlay), draw triangles
-                    for (tileKey in overlayTilesToDraw) {               
-                        overlayTile = overlayTilesToDraw[tileKey];  
+                    for (tileKey in overlayTilesToDraw) { 
 
-                        // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
-                        gl.uniform1f(this.locations_.u_z, 1.0-(zs[i]/this.maxZoom_));  
-                      
-                        // determine offset for each tile in target framebuffer
-                        defUniformOffset(overlayTile, this);                
-                        gl.activeTexture(goog.webgl.TEXTURE2);
-                        mapRenderer.bindTileTexture(overlayTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                        gl.uniform1i(this.locations_.u_overlayTexture, 2);  
+                     // draw only when dem tile is available
+                        if(tilesToDraw.hasOwnProperty(tileKey)){   
+                                   
+                            overlayTile = overlayTilesToDraw[tileKey];  
 
-                        // draw only when dem tile is available
-                        if(tilesToDraw.hasOwnProperty(tileKey)){
+                            // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
+                            gl.uniform1f(this.locations_.u_z, 1.0-(zs[i]/this.maxZoom_));  
+                          
+                            // determine offset for each tile in target framebuffer
+                            defUniformOffset(overlayTile, this);                
+                            gl.activeTexture(goog.webgl.TEXTURE2);
+                            mapRenderer.bindTileTexture(overlayTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                            gl.uniform1i(this.locations_.u_overlayTexture, 2);  
+
+                       
                             tile = tilesToDraw[tileKey];
                             gl.activeTexture(goog.webgl.TEXTURE0);
                             mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
