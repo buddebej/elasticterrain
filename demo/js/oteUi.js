@@ -28,7 +28,7 @@ var OteUi = function(map) {
       ui.init = {
           angleSteps : 1.0,
           ambientLight : 0.1,
-          colorScale : [0, 8000],    
+          colorScale : [0, 4000],    
           criticalElevationThreshold : 0.5,        
           hillShading : true,
           hillShadingOpacity : 0.2,
