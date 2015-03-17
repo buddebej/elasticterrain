@@ -2,20 +2,39 @@ $(document).ready(function() {
     'use strict';
     if (webgl_detect()) {
 
-        var oteMap, oteUi, dem, osm, stamen, bing, debug;
+        var oteMap, oteUi, dem, mapboxStreet, mapboxSatellite, mapboxOutdoors, osm, stamen, bing, debug;
 
         dem = new ol.layer.TileDem({
             source: new ol.source.XYZ({
-                attributions: [new ol.Attribution({
-                    html: '<a href="http://www.eea.europa.eu/data-and-maps/data/eu-dem" target="_blank">Produced using Copernicus data and information funded by the European Union - EU-DEM layers</a>'
-                })],
                 // url: 'http://buddebej.de/tiles/world/{z}/{x}/{y}.png',
                 // url: 'http://buddebej.de/storage/global/tiles/{z}/{x}/{y}.png',        
                 // url: 'http://cartography.oregonstate.edu/tiles/PlanObliqueEurope/data/tiles/{z}/{x}/{y}.png',
-                url: 'http://buddebej.s3-website-us-west-2.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
+                // url: 'http://buddebej.s3-website-us-west-2.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
+                url: '../demo/data/tiles/{z}/{x}/{y}.png',
                 dem: true
             })
         });
+
+        mapboxStreet = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'http://api.tiles.mapbox.com/v4/mapbox.streets-basic/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYnVkZGViZWoiLCJhIjoiQmc4LXVWUSJ9.ucOAXWQKD_a9eDibv7yuyQ'
+            })
+        });
+        mapboxStreet.t = 'Mapbox Streets';
+
+        mapboxSatellite = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'http://api.tiles.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYnVkZGViZWoiLCJhIjoiQmc4LXVWUSJ9.ucOAXWQKD_a9eDibv7yuyQ'
+            })
+        });
+        mapboxSatellite.t = 'Mapbox Satellite';      
+
+        mapboxOutdoors = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'http://api.tiles.mapbox.com/v4/mapbox.outdoors/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYnVkZGViZWoiLCJhIjoiQmc4LXVWUSJ9.ucOAXWQKD_a9eDibv7yuyQ'
+            })
+        });
+        mapboxOutdoors.t = 'Mapbox Outdoors';        
 
         osm = new ol.layer.Tile({
             source: new ol.source.OSM()
@@ -55,7 +74,7 @@ $(document).ready(function() {
             controls: ol.control.defaults({attribution:false}).extend([new ol.control.ScaleLine()]),
             target: 'map',
             renderer: 'webgl',
-            layers: [osm, stamen, bing, dem], // base dem has always to be the last added layer
+            layers: [mapboxStreet, mapboxSatellite, mapboxOutdoors, osm, stamen, bing, dem], // base dem has always to be the last added layer
             // renderer: exampleNS.getRendererFromQueryString(),
             // layers: debug,
             view: new ol.View({ center: ol.proj.transform([7.754974, 46.375803], 'EPSG:4326', 'EPSG:3857'), // alps
