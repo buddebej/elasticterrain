@@ -194,13 +194,15 @@ ol.ImageTile.prototype.handleImageError_ = function() {
   if(this.isDemTileImage){
     // load blank no data tiles if tile belongs to elevation model
     this.src_ = 'data/blank.png';
-    this.tileLoadFunction_(this, this.src_);
-    this.state = ol.TileState.LOADED;
+    this.imageListenerKeys_ = null;
+    this.state = ol.TileState.IDLE;
+    this.load();
   } else {
     this.state = ol.TileState.ERROR;
+    this.unlistenImage_();
+    this.changed();    
   }
-  this.unlistenImage_();
-  this.changed();
+  
 };
 
 
