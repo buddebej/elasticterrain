@@ -12,7 +12,6 @@ goog.require('ol.ViewHint');
  threshold:number,
  springCoefficient:number,
  frictionForce:number,
- minZoom:number,
  maxInnerShearingPx: number,
  maxOuterShearingPx: number,
  staticShearFadeOutAnimationSpeed: number,
@@ -68,9 +67,6 @@ ol.interaction.DragShearIntegrated = function(options) {
 	this.condition = goog.isDef(this.options['keypress']) ? this.options['keypress'] : ol.events.condition.noModifierKeys;
 
 	/** @type {number} */
-	this.minZoom = this.options.minZoom;
-
-	/** @type {number} */
 	this.springLength = 0;
 
 	/** @type {ol.Pixel} */
@@ -79,8 +75,8 @@ ol.interaction.DragShearIntegrated = function(options) {
 	/** @type {number|null} */
 	this.startDragElevation = 0;
 
-  /** @type {number} */
-  this.criticalElevationThreshold = this.options.criticalElevationThreshold;
+ 	/** @type {number} */
+  	this.criticalElevationThreshold = this.options.criticalElevationThreshold;
 
 	/** @type {number} */
 	this.minElevation = 0;
@@ -396,11 +392,10 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
 	goog.asserts.assert(goog.isDef(options.threshold));
 	goog.asserts.assert(goog.isDef(options.springCoefficient));
 	goog.asserts.assert(goog.isDef(options.frictionForce));
-	goog.asserts.assert(goog.isDef(options.minZoom));
 	goog.asserts.assert(goog.isDef(options.maxInnerShearingPx));
 	goog.asserts.assert(goog.isDef(options.maxOuterShearingPx));
-  goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
-  goog.asserts.assert(goog.isDef(options.criticalElevationThreshold));
+    goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
+    goog.asserts.assert(goog.isDef(options.criticalElevationThreshold));
 	this.options = options;
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);
