@@ -41,7 +41,7 @@ body {
     user-select: none;
 }
 
-.showControlBar {
+.controlBarButton {
     top: .5em;
     right: .5em;
     position: absolute;
@@ -84,6 +84,12 @@ body {
     padding:10px;
     text-align:left;
     cursor: pointer;
+}
+
+.controlHeaderInactive {
+    color:#666;
+    background-color: #111111;
+    cursor: default;
 }
 
 .controlBody {
@@ -142,7 +148,7 @@ body {
 }
 .ui-slider-range { background: #ccc; }
 
-.selectTexture {
+.textureSelect {
     padding:0.1em;
     border : 2px #444 solid;
     background-color: #111;

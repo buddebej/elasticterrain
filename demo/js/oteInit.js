@@ -2,89 +2,110 @@ $(document).ready(function() {
     'use strict';
     if (webgl_detect()) {
 
-        var oteMap, oteUi, dem, mapboxStreet, mapboxSatellite, mapboxOutdoors, osm, stamen, bing, debug;
+        var config, map, ui, save, layers = {};
 
-        dem = new ol.layer.TileDem({
+        layers.dem = new ol.layer.TileDem({
             source: new ol.source.XYZ({
                 // url: 'http://buddebej.de/tiles/world/{z}/{x}/{y}.png',
                 // url: 'http://buddebej.de/storage/global/tiles/{z}/{x}/{y}.png',        
                 // url: 'http://cartography.oregonstate.edu/tiles/PlanObliqueEurope/data/tiles/{z}/{x}/{y}.png',
-                // url: 'http://buddebej.s3-website-us-west-2.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
-                url: '../demo/data/tiles/{z}/{x}/{y}.png',
+                url: 'http://elasticreliefmap.s3-website-us-east-1.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
+                // url: '../demo/data/eudem/{z}/{x}/{y}.png',                
+                // url: '../demo/data/global/{z}/{x}/{y}.png',
                 dem: true
             })
         });
 
-        mapboxStreet = new ol.layer.Tile({
+        layers.mapboxStreet = new ol.layer.Tile({
             source: new ol.source.XYZ({
                 url: 'http://api.tiles.mapbox.com/v4/mapbox.streets-basic/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYnVkZGViZWoiLCJhIjoiQmc4LXVWUSJ9.ucOAXWQKD_a9eDibv7yuyQ'
             })
         });
-        mapboxStreet.t = 'Mapbox Streets';
+        layers.mapboxStreet.t = 'Mapbox Streets';
 
-        mapboxSatellite = new ol.layer.Tile({
+        layers.mapboxSatellite = new ol.layer.Tile({
             source: new ol.source.XYZ({
                 url: 'http://api.tiles.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYnVkZGViZWoiLCJhIjoiQmc4LXVWUSJ9.ucOAXWQKD_a9eDibv7yuyQ'
             })
         });
-        mapboxSatellite.t = 'Mapbox Satellite';      
+        layers.mapboxSatellite.t = 'Mapbox Satellite';      
 
-        mapboxOutdoors = new ol.layer.Tile({
+        layers.mapboxOutdoors = new ol.layer.Tile({
             source: new ol.source.XYZ({
                 url: 'http://api.tiles.mapbox.com/v4/mapbox.outdoors/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiYnVkZGViZWoiLCJhIjoiQmc4LXVWUSJ9.ucOAXWQKD_a9eDibv7yuyQ'
             })
         });
-        mapboxOutdoors.t = 'Mapbox Outdoors';        
+        layers.mapboxOutdoors.t = 'Mapbox Outdoors';        
 
-        osm = new ol.layer.Tile({
+        layers.osm = new ol.layer.Tile({
             source: new ol.source.OSM()
         });
-        osm.t = 'Open Street Map';
+        layers.osm.t = 'Open Street Map';
 
-        stamen = new ol.layer.Tile({
+        layers.stamen = new ol.layer.Tile({
             source: new ol.source.Stamen({
                 layer: 'watercolor'
             })
         });
-        stamen.t = 'Stamen Watercolor';
+        layers.stamen.t = 'Stamen Watercolor';
 
-        bing = new ol.layer.Tile({
+        layers.bing = new ol.layer.Tile({
             source: new ol.source.BingMaps({
             key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
             imagerySet: 'Aerial'
             })
         });
-        bing.t = "Bing Aerial";
+        layers.bing.t = "Bing Aerial";
 
-        debug = [
-            new ol.layer.Tile({
-              source: new ol.source.OSM()
-            }),
-            new ol.layer.Tile({
-              source: new ol.source.TileDebug({
-                projection: 'EPSG:3857',
-                tileGrid: new ol.tilegrid.XYZ({
-                  maxZoom: 22
-                })
-              })
-            })
-          ];
-
-        oteMap = new ol.Map({
-            controls: ol.control.defaults({attribution:false}).extend([new ol.control.ScaleLine()]),
+        map = new ol.Map({
+            controls: ol.control.defaults({attribution:false}).extend([new ol.control.ScaleLine(),new ol.control.MousePositionDem(layers.dem)]),
+            view: new ol.View({ maxZoom: 12, minZoom: 1}),            
             target: 'map',
             renderer: 'webgl',
-            layers: [mapboxStreet, mapboxSatellite, mapboxOutdoors, osm, stamen, bing, dem], // base dem has always to be the last added layer
-            // renderer: exampleNS.getRendererFromQueryString(),
-            // layers: debug,
-            view: new ol.View({ center: ol.proj.transform([7.754974, 46.375803], 'EPSG:4326', 'EPSG:3857'), // alps
-                                zoom: 6,
-                                maxZoom: 11,
-                                minZoom: 1})
+            layers: [   layers.mapboxStreet, 
+                        layers.mapboxSatellite, 
+                        layers.mapboxOutdoors, 
+                        layers.osm, 
+                        layers.stamen, 
+                        layers.bing, 
+                        layers.dem
+                    ] // base dem has always to be the last added layer
         });
 
-        oteUi = new OteUi(oteMap);
-        
+        config = {ambientLight : 0.1, // 0:1
+                  colorScale : [0, 4000], // min:max [m]  
+                  criticalElevationThreshold : 0.5, // 0:1       
+                  shading : true, // bool
+                  shadingDarkness : 0.2, // 0:1
+                  shadingExaggeration : 0.2, // 0:1         
+                  lightAzimuth :315, // 0:360
+                  lightZenith : 50, // 0:90
+                  maxElevation : 8600, // -n : +n
+                  obliqueInclination : 90.0, // 0:90
+                  overlayMap: 0, // null or texture index         
+                  resolution : 0.2, // 0;1
+                  debug : false, // bool       
+                  terrainInteraction : true, // bool
+                  waterBodies : true, // bool
+                  viewRotation: 0, // 0:360
+                  viewCenter: [7.754974, 46.375803], // center of map in latlon          
+                  viewZoom : 6, // zoomlevel
+                  shearingInteraction : {threshold: 0.333, // in pixel
+                                         springCoefficient: 0.08, // 0:1
+                                         frictionForce: 0.17, // 0:1             
+                                         maxInnerShearingPx: 40.0, // radius in pixel
+                                         maxOuterShearingPx: 80.0, // radius in pixel
+                                         staticShearFadeOutAnimationSpeed: 1.5, 
+                                         criticalElevationThreshold: 0.5,
+                                         keypress : ol.events.condition.noModifierKeys,
+                                         map: map}   
+        };
+
+        ui = new OteUi(map, config);
+
+        save = new OteSave(ui, config);
+
+       
 
     } else {
         $('body').append('<div class="webglMissing"><p><span class="title">WebGL Not Supported!</span><br> WebGL is required for this application, and your Web browser does not support WebGL. Google Chrome or Firefox are recommended browsers with WebGL support. Click <a href="http://www.browserleaks.com/webgl" target="_blank">here</a> to check the WebGL specifications of your browser.</p></div>');

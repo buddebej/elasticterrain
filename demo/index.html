@@ -16,6 +16,7 @@
 
     <script src="js/checkWebgl.js" type="text/javascript"></script>
     <script src="js/oteUi.js" type="text/javascript"></script>
+    <script src="js/oteSave.js" type="text/javascript"></script>    
     <script src="js/oteInit.js" type="text/javascript"></script>
 
     <title>Open Terrain Viewer</title>
@@ -30,7 +31,7 @@
                 <div class="controlBody">
                     <p class="knobLabel">Inclination</p>
                     <div class="knob">
-                        <input type="text" class="inclinationKnob" data-cursor=true>
+                        <input type="text" class="inclinationKnob" data-cursor="true">
                     </div>
                 </div>
             </div>
@@ -40,18 +41,18 @@
                         <div><i class="fa fa-picture-o"></i> Map</div>
                     </div>
                     <div class="controlBody">
-                        <select class="selectTexture">
+                        <select class="textureSelect">
                             <option value="dem">Hypsometric Colors</option>
                         </select>
                        
                         <div class="colorControls">                        
                             <div class="vcenter">
-                                    <i class="fa fa-eyedropper"></i> Scale of Color Ramp
+                                    Scale of Color Ramp
                                     <div class="colorSlider floatingSlider"></div>
                             </div>
                             <div class="switchBox">
                                 <div class="onoffswitch">
-                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_WaterBodies" id="switchWaterbodies">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox waterBodiesSwitch" id="switchWaterbodies">
                                     <label class="onoffswitch-label" for="switchWaterbodies">
                                         <span class="onoffswitch-inner"></span>
                                         <span class="onoffswitch-switch"></span>
@@ -67,10 +68,10 @@
                 
                 <div class="controlHeader">
                         <div class="onoffswitch">
-                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_HillShading" id="switchShading">
-                            <label class="onoffswitch-label" for="switchShading">
-                                <span class="onoffswitch-inner"></span>
-                                <span class="onoffswitch-switch"></span>
+                            <input type="checkbox" name="onoffswitch" class="ows onoffswitch-checkbox shadingSwitch" id="switchShading">
+                            <label class="ows onoffswitch-label" for="switchShading">
+                                <span class="ows onoffswitch-inner"></span>
+                                <span class="ows onoffswitch-switch"></span>
                             </label>
                         </div>
                         <div class="switchlabel"><i class="fa fa-paint-brush"></i> Shading</div>
@@ -80,14 +81,14 @@
                         <div class="floatBox">
                             <p class="knobLabel">Zenith</p>
                             <div class="knob">
-                                <input class="lightZenith" value="35"></input>
+                                <input type="text" class="lightZenithKnob" data-cursor="true"></input>
                             </div>
                         </div>
 
                         <div class="floatBox">
                             <p class="knobLabel">Azimuth</p>
                             <div class="knob">
-                                <input class="lightAzimuth" value="35"></input>
+                                <input type="text" class="lightAzimuthKnob" data-cursor="true"></input>
                             </div>
                         </div>
            
@@ -100,7 +101,7 @@
 
                         <div class="vcenter">
                             Darkness
-                            <div class="opacitySlider floatingSlider"></div>
+                            <div class="darknessSlider floatingSlider"></div>
                         </div>
 
                         <div class="vcenter">
@@ -113,10 +114,10 @@
             <div class="control shearing">
                     <div class="controlHeader">
                             <div class="onoffswitch">
-                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_Interaction" id="switchInteraction">
-                                <label class="onoffswitch-label" for="switchInteraction">
-                                    <span class="onoffswitch-inner"></span>
-                                    <span class="onoffswitch-switch"></span>
+                                <input type="checkbox" name="onoffswitch" class="ows onoffswitch-checkbox shearingInteractionsSwitch" id="switchInteraction">
+                                <label class="ows onoffswitch-label" for="switchInteraction">
+                                    <span class="ows onoffswitch-inner"></span>
+                                    <span class="ows onoffswitch-switch"></span>
                                 </label>
                             </div>
                             <div class="switchlabel"><i class="fa fa-lightbulb-o"></i> Wiggling Mountains</div>
@@ -163,8 +164,8 @@
                 <div class="controlBody">    
                     <div class="switchBox">
                         <div class="onoffswitch">
-                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox t_Testing" id="switchTesting">
-                            <label class="onoffswitch-label" for="switchTesting">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox debugModeSwitch" id="switchDebug">
+                            <label class="onoffswitch-label" for="switchDebug">
                                 <span class="onoffswitch-inner"></span>
                                  <span class="onoffswitch-switch"></span>
                              </label>
@@ -187,11 +188,11 @@
                 <div class="controlBody"> 
                         <p class="knobLabel">Rotate Map</p>
                         <div class="knob">
-                            <input type="text" class="rotateView" data-cursor=true>
+                            <input type="text" class="rotationKnob" data-cursor="true">
                         </div>
                 </div>
-            </div>
 
+            </div>
         </div>
 
         <div id="map" class="map"></div>
