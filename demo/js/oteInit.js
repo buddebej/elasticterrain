@@ -82,7 +82,7 @@ $(document).ready(function() {
                   lightZenith : 50, // 0:90
                   maxElevation : 8600, // -n : +n
                   obliqueInclination : 90.0, // 0:90
-                  overlayMap: 0, // null or texture index         
+                  overlayMap: null, // null or texture index         
                   resolution : 0.2, // 0;1
                   debug : false, // bool       
                   terrainInteraction : true, // bool
