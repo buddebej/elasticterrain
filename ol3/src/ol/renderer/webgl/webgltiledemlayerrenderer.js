@@ -332,7 +332,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
       this.timeoutCounter_++;
 
       // increase tile extent 
-      var padding = {x: 256, y: 256}; 
+      var padding = {x: 512, y: 512}; 
       if (tileResolution == viewState.resolution) {
           center = this.snapCenterToPixel(center, tileResolution, [frameState.size[0]-padding.x,frameState.size[1]-padding.y]);    
           extent = ol.extent.getForViewAndSize(center, tileResolution, viewState.rotation, [frameState.size[0]+padding.x,frameState.size[1]+padding.y]);    
@@ -576,8 +576,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                   }
                   
                   // Overlay tiles get loaded first. The corresponding dem tiles are loaded accordingly.
-                  zs = goog.array.map(goog.object.getKeys(overlayTilesToDrawByZ), Number);
+                  zs = goog.array.map(goog.object.getKeys(overlayTilesToDrawByZ), Number);           
                   goog.array.sort(zs);
+
                   for (i = 0, ii = zs.length; i < ii; ++i) {
                     overlayTilesToDraw = overlayTilesToDrawByZ[zs[i]];
                     if(tilesToDrawByZ.hasOwnProperty(zs[i])){
@@ -590,27 +591,31 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
                      // draw only when dem tile is available
                         if(tilesToDraw.hasOwnProperty(tileKey)){   
-                                   
+                             
                             overlayTile = overlayTilesToDraw[tileKey];  
+                            demTile = tilesToDraw[tileKey];
 
-                            // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
-                            gl.uniform1f(this.locations_.u_z, 1.0-(zs[i]/this.maxZoom_));  
-                          
-                            // determine offset for each tile in target framebuffer
-                            defUniformOffset(overlayTile, this);                
-                            gl.activeTexture(goog.webgl.TEXTURE2);
-                            mapRenderer.bindTileTexture(overlayTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                            gl.uniform1i(this.locations_.u_overlayTexture, 2);  
+                            if(demTile.state === 2 && overlayTile.state === 2){
+                                // overlay texture             
+                                gl.activeTexture(goog.webgl.TEXTURE2);
+                                mapRenderer.bindTileTexture(overlayTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                                gl.uniform1i(this.locations_.u_overlayTexture, 2);  
+                            
+                                // dem texture
+                                gl.activeTexture(goog.webgl.TEXTURE0);
+                                mapRenderer.bindTileTexture(demTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                                gl.uniform1i(this.locations_.u_texture, 0);    
 
-                       
-                            tile = tilesToDraw[tileKey];
-                            gl.activeTexture(goog.webgl.TEXTURE0);
-                            mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                            gl.uniform1i(this.locations_.u_texture, 0);        
-                        
-                            // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
-                            gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                            this.updateCurrentMinMax(tile.getMinMaxElevations());
+                                // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
+                                gl.uniform1f(this.locations_.u_z, 1.0-(zs[i]/this.maxZoom_));  
+                                
+                                // determine offset for each tile in target framebuffer
+                                defUniformOffset(overlayTile, this);      
+                            
+                                // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
+                                gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
+                                this.updateCurrentMinMax(demTile.getMinMaxElevations());
+                            }  
                         }
                     }
                 }
