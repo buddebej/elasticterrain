@@ -20,6 +20,7 @@ goog.provide('ol.renderer.webgl.TileDemLayer');
     goog.require('ol.tilegrid.TileGrid');
     goog.require('ol.webgl.Buffer');
     goog.require('ol.Elevation');
+    goog.require('ol.ColorRamp');    
 
 /**
  * @classdesc
@@ -266,38 +267,7 @@ ol.renderer.webgl.TileDemLayer.prototype.getTileMesh = function(meshResolution) 
  * @return {Uint8Array} .
  */
 ol.renderer.webgl.TileDemLayer.prototype.getColorRampTexture = function() {
-  var colors = new Array(
-    66, 120, 40, 255,
-    78, 129, 49, 255,
-    90, 138, 58, 255,
-    103, 147, 67, 255,
-    115, 156, 76, 255,
-    127, 165, 85, 255,
-    140, 174, 94, 255,
-    146, 175, 95, 255,
-    152, 176, 96, 255,
-    159, 178, 98, 255,
-    165, 179, 99, 255,
-    171, 181, 101, 255,
-    178, 182, 102, 255,
-    184, 184, 104, 255,
-    190, 185, 105, 255,
-    197, 187, 107, 255,
-    203, 188, 108, 255,
-    210, 190, 110, 255,
-    213, 195, 122, 255,
-    217, 200, 134, 255,
-    221, 205, 146, 255,
-    225, 211, 158, 255,
-    228, 216, 170, 255,
-    232, 222, 182, 255,
-    236, 227, 194, 255,
-    240, 233, 206, 255,
-    243, 238, 218, 255,
-    247, 244, 230, 255,
-    251, 249, 242, 255,
-    255, 255, 255, 255);
-  return new Uint8Array(colors);
+  return new Uint8Array(ol.ColorRamp.v1);
 };
 
 /**
