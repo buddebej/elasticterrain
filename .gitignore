@@ -4,5 +4,6 @@ ol3/examples/*.html.png
 ol3/examples/example-list.js
 ol3/examples/example-list.xml
 ol3/node_modules/
+ol3/src/ol/renderer/webgl/webgltiledemlayershader.js
 demo/tiles/*
 .DS_Store
