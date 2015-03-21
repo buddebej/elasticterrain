@@ -70,7 +70,7 @@ ol.interaction.defaults = function(opt_options) {
       options.dragPan : true;
   if (dragPan) {
     interactions.push(new ol.interaction.DragPan({
-      kinetic: kinetic, condition: ol.events.condition.altKeyOnly
+      kinetic: kinetic
     }));
   }  
 
