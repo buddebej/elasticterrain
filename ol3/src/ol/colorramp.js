@@ -5,7 +5,7 @@ goog.provide('ol.ColorRamp');
  * @const 
  * @type {Array}
  */
-ol.ColorRamp.default = new Array(
+ol.ColorRamp.v0 = new Array(
     66, 120, 40, 255,
     78, 129, 49, 255,
     90, 138, 58, 255,
