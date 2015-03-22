@@ -105,7 +105,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
    * @private
    * @type {number}
    */
-  this.timeoutCounterMax_ = 250;
+  this.timeoutCounterMax_ = 350;
 
   /**
    * @private

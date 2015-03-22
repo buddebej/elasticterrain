@@ -20,7 +20,11 @@ varying vec2 v_texCoord;
 
 // decodes input data elevation value and apply exaggeration
 float decodeElevation(in vec4 colorChannels) {
-    float elevationM = (colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0;
+    float elevationM = 0.0;
+    // make sure this is really the elevation encoded texture
+    if(colorChannels.b == 0.0 && colorChannels.a == 1.0){
+        elevationM = (colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0;
+    }
     return elevationM;
 }
 
@@ -56,16 +60,14 @@ void main(void) {
     // read and decode elevation for current vertex
     float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy));
     
+    // normalize elevation for current minimum and maximum
+    float nElevation = u_maxElevation*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
+
     // shift vertex positions by given shearing factors
     // z value has to be inverted to get a left handed coordinate system and to make the depth test work
-    if(absElevation<11000.0){
-        // normalize elevation for current minimum and maximum
-        float nElevation = u_maxElevation*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation);
-
-        gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
-                            (u_z-abs(absElevation/u_tileSizeM)), 
-                            1.0);
-    }
+    gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
+                        (u_z-abs(absElevation/u_tileSizeM)), 
+                        1.0);
 }
 
 //! FRAGMENT
