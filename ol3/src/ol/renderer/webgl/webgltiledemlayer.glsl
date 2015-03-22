@@ -55,15 +55,17 @@ void main(void) {
 
     // read and decode elevation for current vertex
     float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy));
-
-    // normalize elevation for current minimum and maximum
-    float nElevation = u_maxElevation*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation);
     
     // shift vertex positions by given shearing factors
     // z value has to be inverted to get a left handed coordinate system and to make the depth test work
-    gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
-                        (u_z+abs(absElevation/u_tileSizeM)), 
-                        1.0);
+    if(absElevation<11000.0){
+        // normalize elevation for current minimum and maximum
+        float nElevation = u_maxElevation*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation);
+
+        gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
+                            (u_z-abs(absElevation/u_tileSizeM)), 
+                            1.0);
+    }
 }
 
 //! FRAGMENT
