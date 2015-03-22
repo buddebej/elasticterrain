@@ -478,7 +478,7 @@ var OteUi = function(map, config) {
             angle = toDegrees(ote.view.getRotation() % (2.0 * Math.PI));
           }
           KNOB_ROTATION.val(angle).trigger('change');
-          renderMap();
+          // renderMap();
         });
 
     // DEBUG    
