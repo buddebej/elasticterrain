@@ -333,11 +333,11 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
  * @private
  */
 ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) {
-	console.log("inner circle radius", this.options['maxInnerShearingPx']);
-	console.log("outer circle radius", this.options['maxOuterShearingPx']);
-	console.log("wiggling threshold", this.options['threshold']);
-	console.log("spring constant", this.options['springCoefficient']);
-	console.log("velocity friction coefficient", this.options['frictionForce']);
+	// console.log("inner circle radius", this.options['maxInnerShearingPx']);
+	// console.log("outer circle radius", this.options['maxOuterShearingPx']);
+	// console.log("wiggling threshold", this.options['threshold']);
+	// console.log("spring constant", this.options['springCoefficient']);
+	// console.log("velocity friction coefficient", this.options['frictionForce']);
 
 	var minMax,
 	    mapCenter;
@@ -346,9 +346,8 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
 		minMax = this.demRenderer.getCurrentMinMax();
 		this.minElevation = minMax[0];
 		this.maxElevation = minMax[1];
-    // critical elevation value to seperate minima and maxima
+    	// critical elevation value to seperate minima and maxima
 		this.criticalElevation = this.minElevation + (this.maxElevation - this.minElevation) * this.options['criticalElevationThreshold'];
-    console.log('critical elevation threshold ' + this.options['criticalElevationThreshold']);
 		mapCenter = this.view.getCenter();
 		this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
 		this.startDragElevation = this.demRenderer.getElevation(mapBrowserEvent.coordinate, this.view.getZoom());
