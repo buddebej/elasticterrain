@@ -560,11 +560,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     for (tileKey in overlayTilesToDraw) { 
 
                      // draw only when dem tile is available
-                        if(tilesToDraw.hasOwnProperty(tileKey)){  
-                          overlayTile = overlayTilesToDraw[tileKey];  
-                          demTile = tilesToDraw[tileKey]; 
+                        if(tilesToDraw.hasOwnProperty(tileKey)){ 
+                          if(tilesToDraw[tileKey].getState() == ol.TileState.LOADED){
+                            overlayTile = overlayTilesToDraw[tileKey];  
 
-                          if(demTile.state === 2 && overlayTile.state === 2){                                
                             // overlay texture             
                             gl.activeTexture(goog.webgl.TEXTURE3);
                             mapRenderer.bindTileTexture(overlayTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.LINEAR, goog.webgl.LINEAR);
@@ -572,7 +571,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
                             // dem texture
                             gl.activeTexture(goog.webgl.TEXTURE0);
-                            mapRenderer.bindTileTexture(demTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                            mapRenderer.bindTileTexture(tilesToDraw[tileKey], tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
                             gl.uniform1i(this.locations_.u_texture, 0);    
 
                             // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
@@ -583,8 +582,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                           
                             // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                             gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                            this.updateCurrentMinMax(demTile.getMinMaxElevations());
-                          }  
+                            this.updateCurrentMinMax(tilesToDraw[tileKey].getMinMaxElevations());
+                          }
                         }
                     }
                 }
