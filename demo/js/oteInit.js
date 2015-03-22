@@ -9,9 +9,9 @@ $(document).ready(function() {
                 // url: 'http://buddebej.de/tiles/world/{z}/{x}/{y}.png',
                 // url: 'http://buddebej.de/storage/global/tiles/{z}/{x}/{y}.png',        
                 // url: 'http://cartography.oregonstate.edu/tiles/PlanObliqueEurope/data/tiles/{z}/{x}/{y}.png',
-                url: 'http://elasticreliefmap.s3-website-us-east-1.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
+                // url: 'http://elasticreliefmap.s3-website-us-east-1.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
                 // url: '../demo/data/eudem/{z}/{x}/{y}.png',                
-                // url: '../demo/data/global/{z}/{x}/{y}.png',
+                url: '../demo/data/tiles/{z}/{x}/{y}.png',
                 dem: true
             })
         });
@@ -74,6 +74,7 @@ $(document).ready(function() {
 
         config = {ambientLight : 0.1, // 0:1
                   colorScale : [0, 4000], // min:max [m]  
+                  colorRamp : 0, // id                 
                   criticalElevationThreshold : 0.5, // 0:1       
                   shading : true, // bool
                   shadingDarkness : 0.2, // 0:1
@@ -82,7 +83,7 @@ $(document).ready(function() {
                   lightZenith : 50, // 0:90
                   maxElevation : 8600, // -n : +n
                   obliqueInclination : 90.0, // 0:90
-                  overlayMap: null, // null or texture index         
+                  overlayMap: null, // null or texture id         
                   resolution : 0.2, // 0;1
                   debug : false, // bool       
                   terrainInteraction : true, // bool

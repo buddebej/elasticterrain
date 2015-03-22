@@ -82,7 +82,7 @@ uniform sampler2D u_overlayTexture;
 uniform bool u_waterBodies; 
 
 // flag for hillShading
-uniform bool u_hillShading; 
+uniform bool u_shading; 
 
 // flag for active overlay texture
 uniform bool u_overlayActive;
@@ -98,7 +98,7 @@ uniform vec2 u_colorScale;
 uniform vec3 u_light; 
 
 // hillShading Opacity for Blending
-uniform float u_hillShadingOpacity; 
+uniform float u_shadingOpacity; 
 
 // hillShading Exaggeration
 uniform float u_hsExaggeration; 
@@ -179,11 +179,16 @@ void main(void) {
                     {
                         fragColor = waterBlue; 
                     }
+
+                    if(absElevation<0.0) 
+                    {
+                        fragColor = waterBlue; 
+                    }                    
                 } 
         }
 
-    // computation of hillshading
-        if(u_hillShading){
+    // computation of shading
+        if(u_shading){
 
             // apply exaggeration
             float exaggerationFactor = max(u_hsExaggeration*10.0,1.0);
@@ -202,7 +207,7 @@ void main(void) {
             hillShade = clamp(u_ambient_light * 1.0 + (hillShade + 1.0) * 0.5, 0.0, 1.0);
 
             // remap image tonality
-            hillShade = pow(hillShade, 1.0 / (1.0 + u_hillShadingOpacity * 2.0));
+            hillShade = pow(hillShade, 1.0 / (1.0 + u_shadingOpacity * 2.0));
 
             // avoid black shadows
             hillShade = max(hillShade, 0.25);

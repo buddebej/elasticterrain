@@ -50,3 +50,9 @@ ol.ColorRamp.v1 = new Array(
     102,51,12,255,
     102,51,0,255);
 
+/**
+ * @public
+ * @const 
+ * @type {Array}
+ */
+ol.ColorRamp.d = [ol.ColorRamp.v0,ol.ColorRamp.v1];

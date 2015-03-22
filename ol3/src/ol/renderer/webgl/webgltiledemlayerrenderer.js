@@ -67,12 +67,6 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
 
   /**
    * @private
-   * @type {Uint8Array}
-   */
-  this.arrayColorRamp_ = this.getColorRampTexture();
- 
-  /**
-   * @private
    * @type {ol.TileRange}
    */
   this.renderedTileRange_ = null;
@@ -262,15 +256,6 @@ ol.renderer.webgl.TileDemLayer.prototype.getTileMesh = function(meshResolution) 
 };
 
 /**
- * Returns lookup texture with colorramp for hypsometric coloring
- * @private
- * @return {Uint8Array} .
- */
-ol.renderer.webgl.TileDemLayer.prototype.getColorRampTexture = function() {
-  return new Uint8Array(ol.ColorRamp.v1);
-};
-
-/**
  * @inheritDoc
  */
 ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, layerState, context) {
@@ -382,16 +367,16 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           gl.uniform2f(this.locations_.u_colorScale, tileDemLayer.getColorScale()[0],tileDemLayer.getColorScale()[1]); 
           // u_waterBodies: pass waterBodies to toggle rendering of inland waterBodies
           gl.uniform1f(this.locations_.u_waterBodies, tileDemLayer.getWaterBodies() === true ? 1.0 : 0.0);
-          // u_hillShading: pass flag to activate hillShading
-          gl.uniform1f(this.locations_.u_hillShading, tileDemLayer.getHillShading() === true ? 1.0 : 0.0);
-          // u_hillShadingOpacity: pass hillShadingOpacity
-          gl.uniform1f(this.locations_.u_hillShadingOpacity, tileDemLayer.getHillShadingOpacity());
-          // u_hsExaggeration: pass hillShadingExaggeration
-          gl.uniform1f(this.locations_.u_hsExaggeration, tileDemLayer.getHillShadingExaggeration());     
+          // u_shading: pass flag to activate Shading
+          gl.uniform1f(this.locations_.u_shading, tileDemLayer.getShading() === true ? 1.0 : 0.0);
+          // u_ShadingOpacity: pass ShadingOpacity
+          gl.uniform1f(this.locations_.u_shadingOpacity, tileDemLayer.getShadingOpacity());
+          // u_hsExaggeration: pass ShadingExaggeration
+          gl.uniform1f(this.locations_.u_hsExaggeration, tileDemLayer.getShadingExaggeration());     
 
           // u_testing: pass flag to activate testing mode
           gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
-          // u_critElThreshold: pass hillShadingExaggeration
+          // u_critElThreshold: pass shadingExaggeration
           gl.uniform1f(this.locations_.u_critElThreshold, tileDemLayer.getCriticalElevationThreshold());    
 
           // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
@@ -417,8 +402,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             gl.activeTexture(goog.webgl.TEXTURE1);
             gl.bindTexture(goog.webgl.TEXTURE_2D, this.textureColorRamp_);
 
+            var arrayColorRamp = new Uint8Array(ol.ColorRamp.d[tileDemLayer.getColorRamp()]);
+
             // read color ramp array and store it in textureColorRamp
-            gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, this.arrayColorRamp_.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, this.arrayColorRamp_);
+            gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayColorRamp.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayColorRamp);
             gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER, goog.webgl.LINEAR);
             gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
             gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);

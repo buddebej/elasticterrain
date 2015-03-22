@@ -12,9 +12,9 @@ ol.layer.TileDemProperty = {
   COLOR_RAMP: 'colorRamp',
   COLOR_SCALE: 'colorScale',  
   CRITICAL_ELEVATION: 'criticalElevation',    
-  HILL_SHADING : 'hillShading',
-  HILL_SHADING_OPACITY : 'hillShadingOpacity',
-  HILL_SHADING_EXAGGERATION : 'hillShadingExaggeration',  
+  SHADING : 'shading',
+  SHADING_OPACITY : 'shadingOpacity',
+  SHADING_EXAGGERATION : 'shadingExaggeration',  
   LIGHT_AZIMUTH: 'lightAzimuth',
   LIGHT_ZENITH: 'lightZenith',  
   OBLIQUE_INCLINATION: 'obliqueInclination',
@@ -56,18 +56,17 @@ ol.layer.TileDem = function(opt_options) {
   goog.base(this,  /** @type {olx.layer.LayerOptions} */ (baseOptions));
 
   this.setAmbientLight(goog.isDef(options.ambientLight) ? options.ambientLight : 0.0);
-  this.setColorRamp(goog.isDef(options.colorRamp) ? options.colorRamp : {});  
+  this.setColorRamp(goog.isDef(options.colorRamp) ? options.colorRamp : 0);  
   this.setColorScale(goog.isDef(options.colorScale) ? options.colorScale : [0.0,1.0]);  
   this.setCriticalElevationThreshold(goog.isDef(options.criticalElevation) ? options.criticalElevation : 0.5);  
-  this.setHillShading(goog.isDef(options.hillShading) ? options.hillShading : true);
-  this.setHillShadingOpacity(goog.isDef(options.hillShadingOpacity) ? options.hillShadingOpacity : 1.0);
-  this.setHillShadingExaggeration(goog.isDef(options.hillShadingExaggeration) ? options.hillShadingExaggeration : 0.0);  
+  this.setShading(goog.isDef(options.shading) ? options.shading : true);
+  this.setShadingOpacity(goog.isDef(options.shadingOpacity) ? options.shadingOpacity : 1.0);
+  this.setShadingExaggeration(goog.isDef(options.shadingExaggeration) ? options.shadingExaggeration : 0.0);  
   this.setTerrainInteraction(goog.isDef(options.terrainInteraction) ? options.terrainInteraction : false);
   this.setTerrainShearing(goog.isDef(options.terrainShearing) ? options.terrainShearing : {x : 0.0, y : 0.0});   
   this.setObliqueInclination(goog.isDef(options.obliqueInclination) ? options.obliqueInclination : 90.0);
   this.setLightAzimuth(goog.isDef(options.lightAzimuth) ? options.lightAzimuth : 225.0);
   this.setLightZenith(goog.isDef(options.lightZenith) ? options.lightZenith : 45.0);
-  this.setObliqueInclination(goog.isDef(options.obliqueInclination) ? options.obliqueInclination : 90.0);
   this.setOverlayTiles(goog.isDef(options.overlayTiles) ? options.overlayTiles : null);
   this.setResolution(goog.isDef(options.resolution) ? options.resolution : 0.25);
   this.setTesting(goog.isDef(options.testing) ? options.testing : false);
@@ -138,7 +137,7 @@ goog.exportProperty(
 
 
 /**
- * @param {Object} colorRamp ColorRamp.
+ * @param {number} colorRamp ColorRamp.
  */
 ol.layer.TileDem.prototype.setColorRamp = function(colorRamp) {
   this.set(ol.layer.TileDemProperty.COLOR_RAMP, colorRamp);
@@ -148,10 +147,10 @@ goog.exportProperty(
   'setColorRamp',
   ol.layer.TileDem.prototype.setColorRamp);
 /**
- * @return {Object} ColorRamp.
+ * @return {number} ColorRamp.
  */
 ol.layer.TileDem.prototype.getColorRamp = function() {
-  return /** @type {Object} */ (
+  return /** @type {number} */ (
     this.get(ol.layer.TileDemProperty.COLOR_RAMP));
 };
 goog.exportProperty(
@@ -187,74 +186,74 @@ goog.exportProperty(
 
 
 /**
- * @param {boolean} hillShading HillShading Flag.
+ * @param {boolean} shading Shading Flag.
  */
-ol.layer.TileDem.prototype.setHillShading = function(hillShading) {
-  this.set(ol.layer.TileDemProperty.HILL_SHADING, hillShading);
+ol.layer.TileDem.prototype.setShading = function(shading) {
+  this.set(ol.layer.TileDemProperty.SHADING, shading);
 };
 goog.exportProperty(
   ol.layer.TileDem.prototype,
-  'setHillShading',
-  ol.layer.TileDem.prototype.setHillShading);
+  'setShading',
+  ol.layer.TileDem.prototype.setShading);
 /**
- * @return {boolean} HillShading Flag.
+ * @return {boolean} Shading Flag.
  */
-ol.layer.TileDem.prototype.getHillShading = function() {
+ol.layer.TileDem.prototype.getShading = function() {
   return /** @type {boolean} */ (
-    this.get(ol.layer.TileDemProperty.HILL_SHADING));
+    this.get(ol.layer.TileDemProperty.SHADING));
 };
 goog.exportProperty(
   ol.layer.TileDem.prototype,
-  'getHillShading',
-  ol.layer.TileDem.prototype.getHillShading);
+  'getShading',
+  ol.layer.TileDem.prototype.getShading);
 
 
 
 /**
- * @param {number} hillShadingOpacity HillShading Opacity.
+ * @param {number} shadingOpacity Shading Opacity.
  */
-ol.layer.TileDem.prototype.setHillShadingOpacity = function(hillShadingOpacity) {
-  this.set(ol.layer.TileDemProperty.HILL_SHADING_OPACITY, hillShadingOpacity);
+ol.layer.TileDem.prototype.setShadingOpacity = function(shadingOpacity) {
+  this.set(ol.layer.TileDemProperty.SHADING_OPACITY, shadingOpacity);
 };
 goog.exportProperty(
   ol.layer.TileDem.prototype,
-  'setHillShadingOpacity',
-  ol.layer.TileDem.prototype.setHillShadingOpacity);
+  'setShadingOpacity',
+  ol.layer.TileDem.prototype.setShadingOpacity);
 /**
- * @return {number} HillShading Opacity.
+ * @return {number} Shading Opacity.
  */
-ol.layer.TileDem.prototype.getHillShadingOpacity = function() {
+ol.layer.TileDem.prototype.getShadingOpacity = function() {
   return /** @type {number} */ (
-    this.get(ol.layer.TileDemProperty.HILL_SHADING_OPACITY));
+    this.get(ol.layer.TileDemProperty.SHADING_OPACITY));
 };
 goog.exportProperty(
   ol.layer.TileDem.prototype,
-  'getHillShadingOpacity',
-  ol.layer.TileDem.prototype.getHillShadingOpacity);
+  'getShadingOpacity',
+  ol.layer.TileDem.prototype.getShadingOpacity);
 
 
 
 /**
- * @param {number} hillShadingExaggeration HillShading Exaggeration.
+ * @param {number} shadingExaggeration Shading Exaggeration.
  */
-ol.layer.TileDem.prototype.setHillShadingExaggeration = function(hillShadingExaggeration) {
-  this.set(ol.layer.TileDemProperty.HILL_SHADING_EXAGGERATION, hillShadingExaggeration);
+ol.layer.TileDem.prototype.setShadingExaggeration = function(shadingExaggeration) {
+  this.set(ol.layer.TileDemProperty.SHADING_EXAGGERATION, shadingExaggeration);
 };
 goog.exportProperty(
   ol.layer.TileDem.prototype,
-  'setHillShadingExaggeration',
-  ol.layer.TileDem.prototype.setHillShadingExaggeration);
+  'setShadingExaggeration',
+  ol.layer.TileDem.prototype.setShadingExaggeration);
 /**
- * @return {number} HillShading Exaggeration.
+ * @return {number} Shading Exaggeration.
  */
-ol.layer.TileDem.prototype.getHillShadingExaggeration = function() {
+ol.layer.TileDem.prototype.getShadingExaggeration = function() {
   return /** @type {number} */ (
-    this.get(ol.layer.TileDemProperty.HILL_SHADING_EXAGGERATION));
+    this.get(ol.layer.TileDemProperty.SHADING_EXAGGERATION));
 };
 goog.exportProperty(
   ol.layer.TileDem.prototype,
-  'getHillShadingExaggeration',
-  ol.layer.TileDem.prototype.getHillShadingExaggeration);
+  'getShadingExaggeration',
+  ol.layer.TileDem.prototype.getShadingExaggeration);
 
 
 

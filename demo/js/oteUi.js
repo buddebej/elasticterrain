@@ -72,7 +72,9 @@ var OteUi = function(map, config) {
           SLIDER_SPRING_OUTRAD = $('.springOuterRadiusSlider'),
           SLIDER_CRITICAL_ELEVATION = $('.criticalElevationSlider'),
           SLIDER_RESOLUTION = $('.resolutionSlider'),
-          SELECT_TEXTURE = $('.textureSelect');
+          SELECT_TEXTURE = $('.textureSelect'),
+          SELECT_COLOR_RAMP = $('.colorRampSelect');
+
 
     // INITIAL CONFIGURATION   
       // config control bar
@@ -159,6 +161,7 @@ var OteUi = function(map, config) {
         SLIDER_CRITICAL_ELEVATION.slider({value:toSlider(config.criticalElevationThreshold)});
         SLIDER_RESOLUTION.slider({value:toSlider(config.resolution)});
         SELECT_TEXTURE.find('option[value='+config.overlayMap+']').attr('selected',true);
+        SELECT_COLOR_RAMP.find('option[value='+config.colorRamp+']').attr('selected',true);
                 
       };
 
@@ -170,17 +173,18 @@ var OteUi = function(map, config) {
         config.obliqueInclination = ote.dem.getObliqueInclination();
         config.lightAzimuth = ote.dem.getLightAzimuth();
         config.lightZenith = ote.dem.getLightZenith();
-        config.shading = ote.dem.getHillShading();
+        config.shading = ote.dem.getShading();
         config.debug = ote.dem.getTesting();    
         config.waterBodies = ote.dem.getWaterBodies();
         config.terrainInteraction = ote.dem.getTerrainInteraction();
         config.ambientLight = ote.dem.getAmbientLight();
         config.colorScale = ote.dem.getColorScale();
-        config.shadingDarkness = ote.dem.getHillShadingOpacity();
-        config.shadingExaggeration = ote.dem.getHillShadingExaggeration();
+        config.shadingDarkness = ote.dem.getShadingOpacity();
+        config.shadingExaggeration = ote.dem.getShadingExaggeration();
         config.criticalElevationThreshold = ote.dem.getCriticalElevationThreshold();
         config.resolution = ote.dem.getResolution();
         config.texture = parseInt(SELECT_TEXTURE.find($('option:selected')).val());
+        config.colorRamp = parseInt(SELECT_COLOR_RAMP.find($('option:selected')).val());        
       };      
 
       // update map to current parameters
@@ -190,11 +194,12 @@ var OteUi = function(map, config) {
         ote.view.setZoom(config.viewZoom);
         ote.dem.setAmbientLight(config.ambientLight);
         ote.dem.setColorScale(config.colorScale);
+        ote.dem.setColorRamp(0);                
         ote.dem.setCriticalElevationThreshold(config.criticalElevationThreshold);
         config.shearingInteraction.criticalElevationThreshold = config.criticalElevationThreshold;
-        ote.dem.setHillShading(config.shading);    
-        ote.dem.setHillShadingOpacity(config.shadingDarkness);    
-        ote.dem.setHillShadingExaggeration(config.shadingExaggeration);          
+        ote.dem.setShading(config.shading);    
+        ote.dem.setShadingOpacity(config.shadingDarkness);    
+        ote.dem.setShadingExaggeration(config.shadingExaggeration);          
         ote.dem.setLightAzimuth(config.lightAzimuth);
         ote.dem.setLightZenith(config.lightZenith);
         ote.dem.setResolution(config.resolution); 
@@ -247,7 +252,6 @@ var OteUi = function(map, config) {
         hideAllOtherOverlayers(ote);
         setLayerPreload(5);
 
-        // on change
         SELECT_TEXTURE.change(function(){
             var selectedLayer = SELECT_TEXTURE.find($('option:selected')).val();
             if( selectedLayer === 'dem'){
@@ -269,6 +273,11 @@ var OteUi = function(map, config) {
       }
 
     // HYPSOMETRIC COLORS
+      SELECT_COLOR_RAMP.change(function(){  
+            ote.dem.setColorRamp(SELECT_COLOR_RAMP.find($('option:selected')).val()); 
+            renderMap();
+      });
+
       // slider to stretch hypsometric colors  
       SLIDER_COLOR.slider({
         min: 0,
@@ -297,14 +306,14 @@ var OteUi = function(map, config) {
       //  turn shading on / off
       SWITCH_SHADING.click(function() {
         var checkbox = SWITCH_SHADING.find($('input'));
-        if (ote.dem.getHillShading()) {
-          ote.dem.setHillShading(false);   
+        if (ote.dem.getShading()) {
+          ote.dem.setShading(false);   
           renderMap();
           checkbox.prop(CHECKED, false);
           ui.controlDeactivate(ui.controls.shading);                 
           ui.controls.shading.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         } else {
-          ote.dem.setHillShading(true);                
+          ote.dem.setShading(true);                
           renderMap(); 
           checkbox.prop(CHECKED, true);
           ui.controlActivate(ui.controls.shading);    
@@ -363,7 +372,7 @@ var OteUi = function(map, config) {
         min: 0,
         max: 100,
         slide: function(event, ui) {
-          ote.dem.setHillShadingOpacity(fromSlider(ui.value));
+          ote.dem.setShadingOpacity(fromSlider(ui.value));
           renderMap();
         }
       });  
@@ -373,7 +382,7 @@ var OteUi = function(map, config) {
         min: 0,
         max: 100,
         slide: function(event, ui) {
-          ote.dem.setHillShadingExaggeration(fromSlider(ui.value));
+          ote.dem.setShadingExaggeration(fromSlider(ui.value));
           renderMap();
         }
       });    

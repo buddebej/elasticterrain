@@ -148,7 +148,7 @@ body {
 }
 .ui-slider-range { background: #ccc; }
 
-.textureSelect {
+select {
     padding:0.1em;
     border : 2px #444 solid;
     background-color: #111;
