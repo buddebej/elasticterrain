@@ -50,6 +50,24 @@ body {
     padding: 2px;
 }
 
+.saveConfigButton {
+    top: 50px;
+    right: .5em;
+    position: absolute;
+    background: rgba(255,255,255,0.4);
+    border-radius: 4px;
+    padding: 2px;
+}
+
+.loadConfigButton {
+    top: 100px;
+    right: .5em;
+    position: absolute;
+    background: rgba(255,255,255,0.4);
+    border-radius: 4px;
+    padding: 2px;
+}
+
 .indicator {
   padding:4px;
   width: auto;

@@ -10,8 +10,8 @@ $(document).ready(function() {
                 // url: 'http://buddebej.de/storage/global/tiles/{z}/{x}/{y}.png',        
                 // url: 'http://cartography.oregonstate.edu/tiles/PlanObliqueEurope/data/tiles/{z}/{x}/{y}.png',
                 // url: 'http://elasticreliefmap.s3-website-us-east-1.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
-                // url: '../demo/data/eudem/{z}/{x}/{y}.png',                
-                url: '../demo/data/tiles/{z}/{x}/{y}.png',
+                url: '../demo/data/tiles/{z}/{x}/{y}.png',                
+                // url: '../demo/data/sample9/{z}/{x}/{y}.png',                
                 dem: true
             })
         });
@@ -75,31 +75,27 @@ $(document).ready(function() {
         config = {ambientLight : 0.1, // 0:1
                   colorScale : [0, 4000], // min:max [m]  
                   colorRamp : 0, // id                 
-                  criticalElevationThreshold : 0.5, // 0:1       
+                  criticalElevationThreshold : 0.75, // 0:1       
                   shading : true, // bool
                   shadingDarkness : 0.2, // 0:1
                   shadingExaggeration : 0.2, // 0:1         
                   lightAzimuth :315, // 0:360
                   lightZenith : 50, // 0:90
-                  maxElevation : 8600, // -n : +n
                   obliqueInclination : 90.0, // 0:90
-                  overlayMap: null, // null or texture id         
+                  texture: -1, // -1 = hypsometric or layer number          
                   resolution : 0.2, // 0;1
                   debug : false, // bool       
                   terrainInteraction : true, // bool
                   waterBodies : true, // bool
                   viewRotation: 0, // 0:360
-                  viewCenter: [7.754974, 46.375803], // center of map in latlon          
+                  viewCenter: [139.754974, 35.375803], // center of map in latlon          
                   viewZoom : 6, // zoomlevel
                   shearingInteraction : {threshold: 0.333, // in pixel
                                          springCoefficient: 0.08, // 0:1
                                          frictionForce: 0.17, // 0:1             
                                          maxInnerShearingPx: 40.0, // radius in pixel
                                          maxOuterShearingPx: 80.0, // radius in pixel
-                                         staticShearFadeOutAnimationSpeed: 1.5, 
-                                         criticalElevationThreshold: 0.5,
-                                         keypress : ol.events.condition.noModifierKeys,
-                                         map: map}   
+                                         staticShearFadeOutAnimationSpeed: 1.5}   
         };
 
         ui = new OteUi(map, config);

@@ -15,8 +15,7 @@ goog.require('ol.ViewHint');
  maxInnerShearingPx: number,
  maxOuterShearingPx: number,
  staticShearFadeOutAnimationSpeed: number,
- criticalElevationThreshold: number,
- keypress: ol.events.ConditionType}} */
+ criticalElevationThreshold: number}} */
 ol.interaction.DragShearIntegratedOptions;
 
 
@@ -27,9 +26,11 @@ ol.interaction.DragShearIntegratedOptions;
  * @constructor
  * @extends {ol.interaction.Pointer}
  * @param {ol.interaction.DragShearIntegratedOptions} options
+ * @param {ol.Map} map
+ * @param {ol.events.ConditionType} condition
  * @api stable
  */
-ol.interaction.DragShearIntegrated = function(options) {
+ol.interaction.DragShearIntegrated = function(options,map,condition) {
 	goog.base(this, {
 		handleDownEvent : ol.interaction.DragShearIntegrated.handleDownEvent_,
 		handleDragEvent : ol.interaction.DragShearIntegrated.handleDragEvent_,
@@ -51,8 +52,10 @@ ol.interaction.DragShearIntegrated = function(options) {
 	this.options;
 	this.setOptions(options);
 
+	goog.asserts.assertInstanceof(map, ol.Map, 'dragShearIntegrated expects map object');
+
 	/** @type {ol.Map} */
-	this.map = this.options.map;
+	this.map = map;
 
 	/** @type {ol.View} */
 	this.view = this.map.getView();
@@ -64,7 +67,7 @@ ol.interaction.DragShearIntegrated = function(options) {
 	this.demRenderer = /** @type {ol.renderer.webgl.TileDemLayer} */(this.map.getRenderer().getLayerRenderer(this.demLayer));
 
 	/** @type {ol.events.ConditionType} */
-	this.condition = goog.isDef(this.options['keypress']) ? this.options['keypress'] : ol.events.condition.noModifierKeys;
+	this.condition = goog.isDef(condition['keypress']) ? condition['keypress'] : ol.events.condition.noModifierKeys;
 
 	/** @type {number} */
 	this.springLength = 0;
@@ -387,7 +390,6 @@ goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'disable', ol.
  * @param {ol.interaction.DragShearIntegratedOptions} options
  */
 ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
-	goog.asserts.assertInstanceof(options.map, ol.Map, 'dragShearIntegrated expects map object');
 	goog.asserts.assert(goog.isDef(options.threshold));
 	goog.asserts.assert(goog.isDef(options.springCoefficient));
 	goog.asserts.assert(goog.isDef(options.frictionForce));
