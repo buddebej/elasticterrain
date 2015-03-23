@@ -68,7 +68,7 @@ ol.render.Event = function(
    * Canvas context. Only available when a Canvas renderer is used, null
    * otherwise.
    * @type {CanvasRenderingContext2D|null|undefined}
-   * @api
+   * @api 
    */
   this.context = opt_context;
 

@@ -15,7 +15,7 @@
     <script src="js/oteUi.js" type="text/javascript"></script>
     <script src="js/oteSave.js" type="text/javascript"></script>
     <script src="js/oteInit.js" type="text/javascript"></script>
-    <title>Open Terrain Viewer</title>
+    <title>Elastic Relief Map</title>
 </head>
 
 <body>
@@ -166,6 +166,13 @@
                         <i class="fa fa-connectdevelop"></i> Model Resolution
                         <div class="resolutionSlider floatingSlider"></div>
                     </div>
+
+                    <div id="no-download" class="alert alert-error" style="display: none">
+            This example requires a browser that supports the
+            <a href="http://caniuse.com/#feat=download">link download</a> attribute.
+          </div>
+          <a id="export-png" class="btn" download="map.png"><i class="icon-download"></i> Export PNG</a>
+
                 </div>
             </div>
             <div class="control rotation">

@@ -188,7 +188,7 @@ var OteUi = function(map, config) {
         });
         SLIDER_COLOR.slider({
             values: config.colorScale
-        }); 
+        });
         SLIDER_DARKNESS.slider({
             value: toSlider(config.shadingDarkness)
         });
@@ -278,15 +278,15 @@ var OteUi = function(map, config) {
                 var name = obj.viewCenter[1].toFixed(2) + ', ' + obj.viewCenter[0].toFixed(2);
                 SELECT_CONFIG.append($('<option></option>').val(val).html(name));
                 // select config that was saved last
-                if(val === ui.options.configStore.length-1 ){
-                  SELECT_CONFIG.find('option[value=' + val + ']').attr('selected', true);
+                if (val === ui.options.configStore.length - 1) {
+                    SELECT_CONFIG.find('option[value=' + val + ']').attr('selected', true);
                 }
             });
         };
 
         SELECT_CONFIG.change(function() {
             config = ui.options.configStore[SELECT_CONFIG.find($('option:selected')).val()];
-            ui.updateControlTools();                        
+            ui.updateControlTools();
             ui.updateMap();
         });
     }
@@ -681,14 +681,18 @@ var OteUi = function(map, config) {
         </div>
         <a id="export-png" class="btn" download="map.png"><i class="icon-download"></i> Export PNG</a>
     */
-    /*var exportPNGElement = document.getElementById('export-png');
+    var exportPNGElement = document.getElementById('export-png');
 
     if ('download' in exportPNGElement) {
-      exportPNGElement.addEventListener('click', function(e) {
-        e.target.href = map.getRenderer().getCanvas().toDataURL('image/png');
-      }, false);
+        exportPNGElement.addEventListener('click', function(e) {
+            ui.map.once('postcompose', function(event) {
+                var canvas = event.glContext.getCanvas();
+                exportPNGElement.href = canvas.toDataURL('image/png');
+            });
+            ui.map.renderSync();
+        }, false);
     } else {
-      var info = document.getElementById('no-download');
-      info.style.display = '';
-    }*/
+        var info = document.getElementById('no-download');
+        info.style.display = '';
+    }
 };

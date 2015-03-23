@@ -79,8 +79,11 @@ var OteSave = function(ui, config) {
             type: 'GET',
             url: url,
             success: function(data) {
-                ui.updateConfigStore(data);
+                ui.updateConfigStore(data);                
             },
+            error: function(data) {
+                ui.controls.config.cont.hide();                
+            },            
             dataType: dataType
         });
     };

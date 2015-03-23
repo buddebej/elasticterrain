@@ -163,6 +163,10 @@ ol.webgl.Context.prototype.disposeInternal = function() {
 ol.webgl.Context.prototype.getCanvas = function() {
   return this.canvas_;
 };
+goog.exportProperty(
+    ol.webgl.Context.prototype,
+    'getCanvas',
+    ol.webgl.Context.prototype.getCanvas);
 
 
 /**
