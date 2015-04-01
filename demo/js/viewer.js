@@ -39,12 +39,15 @@ var Viewer = function(config, layers) {
             return n + this.DEGREE_STEP - rest;
         }
     };
+
     this.toRadians = function(a) {
         return a * Math.PI / 180.0;
     };
+
     this.toDegrees = function(a) {
         return Math.abs(a) * 180 / Math.PI;
     };
+
     this.hideLayersExcept = function(id) {
         $.each(this.layers, function(val, obj) {
             if (!obj.base) { // don't hide dem base layer
@@ -56,22 +59,25 @@ var Viewer = function(config, layers) {
             }
         }.bind(this));
     };
+
     this.setLayerPreload = function(l) {
         $.each(this.layers, function(val, obj) {
             obj.data.setPreload(l);
         });
     };
+
     // wrapper for config.set    
     this.set = function(attr, val) {
         config.set(attr, val);
         this.update();
     };
+
     // wrapper for config.get
     this.get = function(attr, val) {
         return config.get(attr);
     };
 
-    // apply current config values to map
+    // apply current config 
     this.update = function() {
         this.view.setCenter(ol.proj.transform(this.config.get('viewCenter'), 'EPSG:4326', 'EPSG:3857'));
         this.view.setRotation(this.toRadians(this.config.get('viewRotation')));
@@ -91,21 +97,27 @@ var Viewer = function(config, layers) {
         this.dem.setTerrainInteraction(this.config.get('terrainInteraction'));
         this.dem.setCriticalElevationThreshold(this.config.get('iCriticalElevationThreshold'));
         this.dem.setOverlayTiles((this.config.get('texture') !== -1) ? this.layers[this.config.get('texture')].data : null);
+        this.shearingInteraction.setOptions(this.getShearingInteractionOptions());
         this.render();
     };
 
+    // return options from config
+    this.getShearingInteractionOptions = function() {
+        return {
+            threshold: this.config.get('iShearingThreshold'),
+            springCoefficient: this.config.get('iSpringCoefficient'),
+            frictionForce: this.config.get('iFrictionForce'),
+            maxInnerShearingPx: this.config.get('iMaxInnerShearingPx'),
+            maxOuterShearingPx: this.config.get('iMaxOuterShearingPx'),
+            staticShearFadeOutAnimationSpeed: this.config.get('iStaticShearFadeOutAnimationSpeed'),
+            criticalElevationThreshold: this.config.get('iCriticalElevationThreshold')
+        };
+    }.bind(this);
+    
     // init elastic terrain interactions
-    this.shearingConfig = {
-        threshold: this.config.get('iShearingThreshold'),
-        springCoefficient: this.config.get('iSpringCoefficient'),
-        frictionForce: this.config.get('iFrictionForce'),
-        maxInnerShearingPx: this.config.get('iMaxInnerShearingPx'),
-        maxOuterShearingPx: this.config.get('iMaxOuterShearingPx'),
-        staticShearFadeOutAnimationSpeed: this.config.get('iStaticShearFadeOutAnimationSpeed'),
-        criticalElevationThreshold: this.config.get('iCriticalElevationThreshold')
-    };
-    this.shearingInteraction = new ol.interaction.DragShearIntegrated(this.shearingConfig, this.map, ol.events.condition.noModifierKeys);
+    this.shearingInteraction = new ol.interaction.DragShearIntegrated(this.getShearingInteractionOptions(), this.map, ol.events.condition.noModifierKeys);
     this.map.addInteraction(this.shearingInteraction);
+
 
     // update config file when zooming
     this.view.on('change:resolution', function() {
