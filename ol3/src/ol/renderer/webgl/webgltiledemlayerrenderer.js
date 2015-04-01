@@ -64,7 +64,6 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
                   'Tiles':null,
                   'Source':null                
                  };
-
   /**
    * @private
    * @type {ol.TileRange}

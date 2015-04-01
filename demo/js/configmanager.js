@@ -1,4 +1,4 @@
-var OteSave = function(ui, config) {
+var ConfigManager = function(ControlBar, Viewer) {
     'use strict';
 
     var url = 'http://localhost:8000/api/configs',
@@ -60,11 +60,14 @@ var OteSave = function(ui, config) {
     // };
 
     var saveConfig = function() {
-        ui.updateConfig();
+       ui.updateConfig();
         $.ajax({
             type: 'POST',
             url: url,
             data: config,
+            beforeSend : function (){
+                //
+            },
             success: function(data) {
                 console.log('new config saved to db');
                 loadAllConfigs();
