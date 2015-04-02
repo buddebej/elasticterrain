@@ -2,7 +2,7 @@ var Viewer = function(config, layers) {
     'use strict';
 
     this.config = config;
-
+    this.configStore = [];
     this.layers = layers.getAll();
 
     // get handle for base layer with elevation data
@@ -79,7 +79,23 @@ var Viewer = function(config, layers) {
         return config.get(attr);
     };
 
-    // apply current config 
+    // wrapper for config.swap
+    this.swapConfig = function(newStore) {
+        config.swap(newStore);
+        this.update();
+    };
+
+    // setter for configStore
+    this.setConfigStore = function(newStore) {
+        this.configStore = newStore;
+    };
+
+    // getter for configStore
+    this.getConfigStore = function() {
+        return this.configStore;
+    };    
+
+    // apply current config to renderer and map view
     this.update = function() {
         this.view.setCenter(ol.proj.transform(this.config.get('viewCenter'), 'EPSG:4326', 'EPSG:3857'));
         this.view.setRotation(this.toRadians(this.config.get('viewRotation')));
@@ -104,7 +120,7 @@ var Viewer = function(config, layers) {
 
     };
 
-    // return options from config
+    // return shearingInteractionOptions from config
     this.getShearingInteractionOptions = function() {
         return {
             threshold: this.config.get('iShearingThreshold'),

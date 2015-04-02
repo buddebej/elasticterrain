@@ -33,8 +33,8 @@ var ConfigManager = function(controlBar, viewer) {
             url: url,
             data: newConfig,
             success: function(data) {
+                // reload configStore
                 loadAllConfigs();
-                controlBar.updateConfigStore(); 
                 console.log(data.message);         
             },
             error: function(data) {
@@ -52,7 +52,7 @@ var ConfigManager = function(controlBar, viewer) {
                 controlBar.updateConfigStore(data);                
             },
             error: function(data) {
-                controlBar.controls.config.cont.hide();                
+                console.log('could not read configs from database');            
             },            
             dataType: dataType
         });

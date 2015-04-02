@@ -55,13 +55,12 @@ var ControlBar = function(viewer) {
         controlAnimation: 'blind', // animation of collapsing and expanding
         controlAnimationSpeed: 300, // animation of collapsing and expanding
         maxElevation: 8600, // max value for scaling of hypsometric color ramp
-        configStore: []
     };
 
     // config available control boxes
     ui.controls = {
         config: {
-            enabled: true,
+            enabled: false,
             collapsed: false
         },
         inclination: {
@@ -69,7 +68,7 @@ var ControlBar = function(viewer) {
             collapsed: false
         },
         texture: {
-            enabled: true,
+            enabled: false,
             collapsed: false
         },
         shading: {
@@ -124,11 +123,13 @@ var ControlBar = function(viewer) {
         });
     }();
 
+    // disable control when switch in control header is triggered
     ui.controlDeactivate = function(c) {
         c.inactive = true;
         c.head.addClass('controlHeaderInactive');
     };
 
+    // enable control when switch in control header is triggered
     ui.controlActivate = function(c) {
         c.inactive = false;
         c.head.removeClass('controlHeaderInactive');
@@ -140,11 +141,12 @@ var ControlBar = function(viewer) {
         KNOB_AZIMUTH.val(viewer.get('lightAzimuth')).trigger('change');
         KNOB_ZENITH.val(viewer.get('lightZenith')).trigger('change');
         KNOB_ROTATION.val(viewer.get('viewRotation')).trigger('change');
-        KNOB_ROTATION1.val(viewer.get('viewRotation')).trigger('change');
+
         SWITCH_SHADING.prop(CHECKED, viewer.get('shading'));
         SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
         SWITCH_WATERBODIES.prop(CHECKED, viewer.get('waterBodies'));
         SWITCH_SHEARING_INTERACTION.prop(CHECKED, viewer.get('terrainInteraction'));
+
         SLIDER_AMBIENT_LIGHT.slider({
             value: toSlider(viewer.get('ambientLight'))
         });
@@ -178,36 +180,42 @@ var ControlBar = function(viewer) {
         SLIDER_RESOLUTION.slider({
             value: toSlider(viewer.get('resolution'))
         });
+
         SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
         SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
     };
 
     // LOAD PREDEFINED CONFIGURATIONS
-    // populate select with available configurations
-    if (ui.controls.config.enabled) {
-        ui.updateConfigStore = function(newStore) {
-            if (newStore) {
-                ui.options.configStore = newStore;
-            }
-            SELECT_CONFIG.empty();
-            $.each(ui.options.configStore, function(val, obj) {
-                var name = obj.viewCenter[1].toFixed(2) + ', ' + obj.viewCenter[0].toFixed(2);
-                SELECT_CONFIG.append($('<option></option>').val(val).html(name));
-                // select config that was saved last
-                if (val === ui.options.configStore.length - 1) {
-                    SELECT_CONFIG.find('option[value=' + val + ']').attr('selected', true);
-                }
-            });
-        };
+    // update select box with configs from newStore
+    ui.updateConfigStore = function(newStore) {
+        viewer.setConfigStore(newStore);
 
-        SELECT_CONFIG.change(function() {
-            // use a copy of config for read only access during runtime
-            var configCopy = $.extend(true, {}, ui.options.configStore[SELECT_CONFIG.find($('option:selected')).val()]);
-            this.config.swap(configCopy);
-            ui.updateControlTools();
-            viewer.update();
-        }.bind(this));
-    }
+        // show control
+        ui.controls.config.cont.show();
+
+        // empty select box
+        SELECT_CONFIG.empty();
+
+        // populate select box with available configs
+        $.each(viewer.getConfigStore(), function(val, obj) {
+            var name = obj.viewCenter[1].toFixed(2) + ', ' + obj.viewCenter[0].toFixed(2) + ' (z ' + obj.viewZoom + ')';
+            SELECT_CONFIG.append($('<option></option>').val(val).html(name));
+            // select config that was saved last
+            if (val === viewer.getConfigStore().length - 1) {
+                SELECT_CONFIG.find('option[value=' + val + ']').attr('selected', true);
+            }
+        });
+    };
+
+    // on config select change
+    SELECT_CONFIG.change(function() {
+        // use a copy of config for read only access during runtime
+        var configCopy = $.extend(true, {}, viewer.getConfigStore()[SELECT_CONFIG.find($('option:selected')).val()]);
+        this.config.swap(configCopy);
+        ui.updateControlTools();        
+        viewer.update();
+    }.bind(this));
+
 
     // PLAN OBLIQUE 
     // set inclination for planoblique relief
@@ -233,7 +241,7 @@ var ControlBar = function(viewer) {
     // find available overlayers and populate dropdown menu
 
     if (viewer.layers.length > 0) {
-        ui.controls.texture.body.show();
+        ui.controls.texture.cont.show();
 
         // create copy of layers
         var sortedLayers = [];
@@ -350,6 +358,7 @@ var ControlBar = function(viewer) {
         'thickness': '.15',
         'readOnly': false,
         'angleOffset': -90,
+        'displayInput': false,
         'angleArc': 90,
         'cursor': 8,
         'fgColor': ui.options.knobcolor,
