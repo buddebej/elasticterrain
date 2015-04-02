@@ -8,3 +8,4 @@ ol3/src/ol/renderer/webgl/webgltiledemlayershader.js
 demo/data/*
 !demo/data/blank.png
 .DS_Store
+backend/node_modules/
