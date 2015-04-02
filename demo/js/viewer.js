@@ -14,10 +14,10 @@ var Viewer = function(config, layers) {
             attribution: false
         }).extend([new ol.control.ScaleLine(), new ol.control.MousePositionDem(this.dem)]),
         view: new ol.View({
-            maxZoom: 13,
-            minZoom: 1
+            maxZoom: this.config.maxZoom,
+            minZoom: this.config.minZoom
         }),
-        target: 'map',
+        target: this.config.domContainer,
         renderer: 'webgl',
         layers: layers.getData()
     });
@@ -48,6 +48,7 @@ var Viewer = function(config, layers) {
         return Math.abs(a) * 180 / Math.PI;
     };
 
+    // hide all over-layers except the given id
     this.hideLayersExcept = function(id) {
         $.each(this.layers, function(val, obj) {
             if (!obj.base) { // don't hide dem base layer
@@ -60,9 +61,10 @@ var Viewer = function(config, layers) {
         }.bind(this));
     };
 
-    this.setLayerPreload = function(l) {
+    // apply preload level (zoomlevel 1 to maxZoom) for enabled layers
+    this.setLayerPreload = function(maxZoom) {
         $.each(this.layers, function(val, obj) {
-            obj.data.setPreload(l);
+            obj.data.setPreload(maxZoom);
         });
     };
 
@@ -99,6 +101,7 @@ var Viewer = function(config, layers) {
         this.dem.setOverlayTiles((this.config.get('texture') !== -1) ? this.layers[this.config.get('texture')].data : null);
         this.shearingInteraction.setOptions(this.getShearingInteractionOptions());
         this.render();
+
     };
 
     // return options from config

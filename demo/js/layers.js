@@ -10,10 +10,10 @@ var Layers = function() {
         enabled: true,
         data: new ol.layer.TileDem({
             source: new ol.source.XYZ({
-                url: 'http://192.168.0.27/demo/data/tiles/{z}/{x}/{y}.png',
+                // url: 'http://192.168.0.27/demo/data/tiles/{z}/{x}/{y}.png',
                 // url: 'http://buddebej.de/storage/global/tiles/{z}/{x}/{y}.png',        
                 // url: 'http://cartography.oregonstate.edu/tiles/PlanObliqueEurope/data/tiles/{z}/{x}/{y}.png',
-                // url: 'http://elasticreliefmap.s3-website-us-east-1.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
+                url: 'http://elasticreliefmap.s3-website-us-east-1.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
                 // url: '../demo/data/eudem/{z}/{x}/{y}.png',
                 // url: '../demo/data/tiles/{z}/{x}/{y}.png',                                            
                 // url: '../demo/data/sample9/{z}/{x}/{y}.png',                
@@ -93,7 +93,7 @@ var Layers = function() {
         return array;
     };
 
-    this.init = function() {
+    this.enable = function() {
         $.each(this.layers_available, function(key, layer) {
             if (layer.enabled) {
                 this.layers_enabled.push(layer);
@@ -101,5 +101,5 @@ var Layers = function() {
         }.bind(this));
     };
 
-    this.init();
+    this.enable();
 };

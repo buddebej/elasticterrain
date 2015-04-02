@@ -1,26 +1,46 @@
 var Config = function(viewer) {
     'use strict';
 
-    this.c = {
-        ambientLight: 0.1, // 0:1
-        colorScale: [0, 4000], // min:max [m]  
-        colorRamp: 0, // id                 
+    // static config
+    this.maxZoom = 12;
+    this.minZoom = 3;
+    this.domContainer = 'map';
+
+    // dynamic config 
+    // can be saved and loaded by configManager
+    // can be modified by controlBar
+    // initial values
+    this.init = {
+        // shading
         shading: true, // bool
         shadingDarkness: 0.2, // 0:1
         shadingExaggeration: 0.2, // 0:1         
         lightAzimuth: 315, // 0:360
         lightZenith: 50, // 0:90
-        obliqueInclination: 90.0, // 0:90
-        texture: -1, // -1 = hypsometric or layer number          
+        ambientLight: 0.1, // 0:1
+
+        // texture
+        texture: -1, // -1 = hypsometric or layer number 
+
+        // hypsometric colors
+        waterBodies: true, // bool
+        colorScale: [0, 4000], // min:max [m]  
+        colorRamp: 0, // id   
+
+        // debug         
         resolution: 0.2, // 0;1
         debug: false, // bool       
-        terrainInteraction: true, // bool
-        waterBodies: true, // bool
+
+        // view
         viewRotation: 0, // 0:360
         viewCenter: [15.0, 38.0], // center of map in latlon          
-        viewZoom: 12, // zoomlevel
+        viewZoom: 11, // zoomlevel
+
+        // static plan oblique
+        obliqueInclination: 90.0, // 0:90
 
         // shearingInteraction 
+        terrainInteraction: true, // bool
         iCriticalElevationThreshold: 0.75, // 0:1               
         iShearingThreshold: 0.333, // in pixel
         iSpringCoefficient: 0.08, // 0:1
@@ -30,11 +50,17 @@ var Config = function(viewer) {
         iStaticShearFadeOutAnimationSpeed: 1.5
     };
 
-    this.set = function (attr, val){
-        this.c[attr]=val;
+    this.dynamic = this.init;
+
+    this.set = function(attr, val) {
+        this.dynamic[attr] = val;
     };
 
-    this.get = function(attr){
-        return this.c[attr];
+    this.get = function(attr) {
+        return (attr !== undefined) ? this.dynamic[attr] : this.dynamic;
+    };
+
+    this.swap = function(newConfig) {
+        this.dynamic = newConfig;
     };
 };

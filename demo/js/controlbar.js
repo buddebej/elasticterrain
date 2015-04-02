@@ -3,7 +3,7 @@ var ControlBar = function(viewer) {
     var ui = this,
         ote = {};
 
-    var config = viewer.config.c;
+    this.config = viewer.config;
 
     // HELPER FUNCTIONS
     var toSlider = function(v, k) {
@@ -136,74 +136,51 @@ var ControlBar = function(viewer) {
 
     // update control tools to current parameters
     ui.updateControlTools = function() {
-        KNOB_INCLINATION.val(config.obliqueInclination).trigger('change');
-        KNOB_AZIMUTH.val(config.lightAzimuth).trigger('change');
-        KNOB_ZENITH.val(config.lightZenith).trigger('change');
-        KNOB_ROTATION.val(config.viewRotation).trigger('change');
-        KNOB_ROTATION1.val(config.viewRotation).trigger('change');
-        SWITCH_SHADING.prop(CHECKED, config.shading);
-        SWITCH_DEBUG.prop(CHECKED, config.debug);
-        SWITCH_WATERBODIES.prop(CHECKED, config.waterBodies);
-        SWITCH_SHEARING_INTERACTION.prop(CHECKED, config.terrainInteraction);
+        KNOB_INCLINATION.val(viewer.get('obliqueInclination')).trigger('change');
+        KNOB_AZIMUTH.val(viewer.get('lightAzimuth')).trigger('change');
+        KNOB_ZENITH.val(viewer.get('lightZenith')).trigger('change');
+        KNOB_ROTATION.val(viewer.get('viewRotation')).trigger('change');
+        KNOB_ROTATION1.val(viewer.get('viewRotation')).trigger('change');
+        SWITCH_SHADING.prop(CHECKED, viewer.get('shading'));
+        SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
+        SWITCH_WATERBODIES.prop(CHECKED, viewer.get('waterBodies'));
+        SWITCH_SHEARING_INTERACTION.prop(CHECKED, viewer.get('terrainInteraction'));
         SLIDER_AMBIENT_LIGHT.slider({
-            value: toSlider(config.ambientLight)
+            value: toSlider(viewer.get('ambientLight'))
         });
         SLIDER_COLOR.slider({
-            values: config.colorScale
+            values: viewer.get('colorScale')
         });
         SLIDER_DARKNESS.slider({
-            value: toSlider(config.shadingDarkness)
+            value: toSlider(viewer.get('shadingDarkness'))
         });
         SLIDER_EXAGGERATION.slider({
-            value: toSlider(config.shadingExaggeration)
+            value: toSlider(viewer.get('shadingExaggeration'))
         });
         SLIDER_SPRING_COEFFICIENT.slider({
-            value: toSlider(config.iSpringCoefficient, 10)
+            value: toSlider(viewer.get('iSpringCoefficient'), 10)
         });
         SLIDER_SPRING_FRICTION.slider({
-            value: toSlider(config.iFrictionForce, 10)
+            value: toSlider(viewer.get('iFrictionForce'), 10)
         });
         SLIDER_SPRING_FADEOUT.slider({
-            value: toSlider(config.iStaticShearFadeOutAnimationSpeed)
+            value: toSlider(viewer.get('iStaticShearFadeOutAnimationSpeed'))
         });
         SLIDER_SPRING_INNRAD.slider({
-            value: config.iMaxInnerShearingPx
+            value: viewer.get('iMaxInnerShearingPx')
         });
         SLIDER_SPRING_OUTRAD.slider({
-            value: config.iMaxOuterShearingPx
+            value: viewer.get('iMaxOuterShearingPx')
         });
         SLIDER_CRITICAL_ELEVATION.slider({
-            value: toSlider(config.iCriticalElevationThreshold)
+            value: toSlider(viewer.get('iCriticalElevationThreshold'))
         });
         SLIDER_RESOLUTION.slider({
-            value: toSlider(config.resolution)
+            value: toSlider(viewer.get('resolution'))
         });
-        SELECT_TEXTURE.find('option[value=' + config.texture + ']').attr('selected', true).change();
-        SELECT_COLOR_RAMP.find('option[value=' + config.colorRamp + ']').attr('selected', true);
+        SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
+        SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
     };
-
-    // update control tools to current parameters
-    ui.updateConfig = function() {
-        config.viewCenter = ol.proj.transform(viewer.view.getCenter(), 'EPSG:3857', 'EPSG:4326');
-        config.viewZoom = viewer.view.getZoom();
-        config.viewRotation = viewer.view.getRotation();
-        config.obliqueInclination = viewer.dem.getObliqueInclination();
-        config.lightAzimuth = viewer.dem.getLightAzimuth();
-        config.lightZenith = viewer.dem.getLightZenith();
-        config.shading = viewer.dem.getShading();
-        config.debug = viewer.dem.getTesting();
-        config.waterBodies = viewer.dem.getWaterBodies();
-        config.terrainInteraction = viewer.dem.getTerrainInteraction();
-        config.ambientLight = viewer.dem.getAmbientLight();
-        config.colorScale = viewer.dem.getColorScale();
-        config.shadingDarkness = viewer.dem.getShadingOpacity();
-        config.shadingExaggeration = viewer.dem.getShadingExaggeration();
-        config.iCriticalElevationThreshold = viewer.dem.getCriticalElevationThreshold();
-        config.resolution = viewer.dem.getResolution();
-        config.texture = parseInt(SELECT_TEXTURE.find($('option:selected')).val());
-        config.colorRamp = parseInt(SELECT_COLOR_RAMP.find($('option:selected')).val());
-    };
-
 
     // LOAD PREDEFINED CONFIGURATIONS
     // populate select with available configurations
@@ -224,10 +201,11 @@ var ControlBar = function(viewer) {
         };
 
         SELECT_CONFIG.change(function() {
-            config = ui.options.configStore[SELECT_CONFIG.find($('option:selected')).val()];
+            // use a copy of config for read only access during runtime
+            var configCopy = $.extend(true, {}, ui.options.configStore[SELECT_CONFIG.find($('option:selected')).val()]);
+            this.config.swap(configCopy);
             ui.updateControlTools();
-            ui.updateMap();
-        });
+        }.bind(this));
     }
 
     // PLAN OBLIQUE 
@@ -237,7 +215,6 @@ var ControlBar = function(viewer) {
         'height': 70,
         'max': 90,
         'min': 10,
-        'value': config.inclination,
         'step': ui.options.degreeSteps,
         'thickness': '.15',
         'readOnly': false,
@@ -256,14 +233,17 @@ var ControlBar = function(viewer) {
 
     if (viewer.layers.length > 0) {
         ui.controls.texture.body.show();
-        
+
         // create copy of layers
         var sortedLayers = [];
         $.each(viewer.layers, function(val, obj) {
-            if(obj.data === viewer.dem){
+            if (obj.data === viewer.dem) {
                 val = -1;
             }
-            sortedLayers.push({id: val, layer: obj});
+            sortedLayers.push({
+                id: val,
+                layer: obj
+            });
         });
 
         // sort layers by pos attribute for select box
@@ -279,13 +259,14 @@ var ControlBar = function(viewer) {
         // on layer changed
         SELECT_TEXTURE.change(function() {
             var selectedLayer = parseInt(SELECT_TEXTURE.find($('option:selected')).val());
+
             if (selectedLayer === -1) {
-                viewer.set('texture', -1);   
+                viewer.set('texture', -1);
                 // hide all overlayers             
                 viewer.hideLayersExcept(null);
                 // show hypsometric color controls               
                 COLOR_CONTROLS.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
-            } else if (viewer.layers.hasOwnProperty(selectedLayer)) {
+            } else {
                 viewer.set('texture', selectedLayer);
                 // hide other layers                             
                 viewer.hideLayersExcept(selectedLayer);

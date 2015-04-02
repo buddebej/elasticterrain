@@ -1,4 +1,4 @@
-var ConfigManager = function(ControlBar, Viewer) {
+var ConfigManager = function(controlBar, viewer) {
     'use strict';
 
     var url = 'http://localhost:8000/api/configs',
@@ -22,7 +22,7 @@ var ConfigManager = function(ControlBar, Viewer) {
         });
     };
     ol.inherits(this.saveConfigButton, ol.control.Control);
-    ui.map.addControl(new this.saveConfigButton());
+    viewer.map.addControl(new this.saveConfigButton());
 
     // this.loadConfigButton = function() {
     //     var anchor = document.createElement('button');
@@ -60,18 +60,16 @@ var ConfigManager = function(ControlBar, Viewer) {
     // };
 
     var saveConfig = function() {
-       ui.updateConfig();
         $.ajax({
             type: 'POST',
             url: url,
-            data: config,
+            data: viewer.config.get(),
             beforeSend : function (){
                 //
             },
             success: function(data) {
-                console.log('new config saved to db');
                 loadAllConfigs();
-                ui.updateConfigStore();       
+                controlBar.updateConfigStore();       
             },
             dataType: dataType
         });
@@ -82,10 +80,10 @@ var ConfigManager = function(ControlBar, Viewer) {
             type: 'GET',
             url: url,
             success: function(data) {
-                ui.updateConfigStore(data);                
+                controlBar.updateConfigStore(data);                
             },
             error: function(data) {
-                ui.controls.config.cont.hide();                
+                controlBar.controls.config.cont.hide();                
             },            
             dataType: dataType
         });
