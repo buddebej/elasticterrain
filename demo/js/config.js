@@ -5,6 +5,7 @@ var Config = function(viewer) {
     this.maxZoom = 12;
     this.minZoom = 3;
     this.domContainer = 'map';
+    this.dbUrl = 'http://localhost:8000/api/configs';
 
     // dynamic config 
     // can be saved and loaded by configManager

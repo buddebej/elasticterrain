@@ -205,6 +205,7 @@ var ControlBar = function(viewer) {
             var configCopy = $.extend(true, {}, ui.options.configStore[SELECT_CONFIG.find($('option:selected')).val()]);
             this.config.swap(configCopy);
             ui.updateControlTools();
+            viewer.update();
         }.bind(this));
     }
 
