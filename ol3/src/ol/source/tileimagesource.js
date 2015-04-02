@@ -37,7 +37,7 @@ ol.source.TileImage = function(options, opt_isDem) {
   });
 
   /**
-   * @protected
+   * @public
    * @type {boolean}
    */ 
   this.isDemTileImage = (goog.isDef(opt_isDem)) ? opt_isDem : false;

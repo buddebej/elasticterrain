@@ -62,7 +62,7 @@ ol.interaction.DragShearIntegrated = function(options,map,condition) {
 
 	// find elevation model layer
 	var demIndex = null;
-	goog.array.forEach(this.map.getLayers().getArray(), function(v,i,array){if(v.getSource().isDemTileImage){demIndex = i;}});
+	goog.array.forEach(this.map.getLayers().getArray(), function(v,i,array){if(/** @type {ol.source.TileImage} */(/** @type {ol.layer.TileDem|ol.layer.Tile} */(v).getSource()).isDemTileImage){demIndex = i;}});
 	/** @type {ol.layer.TileDem} */
 	this.demLayer = /** @type {ol.layer.TileDem} */(this.map.getLayers().getArray()[demIndex]);
 
