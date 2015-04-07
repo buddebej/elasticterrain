@@ -6,6 +6,12 @@
 // texture with encoded elevation values
 uniform sampler2D u_texture;
 
+// texture with overlay map
+uniform sampler2D u_overlayTexture;
+
+// flag for active overlay texture
+uniform bool u_overlayActive;
+
 // length of one tile in meter at equator
 uniform float u_tileSizeM;
 
@@ -65,11 +71,23 @@ void main(void) {
     // normalize elevation for current minimum and maximum
     float nElevation = u_maxElevation*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
 
-    // shift vertex positions by given shearing factors
-    // z value has to be inverted to get a left handed coordinate system and to make the depth test work
-    gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
-                        (u_z-abs(absElevation/u_tileSizeM)), 
-                        1.0);
+    if(u_overlayActive){
+        // FIXME 
+        // sometimes the overlay texture is mistaken for the elevation model
+        // we could use different shaders for rendering with and without overlay
+        // or we can find a reliable test in the function that serves the overlay textures
+        if(texture2D(u_overlayTexture, v_texCoord) != texture2D(u_texture, v_texCoord)){
+            gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
+                                u_z-(absElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
+                                1.0);
+        }
+    } else {
+        // shift vertex positions by given shearing factors
+        // z value has to be inverted to get a left handed coordinate system and to make the depth test work
+        gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
+                            u_z-(absElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
+                            1.0);
+    }
 }
 
 //! FRAGMENT
@@ -77,17 +95,11 @@ void main(void) {
 // color ramp texture to look up hypsometric tints
 uniform sampler2D u_colorRamp;
 
-// texture with overlay map
-uniform sampler2D u_overlayTexture;
-
 // flag for coloring inland waterbodies
 uniform bool u_waterBodies; 
 
 // flag for hillShading
 uniform bool u_shading; 
-
-// flag for active overlay texture
-uniform bool u_overlayActive;
 
 // flag for testing mode
 uniform bool u_testing;    
@@ -236,7 +248,7 @@ void main(void) {
     // testing mode
         if(u_testing){
 
-            vec4 red = vec4(1.0,0.0,0.0,1.0);
+            vec4 red = vec4(0.98,0.18,0.15,1.0);
             vec4 green = vec4(0.0,1.0,0.0,1.0);
             vec4 blue = vec4(0.0,0.0,1.0,1.0);
             vec4 cyan = vec4(0.0,0.5,0.5,1.0);
@@ -249,6 +261,11 @@ void main(void) {
             if(absElevation < criticalEl){
                 float gray = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114));
                 gl_FragColor = vec4(gray, gray, gray, 1.0);
+            }   
+
+            if(absElevation > criticalEl){
+                float gray = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114));
+                gl_FragColor = vec4(red.xyz, gray);
             }           
 
             // mark tile borders and draw a grid            
