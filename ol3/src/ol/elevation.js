@@ -23,4 +23,4 @@ ol.Elevation.MAX = 9000;
  * @const 
  * @type {number}
  */
-ol.Elevation.MIN = -500;
+ol.Elevation.MIN = -11000;
