@@ -435,13 +435,6 @@ ol.renderer.webgl.Map.prototype.handleWebGLContextRestored = function() {
  */
 ol.renderer.webgl.Map.prototype.initializeGL_ = function() {
   var gl = this.gl_;
-  gl.activeTexture(goog.webgl.TEXTURE0);
-  // gl.blendFuncSeparate(
-  //     goog.webgl.SRC_ALPHA, goog.webgl.ONE_MINUS_SRC_ALPHA,
-  //     goog.webgl.ONE, goog.webgl.ONE_MINUS_SRC_ALPHA);
-
-  // gl.blendFunc(goog.webgl.ONE, goog.webgl.ONE_MINUS_SRC_ALPHA);
-  
   gl.disable(goog.webgl.BLEND);
   gl.disable(goog.webgl.SCISSOR_TEST);
   gl.enable(goog.webgl.DEPTH_TEST);  
