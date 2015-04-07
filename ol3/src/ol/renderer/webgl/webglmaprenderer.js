@@ -100,7 +100,8 @@ ol.renderer.webgl.Map = function(container, map) {
     depth: true,
     failIfMajorPerformanceCaveat: true,
     preserveDrawingBuffer: false,
-    stencil: true
+    stencil: true,
+    premultipliedAlpha : false
   });
   goog.asserts.assert(!goog.isNull(this.gl_));
 
@@ -435,17 +436,20 @@ ol.renderer.webgl.Map.prototype.handleWebGLContextRestored = function() {
 ol.renderer.webgl.Map.prototype.initializeGL_ = function() {
   var gl = this.gl_;
   gl.activeTexture(goog.webgl.TEXTURE0);
-  gl.blendFuncSeparate(
-      goog.webgl.SRC_ALPHA, goog.webgl.ONE_MINUS_SRC_ALPHA,
-      goog.webgl.ONE, goog.webgl.ONE_MINUS_SRC_ALPHA);
- 
- // enable depth testing
+  // gl.blendFuncSeparate(
+  //     goog.webgl.SRC_ALPHA, goog.webgl.ONE_MINUS_SRC_ALPHA,
+  //     goog.webgl.ONE, goog.webgl.ONE_MINUS_SRC_ALPHA);
+
+  // gl.blendFunc(goog.webgl.ONE, goog.webgl.ONE_MINUS_SRC_ALPHA);
+  
+  gl.disable(goog.webgl.BLEND);
   gl.disable(goog.webgl.SCISSOR_TEST);
   gl.enable(goog.webgl.DEPTH_TEST);  
   gl.depthRange(0.0,1.0);                             
   gl.depthFunc(goog.webgl.LEQUAL);   
   // https://www.khronos.org/webgl/public-mailing-list/archives/1010/msg00009.html
   gl.pixelStorei(goog.webgl.UNPACK_COLORSPACE_CONVERSION_WEBGL, goog.webgl.NONE);
+  gl.pixelStorei(goog.webgl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);  
 };
 
 
@@ -519,7 +523,6 @@ ol.renderer.webgl.Map.prototype.renderFrame = function(frameState) {
 
   gl.clearColor(0, 0, 0, 0);
   gl.clear(goog.webgl.COLOR_BUFFER_BIT);
-  //gl.enable(goog.webgl.BLEND);
   gl.viewport(0, 0, this.canvas_.width, this.canvas_.height);
 
   this.dispatchComposeEvent_(ol.render.EventType.PRECOMPOSE, frameState);
