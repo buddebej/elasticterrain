@@ -31,8 +31,8 @@ float decodeElevation(in vec4 colorChannels) {
 }
 
 // decodes input data elevation value for tile borders, using blue channel
-float decodeElevationA(in vec4 colorChannels) {
-    float elevationM = (colorChannels.b*255.0 + (colorChannels.g*255.0)*256.0)-11000.0;
+float decodeElevationB(in vec2 colorChannels) {
+    float elevationM = (colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0;
     return elevationM;
 }
 
@@ -125,9 +125,29 @@ uniform float u_critElThreshold;
 
 // cellsize for tile resolution of 256x256 pixel = 1.0/256.0
 const highp float CELLSIZE = 0.00390625; 
+const highp float PSIZE = 1.0/512.0; 
+
+float rowToCell(in int row) { 
+    float v = (float(row)*2.0+1.0)/512.0;
+    return v;
+}
 
 void main(void) {
+
+        // Orientation of coordinate system in fragment shader:
+        //  NORTH
+        // ------>  x
+        // |
+        // | 
+        // y    
+
         vec2 m_texCoord = v_texCoord;
+        m_texCoord = vec2(m_texCoord.x,m_texCoord.y);
+
+        bool atNorthBorder = m_texCoord.y <= CELLSIZE;
+        bool atSouthBorder = m_texCoord.y >= 1.0-CELLSIZE;
+        bool atWestBorder = m_texCoord.x <= CELLSIZE;
+        bool atEastBorder = m_texCoord.x >= 1.0 - CELLSIZE;
 
         // read and decode elevation values from tile texture
         float absElevation = decodeElevation(texture2D(u_texture, m_texCoord.xy));
@@ -135,29 +155,49 @@ void main(void) {
         // read neighboring values
         float neighborRight = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)));
         float neighborLeft = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)));
-        float neighborAbove = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)));
-        float neighborBelow = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)));          
-          
+        float neighborAbove = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)));
+        float neighborBelow = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)));         
+    
 
-        // display tile borders properly: use alternative decoding, read neighboring values from blue-band
-        bool atEastBorder = m_texCoord.x >= 1.0 - CELLSIZE;
-        bool atWestBorder = m_texCoord.x <= CELLSIZE;
-        bool atNorthBorder = m_texCoord.y >= 1.0 - CELLSIZE;
-        bool atSouthBorder = m_texCoord.y <= CELLSIZE;
+        // display tile borders properly: use alternative decoding
+        // last eight rows of blue channel contain neighbor values
+        if(atNorthBorder){ 
+            float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(256))).b; // row 256          
+            float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(251))).b; // row 251
+            neighborAbove = decodeElevationB(vec2(valB, valA));
+        }
 
-        if(atEastBorder){            
-            neighborRight = decodeElevationA(texture2D(u_texture, m_texCoord.xy));
+        if(atSouthBorder){  
+            float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(254))).b; // row 254        
+            float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(250))).b; // row 250
+            neighborBelow = decodeElevationB(vec2(valB, valA));            
         }
-        if(atWestBorder){                
-            neighborLeft = decodeElevationA(texture2D(u_texture, m_texCoord.xy));
+
+        if(atEastBorder){ 
+            float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(253))).b; // row 253         
+            float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(249))).b; // row 249 
+            neighborRight = decodeElevationB(vec2(valB, valA));            
         }
-        if(atNorthBorder){          
-            neighborAbove = decodeElevationA(texture2D(u_texture, m_texCoord.xy));
-        }
-        if(atSouthBorder){             
-            neighborBelow = decodeElevationA(texture2D(u_texture, m_texCoord.xy));       
-        }
+
+        if(atWestBorder){  
+            float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(252))).b; // row 252         
+            float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(248))).b; // row 248 
+            neighborLeft = decodeElevationB(vec2(valB, valA));            
+        }        
+
+        // cardboard stack
+        // neighborRight = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.xy)).g));
+        // neighborAbove = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.xy)).g));
+        // neighborLeft = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.xy)).g));
+        // neighborRight = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.xy)).g));
+
+        // neighborRight = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)).g));
+        // neighborLeft  = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)).g));
+        // neighborAbove = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)).g));
+        // neighborBelow = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)).g));         
+   
         
+
     // texture
         vec4 fragColor;
 
@@ -251,7 +291,7 @@ void main(void) {
             vec4 red = vec4(0.98,0.18,0.15,1.0);
             vec4 green = vec4(0.0,1.0,0.0,1.0);
             vec4 blue = vec4(0.0,0.0,1.0,1.0);
-            vec4 cyan = vec4(0.0,0.5,0.5,1.0);
+            vec4 black = vec4(0.0,0.0,0.0,1.0);
             vec4 lighten = vec4(1.2,1.2,1.2,1.0);
 
             // highlight maxima and minima 
@@ -270,16 +310,16 @@ void main(void) {
 
             // mark tile borders and draw a grid            
             if(atWestBorder){
-                gl_FragColor = blue;
-            }
-            if(atEastBorder){
-                gl_FragColor = red;
-            }
-            if(atNorthBorder){
                 gl_FragColor = green;
             }
+            if(atEastBorder){
+                gl_FragColor = black;
+            }
+            if(atNorthBorder){
+                gl_FragColor = red;
+            }
             if(atSouthBorder){
-                gl_FragColor = cyan;
+                gl_FragColor = blue;
             } 
             if(mod(m_texCoord.x,65.0*CELLSIZE) < CELLSIZE){
                gl_FragColor = gl_FragColor*lighten;
