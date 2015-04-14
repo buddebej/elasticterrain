@@ -5,7 +5,7 @@ ol3/examples/example-list.js
 ol3/examples/example-list.xml
 ol3/node_modules/
 ol3/src/ol/renderer/webgl/webgltiledemlayershader.js
-demo/data/*
-!demo/data/blank.png
+www/data/*
+!www/data/blank.png
 .DS_Store
 backend/node_modules/
