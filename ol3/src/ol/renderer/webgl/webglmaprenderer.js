@@ -442,7 +442,6 @@ ol.renderer.webgl.Map.prototype.initializeGL_ = function() {
   gl.depthFunc(goog.webgl.LEQUAL);   
   // https://www.khronos.org/webgl/public-mailing-list/archives/1010/msg00009.html
   gl.pixelStorei(goog.webgl.UNPACK_COLORSPACE_CONVERSION_WEBGL, goog.webgl.NONE);
-  gl.pixelStorei(goog.webgl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);  
 };
 
 

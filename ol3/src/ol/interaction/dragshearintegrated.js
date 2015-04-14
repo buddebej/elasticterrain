@@ -227,7 +227,7 @@ ol.interaction.DragShearIntegrated = function(options,map,condition) {
 		var otherInteractionActive = this.view.getHints()[ol.ViewHint.INTERACTING];
 
 		if (stopAnimation || otherInteractionActive) {
-			console.log("stop");
+			// console.log("stop");
 			// stop the animation
 			this.animationDelay.stop();
 			this.lastRenderTime = null;
