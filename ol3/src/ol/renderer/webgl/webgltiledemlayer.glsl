@@ -24,6 +24,9 @@ uniform float u_maxElevation;
 // temporary variable for coord transfer to fragment shader
 varying vec2 v_texCoord;
 
+// current shearing factor
+uniform vec2 u_scaleFactor;
+
 // decodes input data elevation value using red and green channel
 float decodeElevation(in vec4 colorChannels) {
     float elevationM = (colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0;
@@ -43,9 +46,6 @@ attribute vec2 a_position;
 
 // tile offset in current framebuffer view
 uniform vec4 u_tileOffset;
-
-// current shearing factor
-uniform vec2 u_scaleFactor;
 
 // current depth depends on zoomlevel
 uniform float u_z;
@@ -104,6 +104,9 @@ uniform bool u_shading;
 // flag for testing mode
 uniform bool u_testing;    
 
+// flag for testing mode
+uniform bool u_stackedCardb; 
+
 // scale threshold values to adapt color ramp 
 // u_colorScale.x is lower threshold, u_colorScale.y is upper threshold
 uniform vec2 u_colorScale;
@@ -149,28 +152,31 @@ void main(void) {
         bool atWestBorder = m_texCoord.x <= CELLSIZE;
         bool atEastBorder = m_texCoord.x >= 1.0 - CELLSIZE;
 
+        vec2 nRight = vec2(m_texCoord.x+CELLSIZE, m_texCoord.y);
+        vec2 nLeft = vec2(m_texCoord.x-CELLSIZE, m_texCoord.y);
+        vec2 nAbove = vec2(m_texCoord.x, m_texCoord.y+CELLSIZE);
+        vec2 nBelow = vec2(m_texCoord.x, m_texCoord.y-CELLSIZE);
         // read and decode elevation values from tile texture
         float absElevation = decodeElevation(texture2D(u_texture, m_texCoord.xy));
 
         // read neighboring values
-        float neighborRight = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)));
-        float neighborLeft = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)));
-        float neighborAbove = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)));
-        float neighborBelow = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)));         
-    
+        float neighborRight = decodeElevation(texture2D(u_texture, nRight));
+        float neighborLeft  = decodeElevation(texture2D(u_texture, nLeft));
+        float neighborAbove = decodeElevation(texture2D(u_texture, nAbove));
+        float neighborBelow = decodeElevation(texture2D(u_texture, nBelow));    
 
         // display tile borders properly: use alternative decoding
         // last eight rows of blue channel contain neighbor values
         if(atNorthBorder){ 
             float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(256))).b; // row 256          
             float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(251))).b; // row 251
-            neighborAbove = decodeElevationB(vec2(valB, valA));
+            neighborBelow = decodeElevationB(vec2(valB, valA));
         }
 
         if(atSouthBorder){  
             float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(254))).b; // row 254        
             float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(250))).b; // row 250
-            neighborBelow = decodeElevationB(vec2(valB, valA));            
+            neighborAbove = decodeElevationB(vec2(valB, valA));            
         }
 
         if(atEastBorder){ 
@@ -183,20 +189,15 @@ void main(void) {
             float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(252))).b; // row 252         
             float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(248))).b; // row 248 
             neighborLeft = decodeElevationB(vec2(valB, valA));            
-        }        
+        }         
 
         // cardboard stack
-        // neighborRight = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.xy)).g));
-        // neighborAbove = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.xy)).g));
-        // neighborLeft = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.xy)).g));
-        // neighborRight = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.xy)).g));
-
-        // neighborRight = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y)).g));
-        // neighborLeft  = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y)).g));
-        // neighborAbove = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y-CELLSIZE)).g));
-        // neighborBelow = decodeElevationB(vec2(0.0, texture2D(u_texture, vec2(m_texCoord.x, m_texCoord.y+CELLSIZE)).g));         
-   
-        
+        if(u_stackedCardb && !u_overlayActive && absElevation<0.0){
+            // neighborRight = decodeElevationB(vec2(0.0, texture2D(u_texture, nRight).g));
+            // neighborLeft  = decodeElevationB(vec2(0.0, texture2D(u_texture, nLeft).g));
+            neighborAbove = decodeElevationB(vec2(0.0, texture2D(u_texture, nAbove).g));            
+            // neighborBelow = decodeElevationB(vec2(0.0, texture2D(u_texture, nBelow).g));
+        }               
 
     // texture
         vec4 fragColor;
@@ -208,17 +209,14 @@ void main(void) {
             // lookup a hypsometric color   
 
                 // scaling of color ramp
-                // float elevationRange = u_maxElevation-u_minElevation;
-                // float colorMin = u_colorScale.x/elevationRange;
-                // float colorMax = u_colorScale.y/elevationRange;   
-                // float relativeElevation = ((absElevation/elevationRange) - colorMax) / (colorMax - colorMin);
-                // float relativeElevation = (((absElevation+abs(u_minElevation))/elevationRange) - colorMin) / (colorMax - colorMin);
+                float colorMin = 1.0-u_colorScale.x*1.0;
+                float colorMax = u_colorScale.y*1.0;   
 
                 // treshold on color ramp texture
                 float landWaterLimit = 0.325;
 
                 // use color values above threshold
-                float relativeElevation = landWaterLimit+landWaterLimit*(absElevation/u_maxElevation);
+                float relativeElevation = landWaterLimit+(1.0-landWaterLimit)*(absElevation/u_maxElevation);
 
                 // use color values below threshold (bathymetry)
                 if(absElevation < 0.0){

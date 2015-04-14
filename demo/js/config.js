@@ -2,10 +2,10 @@ var Config = function(viewer) {
     'use strict';
 
     // static config
-    this.maxZoom = 12;
-    this.minZoom = 3;
+    this.maxZoom = 11;
+    this.minZoom = 1;
     this.domContainer = 'map';
-    this.dbUrl = 'http://localhost:8000/api/configs';
+    this.dbUrl = 'http://54.69.7.112:8000/api/configs';
 
     // dynamic config 
     // can be saved and loaded by configManager
@@ -14,8 +14,8 @@ var Config = function(viewer) {
     this.init = {
         // shading
         shading: true, // bool
-        shadingDarkness: 0.2, // 0:1
-        shadingExaggeration: 0.2, // 0:1         
+        shadingDarkness: 0.1, // 0:1
+        shadingExaggeration: 0.6, // 0:1         
         lightAzimuth: 315, // 0:360
         lightZenith: 50, // 0:90
         ambientLight: 0.1, // 0:1
@@ -24,6 +24,7 @@ var Config = function(viewer) {
         texture: -1, // -1 = hypsometric or layer number 
 
         // hypsometric colors
+        stackedCardboard: true, // bool
         waterBodies: true, // bool
         colorScale: [0, 4000], // min:max [m]  
         colorRamp: 0, // id   
@@ -35,7 +36,7 @@ var Config = function(viewer) {
         // view
         viewRotation: 0, // 0:360
         viewCenter: [15.0, 38.0], // center of map in latlon          
-        viewZoom: 11, // zoomlevel
+        viewZoom: 6, // zoomlevel
 
         // static plan oblique
         obliqueInclination: 90.0, // 0:90
@@ -55,6 +56,7 @@ var Config = function(viewer) {
 
     this.set = function(attr, val) {
         this.dynamic[attr] = val;
+        // console.log(attr,val);
     };
 
     this.get = function(attr) {

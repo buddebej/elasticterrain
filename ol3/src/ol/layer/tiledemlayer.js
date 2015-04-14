@@ -11,6 +11,7 @@ ol.layer.TileDemProperty = {
   AMBIENT_LIGHT: 'ambientLight',
   COLOR_RAMP: 'colorRamp',
   COLOR_SCALE: 'colorScale',  
+  STACKED_CARDBOARD: 'stackedCardboard',
   CRITICAL_ELEVATION: 'criticalElevation',    
   SHADING : 'shading',
   SHADING_OPACITY : 'shadingOpacity',
@@ -58,6 +59,7 @@ ol.layer.TileDem = function(opt_options) {
   this.setAmbientLight(goog.isDef(options.ambientLight) ? options.ambientLight : 0.0);
   this.setColorRamp(goog.isDef(options.colorRamp) ? options.colorRamp : 0);  
   this.setColorScale(goog.isDef(options.colorScale) ? options.colorScale : [0.0,1.0]);  
+  this.setStackedCardboard(goog.isDef(options.stackedCardboard) ? options.stackedCardboard : true);  
   this.setCriticalElevationThreshold(goog.isDef(options.criticalElevation) ? options.criticalElevation : 0.5);  
   this.setShading(goog.isDef(options.shading) ? options.shading : true);
   this.setShadingOpacity(goog.isDef(options.shadingOpacity) ? options.shadingOpacity : 1.0);
@@ -133,6 +135,30 @@ goog.exportProperty(
   ol.layer.TileDem.prototype,
   'getColorScale',
   ol.layer.TileDem.prototype.getColorScale);
+
+
+
+/**
+ * @param {boolean} stackedCardboard StackedCardboard.
+ */
+ol.layer.TileDem.prototype.setStackedCardboard = function(stackedCardboard) {
+  this.set(ol.layer.TileDemProperty.STACKED_CARDBOARD, stackedCardboard);
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'setStackedCardboard',
+  ol.layer.TileDem.prototype.setStackedCardboard);
+/**
+ * @return {boolean} StackedCardboard.
+ */
+ol.layer.TileDem.prototype.getStackedCardboard = function() {
+  return /** @type {boolean} */ (
+    this.get(ol.layer.TileDemProperty.STACKED_CARDBOARD));
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'getStackedCardboard',
+  ol.layer.TileDem.prototype.getStackedCardboard);
 
 
 

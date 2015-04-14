@@ -364,6 +364,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
           gl.uniform1f(this.locations_.u_overlayActive, this.overlay.Active === true ? 1.0 : 0.0);    
           // u_colorScale: pass colorScale factor to adapt color ramp dynamically
           gl.uniform2f(this.locations_.u_colorScale, tileDemLayer.getColorScale()[0],tileDemLayer.getColorScale()[1]); 
+          // u_stackedCardb: pass stackedCardboard flag
+          gl.uniform1f(this.locations_.u_stackedCardb, tileDemLayer.getStackedCardboard() === true ? 1.0 : 0.0);           
           // u_waterBodies: pass waterBodies to toggle rendering of inland waterBodies
           gl.uniform1f(this.locations_.u_waterBodies, tileDemLayer.getWaterBodies() === true ? 1.0 : 0.0);
           // u_shading: pass flag to activate Shading

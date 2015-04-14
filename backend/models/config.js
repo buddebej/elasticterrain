@@ -5,6 +5,7 @@ var configSchema = new Schema({
     ambientLight: Number,
     colorScale: [Number],
     colorRamp: Number,
+    stackedCardboard: Boolean,    
     shading: Boolean,
     shadingDarkness: Number,
     shadingExaggeration: Number,
