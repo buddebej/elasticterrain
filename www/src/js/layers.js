@@ -13,13 +13,11 @@ var Layers = function() {
                 // url: 'http://192.168.0.127/demo/data/chrixx/{z}/{x}/{y}.png',
                 // url: 'http://192.168.1.1/demo/data/gool/{z}/{x}/{y}.png',                
                 // url: 'http://buddebej.de/storage/global/tiles/{z}/{x}/{y}.png',        
-                // url: 'http://cartography.oregonstate.edu/tiles/PlanObliqueEurope/data/tiles/{z}/{x}/{y}.png',
-                
+                // url: 'http://cartography.oregonstate.edu/tiles/PlanObliqueEurope/data/tiles/{z}/{x}/{y}.png',     
                 // url: 'http://elasticreliefmap.s3-website-us-east-1.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
-                url: 'http://elasticterrain-us-1.s3-website-us-east-1.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
-
+                // url: 'http://elasticterrain-us-1.s3-website-us-east-1.amazonaws.com/data/tiles/{z}/{x}/{y}.png',
                 // url: '../demo/data/eudem/{z}/{x}/{y}.png',
-                // url: '../demo/data/sample9/{z}/{x}/{y}.png',                
+                url: 'data/tiles/{z}/{x}/{y}.png',                
                 dem: true
             })
         })

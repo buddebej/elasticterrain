@@ -2,7 +2,7 @@ var Config = function(viewer) {
     'use strict';
 
     // static config
-    this.maxZoom = 11;
+    this.maxZoom = 9;
     this.minZoom = 1;
     this.domContainer = 'map';
     this.dbUrl = 'http://54.69.7.112:8000/api/configs';
