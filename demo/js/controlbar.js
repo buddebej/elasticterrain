@@ -28,6 +28,7 @@ var ControlBar = function(viewer) {
         KNOB_ROTATION1 = $('.rotationKnob1'),
         SWITCH_SHADING = $('.shadingSwitch'),
         SWITCH_WATERBODIES = $('.waterBodiesSwitch'),
+        SWITCH_STACKED_CARDBOARD = $('.stackedCardboardSwitch'),
         SWITCH_SHEARING_INTERACTION = $('.shearingInteractionsSwitch'),
         SWITCH_DEBUG = $('.debugModeSwitch'),
         SLIDER_AMBIENT_LIGHT = $('.ambientLightSlider'),
@@ -43,7 +44,9 @@ var ControlBar = function(viewer) {
         SLIDER_RESOLUTION = $('.resolutionSlider'),
         SELECT_TEXTURE = $('.textureSelect'),
         SELECT_COLOR_RAMP = $('.colorRampSelect'),
-        SELECT_CONFIG = $('.configSelect');
+        SELECT_CONFIG = $('.configSelect'),
+        INFOCONTENT = $('.infoBox .content'),
+        INFOMENUE = $('.infoBox .menue');
 
 
     // INITIAL CONFIGURATION   
@@ -73,12 +76,12 @@ var ControlBar = function(viewer) {
         },
         shading: {
             enabled: true,
-            collapsed: false,
+            collapsed: true,
             inactive: false
         },
         shearing: {
             enabled: true,
-            collapsed: false,
+            collapsed: true,
             inactive: false
         },
         debug: {
@@ -88,6 +91,10 @@ var ControlBar = function(viewer) {
         rotation: {
             enabled: true,
             collapsed: true
+        },
+        info: {
+            enabled: true,
+            collapsed: false
         }
     };
 
@@ -114,6 +121,9 @@ var ControlBar = function(viewer) {
                     if (val.collapsed) {
                         val.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
                         val.collapsed = false;
+                        // collapse info box content
+                        INFOCONTENT.children().hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+                        INFOMENUE.children().removeClass('active');
                     } else {
                         val.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
                         val.collapsed = true;
@@ -135,6 +145,19 @@ var ControlBar = function(viewer) {
         c.head.removeClass('controlHeaderInactive');
     };
 
+    ui.collapseAll = function() {
+        $.each(ui.controls, function(key, val) {
+            val.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+            val.collapsed = true;
+        });
+    };
+    ui.expandAll = function() {
+        $.each(ui.controls, function(key, val) {
+            val.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+            val.collapsed = false;
+        });
+    };
+
     // update control tools to current parameters
     ui.updateControlTools = function() {
         KNOB_INCLINATION.val(viewer.get('obliqueInclination')).trigger('change');
@@ -145,6 +168,7 @@ var ControlBar = function(viewer) {
         SWITCH_SHADING.prop(CHECKED, viewer.get('shading'));
         SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
         SWITCH_WATERBODIES.prop(CHECKED, viewer.get('waterBodies'));
+        SWITCH_STACKED_CARDBOARD.prop(CHECKED, viewer.get('stackedCardboard'));        
         SWITCH_SHEARING_INTERACTION.prop(CHECKED, viewer.get('terrainInteraction'));
 
         SLIDER_AMBIENT_LIGHT.slider({
@@ -160,10 +184,10 @@ var ControlBar = function(viewer) {
             value: toSlider(viewer.get('shadingExaggeration'))
         });
         SLIDER_SPRING_COEFFICIENT.slider({
-            value: toSlider(viewer.get('iSpringCoefficient'), 10)
+            value: toSlider(viewer.get('iSpringCoefficient'))
         });
         SLIDER_SPRING_FRICTION.slider({
-            value: toSlider(viewer.get('iFrictionForce'), 10)
+            value: toSlider(viewer.get('iFrictionForce'))
         });
         SLIDER_SPRING_FADEOUT.slider({
             value: toSlider(viewer.get('iStaticShearFadeOutAnimationSpeed'))
@@ -184,6 +208,7 @@ var ControlBar = function(viewer) {
         SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
         SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
     };
+
 
     // LOAD PREDEFINED CONFIGURATIONS
     // update select box with configs from newStore
@@ -212,7 +237,7 @@ var ControlBar = function(viewer) {
         // use a copy of config for read only access during runtime
         var configCopy = $.extend(true, {}, viewer.getConfigStore()[SELECT_CONFIG.find($('option:selected')).val()]);
         this.config.swap(configCopy);
-        ui.updateControlTools();        
+        ui.updateControlTools();
         viewer.update();
     }.bind(this));
 
@@ -236,6 +261,7 @@ var ControlBar = function(viewer) {
             viewer.set('obliqueInclination', v);
         }
     });
+
 
     // OVERLAY MAP
     // find available overlayers and populate dropdown menu
@@ -287,6 +313,7 @@ var ControlBar = function(viewer) {
         ui.controls.texture.body.hide();
     }
 
+
     // HYPSOMETRIC COLORS
     SELECT_COLOR_RAMP.change(function() {
         viewer.set('colorRamp', parseInt(SELECT_COLOR_RAMP.find($('option:selected')).val()));
@@ -314,6 +341,19 @@ var ControlBar = function(viewer) {
         }
         viewer.render();
     });
+
+    SWITCH_STACKED_CARDBOARD.click(function() {
+        var checkbox = SWITCH_STACKED_CARDBOARD.find($('input'));
+        if (viewer.get('stackedCardboard')) {
+            viewer.set('stackedCardboard', false);
+            checkbox.prop(CHECKED, false);
+        } else {
+            viewer.set('stackedCardboard', true);
+            checkbox.prop(CHECKED, true);
+        }
+        viewer.render();
+    });
+
 
     // SHADING
     //  turn shading on / off
@@ -391,7 +431,7 @@ var ControlBar = function(viewer) {
         }
     });
 
-    // // switch to activate terrain interactions
+    // switch to activate terrain interactions
     SWITCH_SHEARING_INTERACTION.click(function() {
         var checkbox = SWITCH_SHEARING_INTERACTION.find($('input'));
         if (viewer.get('terrainInteraction')) {
@@ -413,9 +453,9 @@ var ControlBar = function(viewer) {
 
     SLIDER_SPRING_COEFFICIENT.slider({
         min: 0,
-        max: 10,
+        max: 100,
         slide: function(event, ui) {
-            viewer.set('iSpringCoefficient', fromSlider(ui.value, 10));
+            viewer.set('iSpringCoefficient', fromSlider(ui.value));
 
         }
     });
@@ -428,9 +468,9 @@ var ControlBar = function(viewer) {
     });
     SLIDER_SPRING_FRICTION.slider({
         min: 0,
-        max: 10,
+        max: 100,
         slide: function(event, ui) {
-            viewer.set('iFrictionForce', fromSlider(ui.value, 10));
+            viewer.set('iFrictionForce', fromSlider(ui.value));
         }
     });
     SLIDER_SPRING_INNRAD.slider({
@@ -454,6 +494,7 @@ var ControlBar = function(viewer) {
             viewer.set('iCriticalElevationThreshold', fromSlider(ui.value, 100));
         }
     });
+
 
     // ROTATION 
     KNOB_ROTATION.knob({
@@ -489,6 +530,7 @@ var ControlBar = function(viewer) {
         KNOB_ROTATION.val(alpha).trigger('change');
     });
 
+
     // DEBUG    
     SWITCH_DEBUG.click(function() {
         var checkbox = SWITCH_DEBUG.find($('input'));
@@ -510,6 +552,43 @@ var ControlBar = function(viewer) {
             viewer.set('resolution', fromSlider(ui.value, 100));
         }
     });
+
+    // export
+    var exportPNGElement = document.getElementById('export-png');
+
+    if ('download' in exportPNGElement) {
+        exportPNGElement.addEventListener('click', function(e) {
+            viewer.map.once('postcompose', function(event) {
+                var canvas = event.glContext.getCanvas();
+                exportPNGElement.href = canvas.toDataURL('image/png');
+            });
+            viewer.map.renderSync();
+        }, false);
+    } else {
+        var info = document.getElementById('no-download');
+        info.style.display = '';
+    }
+
+    // INFO    
+
+    INFOMENUE.click(function(e) {
+        ui.collapseAll();
+        var eClass = '#' + e.target.id,
+            eId = '.' + e.target.id;
+
+        if (!INFOMENUE.children(eClass).hasClass('active')) {
+            INFOCONTENT.children().hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+            INFOCONTENT.children(eId).show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+            INFOMENUE.children().removeClass('active');
+            INFOMENUE.children(eClass).addClass('active');
+        } else {
+            INFOCONTENT.children().hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);            
+            INFOMENUE.children().removeClass('active');
+        }
+    });
+    INFOCONTENT.children().hide();
+
+
 
     // HIDE & SHOW CONTROL BOX
     if (ui.options.enabled) {
@@ -590,28 +669,5 @@ var ControlBar = function(viewer) {
         ui.updateControlTools();
     }
 
-    // EXPORT FUNCTIONALITY
-    // export functionality, causes memory problems in chrome
-    // preserveDrawingBuffer has to be true for canvas (webglmaprenderer.js)
-    // add following lines to ui
-    /*    <div id="no-download" class="alert alert-error" style="display: none">
-          Your Browser does not support the 
-          <a href="http://caniuse.com/#feat=download">link download</a> attribute.
-        </div>
-        <a id="export-png" class="btn" download="map.png"><i class="icon-download"></i> Export PNG</a>
-    */
-    var exportPNGElement = document.getElementById('export-png');
 
-    if ('download' in exportPNGElement) {
-        exportPNGElement.addEventListener('click', function(e) {
-            viewer.map.once('postcompose', function(event) {
-                var canvas = event.glContext.getCanvas();
-                exportPNGElement.href = canvas.toDataURL('image/png');
-            });
-            viewer.map.renderSync();
-        }, false);
-    } else {
-        var info = document.getElementById('no-download');
-        info.style.display = '';
-    }
 };

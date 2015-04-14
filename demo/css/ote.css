@@ -5,6 +5,23 @@ body {
     height: 100%;
 }
 
+select {
+    padding:0.1em;
+    border : 2px #444 solid;
+    background-color: #111;
+    color: #fff;
+    font-size: 9pt;
+    width: 70%;
+    margin-top: 0.5em;
+    font-family: 'Open Sans', sans-serif;        
+}
+
+h3{
+    margin: 0px;
+    margin-bottom: 3px;   
+    font-size: 11pt; 
+}
+
 .container {
     height: 100%;
     width: 100%;
@@ -17,6 +34,7 @@ body {
     width: 100%;
     z-index: 100;
     position:absolute;
+    border-right: 1px solid #444;
 }
 
 .controlBar {
@@ -24,12 +42,12 @@ body {
     width: 310px;
     right:0;
     position:absolute;
-    background-color: #333333;
-    -moz-box-shadow:    inset 0 0 10px #000000;
-    -webkit-box-shadow: inset 0 0 10px #000000;
-    box-shadow:         inset 0 0 10px #000000;
+    background-color: #111;
+    -moz-box-shadow:    inset 10px 0 15px #000000;
+    -webkit-box-shadow: inset 10px 0 15px #000000;
+    box-shadow:         inset 10px 0 15px #000000;
     color: #ffffff;
-    font-family: Verdana, Geneva, sans-serif;
+    font-family: 'Open Sans', sans-serif;    
     font-size: 8pt;
     display:none;
     overflow:auto;
@@ -48,6 +66,130 @@ body {
     background: rgba(255,255,255,0.4);
     border-radius: 4px;
     padding: 2px;
+}
+
+.control{
+    padding:0;
+}
+
+.control a:link {
+    color: #aaa;
+    text-decoration: none;
+}
+
+.control a:visited {
+    color: #aaa;
+    text-decoration: none;    
+}
+
+.control a:hover {
+    color: #FFFFFF;
+    text-decoration: none;   
+}
+
+.control a:active {
+    color: #FFFFFF;
+    text-decoration: none;    
+}
+
+
+.controlHeader {
+    color:#fefefe;
+    vertical-align: middle;
+    height:15px;
+    padding:10px;
+    text-align:left;
+    cursor: pointer;
+    border-bottom: rgba(255,255,255,0.1) solid 2px;
+    font-weight: 600;
+}
+
+.controlHeader:hover {
+    background-color: rgba(255,255,255,0.02);
+}
+
+.controlHeaderInactive {
+    color:#666;
+    background-color: #333;
+    cursor: default;
+}
+
+.controlHeaderInactive:hover {
+    background-color: #333;
+}
+
+.controlBody {
+    padding-left: 10px;
+    padding-right: 10px;    
+    padding-bottom:8px;
+    padding-top:4px;       
+    margin:0;
+    text-align:left;   
+    background: rgba(255,255,255,0.1);
+    border-bottom: 2px solid #333;   
+    width:auto; 
+    font-family: 'Open Sans', sans-serif;        
+}
+
+.infoBox {
+    padding: 15px;    
+    color: #eee;
+    font-size: 8pt;
+    border: 0;
+    border-bottom: #333 solid 5px;    
+}
+
+.info .menue {
+    color: #4479E3;
+    clear: both;
+}
+
+.info .menue .item{
+    float: left;
+    padding: 4px;
+    margin-top: 4px;
+    margin-right: 6px;
+    margin-left: -4px;
+    margin-bottom: 0;
+    background-color: none;
+    font-weight: 600;    
+}
+
+.info .menue .item:hover{
+    background-color: #4479E3;
+    color: #fefefe;
+}
+
+.info .menue .active{
+    background-color: #4479E3;
+    color: #fefefe;
+}
+
+.info .content {
+    clear: both;
+    color: #888;
+    -webkit-touch-callout: all;
+    -webkit-user-select: all;
+    -khtml-user-select: all;
+    -moz-user-select: all;
+    -ms-user-select: all;
+    user-select: all;
+}
+
+.info .topborder{
+    border-top: 1px solid #333;
+    padding-top: 5px;
+}
+
+.info p{
+    padding: 0;
+    margin: 0;
+    margin-bottom: 5px;
+    color: #888;
+}
+
+.logoContainer{
+    padding-top: 6px;
 }
 
 .saveConfigButton {
@@ -74,49 +216,20 @@ body {
   min-width:170px;
   text-align: center;
   background: rgba(0,60,136,0.6);
-  font-family: Verdana, Geneva, sans-serif;
   font-size: 8pt;  
   right: 8px;
   bottom: 8px;
   position: absolute; 
   color: #eee;
+  font-family: 'Open Sans', sans-serif;      
   -webkit-tap-highlight-color: none;
+  border-radius: 4px;
+
 }
 
 .hidden {
   visibility: hidden;
 }
-
-.control{
-    margin-top:10px;
-    padding:0;
-    padding-left: 5px;
-    text-align:center;
-}
-
-.controlHeader {
-    color:#ffffff;
-    background-color: #111111;
-    vertical-align: middle;
-    height:17px;
-    padding:10px;
-    text-align:left;
-    cursor: pointer;
-}
-
-.controlHeaderInactive {
-    color:#666;
-    background-color: #111111;
-    cursor: default;
-}
-
-.controlBody {
-    padding-left: 10px;
-    padding-right: 10px;    
-    margin:0;
-    text-align:left;    
-}
-
 
 .floatBox {
     float:left;
@@ -127,20 +240,24 @@ body {
     clear:both;
 }
 
-.colorSlider {
-    margin-top:0.6em;
-    margin-bottom:0.2em;
-}
-
-.floatingSlider {
-    float:right;
-    margin-top: 2px;
-}
-
 .vcenter{
     vertical-align: middle;
     padding-top:8px;
     padding-bottom:8px;    
+}
+
+.controlbutton{
+    padding:4px;
+    padding-right: 8px;
+    padding-left: 8px;
+    background-color: #111;
+    cursor: pointer;
+    border:#333;
+    font-weight: 600;
+}
+
+.controlbutton:hover{
+    background-color: #000;
 }
 
 .knobLabel{
@@ -151,6 +268,19 @@ body {
 
 .knob {
     width:60px;
+    height:60px;
+        font-family: 'Open Sans', sans-serif;    
+
+}
+
+.colorSlider {
+    margin-top:0.6em;
+    margin-bottom:0.2em;
+}
+
+.floatingSlider {
+    float:right;
+    margin-top: 2px;
 }
 
 .ui-slider-horizontal {
@@ -166,22 +296,13 @@ body {
 }
 .ui-slider-range { background: #ccc; }
 
-select {
-    padding:0.1em;
-    border : 2px #444 solid;
-    background-color: #111;
-    color: #fff;
-    font-size: 9pt;
-    width: 70%;
-    margin-top: 0.5em;
-}  
-
 .switchBox{
     margin-bottom: 12px;
     margin-top: 8px;
 }
 .switchlabel{
     padding:4px;
+    padding-left: 0;
     vertical-align: middle;
 }
 
@@ -204,7 +325,7 @@ select {
 }
 .onoffswitch-inner:before, .onoffswitch-inner:after {
     display: block; float: left; width: 50%; height: 15px; padding: 0; line-height: 15px;
-    font-size: 10px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    font-size: 10px; color: white; font-family: 'Open Sans', sans-serif;  font-weight: 600;
     -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
 }
 .onoffswitch-inner:before {
@@ -239,7 +360,7 @@ select {
 
 
 
-.webglMissing{
+/*.webglMissing{
     margin:auto;
     position: absolute;
     width:100%;
@@ -268,3 +389,4 @@ select {
 
 .webglMissing a:link,a:visited,a:active {color:#000000;text-decoration: none; font-weight: bold;}     
 .webglMissing a:hover {color:#000000;text-decoration: underline;}  
+*/

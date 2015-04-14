@@ -103,6 +103,7 @@ var Viewer = function(config, layers) {
         this.dem.setAmbientLight(this.config.get('ambientLight'));
         this.dem.setColorScale(this.config.get('colorScale'));
         this.dem.setColorRamp(this.config.get('colorRamp'));
+        this.dem.setStackedCardboard(this.config.get('stackedCardboard'));        
         this.dem.setShading(this.config.get('shading'));
         this.dem.setShadingOpacity(this.config.get('shadingDarkness'));
         this.dem.setShadingExaggeration(this.config.get('shadingExaggeration'));
