@@ -6,6 +6,7 @@ ol3/examples/example-list.xml
 ol3/node_modules/
 ol3/src/ol/renderer/webgl/webgltiledemlayershader.js
 www/data/*
+www/node_modules/
 !www/data/blank.png
 .DS_Store
 backend/node_modules/
