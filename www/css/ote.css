@@ -359,16 +359,17 @@ h3{
 }
 
 
-
-/*.webglMissing{
+.webglMissing{
+    font-family: 'Open Sans', sans-serif;            
     margin:auto;
     position: absolute;
     width:100%;
     height: 100%;
-    background: url('../img/ol3dem_preview.jpg');
+    background: url('../img/elasticterrain_preview.jpg');
     background-size:cover;
     background-repeat:no-repeat;
     text-align: center;
+    z-index:101;
 }
 .webglMissing p{
     text-align: left;
@@ -389,4 +390,4 @@ h3{
 
 .webglMissing a:link,a:visited,a:active {color:#000000;text-decoration: none; font-weight: bold;}     
 .webglMissing a:hover {color:#000000;text-decoration: underline;}  
-*/
+
