@@ -208,15 +208,20 @@ ol.renderer.webgl.TileDemLayer.prototype.getTileCoord = function(xy, z) {
  * @return {number|null}
  */
 ol.renderer.webgl.TileDemLayer.prototype.getElevation = function(xy, z) {
-    var tc = this.getTileCoord(xy, ((!goog.isDef(z)) ? 1 : z));
-    var xyzKey = ol.tilecoord.getKeyZXY(tc[0], tc[1], tc[2]);
-    var tileExtent = this.tileGrid_.getTileCoordExtent(tc); // minX, minY, maxX, maxY
-    var tileXY = [0, 0];
-    var elevation = 0;
-    tileXY[0] = Math.floor(((xy[0] - tileExtent[0]) / (tileExtent[2] - tileExtent[0])) * 256);
-    tileXY[1] = 256 - Math.floor(((xy[1] - tileExtent[1]) / (tileExtent[3] - tileExtent[1])) * 256);
-    elevation = ol.Elevation.decode(this.tileCache_.get(xyzKey).getPixelValue(tileXY));
-    return elevation;
+    var tc = this.getTileCoord(xy, ((!goog.isDef(z)) ? 1 : z)),
+        xyzKey = ol.tilecoord.getKeyZXY(tc[0], tc[1], tc[2]),
+        tileExtent = this.tileGrid_.getTileCoordExtent(tc), // minX, minY, maxX, maxY
+        tileXY = [0, 0],
+        elevation = 0,
+        tile = this.tileCache_.get(xyzKey);
+    if (tile.hasOwnProperty('minMax')) {
+        tileXY[0] = Math.floor(((xy[0] - tileExtent[0]) / (tileExtent[2] - tileExtent[0])) * 256);
+        tileXY[1] = 256 - Math.floor(((xy[1] - tileExtent[1]) / (tileExtent[3] - tileExtent[1])) * 256);
+        elevation = ol.Elevation.decode(tile.getPixelValue(tileXY));
+        return elevation;
+    } else {
+        return null;
+    }
 };
 
 /**
@@ -261,30 +266,30 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
 
     var getSegmentCoord = function(tc) {
         // Tile minX, minY, maxX, maxY
-        var tileExtent = this.tileGrid_.getTileCoordExtent(tc);
+        var tileExtent = this.tileGrid_.getTileCoordExtent(tc),
 
-        // Length of tile edge in web mercator
-        var tileLengthXCoord = tileExtent[2] - tileExtent[0];
-        var tileLengthYCoord = tileExtent[3] - tileExtent[1];
+            // Length of tile edge in web mercator
+            tileLengthXCoord = tileExtent[2] - tileExtent[0],
+            tileLengthYCoord = tileExtent[3] - tileExtent[1],
 
-        var segmentsXY = clickedTile.numberOfSegments / 4;
-        var segmentSizeRel = 1 / segmentsXY;
-        var segmentSizeAbsX = tileLengthXCoord * segmentSizeRel;
-        var segmentSizeAbsY = tileLengthYCoord * segmentSizeRel;
+            segmentsXY = clickedTile.numberOfSegments / 4,
+            segmentSizeRel = 1 / segmentsXY,
+            segmentSizeAbsX = tileLengthXCoord * segmentSizeRel,
+            segmentSizeAbsY = tileLengthYCoord * segmentSizeRel,
 
-        // Compute Segment Coordinates
-        var segmentX = Math.ceil((xy[0] - tileExtent[0]) / segmentSizeAbsX) - 1;
-        // flip coordinates
-        var segmentY = segmentsXY - Math.ceil((xy[1] - tileExtent[1]) / segmentSizeAbsY);
+            // Compute Segment Coordinates
+            segmentX = Math.ceil((xy[0] - tileExtent[0]) / segmentSizeAbsX) - 1,
+            // flip coordinates
+            segmentY = segmentsXY - Math.ceil((xy[1] - tileExtent[1]) / segmentSizeAbsY);
 
         return [segmentX, segmentY];
     }.bind(this);
 
-    var clickedTileCoord = this.getTileCoord(xy, ((!goog.isDef(z)) ? 1 : z));
-    var clickedXyzKey = ol.tilecoord.getKeyZXY(clickedTileCoord[0], clickedTileCoord[1], clickedTileCoord[2]);
-    var clickedTile = this.tileCache_.get(clickedXyzKey);
-    var clickedSegmentCoord = getSegmentCoord(clickedTileCoord);
-    var clickedSegmentMinMax = clickedTile.getSegmentMinMaxElevations(clickedSegmentCoord);
+    var clickedTileCoord = this.getTileCoord(xy, ((!goog.isDef(z)) ? 1 : z)),
+        clickedXyzKey = ol.tilecoord.getKeyZXY(clickedTileCoord[0], clickedTileCoord[1], clickedTileCoord[2]),
+        clickedTile = this.tileCache_.get(clickedXyzKey),
+        clickedSegmentCoord = getSegmentCoord(clickedTileCoord),
+        clickedSegmentMinMax = clickedTile.getSegmentMinMaxElevations(clickedSegmentCoord);
 
     //  0 1 2
     //  3 X 4
@@ -375,7 +380,7 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
     var localMinMax = clickedSegmentMinMax;
 
 
-    return [localMinMax[0], localMinMax[1]];
+    return localMinMax;
 };
 
 
@@ -748,7 +753,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
                             // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                             gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                            this.updateCurrentMinMax(tilesToDraw[tileKey].getMinMaxElevations());
+                            if (zs[i] === z) {
+                                this.updateCurrentMinMax(tilesToDraw[tileKey].getMinMaxElevations());
+                            }
                         }
                     }
                 }
@@ -802,7 +809,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     gl.uniform1i(this.locations_.u_texture, 0);
                     // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                     gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                    this.updateCurrentMinMax(tile.getMinMaxElevations());
+                    if (zs[i] === z) {
+                        this.updateCurrentMinMax(tile.getMinMaxElevations());
+                    }
                 }
             }
         }

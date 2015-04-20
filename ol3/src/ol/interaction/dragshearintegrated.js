@@ -415,9 +415,10 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
 
         // get local max and min of the tile segments close to the dragged point
         minMaxLocal = this.demRenderer.getLocalMinMax(mapBrowserEvent.coordinate, this.view.getZoom());
-        this.minElevationLocal = minMaxLocal[0];
-        this.maxElevationLocal = minMaxLocal[1];
-
+        if (goog.isDef(minMaxLocal)) {
+            this.minElevationLocal = minMaxLocal[0];
+            this.maxElevationLocal = minMaxLocal[1];
+        }
         // critical elevation value to seperate minima and maxima
         this.criticalElevation = this.minElevationLocal + (this.maxElevationLocal - this.minElevationLocal) * this.options['criticalElevationThreshold'];
 

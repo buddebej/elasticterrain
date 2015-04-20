@@ -247,8 +247,9 @@ ol.ImageTile.prototype.getMinMaxElevations = function() {
  * @public
  */
 ol.ImageTile.prototype.getSegmentMinMaxElevations = function(segmentXY) {
-    var x = segmentXY[0], y = segmentXY[1];
-    return this.segmentMinMax[x][y];
+    var x = segmentXY[0], y = segmentXY[1], minMax = [0,0];
+    minMax = this.segmentMinMax[x][y];
+    return minMax;
 };
 
 /**
