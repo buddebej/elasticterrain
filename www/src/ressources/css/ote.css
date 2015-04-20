@@ -48,6 +48,7 @@ h3{
     box-shadow:         inset 10px 0 15px #000000;
     color: #ffffff;
     font-family: 'Open Sans', sans-serif;    
+    font-weight: 400;
     font-size: 8pt;
     display:none;
     overflow:auto;
