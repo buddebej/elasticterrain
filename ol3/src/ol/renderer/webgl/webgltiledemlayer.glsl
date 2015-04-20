@@ -3,6 +3,24 @@
 
 //! COMMON
 
+// ELASTIC TERRAIN MAP
+
+// Copyright (C) 2015 Jonas Buddeberg <buddebej * mailbox.org>, 
+//                    Bernhard Jenny <jennyb * geo.oregonstate.edu>
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 // texture with encoded elevation values
 uniform sampler2D u_texture;
 
@@ -30,12 +48,18 @@ uniform vec2 u_scaleFactor;
 // decodes input data elevation value using red and green channel
 float decodeElevation(in vec4 colorChannels) {
     float elevationM = (colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0;
+    if(elevationM > 9000.0){
+        elevationM = 0.0;
+    }
     return elevationM;
 }
 
 // decodes input data elevation value for tile borders, using blue channel
 float decodeElevationB(in vec2 colorChannels) {
     float elevationM = (colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0;
+    if(elevationM > 9000.0){
+        elevationM = 0.0;
+    }    
     return elevationM;
 }
 
@@ -69,7 +93,9 @@ void main(void) {
     float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy));
     
     // normalize elevation for current minimum and maximum
-    float nElevation = u_maxElevation*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
+    float nElevation = (u_maxElevation-u_minElevation)*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
+
+    // float nElevation = absElevation / u_maxElevation - u_minElevation;
 
     if(u_overlayActive){
         // FIXME 
@@ -93,7 +119,10 @@ void main(void) {
 //! FRAGMENT
 
 // color ramp texture to look up hypsometric tints
-uniform sampler2D u_colorRamp;
+uniform sampler2D u_hypsoColors;
+
+// color ramp texture to look up bathymetric tints
+uniform sampler2D u_bathyColors;
 
 // flag for coloring inland waterbodies
 uniform bool u_waterBodies; 
@@ -212,18 +241,15 @@ void main(void) {
                 float colorMin = 1.0-u_colorScale.x*1.0;
                 float colorMax = u_colorScale.y*1.0;   
 
-                // treshold on color ramp texture
-                float landWaterLimit = 0.325;
+                float relativeElevation = 0.0;
 
-                // use color values above threshold
-                float relativeElevation = landWaterLimit+(1.0-landWaterLimit)*(absElevation/u_maxElevation);
-
-                // use color values below threshold (bathymetry)
-                if(absElevation < 0.0){
-                    relativeElevation = landWaterLimit-landWaterLimit*abs(absElevation/u_minElevation);
+                if(absElevation > 0.1){
+                    relativeElevation = absElevation/u_maxElevation;
+                    fragColor = abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation)));
+                } else {
+                    relativeElevation = abs(absElevation/u_minElevation);
+                    fragColor = abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation)));
                 }
-
-                fragColor = abs(texture2D(u_colorRamp,vec2(0.5,relativeElevation)));
                                   
                 // color for water surfaces in flat terrain
                 if(u_waterBodies) {
@@ -278,6 +304,8 @@ void main(void) {
 
             // mix with hypsometric color
             gl_FragColor = vec4(hillShade,hillShade,hillShade,1.0)*fragColor;
+
+
         } else {
             // apply hypsometric color without hillshading
             gl_FragColor = fragColor;
@@ -296,15 +324,15 @@ void main(void) {
             float criticalEl = u_minElevation + (u_maxElevation - u_minElevation) * u_critElThreshold;
            
             // display minima in gray
-            if(absElevation < criticalEl){
-                float gray = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114));
-                gl_FragColor = vec4(gray, gray, gray, 1.0);
-            }   
+            // if(absElevation < criticalEl){
+            //     float gray = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114));
+            //     gl_FragColor = vec4(gray, gray, gray, 1.0);
+            // }   
 
-            if(absElevation > criticalEl){
-                float gray = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114));
-                gl_FragColor = vec4(red.xyz, gray);
-            }           
+            // if(absElevation > criticalEl){
+            //     float gray = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114));
+            //     gl_FragColor = vec4(red.xyz, gray);
+            // }           
 
             // mark tile borders and draw a grid            
             if(atWestBorder){
