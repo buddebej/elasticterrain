@@ -8,6 +8,9 @@ goog.provide('ol.Elevation');
  */
 ol.Elevation.decode = function(rgba) {
     var elevationM = (rgba[0] + rgba[1]*256.0)-11000.0;
+    if(elevationM > 9000.0){
+        elevationM = 0.0;
+    }
     return elevationM;
 };
 
