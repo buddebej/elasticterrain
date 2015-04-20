@@ -72,16 +72,34 @@ ol.ImageTile = function(tileCoord, state, src, crossOrigin, tileLoadFunction, op
 
     if (this.isDemTileImage) {
         /**
-         * @private
+         * @public
+         * @type {number}
+         * The tile is split up in n blocks (segments) for min max computation
+         */
+        this.numberOfSegments = 16;
+
+        /**
+         * @public
          * @type {number}
          */
-        this.maxElevation = 0;
+        this.segmentsXY = this.numberOfSegments / 4;
 
         /**
          * @private
-         * @type {number}
+         * @type {Array}
          */
-        this.minElevation = 0;
+        this.minMax = [0.0,0.0];
+
+        /**
+         * @private
+         * @type {Array}
+         */
+        this.segmentMinMax = new Array(this.segmentsXY);
+
+        // make 2d array
+        for (var l = 0; l < this.segmentsXY; l = l + 1) {
+            this.segmentMinMax[l] = new Array(this.segmentsXY);
+        }
 
         /** 
          * @private
@@ -125,11 +143,7 @@ ol.ImageTile.prototype.getImage = function(opt_context) {
  */
 ol.ImageTile.prototype.getPixelValue = function(pixelXY) {
     if (!goog.isNull(this.canvasContext_)) {
-
         var colorValues = this.canvasContext_.getImageData(pixelXY[0], pixelXY[1], 1, 1).data;
-        // var decoded = ol.Elevation.decode(colorValues);
-        // console.log(colorValues, decoded);
-
         return colorValues;
     } else {
         return [0, 0];
@@ -153,36 +167,98 @@ ol.ImageTile.prototype.createCanvas = function() {
  */
 ol.ImageTile.prototype.readMinMaxElevations = function() {
     if (!goog.isNull(this.canvasContext_)) {
-        var imageDataArray = this.canvasContext_.getImageData(0, 0, this.image_.width, this.image_.height).data;
-        var currentElevation;
-        var max = 0,
-            min = ol.Elevation.MAX;
+        var imageChannels = 4,
+            segmentSize = this.image_.width / this.segmentsXY,
+            currentElevation = 0,
+            segmentMax = ol.Elevation.MIN,
+            segmentMin = ol.Elevation.MAX,
+            globalMax = ol.Elevation.MIN,
+            globalMin = ol.Elevation.MAX;
 
-        for (var i = 0; i <= Math.pow(this.image_.width, 2); i = i + 4) {
+        for (var row = 0; row < this.segmentsXY; row = row + 1) {
 
-            currentElevation = ol.Elevation.decode([imageDataArray[i], imageDataArray[i + 1]]); // use red and green channel of every pixel
+            for (var col = 0; col < this.segmentsXY; col = col + 1) {
 
-            if (currentElevation > max) {
-                max = currentElevation;
-            }
-            if (currentElevation < min) {
-                min = currentElevation;
+                var segmentData = this.canvasContext_.getImageData(col * segmentSize, row * segmentSize, segmentSize, segmentSize).data;
+
+                // loop through pixel and channel values
+                for (var j = 0; j < segmentData.length; j = j + imageChannels) {
+                    currentElevation = ol.Elevation.decode([segmentData[j], segmentData[j + 1]]); // use red and green channel of every pixel
+
+                    // segment minMax
+                    if (currentElevation > segmentMax) {
+                        segmentMax = currentElevation;
+                    }
+                    if (currentElevation < segmentMin) {
+                        segmentMin = currentElevation;
+                    }
+
+                    // global minMax
+                    if (currentElevation > globalMax) {
+                        globalMax = currentElevation;
+                    }
+                    if (currentElevation < globalMin) {
+                        globalMin = currentElevation;
+                    }
+                }
+
+                // save values for segment
+                this.segmentMinMax[col][row] = [segmentMin, segmentMax];
+                // reset min max 
+                segmentMax = ol.Elevation.MIN;
+                segmentMin = ol.Elevation.MAX;
             }
         }
-        this.minElevation = min;
-        this.maxElevation = max;
+
+        this.minMax = [globalMin, globalMax];
+
+        // TEST
+        // var tileMax = ol.Elevation.MIN,
+        //     tileMin = ol.Elevation.MAX;
+        // for (var c = 0; c < this.segmentMinMax.length; c++) {
+        //     for (var r = 0; r < this.segmentMinMax.length; r++) {
+
+        //         if (this.segmentMinMax[c][r][1] > tileMax) {
+        //             tileMax = this.segmentMinMax[c][r][1];
+        //         }
+        //         if (this.segmentMinMax[c][r][0] < tileMin) {
+        //             tileMin = this.segmentMinMax[c][r][0];
+        //         }
+        //     }
+        // }
+        // console.log(globalMin, globalMax, tileMin, tileMax);
     }
 };
 
+
 /**
- * Compute min and max elevations in a dem tile and store the values
+ * Return min and max elevations for entire tile
  * @return {Array}
  * @public
  */
 ol.ImageTile.prototype.getMinMaxElevations = function() {
-    return [this.minElevation, this.maxElevation];
+    return this.minMax;
 };
 
+/**
+ * Return local min and max for a subset of segments
+ * @param {Array} segmentXY
+ * @return {Array}
+ * @public
+ */
+ol.ImageTile.prototype.getSegmentMinMaxElevations = function(segmentXY) {
+    var x = segmentXY[0], y = segmentXY[1];
+    return this.segmentMinMax[x][y];
+};
+
+/**
+ * Return local min and max for a subset of segments
+ * @return {Array}
+ * @public
+ */
+ol.ImageTile.prototype.getSegments = function() {
+    return this.segmentMinMax;
+};
 
 /**
  * @inheritDoc
