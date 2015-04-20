@@ -35,6 +35,7 @@ h3{
     z-index: 100;
     position:absolute;
     border-right: 1px solid #444;
+    background-color: #000;
 }
 
 .controlBar {
