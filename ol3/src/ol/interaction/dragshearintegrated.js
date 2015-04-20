@@ -194,38 +194,38 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
             this.distanceY = currentDragPosition[1] - animatingPositionY;
         }
 
-        // // FIXME this constant should not be here. This could be a configurable parameter.
-        // // Duration of the animation that fades the length of the spring between static and hybrid shearing.
-        // var STATIC_TO_HYBRID_DAMPING_DURATION_S = 0.3;
+        // FIXME this constant should not be here. This could be a configurable parameter.
+        // Duration of the animation that fades the length of the spring between static and hybrid shearing.
+        var STATIC_TO_HYBRID_DAMPING_DURATION_S = 0.3;
 
-        // var currentTime = new Date(),
-        //     timeSinceHybridShearingStart = 0;
-        // if (this.hybridShearingStartTimeMS > 0) {
-        //     timeSinceHybridShearingStart = (currentTime.getTime() - this.hybridShearingStartTimeMS) / 1000;
-        // }
+        var currentTime = new Date(),
+            timeSinceHybridShearingStart = 0;
+        if (this.hybridShearingStartTimeMS > 0) {
+            timeSinceHybridShearingStart = (currentTime.getTime() - this.hybridShearingStartTimeMS) / 1000;
+        }
 
-        // // A damping factor for fading the length of the spring between static and hybrid shearing.
-        // // When the cursor leaves circle with radius maxOuterShearingMeters, the damping factor is
-        // // 1. It fades to 0 within the time interval defined by STATIC_TO_HYBRID_DAMPING_DURATION_S.
-        // var hybridShearingStartDamping = 1;
-        // if (this.shearingStatus === ol.interaction.State.HYBRID_SHEARING) {
-        //     if (timeSinceHybridShearingStart <= STATIC_TO_HYBRID_DAMPING_DURATION_S) {
-        //         hybridShearingStartDamping = 1 - timeSinceHybridShearingStart / STATIC_TO_HYBRID_DAMPING_DURATION_S;
-        //     } else {
-        //         // the damping animation is over
-        //         hybridShearingStartDamping = 0;
-        //         this.hybridShearingStartTimeMS = -1;
-        //         this.springLength = 0;
-        //     }
-        // }
-
+        // A damping factor for fading the length of the spring between static and hybrid shearing.
+        // When the cursor leaves circle with radius maxOuterShearingMeters, the damping factor is
+        // 1. It fades to 0 within the time interval defined by STATIC_TO_HYBRID_DAMPING_DURATION_S.
+        var hybridShearingStartDamping = 1;
+        if (this.shearingStatus === ol.interaction.State.HYBRID_SHEARING) {
+            if (timeSinceHybridShearingStart <= STATIC_TO_HYBRID_DAMPING_DURATION_S) {
+                hybridShearingStartDamping = 1 - timeSinceHybridShearingStart / STATIC_TO_HYBRID_DAMPING_DURATION_S;
+            } else {
+                // the damping animation is over
+                hybridShearingStartDamping = 0;
+                this.hybridShearingStartTimeMS = -1;
+                this.springLength = 0;
+            }
+        }
 
         var distance = Math.sqrt(this.distanceX * this.distanceX + this.distanceY * this.distanceY),
             // spring lengths along the two axes [meters]
-            springLengthX = distance > 0 ? this.distanceX / distance * this.springLength : 0,
-            springLengthY = distance > 0 ? this.distanceY / distance * this.springLength : 0,
-            // spring coefficient // FIXME: passed springCoefficient paramter should be 60 times larger
-            k = this.options['springCoefficient'] * 60,
+            springLengthX = distance > 0 ? this.distanceX / distance * this.springLength * hybridShearingStartDamping : 0,
+            springLengthY = distance > 0 ? this.distanceY / distance * this.springLength * hybridShearingStartDamping : 0;
+
+        // spring coefficient // FIXME: passed springCoefficient paramter should be 60 times larger
+        var k = this.options['springCoefficient'] * 60,
             // friction for damping previous speed
             friction = 1 - this.options['frictionForce'],
             // stretch or compression of the spring
@@ -425,6 +425,8 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         mapCenter = this.view.getCenter();
         this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
         this.startDragElevation = this.demRenderer.getElevation(mapBrowserEvent.coordinate, this.view.getZoom());
+        // clamp values for extremely deep areas to avoid strong disturbing shearing
+        this.startDragElevation = goog.math.clamp(this.startDragElevation, -4000.0, ol.Elevation.MAX);
         this.startCenter = [mapCenter[0], mapCenter[1]];
         this.currentCenter = [mapCenter[0], mapCenter[1]];
         this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);

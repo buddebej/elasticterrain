@@ -94,8 +94,7 @@ void main(void) {
     
     // normalize elevation for current minimum and maximum
     float nElevation = (u_maxElevation-u_minElevation)*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
-
-    // float nElevation = absElevation / u_maxElevation - u_minElevation;
+    float zOrderElevation = absElevation + 11000.0;
 
     if(u_overlayActive){
         // FIXME 
@@ -104,14 +103,14 @@ void main(void) {
         // or we can find a reliable test in the function that serves the overlay textures
         if(texture2D(u_overlayTexture, v_texCoord) != texture2D(u_texture, v_texCoord)){
             gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
-                                u_z-(absElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
+                                u_z-(zOrderElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
                                 1.0);
         }
     } else {
         // shift vertex positions by given shearing factors
         // z value has to be inverted to get a left handed coordinate system and to make the depth test work
         gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
-                            u_z-(absElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
+                            u_z-(zOrderElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
                             1.0);
     }
 }
