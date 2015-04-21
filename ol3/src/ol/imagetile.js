@@ -74,21 +74,25 @@ ol.ImageTile = function(tileCoord, state, src, crossOrigin, tileLoadFunction, op
         /**
          * @public
          * @type {number}
-         * The tile is split up in n blocks (segments) for min max computation
          */
-        this.numberOfSegments = 16;
+        this.numberOfSegments = ol.Elevation.MinMaxNeighborhoodSize;
+
+        // when numberOfSegments = 0 use only single segment (see renderer)
+        if(this.numberOfSegments === 0){
+            this.numberOfSegments = 16;
+        }
 
         /**
          * @public
          * @type {number}
          */
-        this.segmentsXY = this.numberOfSegments / 4;
+        this.segmentsXY = (this.numberOfSegments > 0) ? goog.math.safeFloor(Math.sqrt(this.numberOfSegments)) : 4;
 
         /**
          * @private
          * @type {Array}
          */
-        this.minMax = [0.0,0.0];
+        this.minMax = [0.0, 0.0];
 
         /**
          * @private
@@ -211,22 +215,6 @@ ol.ImageTile.prototype.readMinMaxElevations = function() {
         }
 
         this.minMax = [globalMin, globalMax];
-
-        // TEST
-        // var tileMax = ol.Elevation.MIN,
-        //     tileMin = ol.Elevation.MAX;
-        // for (var c = 0; c < this.segmentMinMax.length; c++) {
-        //     for (var r = 0; r < this.segmentMinMax.length; r++) {
-
-        //         if (this.segmentMinMax[c][r][1] > tileMax) {
-        //             tileMax = this.segmentMinMax[c][r][1];
-        //         }
-        //         if (this.segmentMinMax[c][r][0] < tileMin) {
-        //             tileMin = this.segmentMinMax[c][r][0];
-        //         }
-        //     }
-        // }
-        // console.log(globalMin, globalMax, tileMin, tileMax);
     }
 };
 
@@ -247,9 +235,15 @@ ol.ImageTile.prototype.getMinMaxElevations = function() {
  * @public
  */
 ol.ImageTile.prototype.getSegmentMinMaxElevations = function(segmentXY) {
-    var x = segmentXY[0], y = segmentXY[1], minMax = [0,0];
-    minMax = this.segmentMinMax[x][y];
-    return minMax;
+    var x = segmentXY[0],
+        y = segmentXY[1],
+        minMax = [];
+    if (this.segmentMinMax.hasOwnProperty(x)) {
+        minMax = this.segmentMinMax[x][y];
+        return minMax;
+    } else {
+        return null;
+    }
 };
 
 /**

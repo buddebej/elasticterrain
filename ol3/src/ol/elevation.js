@@ -7,8 +7,8 @@ goog.provide('ol.Elevation');
  * @return {number} elevationM Elevation in meters
  */
 ol.Elevation.decode = function(rgba) {
-    var elevationM = (rgba[0] + rgba[1]*256.0)-11000.0;
-    if(elevationM > 9000.0){
+    var elevationM = (rgba[0] + rgba[1] * 256.0) - 11000.0;
+    if (elevationM > 9000.0) {
         elevationM = 0.0;
     }
     return elevationM;
@@ -27,3 +27,24 @@ ol.Elevation.MAX = 9000;
  * @type {number}
  */
 ol.Elevation.MIN = -11000;
+
+/**
+ * Decode Elevation from Color Values 
+ * @public
+ * @param {number} size
+ */
+ol.Elevation.setMinMaxNeighborhoodSize = function(size) {
+    if (goog.isDef(size) && !goog.isNull(size)) {
+        ol.Elevation.MinMaxNeighborhoodSize = size;
+    }
+};
+
+/**
+ * @public
+ * @type {number}
+ * Each elevation tile is split up in n blocks (segments) for min max computation
+ * For a tile size of 256 pixel, the resulting neighborhood (see webgltiledemlayerrenderer.js)
+ * has the size of a square of 256 / sqrt(MinMaxNeighborhoodSize) pixels
+ * can be 4, 8, 16, 36, 64, 128, 256 ...
+ */
+ol.Elevation.MinMaxNeighborhoodSize = 16;

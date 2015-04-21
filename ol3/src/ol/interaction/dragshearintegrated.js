@@ -34,7 +34,7 @@ goog.require('ol.Elevation');
  maxInnerShearingPx: number,
  maxOuterShearingPx: number,
  staticShearFadeOutAnimationSpeed: number,
- criticalElevationThreshold: number}} */
+ minMaxNeighborhoodSize: number}} */
 ol.interaction.DragShearIntegratedOptions;
 
 
@@ -105,7 +105,7 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
     this.startDragElevation = 0;
 
     /** @type {number} */
-    this.criticalElevationThreshold = this.options.criticalElevationThreshold;
+    this.minMaxNeighborhoodSize = this.options.minMaxNeighborhoodSize;
 
     /** @type {number} */
     this.minElevation = ol.Elevation.MIN;
@@ -146,6 +146,10 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
     this.lastRenderTime = null;
 
     /** @type {number}
+     * Time when static shearing changed to hybrid shearing in milliseconds. */
+    this.hybridShearingStartTimeMS = -1;
+
+    /** @type {number}
      * Distance between current mouse position and point being animated [meters].*/
     this.distanceX = 0;
 
@@ -155,7 +159,6 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
 
     /** @type {number} */
     this.shearingStatus = ol.interaction.State.NO_SHEARING;
-
 
     /**
      * Apply shearing to model and trigger rendering
@@ -233,10 +236,10 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
             springStretchY = this.distanceY - springLengthY,
             // current velocity of animation [meters per second]
             vx_t0 = k * springStretchX + friction * this.vx_t_1,
-            vy_t0 = k * springStretchY + friction * this.vy_t_1,
-            // time since last frame was rendered [seconds]
-            currentTime = new Date(),
-            dTsec = this.lastRenderTime !== null ? (currentTime.getTime() - this.lastRenderTime.getTime()) / 1000 : 1 / 60,
+            vy_t0 = k * springStretchY + friction * this.vy_t_1;
+        // time since last frame was rendered [seconds]
+        currentTime = new Date();
+        var dTsec = this.lastRenderTime !== null ? (currentTime.getTime() - this.lastRenderTime.getTime()) / 1000 : 1 / 60,
             // displacement of clicked point due to spring [meters]
             dx = vx_t0 * dTsec,
             dy = vy_t0 * dTsec;
@@ -370,6 +373,8 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
             }
         }
         this.animationDelay.start();
+
+        // console.log(this.minElevation, this.maxElevation, this.minElevationLocal, this.maxElevationLocal);
     }
 };
 
@@ -408,24 +413,39 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
 
     if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
 
-        // get max and min for visible extent
+        // pass new minMaxNeighborhoodSize values and clear cache if changed
+        if(goog.isDef(this.minMaxNeighborhoodSize) && ol.Elevation.MinMaxNeighborhoodSize !== this.options['minMaxNeighborhoodSize']) {
+           this.demRenderer.clearTileCache();
+           this.demLayer.redraw();
+           ol.Elevation.setMinMaxNeighborhoodSize(this.options['minMaxNeighborhoodSize']);
+        }
+
+        // get global max and min for visible extent
         minMax = this.demRenderer.getCurrentMinMax();
         this.minElevation = minMax[0];
         this.maxElevation = minMax[1];
 
-        // get local max and min of the tile segments close to the dragged point
-        minMaxLocal = this.demRenderer.getLocalMinMax(mapBrowserEvent.coordinate, this.view.getZoom());
-        if (goog.isDef(minMaxLocal)) {
-            this.minElevationLocal = minMaxLocal[0];
-            this.maxElevationLocal = minMaxLocal[1];
+        // compute local minMax only when needed
+        if(ol.Elevation.MinMaxNeighborhoodSize >= 0){
+            // get local max and min of the tile segments close to the dragged point
+            minMaxLocal = this.demRenderer.getLocalMinMax(mapBrowserEvent.coordinate, this.view.getZoom());
+            if (goog.isDef(minMaxLocal)) {
+                this.minElevationLocal = minMaxLocal[0];
+                this.maxElevationLocal = minMaxLocal[1];   
+            }
+        } else {
+            this.minElevationLocal = this.minElevation;
+            this.maxElevationLocal = this.maxElevation; 
         }
+
         // critical elevation value to seperate minima and maxima
-        this.criticalElevation = this.minElevationLocal + (this.maxElevationLocal - this.minElevationLocal) * this.options['criticalElevationThreshold'];
+        this.criticalElevation = this.minElevationLocal + (this.maxElevationLocal - this.minElevationLocal) * 0.5;
 
         mapCenter = this.view.getCenter();
         this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
         this.startDragElevation = this.demRenderer.getElevation(mapBrowserEvent.coordinate, this.view.getZoom());
         // clamp values for extremely deep areas to avoid strong disturbing shearing
+        goog.asserts.assert(!goog.isNull(this.startDragElevation));
         this.startDragElevation = goog.math.clamp(this.startDragElevation, -4000.0, ol.Elevation.MAX);
         this.startCenter = [mapCenter[0], mapCenter[1]];
         this.currentCenter = [mapCenter[0], mapCenter[1]];
@@ -435,9 +455,6 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         this.lastRenderTime = null;
         this.distanceX = this.distanceY = 0;
         this.vx_t_1 = this.vy_t_1 = 0;
-
-        // console.log('critcal elevation ' + this.criticalElevation, 'current elevation' + this.startDragElevation);
-        // console.log('segment min max: ' + minMaxLocal);
 
         return true;
     }
@@ -472,7 +489,7 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
     goog.asserts.assert(goog.isDef(options.maxInnerShearingPx));
     goog.asserts.assert(goog.isDef(options.maxOuterShearingPx));
     goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
-    goog.asserts.assert(goog.isDef(options.criticalElevationThreshold));
+    goog.asserts.assert(goog.isDef(options.minMaxNeighborhoodSize));
     this.options = options;
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);

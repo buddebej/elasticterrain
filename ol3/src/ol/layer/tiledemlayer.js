@@ -12,7 +12,6 @@ ol.layer.TileDemProperty = {
   COLOR_RAMP: 'colorRamp',
   COLOR_SCALE: 'colorScale',  
   STACKED_CARDBOARD: 'stackedCardboard',
-  CRITICAL_ELEVATION: 'criticalElevation',    
   SHADING : 'shading',
   SHADING_OPACITY : 'shadingOpacity',
   SHADING_EXAGGERATION : 'shadingExaggeration',  
@@ -60,7 +59,6 @@ ol.layer.TileDem = function(opt_options) {
   this.setColorRamp(goog.isDef(options.colorRamp) ? options.colorRamp : 0);  
   this.setColorScale(goog.isDef(options.colorScale) ? options.colorScale : [0.0,1.0]);  
   this.setStackedCardboard(goog.isDef(options.stackedCardboard) ? options.stackedCardboard : true);  
-  this.setCriticalElevationThreshold(goog.isDef(options.criticalElevation) ? options.criticalElevation : 0.5);  
   this.setShading(goog.isDef(options.shading) ? options.shading : true);
   this.setShadingOpacity(goog.isDef(options.shadingOpacity) ? options.shadingOpacity : 1.0);
   this.setShadingExaggeration(goog.isDef(options.shadingExaggeration) ? options.shadingExaggeration : 0.0);  
@@ -183,31 +181,6 @@ goog.exportProperty(
   ol.layer.TileDem.prototype,
   'getColorRamp',
   ol.layer.TileDem.prototype.getColorRamp);
-
-
-
-/**
- * @param {number} critElevationThres
- */
-ol.layer.TileDem.prototype.setCriticalElevationThreshold = function(critElevationThres) {
-  this.set(ol.layer.TileDemProperty.CRITICAL_ELEVATION, critElevationThres);
-};
-goog.exportProperty(
-  ol.layer.TileDem.prototype,
-  'setCriticalElevationThreshold',
-  ol.layer.TileDem.prototype.setCriticalElevationThreshold);
-/**
- * @return {number}
- */
-ol.layer.TileDem.prototype.getCriticalElevationThreshold = function() {
-  return /** @type {number} */ (
-    this.get(ol.layer.TileDemProperty.CRITICAL_ELEVATION));
-};
-goog.exportProperty(
-  ol.layer.TileDem.prototype,
-  'getCriticalElevationThreshold',
-  ol.layer.TileDem.prototype.getCriticalElevationThreshold);
-
 
 
 
