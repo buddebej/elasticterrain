@@ -94,7 +94,7 @@ void main(void) {
     
     // normalize elevation for current minimum and maximum
     float nElevation = (u_maxElevation-u_minElevation)*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
-    float zOrderElevation = absElevation + 11000.0;
+    float zOrderElevation = absElevation/100.0;
 
     if(u_overlayActive){
         // FIXME 
@@ -150,9 +150,6 @@ uniform float u_hsExaggeration;
 
 // intensity of ambient light
 uniform float u_ambient_light;    
-
-// critical elevation threshold
-uniform float u_critElThreshold;  
 
 // cellsize for tile resolution of 256x256 pixel = 1.0/256.0
 const highp float CELLSIZE = 0.00390625; 
@@ -320,7 +317,7 @@ void main(void) {
             vec4 lighten = vec4(1.2,1.2,1.2,1.0);
 
             // highlight maxima and minima 
-            float criticalEl = u_minElevation + (u_maxElevation - u_minElevation) * u_critElThreshold;
+            // float criticalEl = u_minElevation + (u_maxElevation - u_minElevation) * u_critElThreshold;
            
             // display minima in gray
             // if(absElevation < criticalEl){
