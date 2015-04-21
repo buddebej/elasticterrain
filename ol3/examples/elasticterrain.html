@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../www/src/ressources/css/ol.css" type="text/css">
     <link rel="stylesheet" href="../www/src/ressources/css/jquery-ui.min.css" />
     <link rel="stylesheet" href="../www/src/ressources/css/ote.css" />
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css' />    
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css' />
     <link rel="stylesheet" href="../www/src/ressources/font-awesome/css/font-awesome.min.css">
     <script src="../www/src/ressources/js/jquery-2.1.3.min.js"></script>
     <script src="../www/src/ressources/js/jquery-ui.min.js"></script>
@@ -147,7 +147,7 @@
                             <option value="0">ColorRamp 1</option>
                             <option value="1">ColorRamp 2</option>
                         </select>
-                       <!--  <div class="vcenter">
+                        <!--  <div class="vcenter">
                             Scale of Color Ramp
                             <div class="colorSlider floatingSlider"></div>
                         </div> -->
@@ -246,8 +246,14 @@
                         <div class="springOuterRadiusSlider floatingSlider"></div>
                     </div>
                     <div class="vcenter">
-                        Critical Elevation
-                        <div class="criticalElevationSlider floatingSlider"></div>
+                        MinMax Radius
+                        <select class="minMaxRadiusSelect narrow">
+                            <option value="-1">Extent</option>
+                            <option value="4">384 x 384 px</option>
+                            <option value="16">192 x 192 px</option>
+                            <option value="64">&nbsp;96 x 96 px</option>
+                            <option value="0">&nbsp;64 x 64 px</option>
+                        </select>
                     </div>
                 </div>
             </div>
