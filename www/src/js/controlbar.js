@@ -40,11 +40,11 @@ var ControlBar = function(viewer) {
         SLIDER_SPRING_FADEOUT = $('.springFadeoutSlider'),
         SLIDER_SPRING_INNRAD = $('.springInnerRadiusSlider'),
         SLIDER_SPRING_OUTRAD = $('.springOuterRadiusSlider'),
-        SLIDER_CRITICAL_ELEVATION = $('.criticalElevationSlider'),
         SLIDER_RESOLUTION = $('.resolutionSlider'),
         SELECT_TEXTURE = $('.textureSelect'),
         SELECT_COLOR_RAMP = $('.colorRampSelect'),
         SELECT_CONFIG = $('.configSelect'),
+        SELECT_NEIGHBORHOOD_SIZE = $('.minMaxRadiusSelect'),        
         INFOCONTENT = $('.infoBox .content'),
         INFOMENUE = $('.infoBox .menue');
 
@@ -198,15 +198,14 @@ var ControlBar = function(viewer) {
         SLIDER_SPRING_OUTRAD.slider({
             value: viewer.get('iMaxOuterShearingPx')
         });
-        SLIDER_CRITICAL_ELEVATION.slider({
-            value: toSlider(viewer.get('iCriticalElevationThreshold'))
-        });
         SLIDER_RESOLUTION.slider({
             value: toSlider(viewer.get('resolution'))
         });
 
         SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
         SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
+        SELECT_NEIGHBORHOOD_SIZE.find('option[value=' + viewer.get('iminMaxNeighborhoodSize') + ']').attr('selected', true);
+        
     };
 
 
@@ -487,13 +486,10 @@ var ControlBar = function(viewer) {
             viewer.set('iMaxOuterShearingPx', ui.value);
         }
     });
-    SLIDER_CRITICAL_ELEVATION.slider({
-        min: 0,
-        max: 100,
-        slide: function(event, ui) {
-            viewer.set('iCriticalElevationThreshold', fromSlider(ui.value, 100));
-        }
+    SELECT_NEIGHBORHOOD_SIZE.change(function() {
+        viewer.set('iminMaxNeighborhoodSize', parseInt(SELECT_NEIGHBORHOOD_SIZE.find($('option:selected')).val()));
     });
+
 
 
     // ROTATION 

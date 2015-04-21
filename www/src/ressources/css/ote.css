@@ -16,6 +16,12 @@ select {
     font-family: 'Open Sans', sans-serif;        
 }
 
+.narrow{
+    width: 40%;
+    margin-left: 65px;
+}
+
+
 h3{
     margin: 0px;
     margin-bottom: 3px;   

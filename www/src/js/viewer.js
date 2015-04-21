@@ -114,7 +114,6 @@ var Viewer = function(config, layers) {
         this.dem.setObliqueInclination(this.config.get('obliqueInclination'));
         this.dem.setWaterBodies(this.config.get('waterBodies'));
         this.dem.setTerrainInteraction(this.config.get('terrainInteraction'));
-        this.dem.setCriticalElevationThreshold(this.config.get('iCriticalElevationThreshold'));
         this.dem.setOverlayTiles((this.config.get('texture') !== -1) ? this.layers[this.config.get('texture')].data : null);
         this.shearingInteraction.setOptions(this.getShearingInteractionOptions());
         this.render();
@@ -130,7 +129,7 @@ var Viewer = function(config, layers) {
             maxInnerShearingPx: this.config.get('iMaxInnerShearingPx'),
             maxOuterShearingPx: this.config.get('iMaxOuterShearingPx'),
             staticShearFadeOutAnimationSpeed: this.config.get('iStaticShearFadeOutAnimationSpeed'),
-            criticalElevationThreshold: this.config.get('iCriticalElevationThreshold')
+            minMaxNeighborhoodSize: this.config.get('iminMaxNeighborhoodSize')
         };
     }.bind(this);
     
@@ -157,7 +156,7 @@ var Viewer = function(config, layers) {
     // INIT
     // hide all overlay maps (disables preloading and caching)
     this.hideLayersExcept(null);
-    this.setLayerPreload(5);
+    this.setLayerPreload(2);
     // apply initial config
     this.update();
 };

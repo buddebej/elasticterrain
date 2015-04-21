@@ -2,7 +2,7 @@ var Config = function(viewer) {
     'use strict';
 
     // static config
-    this.maxZoom = 11;
+    this.maxZoom = 19;
     this.minZoom = 1;
     this.domContainer = 'map';
     this.dbUrl = 'http://54.69.7.112:8000/api/configs';
@@ -36,19 +36,19 @@ var Config = function(viewer) {
         // view
         viewRotation: 0, // 0:360
         viewCenter: [-122.8, 45.7], // center of map in latlon          
-        viewZoom: 12, // zoomlevel
+        viewZoom: 11, // zoomlevel
 
         // static plan oblique
         obliqueInclination: 90.0, // 0:90
 
         // shearingInteraction 
         terrainInteraction: true, // bool
-        iCriticalElevationThreshold: 0.5, // 0:1               
+        iminMaxNeighborhoodSize: 16, // 0:1               
         iShearingThreshold: 0.333, // in pixel
         iSpringCoefficient: 0.08, // 0:1
         iFrictionForce: 0.17, // 0:1             
-        iMaxInnerShearingPx: 0.0, // radius in pixel
-        iMaxOuterShearingPx: 0.0, // radius in pixel
+        iMaxInnerShearingPx: 90.0, // radius in pixel
+        iMaxOuterShearingPx: 90.0, // radius in pixel
         iStaticShearFadeOutAnimationSpeed: 1.5
     };
 
