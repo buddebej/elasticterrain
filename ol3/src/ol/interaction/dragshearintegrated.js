@@ -368,7 +368,7 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 
             // switch from static shearing to hybrid shearing if the pointer is leaving the outer circle.
             if (distance >= maxOuterShearingMeters) {
-                this.springLength = 0;
+                this.hybridShearingStartTimeMS = new Date().getTime();
                 this.shearingStatus = ol.interaction.State.HYBRID_SHEARING;
             }
         }
@@ -414,10 +414,10 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
     if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
 
         // pass new minMaxNeighborhoodSize values and clear cache if changed
-        if(goog.isDef(this.minMaxNeighborhoodSize) && ol.Elevation.MinMaxNeighborhoodSize !== this.options['minMaxNeighborhoodSize']) {
-           this.demRenderer.clearTileCache();
-           this.demLayer.redraw();
-           ol.Elevation.setMinMaxNeighborhoodSize(this.options['minMaxNeighborhoodSize']);
+        if (goog.isDef(this.minMaxNeighborhoodSize) && ol.Elevation.MinMaxNeighborhoodSize !== this.options['minMaxNeighborhoodSize']) {
+            this.demRenderer.clearTileCache();
+            this.demLayer.redraw();
+            ol.Elevation.setMinMaxNeighborhoodSize(this.options['minMaxNeighborhoodSize']);
         }
 
         // get global max and min for visible extent
@@ -426,16 +426,16 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         this.maxElevation = minMax[1];
 
         // compute local minMax only when needed
-        if(ol.Elevation.MinMaxNeighborhoodSize >= 0){
+        if (ol.Elevation.MinMaxNeighborhoodSize >= 0) {
             // get local max and min of the tile segments close to the dragged point
             minMaxLocal = this.demRenderer.getLocalMinMax(mapBrowserEvent.coordinate, this.view.getZoom());
             if (goog.isDef(minMaxLocal)) {
                 this.minElevationLocal = minMaxLocal[0];
-                this.maxElevationLocal = minMaxLocal[1];   
+                this.maxElevationLocal = minMaxLocal[1];
             }
         } else {
             this.minElevationLocal = this.minElevation;
-            this.maxElevationLocal = this.maxElevation; 
+            this.maxElevationLocal = this.maxElevation;
         }
 
         // critical elevation value to seperate minima and maxima
@@ -446,7 +446,7 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         this.startDragElevation = this.demRenderer.getElevation(mapBrowserEvent.coordinate, this.view.getZoom());
         // clamp values for extremely deep areas to avoid strong disturbing shearing
         goog.asserts.assert(!goog.isNull(this.startDragElevation));
-        this.startDragElevation = goog.math.clamp(this.startDragElevation, -4000.0, ol.Elevation.MAX);
+        this.startDragElevation = goog.math.clamp(this.startDragElevation, -3500.0, ol.Elevation.MAX);
         this.startCenter = [mapCenter[0], mapCenter[1]];
         this.currentCenter = [mapCenter[0], mapCenter[1]];
         this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
