@@ -151,6 +151,9 @@ uniform float u_hsExaggeration;
 // intensity of ambient light
 uniform float u_ambient_light;    
 
+// zoom level
+uniform int u_zoom;    
+
 // cellsize for tile resolution of 256x256 pixel = 1.0/256.0
 const highp float CELLSIZE = 0.00390625; 
 const highp float PSIZE = 1.0/512.0; 
@@ -177,6 +180,26 @@ void main(void) {
         bool atWestBorder = m_texCoord.x <= CELLSIZE;
         bool atEastBorder = m_texCoord.x >= 1.0 - CELLSIZE;
 
+        // use different tile border decoding for zoomlevel 12 data
+        // to fix this, tiles for zoomlevel 12 have to be recomputed (a long and boring process)
+        if(u_zoom == 12){
+            if(atEastBorder){ // eastern border of tile                
+                m_texCoord.x = m_texCoord.x - CELLSIZE;
+            }
+
+            if(atWestBorder){ // western border of tile                
+                m_texCoord.x = m_texCoord.x + CELLSIZE;
+            }
+
+            if(atNorthBorder){ // northern border of tile                
+                m_texCoord.y = m_texCoord.y + CELLSIZE;
+            }
+
+            if(atSouthBorder){ // southern border of tile                
+                m_texCoord.y = m_texCoord.y - CELLSIZE;
+            }
+        }
+
         vec2 nRight = vec2(m_texCoord.x+CELLSIZE, m_texCoord.y);
         vec2 nLeft = vec2(m_texCoord.x-CELLSIZE, m_texCoord.y);
         vec2 nAbove = vec2(m_texCoord.x, m_texCoord.y+CELLSIZE);
@@ -190,31 +213,35 @@ void main(void) {
         float neighborAbove = decodeElevation(texture2D(u_texture, nAbove));
         float neighborBelow = decodeElevation(texture2D(u_texture, nBelow));    
 
-        // display tile borders properly: use alternative decoding
-        // last eight rows of blue channel contain neighbor values
-        if(atNorthBorder){ 
-            float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(256))).b; // row 256          
-            float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(251))).b; // row 251
-            neighborBelow = decodeElevationB(vec2(valB, valA));
-        }
+        if(u_zoom != 12){
+            // display tile borders properly: use alternative decoding
+            // last eight rows of blue channel contain neighbor values
+            if(atNorthBorder){ 
+                float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(256))).b; // row 256          
+                float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(251))).b; // row 251
+                neighborBelow = decodeElevationB(vec2(valB, valA));
+            }
 
-        if(atSouthBorder){  
-            float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(254))).b; // row 254        
-            float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(250))).b; // row 250
-            neighborAbove = decodeElevationB(vec2(valB, valA));            
-        }
+            if(atSouthBorder){  
+                float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(254))).b; // row 254        
+                float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(250))).b; // row 250
+                neighborAbove = decodeElevationB(vec2(valB, valA));            
+            }
 
-        if(atEastBorder){ 
-            float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(253))).b; // row 253         
-            float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(249))).b; // row 249 
-            neighborRight = decodeElevationB(vec2(valB, valA));            
-        }
+            if(atEastBorder){ 
+                float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(253))).b; // row 253         
+                float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(249))).b; // row 249 
+                neighborRight = decodeElevationB(vec2(valB, valA));            
+            }
 
-        if(atWestBorder){  
-            float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(252))).b; // row 252         
-            float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(248))).b; // row 248 
-            neighborLeft = decodeElevationB(vec2(valB, valA));            
-        }         
+            if(atWestBorder){  
+                float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(252))).b; // row 252         
+                float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(248))).b; // row 248 
+                neighborLeft = decodeElevationB(vec2(valB, valA));            
+            }      
+        }   
+
+
 
         // cardboard stack
         if(u_stackedCardb && !u_overlayActive && absElevation<0.0){
