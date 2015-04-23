@@ -25,7 +25,7 @@ var Config = function(viewer) {
 
         // hypsometric colors
         stackedCardboard: true, // bool
-        waterBodies: true, // bool
+        waterBodies: false, // bool
         colorScale: [0, 4000], // min:max [m]  
         colorRamp: 0, // id   
 
@@ -35,8 +35,12 @@ var Config = function(viewer) {
 
         // view
         viewRotation: 0, // 0:360
-        viewCenter: [-122.8, 45.7], // center of map in latlon          
-        viewZoom: 11, // zoomlevel
+        viewCenter: [13.04,52.40], // center of map in latlon 
+        // potsdam 13.04,52.40
+        // sicily 17,37
+        // vienna 16.2,48.12
+        // portland -122.8, 45.7        
+        viewZoom: 16, // zoomlevel
 
         // static plan oblique
         obliqueInclination: 90.0, // 0:90
@@ -47,9 +51,9 @@ var Config = function(viewer) {
         iShearingThreshold: 0.333, // in pixel
         iSpringCoefficient: 0.08, // 0:1
         iFrictionForce: 0.17, // 0:1             
-        iMaxInnerShearingPx: 90.0, // radius in pixel
-        iMaxOuterShearingPx: 90.0, // radius in pixel
-        iStaticShearFadeOutAnimationSpeed: 1.5
+        iMaxInnerShearingPx: 10.0, // radius in pixel
+        iMaxOuterShearingPx: 10.0, // radius in pixel
+        iStaticShearFadeOutAnimationSpeed: 1.0
     };
 
     this.dynamic = this.init;

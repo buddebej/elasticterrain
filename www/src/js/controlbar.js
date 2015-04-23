@@ -64,7 +64,7 @@ var ControlBar = function(viewer) {
     ui.controls = {
         config: {
             enabled: false,
-            collapsed: false
+            collapsed: true
         },
         inclination: {
             enabled: false,
