@@ -45,9 +45,17 @@ varying vec2 v_texCoord;
 // current shearing factor
 uniform vec2 u_scaleFactor;
 
+// zoom level
+uniform float u_zoom;   
+
 // decodes input data elevation value using red and green channel
 float decodeElevation(in vec4 colorChannels) {
-    float elevationM = (colorChannels.r*255.0 + (colorChannels.g*255.0)*256.0)-11000.0;
+    // use float decoding for higher zoomlevels
+    float decimalDecode = 1.0;
+    if(u_zoom > 12.0){
+        decimalDecode = 0.01;
+    }
+    float elevationM = ((colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0)*decimalDecode;    
     if(elevationM > 9000.0){
         elevationM = 0.0;
     }
@@ -56,7 +64,12 @@ float decodeElevation(in vec4 colorChannels) {
 
 // decodes input data elevation value for tile borders, using blue channel
 float decodeElevationB(in vec2 colorChannels) {
-    float elevationM = (colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0;
+    // use float decoding for higher zoomlevels    
+    float decimalDecode = 1.0;
+    if(u_zoom > 12.0){
+        decimalDecode = 0.01;
+    }
+    float elevationM = ((colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0)*decimalDecode;    
     if(elevationM > 9000.0){
         elevationM = 0.0;
     }    
@@ -151,9 +164,6 @@ uniform float u_hsExaggeration;
 // intensity of ambient light
 uniform float u_ambient_light;    
 
-// zoom level
-uniform int u_zoom;    
-
 // cellsize for tile resolution of 256x256 pixel = 1.0/256.0
 const highp float CELLSIZE = 0.00390625; 
 const highp float PSIZE = 1.0/512.0; 
@@ -182,7 +192,7 @@ void main(void) {
 
         // use different tile border decoding for zoomlevel 12 data
         // to fix this, tiles for zoomlevel 12 have to be recomputed (a long and boring process)
-        if(u_zoom == 12){
+        if(u_zoom == 12.0){
             if(atEastBorder){ // eastern border of tile                
                 m_texCoord.x = m_texCoord.x - CELLSIZE;
             }
@@ -213,7 +223,7 @@ void main(void) {
         float neighborAbove = decodeElevation(texture2D(u_texture, nAbove));
         float neighborBelow = decodeElevation(texture2D(u_texture, nBelow));    
 
-        if(u_zoom != 12){
+        if(u_zoom != 12.0){
             // display tile borders properly: use alternative decoding
             // last eight rows of blue channel contain neighbor values
             if(atNorthBorder){ 

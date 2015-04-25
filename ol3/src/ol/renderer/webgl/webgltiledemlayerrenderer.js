@@ -216,7 +216,7 @@ ol.renderer.webgl.TileDemLayer.prototype.getElevation = function(xy, z) {
         tile = this.tileCache_.get(xyzKey);
     tileXY[0] = Math.floor(((xy[0] - tileExtent[0]) / (tileExtent[2] - tileExtent[0])) * 256);
     tileXY[1] = 256 - Math.floor(((xy[1] - tileExtent[1]) / (tileExtent[3] - tileExtent[1])) * 256);
-    elevation = ol.Elevation.decode(tile.getPixelValue(tileXY));
+    elevation = ol.Elevation.decode(tile.getPixelValue(tileXY),z);
     return elevation;
 };
 
@@ -584,40 +584,37 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         gl.uniform1f(this.locations_.u_maxElevation, this.maxElevationInExtent);
 
         // COLORING
-        // dont create color lookup when in overlay mode
-        if (!this.overlay.Active) {
-            // create lookup texture only once
-            if (goog.isNull(this.textureHypsometricColors_)) {
-                this.textureHypsometricColors_ = gl.createTexture();
-            }
-            var arrayHypsometryColors = new Uint8Array(ol.ColorRamp.hypsometry[tileDemLayer.getColorRamp()]);
-            gl.activeTexture(goog.webgl.TEXTURE2);
-            gl.bindTexture(goog.webgl.TEXTURE_2D, this.textureHypsometricColors_);
-
-            // read color ramp array
-            gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayHypsometryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayHypsometryColors);
-            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER, goog.webgl.LINEAR);
-            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
-            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
-            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
-            gl.uniform1i(this.locations_.u_hypsoColors, 2);
-
-            // create lookup texture only once
-            if (goog.isNull(this.textureBathymetricColors_)) {
-                this.textureBathymetricColors_ = gl.createTexture();
-            }
-            var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry);
-            gl.activeTexture(goog.webgl.TEXTURE3);
-            gl.bindTexture(goog.webgl.TEXTURE_2D, this.textureBathymetricColors_);
-
-            // read color ramp array
-            gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayBathymetryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayBathymetryColors);
-            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER, goog.webgl.LINEAR);
-            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
-            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
-            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
-            gl.uniform1i(this.locations_.u_bathyColors, 3);
+        // create lookup texture only once
+        if (goog.isNull(this.textureHypsometricColors_)) {
+            this.textureHypsometricColors_ = gl.createTexture();
         }
+        var arrayHypsometryColors = new Uint8Array(ol.ColorRamp.hypsometry[tileDemLayer.getColorRamp()]);
+        gl.activeTexture(goog.webgl.TEXTURE2);
+        gl.bindTexture(goog.webgl.TEXTURE_2D, this.textureHypsometricColors_);
+
+        // read color ramp array
+        gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayHypsometryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayHypsometryColors);
+        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER, goog.webgl.LINEAR);
+        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
+        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
+        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
+        gl.uniform1i(this.locations_.u_hypsoColors, 2);
+
+        // create lookup texture only once
+        if (goog.isNull(this.textureBathymetricColors_)) {
+            this.textureBathymetricColors_ = gl.createTexture();
+        }
+        var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry);
+        gl.activeTexture(goog.webgl.TEXTURE3);
+        gl.bindTexture(goog.webgl.TEXTURE_2D, this.textureBathymetricColors_);
+
+        // read color ramp array
+        gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayBathymetryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayBathymetryColors);
+        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER, goog.webgl.LINEAR);
+        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
+        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
+        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
+        gl.uniform1i(this.locations_.u_bathyColors, 3);
 
         // MESH 
         // check if mesh resolution has changed
@@ -768,8 +765,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                             gl.uniform1i(this.locations_.u_texture, 0);
 
                             // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
-                            gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i]+1) / (this.maxZoom_+1)));
-                            gl.uniform1i(this.locations_.u_zoom, zs[i]);
+                            gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom_ + 1)));
+                            gl.uniform1f(this.locations_.u_zoom, zs[i]);
 
                             // determine offset for each tile in target framebuffer
                             defUniformOffset(overlayTile, this);
@@ -818,8 +815,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     tile = tilesToDraw[tileKey];
 
                     // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
-                    gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i]+1) / (this.maxZoom_+1)));
-                    gl.uniform1i(this.locations_.u_zoom, zs[i]);
+                    gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom_ + 1)));
+                    gl.uniform1f(this.locations_.u_zoom, zs[i]);
 
                     // determine offset for each tile in target framebuffer
                     defUniformOffset(tile, this);

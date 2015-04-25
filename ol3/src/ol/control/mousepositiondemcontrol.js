@@ -228,8 +228,8 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
     var coordinate = map.getCoordinateFromPixel(pixel);
 
     if (!goog.isNull(coordinate)) {
-      elevation = Math.round(/** @type {ol.renderer.webgl.TileDemLayer} */(map.getRenderer().getLayerRenderer(this.demLayer_)).getElevation(coordinate,map.getView().getZoom()));
-      elevation = (elevation === -11000) ? '' : elevation + ' m, ';
+      elevation = /** @type {ol.renderer.webgl.TileDemLayer} */(map.getRenderer().getLayerRenderer(this.demLayer_)).getElevation(coordinate,map.getView().getZoom());
+      elevation = (elevation === -11000) ? '' : elevation.toFixed(1) + ' m, ';
 
       this.transform_(coordinate, coordinate);  
  

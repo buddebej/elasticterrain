@@ -100,6 +100,12 @@ ol.ImageTile = function(tileCoord, state, src, crossOrigin, tileLoadFunction, op
          */
         this.segmentMinMax = new Array(this.segmentsXY);
 
+        /**
+         * @private
+         * @type {number}
+         */
+        this.zoomLevel = this.tileCoord[0];
+
         // make 2d array
         for (var l = 0; l < this.segmentsXY; l = l + 1) {
             this.segmentMinMax[l] = new Array(this.segmentsXY);
@@ -171,6 +177,7 @@ ol.ImageTile.prototype.createCanvas = function() {
  */
 ol.ImageTile.prototype.readMinMaxElevations = function() {
     if (!goog.isNull(this.canvasContext_)) {
+
         var imageChannels = 4,
             segmentSize = this.image_.width / this.segmentsXY,
             currentElevation = 0,
@@ -187,7 +194,7 @@ ol.ImageTile.prototype.readMinMaxElevations = function() {
 
                 // loop through pixel and channel values
                 for (var j = 0; j < segmentData.length; j = j + imageChannels) {
-                    currentElevation = ol.Elevation.decode([segmentData[j], segmentData[j + 1]]); // use red and green channel of every pixel
+                    currentElevation = ol.Elevation.decode([segmentData[j], segmentData[j + 1]],this.zoomLevel); // use red and green channel of every pixel
 
                     // segment minMax
                     if (currentElevation > segmentMax) {

@@ -35,12 +35,12 @@ var Config = function(viewer) {
 
         // view
         viewRotation: 0, // 0:360
-        viewCenter: [13.04,52.40], // center of map in latlon 
+        viewCenter: [-122.8, 45.7], // center of map in latlon 
         // potsdam 13.04,52.40
         // sicily 17,37
-        // vienna 16.2,48.12
+        // vienna 16.4,48.22
         // portland -122.8, 45.7        
-        viewZoom: 16, // zoomlevel
+        viewZoom: 15, // zoomlevel
 
         // static plan oblique
         obliqueInclination: 90.0, // 0:90

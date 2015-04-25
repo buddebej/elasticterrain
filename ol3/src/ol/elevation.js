@@ -6,8 +6,13 @@ goog.provide('ol.Elevation');
  * @param {Array} rgba
  * @return {number} elevationM Elevation in meters
  */
-ol.Elevation.decode = function(rgba) {
-    var elevationM = (rgba[0] + rgba[1] * 256.0) - 11000.0;
+ol.Elevation.decode = function(rgba,zoom) {
+    // use float decoding for higher zoomlevels
+    var decimalDecode = 1.0;
+    if(goog.isDef(zoom) && zoom > 12){
+        decimalDecode = 0.01;
+    }
+    var elevationM = ((rgba[0] + rgba[1] * 256.0) - 11000.0)*decimalDecode;
     if (elevationM > 9000.0) {
         elevationM = 0.0;
     }

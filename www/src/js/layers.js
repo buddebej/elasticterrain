@@ -10,7 +10,7 @@ var Layers = function() {
         enabled: true,
         data: new ol.layer.TileDem({
             source: new ol.source.XYZ({
-                // url: 'http://192.168.0.127/demo/data/x/{z}/{x}/{y}.png',                
+                // url: 'http://192.168.0.127/demo/data/pdxdem/{z}/{x}/{y}.png',                
                 url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png',
                 // url: 'data/tiles/{z}/{x}/{y}.png',                
                 dem: true
