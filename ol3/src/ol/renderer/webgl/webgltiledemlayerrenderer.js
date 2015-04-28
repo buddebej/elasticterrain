@@ -121,14 +121,14 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.tilePadding_ = 256;
+    this.tilePadding_ = 100;
 
     /**
      * Timeout for loading of tiles = max rendering calls per execution
      * @private
      * @type {number}
      */
-    this.timeoutCounterMax_ = 450;    
+    this.timeoutCounterMax_ = 450;
 
     /**
      * @private
@@ -387,16 +387,21 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
                 var // compute row and column of tile that contains the segment
                     tileRow = goog.math.safeFloor(segmentRow / tileSegmentsXY),
                     tileCol = goog.math.safeFloor(segmentCol / tileSegmentsXY),
-                    // get handle for the relevant tile
-                    tile = this.tileCache_.get(ol.tilecoord.getKeyZXY(clickedTileCoord[0], neighborTilesCoordinates[tileRow][tileCol].x, neighborTilesCoordinates[tileRow][tileCol].y)),
+                    tile = null,
+                    xyzKey = ol.tilecoord.getKeyZXY(clickedTileCoord[0], neighborTilesCoordinates[tileRow][tileCol].x, neighborTilesCoordinates[tileRow][tileCol].y);
+                // get handle for the relevant tile
+                if (this.tileCache_.containsKey(xyzKey)) {
+                    tile = this.tileCache_.get(xyzKey);
                     // get the segments
-                    nSegments = tile.getSegments(),
-                    // copy the corresponding segment from the tile segment store to the global segment store
-                    segmentCopy = nSegments[goog.math.safeFloor(segmentCol / neighborhoodSize)][goog.math.safeFloor(segmentRow / neighborhoodSize)];
-                neighborSegmentStore[segmentCol][segmentRow] = segmentCopy;
+                    var nSegments = tile.getSegments(),
+                        // copy the corresponding segment from the tile segment store to the global segment store
+                        segmentCopy = nSegments[goog.math.safeFloor(segmentCol / neighborhoodSize)][goog.math.safeFloor(segmentRow / neighborhoodSize)];
+                    neighborSegmentStore[segmentCol][segmentRow] = segmentCopy;
+                }
             }
         }
 
+        var segmentCounter = 0;
         // read minMax for relevant segments
         for (var segmentRow = 0; segmentRow < neighborhoodSize; segmentRow++) {
             for (var segmentCol = 0; segmentCol < neighborhoodSize; segmentCol++) {
@@ -404,14 +409,16 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
                 var segmentX = neighborSegmentsCoordinates[segmentRow][segmentCol].x,
                     segmentY = neighborSegmentsCoordinates[segmentRow][segmentCol].y;
 
-                localMinMax[0] += neighborSegmentStore[segmentX][segmentY][0];
-                localMinMax[1] += neighborSegmentStore[segmentX][segmentY][1];
+                if (goog.isDef(neighborSegmentStore[segmentX][segmentY])) {
+                    localMinMax[0] += neighborSegmentStore[segmentX][segmentY][0];
+                    localMinMax[1] += neighborSegmentStore[segmentX][segmentY][1];
+                    segmentCounter++;
+                }
             }
         }
         // average minMax values
-        var n = neighborhoodSize * neighborhoodSize;
-        localMinMax[0] = localMinMax[0] / n;
-        localMinMax[1] = localMinMax[1] / n;
+        localMinMax[0] = localMinMax[0] / segmentCounter;
+        localMinMax[1] = localMinMax[1] / segmentCounter;
     }
     return localMinMax;
 };
@@ -461,6 +468,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
     var map = mapRenderer.map_;
     var gl = context.getGL();
     var viewState = frameState.viewState;
+    var viewZoom = map.getView().getZoom();
     var projection = viewState.projection;
     var tileDemLayer = this.getLayer();
     goog.asserts.assertInstanceof(tileDemLayer, ol.layer.TileDem);
@@ -515,6 +523,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             minX, minY,
             minX + framebufferExtentDimension, minY + framebufferExtentDimension
         ];
+                console.log(framebufferExtent);
+
         this.bindFramebuffer(frameState, framebufferDimension);
         gl.viewport(0, 0, framebufferDimension, framebufferDimension);
 
@@ -778,7 +788,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
                             // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
                             gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom_ + 1)));
-                            gl.uniform1f(this.locations_.u_zoom, zs[i]);
+                            // pass zoomlevel of this tile and zoomlevel of current view
+                            gl.uniform2f(this.locations_.u_zoom, zs[i], (goog.isDef(viewZoom))? viewZoom : zs[i]);
 
                             // determine offset for each tile in target framebuffer
                             defUniformOffset(overlayTile, this);
@@ -828,7 +839,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
                     // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
                     gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom_ + 1)));
-                    gl.uniform1f(this.locations_.u_zoom, zs[i]);
+                    // pass zoomlevel of this tile and zoomlevel of current view
+                    gl.uniform2f(this.locations_.u_zoom, zs[i], (goog.isDef(viewZoom))? viewZoom : zs[i]);
 
                     // determine offset for each tile in target framebuffer
                     defUniformOffset(tile, this);

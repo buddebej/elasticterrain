@@ -46,13 +46,14 @@ varying vec2 v_texCoord;
 uniform vec2 u_scaleFactor;
 
 // zoom level
-uniform float u_zoom;   
+// x is zoomlevel of current tile, y is current zoomlevel of view
+uniform vec2 u_zoom;   
 
 // decodes input data elevation value using texture colors from two channels combined
 float decodeElevation(in vec2 colorChannels) {
     // use float decoding for higher zoomlevels
     float decimalDecode = 1.0;
-    if(u_zoom > 12.0){
+    if(u_zoom.x > 12.0){
         decimalDecode = 0.01;
     }
     float elevationM = ((colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0)*decimalDecode;    
@@ -95,20 +96,25 @@ void main(void) {
     float nElevation = (absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
     float zOrderElevation = absElevation/100.0;
 
+    vec2 shearing = u_scaleFactor.xy;
+    if(u_zoom.y != u_zoom.x){
+        shearing = vec2(0.0,0.0);
+    }
+
     if(u_overlayActive){
         // FIXME 
         // sometimes the overlay texture is mistaken for the elevation model
         // we could use different shaders for rendering with and without overlay
         // or we can find a reliable test in the function that serves the overlay textures
         if(texture2D(u_overlayTexture, v_texCoord) != texture2D(u_texture, v_texCoord)){
-            gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
+            gl_Position = vec4((a_position+(nElevation * shearing.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
                                 u_z-(zOrderElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
                                 1.0);
         }
     } else {
         // shift vertex positions by given shearing factors
         // z value has to be inverted to get a left handed coordinate system and to make the depth test work
-        gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
+        gl_Position = vec4((a_position+(nElevation * shearing.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
                             u_z-(zOrderElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
                             1.0);
     }
@@ -177,7 +183,7 @@ void main(void) {
 
         // use different tile border decoding for zoomlevel 12 data
         // to fix this, tiles for zoomlevel 12 have to be recomputed (a long and boring process)
-        if(u_zoom == 12.0){
+        if(u_zoom.x == 12.0){
             if(atEastBorder){ // eastern border of tile                
                 m_texCoord.x = m_texCoord.x - CELLSIZE;
             }
@@ -210,7 +216,7 @@ void main(void) {
 
         // use different tile border decoding for zoomlevel 12 data
         // to fix this, tiles for zoomlevel 12 have to be recomputed (a long and boring process) 
-        if(u_zoom != 12.0){
+        if(u_zoom.x != 12.0){
             // display tile borders properly: use alternative decoding
             // last eight rows of blue channel contain neighbor values
             if(atNorthBorder){ 
