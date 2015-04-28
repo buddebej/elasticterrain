@@ -20,7 +20,7 @@ var configSchema = new Schema({
     viewRotation: Number,
     viewCenter: [Number],
     viewZoom: Number,
-    iCriticalElevationThreshold: Number,
+    iminMaxNeighborhoodSize: Number,
     iShearingThreshold: Number,
     iSpringCoefficient: Number,
     iFrictionForce: Number,
