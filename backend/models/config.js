@@ -19,6 +19,7 @@ var configSchema = new Schema({
     waterBodies: Boolean,
     viewRotation: Number,
     viewCenter: [Number],
+    viewCenterConstraint: [Number],    
     viewZoom: Number,
     iminMaxNeighborhoodSize: Number,
     iShearingThreshold: Number,

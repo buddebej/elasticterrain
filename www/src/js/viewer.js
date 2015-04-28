@@ -93,17 +93,18 @@ var Viewer = function(config, layers) {
     // getter for configStore
     this.getConfigStore = function() {
         return this.configStore;
-    };    
+    };
 
     // apply current config to renderer and map view
     this.update = function() {
         this.view.setCenter(ol.proj.transform(this.config.get('viewCenter'), 'EPSG:4326', 'EPSG:3857'));
+        this.view.setCenterConstraint(this.config.get('viewCenterConstraint'));
         this.view.setRotation(this.toRadians(this.config.get('viewRotation')));
         this.view.setZoom(this.config.get('viewZoom'));
         this.dem.setAmbientLight(this.config.get('ambientLight'));
         this.dem.setColorScale(this.config.get('colorScale'));
         this.dem.setColorRamp(this.config.get('colorRamp'));
-        this.dem.setStackedCardboard(this.config.get('stackedCardboard'));        
+        this.dem.setStackedCardboard(this.config.get('stackedCardboard'));
         this.dem.setShading(this.config.get('shading'));
         this.dem.setShadingOpacity(this.config.get('shadingDarkness'));
         this.dem.setShadingExaggeration(this.config.get('shadingExaggeration'));
@@ -131,7 +132,7 @@ var Viewer = function(config, layers) {
             minMaxNeighborhoodSize: this.config.get('iminMaxNeighborhoodSize')
         };
     }.bind(this);
-    
+
     // init elastic terrain interactions
     this.shearingInteraction = new ol.interaction.DragShearIntegrated(this.getShearingInteractionOptions(), this.map, ol.events.condition.noModifierKeys);
     this.map.addInteraction(this.shearingInteraction);

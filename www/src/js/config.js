@@ -3,7 +3,7 @@ var Config = function() {
 
     // static config
     this.maxZoom = 19;
-    this.minZoom = 1;
+    this.minZoom = 0;
     this.domContainer = 'map';
     this.dbUrl = 'http://54.69.7.112:8000/api/configs';
     // dynamic config 
@@ -34,11 +34,16 @@ var Config = function() {
 
         // view
         viewRotation: 0, // 0:360
-        viewCenter: [17,37], // center of map in latlon 
+
+        viewCenter: [17, 37], // center of map in latlon 
         // potsdam 13.04,52.40
         // sicily 17,37
         // vienna 16.4,48.22
-        // portland -122.8, 45.7        
+        // portland -122.8, 45.7     
+
+        viewCenterConstraint: undefined, // undefined | [minx, miny, maxx, maxy]
+        //[0, 2504688.542848654, 5009377.085697311, 7514065.628545965]
+          
         viewZoom: 5, // zoomlevel
 
         // static plan oblique

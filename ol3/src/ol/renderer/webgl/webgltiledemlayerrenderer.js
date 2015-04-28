@@ -523,7 +523,6 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             minX, minY,
             minX + framebufferExtentDimension, minY + framebufferExtentDimension
         ];
-                console.log(framebufferExtent);
 
         this.bindFramebuffer(frameState, framebufferDimension);
         gl.viewport(0, 0, framebufferDimension, framebufferDimension);
@@ -862,10 +861,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             this.renderedFramebufferExtent_ = framebufferExtent;
             this.renderedRevision_ = tileSource.getRevision();
             // goog.asserts.assert(this.timeoutCounter_ < this.timeoutCounterMax_, 'Loading of tiles timed out.');
+            // console.log(this.renderedFramebufferExtent_);
             this.timeoutCounter_ = 0;
         } else {
             this.renderedTileRange_ = null;
-            this.renderedFramebufferExtent_ = null;
             this.renderedRevision_ = -1;
             frameState.animate = true;
         }
