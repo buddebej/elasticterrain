@@ -1,4 +1,4 @@
-var Config = function(viewer) {
+var Config = function() {
     'use strict';
 
     // static config
@@ -35,7 +35,7 @@ var Config = function(viewer) {
 
         // view
         viewRotation: 0, // 0:360
-        viewCenter: [-122.8, 45.7], // center of map in latlon 
+        viewCenter: [16.4,48.22], // center of map in latlon 
         // potsdam 13.04,52.40
         // sicily 17,37
         // vienna 16.4,48.22
