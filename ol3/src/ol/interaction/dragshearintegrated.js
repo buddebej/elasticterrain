@@ -310,28 +310,28 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
             var normalizedDraggedElevation = (this.startDragElevation - this.minElevation) / (this.maxElevation - this.minElevation);
             var normalizedDraggedElevationLocal = (this.startDragElevation - this.minElevationLocal) / (this.maxElevationLocal - this.minElevationLocal);
 			
-			console.log("clicked elevation: ", this.startDragElevation);
-			console.log("critical elevation: ", this.criticalElevation);
-			console.log("minimum elevation: ", this.minElevation);
-			console.log("maximum elevation: ", this.maxElevation);
-			console.log("relative elevation: ", normalizedDraggedElevation);
-			console.log("minimum elevation local: ", this.minElevationLocal);
-			console.log("maximum elevation local: ", this.maxElevationLocal);
-			console.log("relative elevation local: ", normalizedDraggedElevationLocal);
+			// console.log("clicked elevation: ", this.startDragElevation);
+			// console.log("critical elevation: ", this.criticalElevation);
+			// console.log("minimum elevation: ", this.minElevation);
+			// console.log("maximum elevation: ", this.maxElevation);
+			// console.log("relative elevation: ", normalizedDraggedElevation);
+			// console.log("minimum elevation local: ", this.minElevationLocal);
+			// console.log("maximum elevation local: ", this.maxElevationLocal);
+			// console.log("relative elevation local: ", normalizedDraggedElevationLocal);
 			
             if (normalizedDraggedElevationLocal > 0.5 /*this.startDragElevation > this.criticalElevation*/) {
-                console.log('higher point');
+                // console.log('higher point');
                 // high elevations
                 this.shear(shearX / normalizedDraggedElevation, shearY / normalizedDraggedElevation);
                 if ((Math.abs(dx) > dTol || Math.abs(dy) > dTol) && this.shearingStatus !== ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
-                    this.view.setCenter([this.currentCenter[0], this.currentCenter[1]]);
+                    this.view.setCenter(this.view.constrainCenter([this.currentCenter[0], this.currentCenter[1]]));
                 }
             } else {
-                console.log('lower point');
+                // console.log('lower point');
                 // low elevations
                 this.shear(-shearX / (1 - normalizedDraggedElevation), -shearY / (1 - normalizedDraggedElevation));
                 // FIXME add similar test as for high elevations and only call setCenter if necessary?
-                this.view.setCenter([this.currentCenter[0] - this.distanceX, this.currentCenter[1] - this.distanceY]);
+                this.view.setCenter(this.view.constrainCenter([this.currentCenter[0] - this.distanceX, this.currentCenter[1] - this.distanceY]));
             }
 
             // trigger the next frame rendering
