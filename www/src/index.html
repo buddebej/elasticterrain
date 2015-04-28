@@ -36,11 +36,13 @@
                             This is the Elastic Terrain Map.
                         </div>
                         <div class="mdata topborder">
+                            <p><a href="http://fbinter.stadt-berlin.de/fb/berlin/service.jsp?id=a_dgm2@senstadt&type=FEED" target="_blank">Geoportal Berlin / ATKIS DGM2</a></p>
                             <p><a href="http://www.eea.europa.eu/data-and-maps/data/eu-dem" target="_blank">EUDEM<br>Produced using Copernicus data and information funded by the European Union</a></p>
                             <p><a href="http://www.gebco.net" target="_blank">The GEBCO Digital Atlas<br> published by the British Oceanographic Data Centre on behalf of IOC and IHO 2003</a></p>
                             <p><a href="http://research.bpcrc.osu.edu/GDG/gimpdem.php" target="_blank">Greenland Mapping Project (GIMP)<br> Digital Elevation Model by BPRC Glacier Dynamics Research Group, Ohio State University</a></p>
                             <p><a href="https://lta.cr.usgs.gov/SRTM1Arc" target="_blank">NASA's Shuttle Radar Topography Mission<br>1 arc-second</a></p>
                             <p><a href="https://lta.cr.usgs.gov/SRTM1Arc" target="_blank">NASA's Shuttle Radar Topography Mission<br>3 arc-seconds</a></p>
+                            <p><a href="http://www.wien.gv.at/stadtentwicklung/stadtvermessung/geodaten/dgm/produkt.html" target="_blank">Digital surface model of Vienna – data.wien.gv.at</a></p>
                         </div>
                         <div class="mabout topborder">
                             <p>The Elastic Terrain Map software is licensed under <a href="https://github.com/buddebej/elasticterrain/blob/master/LICENSE.md" target="_blank">GPL v3</a>. The source code is available on <a href="https://github.com/buddebej/elasticterrain" target="_blank">Github</a>. <a href="https://github.com/buddebej/elasticterrain" target="_blank">Feel free to fork our repository.</a></p>
@@ -126,7 +128,8 @@
                     <div><i class="fa fa-floppy-o fa-fw"></i>&nbsp; Predefined Settings</div>
                 </div>
                 <div class="controlBody">
-                    <select class="configSelect"></select>
+                    <select class="configSelect">
+                    </select>
                 </div>
             </div>
             <div class="control inclination">
@@ -251,14 +254,14 @@
                         <div class="springOuterRadiusSlider floatingSlider"></div>
                     </div>
                     <div class="vcenter">
-                            MinMax Radius
-                            <select class="minMaxRadiusSelect narrow">
-                                <option value="-1">Extent</option>
-                                <option value="4">384 x 384 px</option>
-                                <option value="16">192 x 192 px</option>
-                                <option value="64">&nbsp;96 x 96 px</option>
-                                <option value="0">&nbsp;64 x 64 px</option>
-                            </select>
+                        MinMax Radius
+                        <select class="minMaxRadiusSelect narrow">
+                            <option value="-1">Extent</option>
+                            <option value="4">384 x 384 px</option>
+                            <option value="16">192 x 192 px</option>
+                            <option value="64">&nbsp;96 x 96 px</option>
+                            <option value="0">&nbsp;64 x 64 px</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -283,8 +286,7 @@
                     </div>
                     <div class="vcenter">
                         <div id="no-download" class="alert alert-error" style="display: none">
-                            This example requires a browser that supports the
-                            <a href="http://caniuse.com/#feat=download">link download</a> attribute.
+                            The export feature is not supported by your browser.
                         </div>
                         Export Map (instable)<a id="export-png" class="controlbutton floatingSlider" download="map.png">Download PNG Image</a>
                     </div>
@@ -305,7 +307,7 @@
         <div id="map" class="map"></div>
     </div>
 </body>
-<!-- build:js app.min.js -->
+<!-- build:remove -->
 <script src="../../build/ol.js" type="text/javascript"></script>
 <script src="js/webglcheck.js" type="text/javascript"></script>
 <script src="js/config.js" type="text/javascript"></script>
@@ -315,5 +317,8 @@
 <script src="js/configmanager.js" type="text/javascript"></script>
 <script src="js/init.js" type="text/javascript"></script>
 <!-- /build -->
+<script>
+document.write('<script src="app.min.js?dev=' + Math.floor(Math.random() * 100000) + '"\><\/script>');
+</script>
 
 </html>
