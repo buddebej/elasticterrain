@@ -7,7 +7,7 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     cwd: 'src/',
-                    src: ['data/**', 'ressources/font-awesome/**', 'ressources/images/**'],
+                    src: ['data/**', 'ressources/font-awesome/**', 'ressources/images/**', 'index.html'],
                     dest: 'dist/'
                 }]
             },
@@ -34,6 +34,21 @@ module.exports = function(grunt) {
                 dest: 'dist/ressources/css/app.css'
             }
         },
+        removeLoggingCalls: {
+            // the files inside which you want to remove the console statements 
+            files: ['dist/temp.js'],
+            options: {
+                // an array of method names to remove 
+                methods: ['log', 'info', 'assert'],
+
+                // replacement strategy 
+                strategy: function(consoleStatement) {
+                    // comments console calls statements 
+                    // return '/* ' + consoleStatement + '*/';
+                    return ''; // to remove  
+                }
+            }
+        },
         uglify: {
             options: {
                 banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
@@ -48,14 +63,9 @@ module.exports = function(grunt) {
             js: ["dist/*.js", "!dist/*.min.js"]
         },
         processhtml: {
-            options: {
-                data: {
-                    message: 'Hello world!'
-                }
-            },
             js: {
                 files: {
-                    'dist/index.html': ['src/index.html']
+                    'dist/index.html': ['dist/index.html']
                 }
             },
         },
@@ -68,9 +78,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-processhtml');
+    grunt.loadNpmTasks('grunt-remove-logging-calls');
+
 
     grunt.log.write('Building...').ok();
 
-    grunt.registerTask('default', ['clean:all', 'copy:app', 'copy:ol', 'concat', 'uglify', 'concat:lib', 'copy', 'processhtml', 'clean:js']);
+    grunt.registerTask('default', ['clean:all', 'copy:app', 'copy:ol', 'concat', 'removeLoggingCalls', 'uglify', 'concat:lib', 'copy', 'processhtml', 'clean:js']);
 
 };
