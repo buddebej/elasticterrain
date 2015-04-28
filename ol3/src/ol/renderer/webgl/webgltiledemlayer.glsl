@@ -48,8 +48,8 @@ uniform vec2 u_scaleFactor;
 // zoom level
 uniform float u_zoom;   
 
-// decodes input data elevation value using red and green channel
-float decodeElevation(in vec4 colorChannels) {
+// decodes input data elevation value using texture colors from two channels combined
+float decodeElevation(in vec2 colorChannels) {
     // use float decoding for higher zoomlevels
     float decimalDecode = 1.0;
     if(u_zoom > 12.0){
@@ -59,20 +59,6 @@ float decodeElevation(in vec4 colorChannels) {
     if(elevationM > 9000.0){
         elevationM = 0.0;
     }
-    return elevationM;
-}
-
-// decodes input data elevation value for tile borders, using blue channel
-float decodeElevationB(in vec2 colorChannels) {
-    // use float decoding for higher zoomlevels    
-    float decimalDecode = 1.0;
-    if(u_zoom > 12.0){
-        decimalDecode = 0.01;
-    }
-    float elevationM = ((colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0)*decimalDecode;    
-    if(elevationM > 9000.0){
-        elevationM = 0.0;
-    }    
     return elevationM;
 }
 
@@ -103,7 +89,7 @@ void main(void) {
     v_texCoord.y = 1.0 - v_texCoord.y;
 
     // read and decode elevation for current vertex
-    float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy));
+    float absElevation = decodeElevation(vec2(texture2D(u_texture, v_texCoord.xy).xy));
     
     // normalize elevation for current minimum and maximum
     float nElevation = (absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
@@ -166,7 +152,6 @@ uniform float u_ambient_light;
 
 // cellsize for tile resolution of 256x256 pixel = 1.0/256.0
 const highp float CELLSIZE = 0.00390625; 
-const highp float PSIZE = 1.0/512.0; 
 
 float rowToCell(in int row) { 
     float v = (float(row)*2.0+1.0)/512.0;
@@ -215,50 +200,50 @@ void main(void) {
         vec2 nAbove = vec2(m_texCoord.x, m_texCoord.y+CELLSIZE);
         vec2 nBelow = vec2(m_texCoord.x, m_texCoord.y-CELLSIZE);
         // read and decode elevation values from tile texture
-        float absElevation = decodeElevation(texture2D(u_texture, m_texCoord.xy));
+        float absElevation = decodeElevation(vec2(texture2D(u_texture, m_texCoord.xy).xy));
 
         // read neighboring values
-        float neighborRight = decodeElevation(texture2D(u_texture, nRight));
-        float neighborLeft  = decodeElevation(texture2D(u_texture, nLeft));
-        float neighborAbove = decodeElevation(texture2D(u_texture, nAbove));
-        float neighborBelow = decodeElevation(texture2D(u_texture, nBelow));    
+        float neighborRight = decodeElevation(vec2(texture2D(u_texture, nRight).xy));
+        float neighborLeft  = decodeElevation(vec2(texture2D(u_texture, nLeft).xy));
+        float neighborAbove = decodeElevation(vec2(texture2D(u_texture, nAbove).xy));
+        float neighborBelow = decodeElevation(vec2(texture2D(u_texture, nBelow).xy));    
 
+        // use different tile border decoding for zoomlevel 12 data
+        // to fix this, tiles for zoomlevel 12 have to be recomputed (a long and boring process) 
         if(u_zoom != 12.0){
             // display tile borders properly: use alternative decoding
             // last eight rows of blue channel contain neighbor values
             if(atNorthBorder){ 
                 float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(256))).b; // row 256          
                 float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(251))).b; // row 251
-                neighborBelow = decodeElevationB(vec2(valB, valA));
+                neighborBelow = decodeElevation(vec2(valB, valA));
             }
 
             if(atSouthBorder){  
                 float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(254))).b; // row 254        
                 float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(250))).b; // row 250
-                neighborAbove = decodeElevationB(vec2(valB, valA));            
+                neighborAbove = decodeElevation(vec2(valB, valA));            
             }
 
             if(atEastBorder){ 
                 float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(253))).b; // row 253         
                 float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(249))).b; // row 249 
-                neighborRight = decodeElevationB(vec2(valB, valA));            
+                neighborRight = decodeElevation(vec2(valB, valA));            
             }
 
             if(atWestBorder){  
                 float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(252))).b; // row 252         
                 float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(248))).b; // row 248 
-                neighborLeft = decodeElevationB(vec2(valB, valA));            
+                neighborLeft = decodeElevation(vec2(valB, valA));            
             }      
         }   
 
-
-
         // cardboard stack
         if(u_stackedCardb && !u_overlayActive && absElevation<0.0){
-            // neighborRight = decodeElevationB(vec2(0.0, texture2D(u_texture, nRight).g));
-            // neighborLeft  = decodeElevationB(vec2(0.0, texture2D(u_texture, nLeft).g));
-            neighborAbove = decodeElevationB(vec2(0.0, texture2D(u_texture, nAbove).g));            
-            // neighborBelow = decodeElevationB(vec2(0.0, texture2D(u_texture, nBelow).g));
+            // neighborRight = decodeElevation(vec2(0.0, texture2D(u_texture, nRight).g));
+            // neighborLeft  = decodeElevation(vec2(0.0, texture2D(u_texture, nLeft).g));
+            neighborAbove = decodeElevation(vec2(0.0, texture2D(u_texture, nAbove).g));            
+            // neighborBelow = decodeElevation(vec2(0.0, texture2D(u_texture, nBelow).g));
         }               
 
     // texture
@@ -289,10 +274,10 @@ void main(void) {
                     vec4 waterBlue = vec4(0.4058823529,0.6725490196,0.8970588235,1.0);
 
                     // compute other neighbors for water surface test
-                    float n01 = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y+CELLSIZE)));
-                    float n02 = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)));
-                    float n03 = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y-CELLSIZE)));
-                    float n04 = decodeElevation(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)));         
+                    float n01 = decodeElevation(vec2(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
+                    float n02 = decodeElevation(vec2(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
+                    float n03 = decodeElevation(vec2(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y-CELLSIZE)).xy));
+                    float n04 = decodeElevation(vec2(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));         
 
                     if(absElevation>0.0 && 
                        n01 == absElevation && 

@@ -41,9 +41,6 @@ goog.require('ol.Elevation');
 goog.require('ol.ColorRamp');
 
 /**
- * @classdesc
- * Core class of ol3dem based on webgltilelayerrenderer, openlayers 3.1.1
- * @author Jonas Buddeberg
  *
  * @constructor
  * @extends {ol.renderer.webgl.Layer}
@@ -123,7 +120,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.timeoutCounterMax_ = 350;
+    this.timeoutCounterMax_ = 450;
 
     /**
      * @private
@@ -216,7 +213,7 @@ ol.renderer.webgl.TileDemLayer.prototype.getElevation = function(xy, z) {
         tile = this.tileCache_.get(xyzKey);
     tileXY[0] = Math.floor(((xy[0] - tileExtent[0]) / (tileExtent[2] - tileExtent[0])) * 256);
     tileXY[1] = 256 - Math.floor(((xy[1] - tileExtent[1]) / (tileExtent[3] - tileExtent[1])) * 256);
-    elevation = ol.Elevation.decode(tile.getPixelValue(tileXY),z);
+    elevation = ol.Elevation.decode(tile.getPixelValue(tileXY), z);
     return elevation;
 };
 
@@ -534,11 +531,14 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
         // TERRAIN SHEARING
         var shearX, shearY, shearingFactor;
+
+
         if (tileDemLayer.getTerrainInteraction()) {
             // from current terrain interaction
             shearingFactor = tileDemLayer.getTerrainShearing();
             shearX = shearingFactor.x;
             shearY = shearingFactor.y;
+
         } else {
             // from obliqueInclination angle and current rotation
             shearingFactor = 1.0 / Math.tan(goog.math.toRadians(tileDemLayer.getObliqueInclination()));
