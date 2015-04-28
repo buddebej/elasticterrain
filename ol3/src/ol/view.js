@@ -669,10 +669,10 @@ ol.View.createCenterConstraint_ = function(options) {
  */
 ol.View.prototype.setCenterConstraint = function(extent) {
     var newConstraint = ol.CenterConstraint.none;
-    if (goog.isDef(extent)) {
+    if (goog.isDef(extent) && extent.length > 0) {
         newConstraint = ol.CenterConstraint.createExtent(extent);
-        this.constraints_['center'] = newConstraint;
     }
+    this.constraints_['center'] = newConstraint;
 };
 goog.exportProperty(
     ol.View.prototype,

@@ -41,7 +41,7 @@ var Config = function() {
         // vienna 16.4,48.22
         // portland -122.8, 45.7     
 
-        viewCenterConstraint: undefined, // undefined | [minx, miny, maxx, maxy]
+        viewCenterConstraint: [], // [] | [minx, miny, maxx, maxy]
         //[0, 2504688.542848654, 5009377.085697311, 7514065.628545965]
           
         viewZoom: 5, // zoomlevel
