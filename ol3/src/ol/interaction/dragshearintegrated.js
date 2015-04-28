@@ -277,7 +277,7 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
         //if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
         //  console.log("FPS", Math.round(1 / dTsec), "v", Math.round(v), "\tvTol", Math.round(vTol), "\ta", Math.round(a), "\taTol", Math.round(aTol));
         //}
-
+        
         // Recompute distances after the new velocity is applied.
         this.distanceX -= dx;
         this.distanceY -= dy;

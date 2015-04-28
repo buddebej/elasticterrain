@@ -859,7 +859,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             this.renderedFramebufferExtent_ = framebufferExtent;
             this.renderedRevision_ = tileSource.getRevision();
             // goog.asserts.assert(this.timeoutCounter_ < this.timeoutCounterMax_, 'Loading of tiles timed out.');
-            // console.log(this.renderedFramebufferExtent_);
+            // console.log('extent: ', this.renderedFramebufferExtent_);
+            // console.log('resolution: ',viewState.resolution);
             this.timeoutCounter_ = 0;
         } else {
             this.renderedTileRange_ = null;

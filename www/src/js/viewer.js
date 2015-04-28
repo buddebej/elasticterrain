@@ -117,6 +117,7 @@ var Viewer = function(config, layers) {
         this.dem.setTerrainInteraction(this.config.get('terrainInteraction'));
         this.dem.setOverlayTiles((this.config.get('texture') !== 'hypso') ? this.layers[this.config.get('texture')].data : null);
         this.shearingInteraction.setOptions(this.getShearingInteractionOptions());
+        this.shearingInteraction.setActive(this.config.get('terrainInteraction'));
         this.render();
     };
 

@@ -44,7 +44,7 @@ var ControlBar = function(viewer) {
         SELECT_TEXTURE = $('.textureSelect'),
         SELECT_COLOR_RAMP = $('.colorRampSelect'),
         SELECT_CONFIG = $('.configSelect'),
-        SELECT_NEIGHBORHOOD_SIZE = $('.minMaxRadiusSelect'),        
+        SELECT_NEIGHBORHOOD_SIZE = $('.minMaxRadiusSelect'),
         INFOCONTENT = $('.infoBox .content'),
         INFOMENUE = $('.infoBox .menue');
 
@@ -163,13 +163,13 @@ var ControlBar = function(viewer) {
         KNOB_ZENITH.val(viewer.get('lightZenith')).trigger('change');
         KNOB_ROTATION.val(viewer.get('viewRotation')).trigger('change');
 
-        SWITCH_SHADING.prop(CHECKED, viewer.get('shading'));
-        SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
         SWITCH_WATERBODIES.prop(CHECKED, viewer.get('waterBodies'));
-        SWITCH_STACKED_CARDBOARD.prop(CHECKED, viewer.get('stackedCardboard'));        
+        SWITCH_STACKED_CARDBOARD.prop(CHECKED, viewer.get('stackedCardboard'));
+        SWITCH_SHADING.prop(CHECKED, viewer.get('shading')).setState(viewer.get('shading'));
         SWITCH_SHEARING_INTERACTION.prop(CHECKED, viewer.get('terrainInteraction'));
+        SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
 
-        SLIDER_AMBIENT_LIGHT.slider({
+        SLIDER_AMBIENT_LIGHT.slider({ 
             value: toSlider(viewer.get('ambientLight'))
         });
         SLIDER_COLOR.slider({
@@ -182,13 +182,13 @@ var ControlBar = function(viewer) {
             value: toSlider(viewer.get('shadingExaggeration'))
         });
         SLIDER_SPRING_COEFFICIENT.slider({
-            value: toSlider(viewer.get('iSpringCoefficient'))
+            value: toSlider(viewer.get('iSpringCoefficient'), 500)
         });
         SLIDER_SPRING_FRICTION.slider({
-            value: toSlider(viewer.get('iFrictionForce'))
+            value: toSlider(viewer.get('iFrictionForce'), 500)
         });
         SLIDER_SPRING_FADEOUT.slider({
-            value: toSlider(viewer.get('iStaticShearFadeOutAnimationSpeed'))
+            value: toSlider(viewer.get('iStaticShearFadeOutAnimationSpeed'), 50)
         });
         SLIDER_SPRING_INNRAD.slider({
             value: viewer.get('iMaxInnerShearingPx')
@@ -203,7 +203,7 @@ var ControlBar = function(viewer) {
         SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
         SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
         SELECT_NEIGHBORHOOD_SIZE.find('option[value=' + viewer.get('iminMaxNeighborhoodSize') + ']').attr('selected', true);
-        
+
     };
 
 
@@ -230,7 +230,7 @@ var ControlBar = function(viewer) {
     SELECT_CONFIG.change(function() {
         // use a copy of config for read only access during runtime
         var option = SELECT_CONFIG.find($('option:selected')).val();
-        if(option !== 'default'){
+        if (option !== 'default') {
             var configCopy = $.extend(true, {}, viewer.getConfigStore()[option]);
             this.config.swap(configCopy);
         } else {
@@ -287,7 +287,6 @@ var ControlBar = function(viewer) {
     // on layer changed
     SELECT_TEXTURE.change(function() {
         var selectedLayer = SELECT_TEXTURE.find($('option:selected')).val();
-
         if (selectedLayer === 'hypso') {
             viewer.set('texture', 'hypso');
             // hide all overlayers             
@@ -302,7 +301,7 @@ var ControlBar = function(viewer) {
             COLOR_CONTROLS.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
     });
-  
+
 
     // HYPSOMETRIC COLORS
     SELECT_COLOR_RAMP.change(function() {
@@ -346,10 +345,9 @@ var ControlBar = function(viewer) {
 
 
     // SHADING
-    //  turn shading on / off
-    SWITCH_SHADING.click(function() {
+    SWITCH_SHADING.setState = function(state) {
         var checkbox = SWITCH_SHADING.find($('input'));
-        if (viewer.dem.getShading()) {
+        if (!state) {
             viewer.set('shading', false);
             checkbox.prop(CHECKED, false);
             ui.controlDeactivate(ui.controls.shading);
@@ -361,6 +359,10 @@ var ControlBar = function(viewer) {
             ui.controls.shading.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
         viewer.render();
+    };
+    //  turn shading on / off
+    SWITCH_SHADING.click(function() {
+        SWITCH_SHADING.setState(!viewer.dem.getShading());
     });
 
     KNOB_AZIMUTH.knob({
@@ -422,9 +424,9 @@ var ControlBar = function(viewer) {
     });
 
     // switch to activate terrain interactions
-    SWITCH_SHEARING_INTERACTION.click(function() {
+    SWITCH_SHEARING_INTERACTION.setState = function(state) {
         var checkbox = SWITCH_SHEARING_INTERACTION.find($('input'));
-        if (viewer.get('terrainInteraction')) {
+        if (!state) {
             viewer.set('terrainInteraction', false);
             viewer.shearingInteraction.setActive(false);
             ui.controlDeactivate(ui.controls.shearing);
@@ -439,28 +441,32 @@ var ControlBar = function(viewer) {
             ui.controls.shearing.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
             ui.controls.inclination.cont.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
+    };
+    //  turn shading on / off
+    SWITCH_SHEARING_INTERACTION.click(function() {
+        SWITCH_SHEARING_INTERACTION.setState(!viewer.get('terrainInteraction'));
     });
+
 
     SLIDER_SPRING_COEFFICIENT.slider({
         min: 0,
         max: 100,
         slide: function(event, ui) {
-            viewer.set('iSpringCoefficient', fromSlider(ui.value));
-
+            viewer.set('iSpringCoefficient', fromSlider(ui.value, 500));
         }
     });
     SLIDER_SPRING_FADEOUT.slider({
         min: 0,
         max: 100,
         slide: function(event, ui) {
-            viewer.set('iStaticShearFadeOutAnimationSpeed', fromSlider(ui.value));
+            viewer.set('iStaticShearFadeOutAnimationSpeed', fromSlider(ui.value, 50));
         }
     });
     SLIDER_SPRING_FRICTION.slider({
         min: 0,
         max: 100,
         slide: function(event, ui) {
-            viewer.set('iFrictionForce', fromSlider(ui.value));
+            viewer.set('iFrictionForce', fromSlider(ui.value, 500));
         }
     });
     SLIDER_SPRING_INNRAD.slider({
@@ -566,7 +572,7 @@ var ControlBar = function(viewer) {
             INFOMENUE.children().removeClass('active');
             INFOMENUE.children(eClass).addClass('active');
         } else {
-            INFOCONTENT.children().hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);            
+            INFOCONTENT.children().hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
             INFOMENUE.children().removeClass('active');
         }
     });
