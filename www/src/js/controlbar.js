@@ -48,8 +48,6 @@ var ControlBar = function(viewer) {
         INFOCONTENT = $('.infoBox .content'),
         INFOMENUE = $('.infoBox .menue');
 
-
-    // INITIAL CONFIGURATION   
     // config control bar
     ui.options = {
         knobcolor: '#4479E3',
@@ -71,7 +69,7 @@ var ControlBar = function(viewer) {
             collapsed: false
         },
         texture: {
-            enabled: false,
+            enabled: true,
             collapsed: false
         },
         shading: {
@@ -219,23 +217,25 @@ var ControlBar = function(viewer) {
 
         // empty select box
         SELECT_CONFIG.empty();
+        SELECT_CONFIG.append($('<option></option>').val('default').html('Default')).attr('selected', true);
 
         // populate select box with available configs
         $.each(viewer.getConfigStore(), function(val, obj) {
             var name = obj.viewCenter[1].toFixed(2) + ', ' + obj.viewCenter[0].toFixed(2) + ' (z ' + obj.viewZoom + ')';
             SELECT_CONFIG.append($('<option></option>').val(val).html(name));
-            // select config that was saved last
-            if (val === viewer.getConfigStore().length - 1) {
-                SELECT_CONFIG.find('option[value=' + val + ']').attr('selected', true);
-            }
         });
     };
 
     // on config select change
     SELECT_CONFIG.change(function() {
         // use a copy of config for read only access during runtime
-        var configCopy = $.extend(true, {}, viewer.getConfigStore()[SELECT_CONFIG.find($('option:selected')).val()]);
-        this.config.swap(configCopy);
+        var option = SELECT_CONFIG.find($('option:selected')).val();
+        if(option !== 'default'){
+            var configCopy = $.extend(true, {}, viewer.getConfigStore()[option]);
+            this.config.swap(configCopy);
+        } else {
+            this.config.swap(this.config.init);
+        }
         ui.updateControlTools();
         viewer.update();
     }.bind(this));
@@ -264,54 +264,45 @@ var ControlBar = function(viewer) {
 
     // OVERLAY MAP
     // find available overlayers and populate dropdown menu
+    // create copy of layers
+    var sortedLayers = [];
 
-    if (viewer.layers.length > 0) {
-        ui.controls.texture.cont.show();
-
-        // create copy of layers
-        var sortedLayers = [];
-        $.each(viewer.layers, function(val, obj) {
-            if (obj.data === viewer.dem) {
-                val = -1;
-            }
-            sortedLayers.push({
-                id: val,
-                layer: obj
-            });
+    Object.keys(viewer.layers).forEach(function(key) {
+        sortedLayers.push({
+            id: viewer.layers[key].id,
+            layer: viewer.layers[key]
         });
+    });
 
-        // sort layers by pos attribute for select box
-        sortedLayers.sort(function(obj1, obj2) {
-            return obj1.layer.pos - obj2.layer.pos;
-        }.bind(this));
+    // sort layers by pos attribute for select box
+    sortedLayers.sort(function(obj1, obj2) {
+        return obj1.layer.pos - obj2.layer.pos;
+    }.bind(this));
 
-        // append options to dom
-        $.each(sortedLayers, function(val, obj) {
-            SELECT_TEXTURE.append($('<option></option>').val(obj.id).html(obj.layer.title));
-        });
+    // append options to dom
+    $.each(sortedLayers, function(val, obj) {
+        SELECT_TEXTURE.append($('<option></option>').val(obj.layer.id).html(obj.layer.title));
+    });
 
-        // on layer changed
-        SELECT_TEXTURE.change(function() {
-            var selectedLayer = parseInt(SELECT_TEXTURE.find($('option:selected')).val());
+    // on layer changed
+    SELECT_TEXTURE.change(function() {
+        var selectedLayer = SELECT_TEXTURE.find($('option:selected')).val();
 
-            if (selectedLayer === -1) {
-                viewer.set('texture', -1);
-                // hide all overlayers             
-                viewer.hideLayersExcept(null);
-                // show hypsometric color controls               
-                COLOR_CONTROLS.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
-            } else {
-                viewer.set('texture', selectedLayer);
-                // hide other layers                             
-                viewer.hideLayersExcept(selectedLayer);
-                // hide hypsometric color controls
-                COLOR_CONTROLS.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
-            }
-        });
-    } else {
-        ui.controls.texture.body.hide();
-    }
-
+        if (selectedLayer === 'hypso') {
+            viewer.set('texture', 'hypso');
+            // hide all overlayers             
+            viewer.hideLayersExcept(null);
+            // show hypsometric color controls               
+            COLOR_CONTROLS.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+        } else {
+            viewer.set('texture', selectedLayer);
+            // hide other layers                             
+            viewer.hideLayersExcept(selectedLayer);
+            // hide hypsometric color controls
+            COLOR_CONTROLS.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+        }
+    });
+  
 
     // HYPSOMETRIC COLORS
     SELECT_COLOR_RAMP.change(function() {
@@ -490,8 +481,6 @@ var ControlBar = function(viewer) {
         viewer.set('iminMaxNeighborhoodSize', parseInt(SELECT_NEIGHBORHOOD_SIZE.find($('option:selected')).val()));
     });
 
-
-
     // ROTATION 
     KNOB_ROTATION.knob({
         'width': 60,
@@ -551,7 +540,6 @@ var ControlBar = function(viewer) {
 
     // export
     var exportPNGElement = document.getElementById('export-png');
-
     if ('download' in exportPNGElement) {
         exportPNGElement.addEventListener('click', function(e) {
             viewer.map.once('postcompose', function(event) {

@@ -5,12 +5,12 @@ var Layers = function() {
 
     this.dem = {
         title: 'Hypsometric Colors',
-        pos: 1,
+        id: 'hypso',
+        pos: 0,
         base: true,
         enabled: true,
         data: new ol.layer.TileDem({
             source: new ol.source.XYZ({
-                // url: 'http://192.168.0.127/demo/data/pdxdem/{z}/{x}/{y}.png',                
                 url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png',
                 // url: 'data/tiles/{z}/{x}/{y}.png',                
                 dem: true
@@ -19,7 +19,19 @@ var Layers = function() {
     };
 
     this.layers_available = [{
+        title: 'Bing Aerial',
+        id: 'bingaerial',
+        pos: 1,
+        enabled: true,
+        data: new ol.layer.Tile({
+            source: new ol.source.BingMaps({
+                key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
+                imagerySet: 'Aerial'
+            })
+        }),
+    }, {
         title: 'Mapbox Streets',
+        id: 'mbstreet',
         pos: 2,
         enabled: false,
         data: new ol.layer.Tile({
@@ -29,6 +41,7 @@ var Layers = function() {
         })
     }, {
         title: 'Mapbox Satellite',
+        id: 'mbsat',
         pos: 3,
         enabled: false,
         data: new ol.layer.Tile({
@@ -38,6 +51,7 @@ var Layers = function() {
         })
     }, {
         title: 'Mapbox Outdoors',
+        id: 'mbout',
         pos: 4,
         enabled: false,
         data: new ol.layer.Tile({
@@ -47,6 +61,7 @@ var Layers = function() {
         })
     }, {
         title: 'Open Street Map',
+        id: 'osm',
         pos: 5,
         enabled: true,
         data: new ol.layer.Tile({
@@ -54,6 +69,7 @@ var Layers = function() {
         })
     }, {
         title: 'Stamen Watercolor',
+        id: 'stamenwc',
         pos: 6,
         enabled: true,
         data: new ol.layer.Tile({
@@ -62,13 +78,13 @@ var Layers = function() {
             })
         }),
     }, {
-        title: 'Bing Aerial',
+        title: 'Stamen Toner',
+        id: 'stamentoner',
         pos: 7,
         enabled: true,
         data: new ol.layer.Tile({
-            source: new ol.source.BingMaps({
-                key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
-                imagerySet: 'Aerial'
+            source: new ol.source.Stamen({
+                layer: 'toner'
             })
         }),
     }, this.dem];
@@ -83,16 +99,16 @@ var Layers = function() {
 
     this.getData = function() {
         var array = [];
-        $.each(this.layers_enabled, function(key, layer) {
-            array.push(layer.data);
-        });
+        Object.keys(this.layers_enabled).forEach(function(key) {
+            array.push(this.layers_enabled[key].data);
+        }.bind(this));
         return array;
     };
 
     this.enable = function() {
         $.each(this.layers_available, function(key, layer) {
             if (layer.enabled) {
-                this.layers_enabled.push(layer);
+                this.layers_enabled[layer.id] = layer;
             }
         }.bind(this));
     };

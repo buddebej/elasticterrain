@@ -114,10 +114,9 @@ var Viewer = function(config, layers) {
         this.dem.setObliqueInclination(this.config.get('obliqueInclination'));
         this.dem.setWaterBodies(this.config.get('waterBodies'));
         this.dem.setTerrainInteraction(this.config.get('terrainInteraction'));
-        this.dem.setOverlayTiles((this.config.get('texture') !== -1) ? this.layers[this.config.get('texture')].data : null);
+        this.dem.setOverlayTiles((this.config.get('texture') !== 'hypso') ? this.layers[this.config.get('texture')].data : null);
         this.shearingInteraction.setOptions(this.getShearingInteractionOptions());
         this.render();
-
     };
 
     // return shearingInteractionOptions from config

@@ -6,7 +6,6 @@ var Config = function() {
     this.minZoom = 1;
     this.domContainer = 'map';
     this.dbUrl = 'http://54.69.7.112:8000/api/configs';
-
     // dynamic config 
     // can be saved and loaded by configManager
     // can be modified by controlBar
@@ -21,7 +20,7 @@ var Config = function() {
         ambientLight: 0.1, // 0:1
 
         // texture
-        texture: -1, // -1 = hypsometric or layer number 
+        texture: 'hypso', // see layers.js
 
         // hypsometric colors
         stackedCardboard: true, // bool
@@ -35,12 +34,12 @@ var Config = function() {
 
         // view
         viewRotation: 0, // 0:360
-        viewCenter: [16.4,48.22], // center of map in latlon 
+        viewCenter: [17,37], // center of map in latlon 
         // potsdam 13.04,52.40
         // sicily 17,37
         // vienna 16.4,48.22
         // portland -122.8, 45.7        
-        viewZoom: 15, // zoomlevel
+        viewZoom: 5, // zoomlevel
 
         // static plan oblique
         obliqueInclination: 90.0, // 0:90
