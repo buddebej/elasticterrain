@@ -7,7 +7,7 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     cwd: 'src/',
-                    src: ['data/**', 'ressources/font-awesome/**', 'ressources/images/**', 'index.html'],
+                    src: ['data/**', 'ressources/font-awesome/**', 'ressources/images/**', 'ressources/css/images/**', 'index.html'],
                     dest: 'dist/'
                 }]
             },
@@ -49,6 +49,16 @@ module.exports = function(grunt) {
                 }
             }
         },
+        replace: {
+            dist: {
+                src: ['dist/temp.js'],
+                overwrite: true, // overwrite matched source files
+                replacements: [{
+                    from: "url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png",
+                    to: "url: 'data/tiles/{z}/{x}/{y}.png"
+                }]
+            }
+        },
         uglify: {
             options: {
                 banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
@@ -79,10 +89,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-remove-logging-calls');
+    grunt.loadNpmTasks('grunt-text-replace');
 
 
     grunt.log.write('Building...').ok();
 
-    grunt.registerTask('default', ['clean:all', 'copy:app', 'copy:ol', 'concat', 'removeLoggingCalls', 'uglify', 'concat:lib', 'copy', 'processhtml', 'clean:js']);
+    grunt.registerTask('default', ['clean:all', 'copy:app', 'copy:ol', 'concat', 'replace', 'removeLoggingCalls', 'uglify', 'concat:lib', 'copy', 'processhtml', 'clean:js']);
 
 };
