@@ -210,10 +210,14 @@ ol.renderer.webgl.TileDemLayer.prototype.getElevation = function(xy, z) {
         tileExtent = this.tileGrid_.getTileCoordExtent(tc), // minX, minY, maxX, maxY
         tileXY = [0, 0],
         elevation = 0,
+        tile = null;
+    // check if tile is in cache
+    if (this.tileCache_.containsKey(xyzKey)) {
         tile = this.tileCache_.get(xyzKey);
-    tileXY[0] = Math.floor(((xy[0] - tileExtent[0]) / (tileExtent[2] - tileExtent[0])) * 256);
-    tileXY[1] = 256 - Math.floor(((xy[1] - tileExtent[1]) / (tileExtent[3] - tileExtent[1])) * 256);
-    elevation = ol.Elevation.decode(tile.getPixelValue(tileXY), z);
+        tileXY[0] = Math.floor(((xy[0] - tileExtent[0]) / (tileExtent[2] - tileExtent[0])) * 256);
+        tileXY[1] = 256 - Math.floor(((xy[1] - tileExtent[1]) / (tileExtent[3] - tileExtent[1])) * 256);
+        elevation = ol.Elevation.decode(tile.getPixelValue(tileXY), z);
+    }
     return elevation;
 };
 
