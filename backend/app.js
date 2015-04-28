@@ -11,6 +11,8 @@ mongoose.connect(connectionString);
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', 'http://elasticterrain.xyz');
+    res.header('Access-Control-Allow-Origin', 'http://eu.elasticterrain.xyz');
+    res.header('Access-Control-Allow-Origin', 'http://us-west.elasticterrain.xyz');    
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     next();
