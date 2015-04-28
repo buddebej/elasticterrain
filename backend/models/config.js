@@ -12,7 +12,7 @@ var configSchema = new Schema({
     lightAzimuth: Number,
     lightZenith: Number,
     obliqueInclination: Number,
-    texture: Number,
+    texture: String,
     resolution: Number,
     debug: Boolean,
     terrainInteraction: Boolean,
