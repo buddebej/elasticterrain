@@ -552,8 +552,6 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
         // TERRAIN SHEARING
         var shearX, shearY, shearingFactor;
-
-
         if (tileDemLayer.getTerrainInteraction()) {
             // from current terrain interaction
             shearingFactor = tileDemLayer.getTerrainShearing();
@@ -562,7 +560,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
         } else {
             // from obliqueInclination angle and current rotation
-            shearingFactor = 1.0 / Math.tan(goog.math.toRadians(tileDemLayer.getObliqueInclination()));
+            shearingFactor = (1.0 / Math.tan(goog.math.toRadians(tileDemLayer.getObliqueInclination()))) * (this.maxElevationInExtent - this.minElevationInExtent);
             shearX = shearingFactor * Math.sin(-viewState.rotation);
             shearY = shearingFactor * Math.cos(-viewState.rotation);
         }
@@ -788,7 +786,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                             // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
                             gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom_ + 1)));
                             // pass zoomlevel of this tile and zoomlevel of current view
-                            gl.uniform2f(this.locations_.u_zoom, zs[i], (goog.isDef(viewZoom))? viewZoom : zs[i]);
+                            gl.uniform2f(this.locations_.u_zoom, zs[i], (goog.isDef(viewZoom)) ? viewZoom : zs[i]);
 
                             // determine offset for each tile in target framebuffer
                             defUniformOffset(overlayTile, this);
@@ -839,7 +837,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
                     gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom_ + 1)));
                     // pass zoomlevel of this tile and zoomlevel of current view
-                    gl.uniform2f(this.locations_.u_zoom, zs[i], (goog.isDef(viewZoom))? viewZoom : zs[i]);
+                    gl.uniform2f(this.locations_.u_zoom, zs[i], (goog.isDef(viewZoom)) ? viewZoom : zs[i]);
 
                     // determine offset for each tile in target framebuffer
                     defUniformOffset(tile, this);
