@@ -106,7 +106,7 @@ void main(void) {
     float absElevation = decodeElevation(texture2D(u_texture, v_texCoord.xy));
     
     // normalize elevation for current minimum and maximum
-    float nElevation = (u_maxElevation-u_minElevation)*(absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
+    float nElevation = (absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
     float zOrderElevation = absElevation/100.0;
 
     if(u_overlayActive){

@@ -237,8 +237,8 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
             // current velocity of animation [meters per second]
             vx_t0 = k * springStretchX + friction * this.vx_t_1,
             vy_t0 = k * springStretchY + friction * this.vy_t_1;
+
         // time since last frame was rendered [seconds]
-        currentTime = new Date();
         var dTsec = this.lastRenderTime !== null ? (currentTime.getTime() - this.lastRenderTime.getTime()) / 1000 : 1 / 60,
             // displacement of clicked point due to spring [meters]
             dx = vx_t0 * dTsec,
@@ -307,19 +307,29 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
                     shearY = (this.distanceY / shearLength) * this.options['maxInnerShearingPx'] * this.view.getResolution();
                 }
             }
-            var normalizedDraggedElevation = (this.maxElevation - this.minElevation) * (this.startDragElevation - this.minElevation) / (this.maxElevation - this.minElevation);
-
-            if (this.startDragElevation > this.criticalElevation) {
-                // console.log('higher point');
+            var normalizedDraggedElevation = (this.startDragElevation - this.minElevation) / (this.maxElevation - this.minElevation);
+            var normalizedDraggedElevationLocal = (this.startDragElevation - this.minElevationLocal) / (this.maxElevationLocal - this.minElevationLocal);
+			
+			console.log("clicked elevation: ", this.startDragElevation);
+			console.log("critical elevation: ", this.criticalElevation);
+			console.log("minimum elevation: ", this.minElevation);
+			console.log("maximum elevation: ", this.maxElevation);
+			console.log("relative elevation: ", normalizedDraggedElevation);
+			console.log("minimum elevation local: ", this.minElevationLocal);
+			console.log("maximum elevation local: ", this.maxElevationLocal);
+			console.log("relative elevation local: ", normalizedDraggedElevationLocal);
+			
+            if (normalizedDraggedElevationLocal > 0.5 /*this.startDragElevation > this.criticalElevation*/) {
+                console.log('higher point');
                 // high elevations
                 this.shear(shearX / normalizedDraggedElevation, shearY / normalizedDraggedElevation);
                 if ((Math.abs(dx) > dTol || Math.abs(dy) > dTol) && this.shearingStatus !== ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
                     this.view.setCenter([this.currentCenter[0], this.currentCenter[1]]);
                 }
             } else {
-                // console.log('lower point');
+                console.log('lower point');
                 // low elevations
-                this.shear(-shearX / normalizedDraggedElevation, -shearY / normalizedDraggedElevation);
+                this.shear(-shearX / (1 - normalizedDraggedElevation), -shearY / (1 - normalizedDraggedElevation));
                 // FIXME add similar test as for high elevations and only call setCenter if necessary?
                 this.view.setCenter([this.currentCenter[0] - this.distanceX, this.currentCenter[1] - this.distanceY]);
             }
