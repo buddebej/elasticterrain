@@ -41,6 +41,8 @@ var Config = function() {
         // portland -122.8, 45.7     
         viewCenterConstraint: [], // [] | [minx, miny, maxx, maxy]
         //[0, 2504688.542848654, 5009377.085697311, 7514065.628545965]
+        // vienna [1790460.950551968, 6124746.202434603, 1868732.4675159885, 6203017.719398623]
+        // berlin [1428455.184593372, 6848757.734351791, 1584998.218521413, 7005300.768279833]
           
         viewZoom: 5, // zoomlevel
         viewZoomConstraint: [1,12], // [minZoom, maxZoom]

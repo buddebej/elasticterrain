@@ -24,6 +24,8 @@ var Viewer = function(config, layers) {
 
     this.view = this.map.getView();
 
+    this.view.setHighlevelAreas(layers.getDem().highLevelAreas, layers.getDem().highLevelThreshold);
+
     // render map with current config
     this.render = function() {
         this.dem.redraw();

@@ -102,6 +102,12 @@ ol.View = function(opt_options) {
 
     /**
      * @private
+     * @type {olx.ViewOptions}
+     */
+    this.options = options;
+
+    /**
+     * @private
      * @type {Array.<number>}
      */
     this.hints_ = [0, 0];
@@ -148,6 +154,18 @@ ol.View = function(opt_options) {
 
     /**
      * @private
+     * @type {Array}
+     */
+    this.highlevelAreas = [];
+
+    /**
+     * @private
+     * @type {number}
+     */
+    this.highlevelThreshold = 0;
+
+    /**
+     * @private
      * @type {boolean}
      */
     this.enableRotation = true;
@@ -185,6 +203,13 @@ ol.View.prototype.setZoomConstraint = function(zoom) {
             max = zoom[1];
         this.minZoom = (min > ol.DEFAULT_MIN_ZOOM && min < ol.DEFAULT_MAX_ZOOM) ? min : goog.math.clamp(min, ol.DEFAULT_MIN_ZOOM, ol.DEFAULT_MAX_ZOOM);
         this.maxZoom = (max > ol.DEFAULT_MIN_ZOOM && max < ol.DEFAULT_MAX_ZOOM) ? max : goog.math.clamp(max, ol.DEFAULT_MIN_ZOOM, ol.DEFAULT_MAX_ZOOM);
+        var newConstraint = ol.View.createResolutionConstraint_({
+            minZoom: this.minZoom,
+            maxZoom: this.maxZoom
+        });
+        this.constraints_['resolution'] = newConstraint.constraint;
+        this.maxResolution_ = newConstraint.maxResolution;
+        this.minResolution_ = newConstraint.minResolution;
     }
 };
 goog.exportProperty(
@@ -215,7 +240,7 @@ goog.exportProperty(
 ol.View.prototype.setRotationEnabled = function(state) {
     if (goog.isDef(state)) {
         this.enableRotation = state;
-        this.constraints_['rotation'] = ol.View.createRotationConstraint_({});
+        this.constraints_['rotation'] = ol.View.createRotationConstraint_(this.options);
     }
 };
 goog.exportProperty(
@@ -223,6 +248,37 @@ goog.exportProperty(
     'setRotationEnabled',
     ol.View.prototype.setRotationEnabled);
 
+
+/**
+ * @public
+ */
+ol.View.prototype.adaptForHighlevelAreas = function() {
+    if (goog.isDef(this.highlevelAreas) && this.highlevelAreas.length > 0) {
+        var newMaxZoom = this.highlevelThreshold;
+        for (var k = 0; k < this.highlevelAreas.length; k++) {
+            // use higher maxZoom when current center is within high level area
+            var center = this.getCenter();
+            goog.asserts.assert(goog.isDef(center));
+            if (ol.extent.containsCoordinate(this.highlevelAreas[k][2], center)) {
+                newMaxZoom = this.highlevelAreas[k][1];
+            }
+        }
+        this.setZoomConstraint([this.minZoom, newMaxZoom]);
+    }
+};
+
+/**
+ * @param {Array} highlevelAreas HighlevelAreas.
+ * @public
+ */
+ol.View.prototype.setHighlevelAreas = function(highlevelAreas, highlevelThreshold) {
+    this.highlevelThreshold = highlevelThreshold;
+    this.highlevelAreas = highlevelAreas;
+};
+goog.exportProperty(
+    ol.View.prototype,
+    'setHighlevelAreas',
+    ol.View.prototype.setHighlevelAreas);
 
 /**
  * @param {number} rotation Target rotation.
@@ -488,6 +544,8 @@ ol.View.prototype.getZoom = function() {
         } while (res > this.minResolution_);
     }
 
+    this.adaptForHighlevelAreas();
+
     return goog.isDef(offset) ? this.minZoom + offset : offset;
 };
 
@@ -703,6 +761,7 @@ goog.exportProperty(
  * @api stable
  */
 ol.View.prototype.setZoom = function(zoom) {
+    this.adaptForHighlevelAreas();
     var resolution = this.constrainResolution(
         this.maxResolution_, zoom - this.minZoom, 0);
     this.setResolution(resolution);
@@ -740,6 +799,7 @@ ol.View.createResolutionConstraint_ = function(options) {
 
     this.maxZoom = goog.isDef(options.maxZoom) ?
         options.maxZoom : this.maxZoom;
+
 
     var zoomFactor = goog.isDef(options.zoomFactor) ?
         options.zoomFactor : defaultZoomFactor;
