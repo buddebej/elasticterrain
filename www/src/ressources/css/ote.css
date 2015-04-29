@@ -295,6 +295,7 @@ h3{
     height:6px;
     width:130px;
     text-align:center;
+    background: #000;    
 }
 .ui-slider-horizontal .ui-slider-handle {
     height:13px;
