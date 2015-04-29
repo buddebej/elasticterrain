@@ -27,7 +27,7 @@ ol.BUFFER_REPLACE_UNUSED_ENTRIES_WITH_NANS = goog.DEBUG;
  * see https://github.com/openlayers/ol3/issues/2076
  * @define {number} Default maximum zoom for default tile grids.
  */
-ol.DEFAULT_MAX_ZOOM = 42;
+ol.DEFAULT_MAX_ZOOM = 28;
 
 
 /**

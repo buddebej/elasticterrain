@@ -140,6 +140,19 @@ ol.View = function(opt_options) {
      */
     this.minZoom_ = resolutionConstraintInfo.minZoom;
 
+
+    /**
+     * @private
+     * @type {number}
+     */
+    this.minZoom = ol.DEFAULT_MIN_ZOOM;
+
+    /**
+     * @private
+     * @type {number}
+     */
+    this.maxZoom = ol.DEFAULT_MAX_ZOOM;
+
     var centerConstraint = ol.View.createCenterConstraint_(options);
     var resolutionConstraint = resolutionConstraintInfo.constraint;
     var rotationConstraint = ol.View.createRotationConstraint_(options);
@@ -648,6 +661,22 @@ ol.View.prototype.setZoom = function(zoom) {
     this.setResolution(resolution);
 };
 
+/**
+ * @public
+ * @param {Array} zoom Zoom level.
+ */
+ol.View.prototype.setZoomConstraint = function(zoom) {
+    if (goog.isDef(zoom) && zoom.length === 2) {
+        var min = zoom[0],
+            max = zoom[1];
+        this.minZoom = (min > ol.DEFAULT_MIN_ZOOM && min < ol.DEFAULT_MAX_ZOOM) ? min : goog.math.clamp(min, ol.DEFAULT_MIN_ZOOM, ol.DEFAULT_MAX_ZOOM);
+        this.maxZoom = (max > ol.DEFAULT_MIN_ZOOM && max < ol.DEFAULT_MAX_ZOOM) ? max : goog.math.clamp(max, ol.DEFAULT_MIN_ZOOM, ol.DEFAULT_MAX_ZOOM);
+    }
+};
+goog.exportProperty(
+    ol.View.prototype,
+    'setZoomConstraint',
+    ol.View.prototype.setZoomConstraint);
 
 /**
  * @param {olx.ViewOptions} options View options.
@@ -691,16 +720,13 @@ ol.View.createResolutionConstraint_ = function(options) {
     var maxResolution;
     var minResolution;
 
-    // TODO: move these to be ol constants
-    // see https://github.com/openlayers/ol3/issues/2076
-    var defaultMaxZoom = 28;
     var defaultZoomFactor = 2;
 
-    var minZoom = goog.isDef(options.minZoom) ?
-        options.minZoom : ol.DEFAULT_MIN_ZOOM;
+    this.minZoom = goog.isDef(options.minZoom) ?
+        options.minZoom : this.minZoom;
 
-    var maxZoom = goog.isDef(options.maxZoom) ?
-        options.maxZoom : defaultMaxZoom;
+    this.maxZoom = goog.isDef(options.maxZoom) ?
+        options.maxZoom : this.maxZoom;
 
     var zoomFactor = goog.isDef(options.zoomFactor) ?
         options.zoomFactor : defaultZoomFactor;
@@ -725,14 +751,14 @@ ol.View.createResolutionConstraint_ = function(options) {
             defaultZoomFactor, ol.DEFAULT_MIN_ZOOM);
 
         var defaultMinResolution = defaultMaxResolution / Math.pow(
-            defaultZoomFactor, defaultMaxZoom - ol.DEFAULT_MIN_ZOOM);
+            defaultZoomFactor, ol.DEFAULT_MAX_ZOOM - ol.DEFAULT_MIN_ZOOM);
 
         // user provided maxResolution takes precedence
         maxResolution = options.maxResolution;
         if (goog.isDef(maxResolution)) {
-            minZoom = 0;
+            this.minZoom = 0;
         } else {
-            maxResolution = defaultMaxResolution / Math.pow(zoomFactor, minZoom);
+            maxResolution = defaultMaxResolution / Math.pow(zoomFactor, this.minZoom);
         }
 
         // user provided minResolution takes precedence
@@ -740,9 +766,9 @@ ol.View.createResolutionConstraint_ = function(options) {
         if (!goog.isDef(minResolution)) {
             if (goog.isDef(options.maxZoom)) {
                 if (goog.isDef(options.maxResolution)) {
-                    minResolution = maxResolution / Math.pow(zoomFactor, maxZoom);
+                    minResolution = maxResolution / Math.pow(zoomFactor, this.maxZoom);
                 } else {
-                    minResolution = defaultMaxResolution / Math.pow(zoomFactor, maxZoom);
+                    minResolution = defaultMaxResolution / Math.pow(zoomFactor, this.maxZoom);
                 }
             } else {
                 minResolution = defaultMinResolution;
@@ -750,20 +776,20 @@ ol.View.createResolutionConstraint_ = function(options) {
         }
 
         // given discrete zoom levels, minResolution may be different than provided
-        maxZoom = minZoom + Math.floor(
+        this.maxZoom = this.minZoom + Math.floor(
             Math.log(maxResolution / minResolution) / Math.log(zoomFactor));
-        minResolution = maxResolution / Math.pow(zoomFactor, maxZoom - minZoom);
+        minResolution = maxResolution / Math.pow(zoomFactor, this.maxZoom - this.minZoom);
 
         resolutionConstraint = ol.ResolutionConstraint.createSnapToPower(
-            zoomFactor, maxResolution, maxZoom - minZoom);
+            zoomFactor, maxResolution, this.maxZoom - this.minZoom);
     }
     return {
         constraint: resolutionConstraint,
         maxResolution: maxResolution,
         minResolution: minResolution,
-        minZoom: minZoom
+        minZoom: this.minZoom
     };
-};
+}.bind(this);
 
 
 /**

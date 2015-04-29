@@ -14,8 +14,8 @@ var Viewer = function(config, layers) {
             attribution: false
         }).extend([new ol.control.ScaleLine(), new ol.control.MousePositionDem(this.dem)]),
         view: new ol.View({
-            maxZoom: this.config.maxZoom,
-            minZoom: this.config.minZoom
+            maxZoom: this.config.get('viewZoomConstraint')[1],
+            minZoom: this.config.get('viewZoomConstraint')[0]
         }),
         target: this.config.domContainer,
         renderer: 'webgl',
@@ -75,7 +75,7 @@ var Viewer = function(config, layers) {
     };
 
     // wrapper for config.get
-    this.get = function(attr, val) {
+    this.get = function(attr) {
         return config.get(attr);
     };
 
@@ -101,6 +101,7 @@ var Viewer = function(config, layers) {
         this.view.setCenterConstraint(this.config.get('viewCenterConstraint'));
         this.view.setRotation(this.toRadians(this.config.get('viewRotation')));
         this.view.setZoom(this.config.get('viewZoom'));
+        this.view.setZoomConstraint(this.config.get('viewZoomConstraint'));        
         this.dem.setAmbientLight(this.config.get('ambientLight'));
         this.dem.setColorScale(this.config.get('colorScale'));
         this.dem.setColorRamp(this.config.get('colorRamp'));
