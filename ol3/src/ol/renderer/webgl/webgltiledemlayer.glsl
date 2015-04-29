@@ -277,7 +277,8 @@ void main(void) {
                                   
                 // color for water surfaces in flat terrain
                 if(u_waterBodies) {
-                    vec4 waterBlue = vec4(0.4058823529,0.6725490196,0.8970588235,1.0);
+                    // vec4 waterBlue = vec4(0.4058823529,0.6725490196,0.8970588235,1.0);
+                    vec4 waterBlue = vec4(0.03,0.47,0.67,1.0);
 
                     // compute other neighbors for water surface test
                     float n01 = decodeElevation(vec2(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y+CELLSIZE)).xy));

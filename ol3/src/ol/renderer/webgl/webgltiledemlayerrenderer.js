@@ -243,7 +243,7 @@ ol.renderer.webgl.TileDemLayer.prototype.getCurrentMinMax = function() {
  */
 ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tileMinMax) {
     if (goog.isDef(tileMinMax)) {
-        if (tileMinMax[0] < this.minElevationInExtent && tileMinMax[1] < ol.Elevation.MAX && tileMinMax[1] !== 0.0 && tileMinMax[0] !== 0.0) {
+        if (tileMinMax[0] < this.minElevationInExtent && tileMinMax[1] < ol.Elevation.MAX && tileMinMax[1] !== 0 && tileMinMax[0] !== 0) {
             this.minElevationInExtent = tileMinMax[0];
         }
         if (tileMinMax[1] > this.maxElevationInExtent && tileMinMax[1] < ol.Elevation.MAX) {
@@ -623,7 +623,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         if (goog.isNull(this.textureBathymetricColors_)) {
             this.textureBathymetricColors_ = gl.createTexture();
         }
-        var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry);
+        var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry[tileDemLayer.getColorRamp()]);
         gl.activeTexture(goog.webgl.TEXTURE3);
         gl.bindTexture(goog.webgl.TEXTURE_2D, this.textureBathymetricColors_);
 

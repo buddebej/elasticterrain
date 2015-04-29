@@ -5,7 +5,7 @@ goog.provide('ol.ColorRamp');
  * @const 
  * @type {Array}
  */
-ol.ColorRamp.v0 = new Array(
+ol.ColorRamp.hypso0 = new Array(
     66, 120, 40, 255,
     78, 129, 49, 255,
     90, 138, 58, 255,
@@ -42,27 +42,41 @@ ol.ColorRamp.v0 = new Array(
  * @const 
  * @type {Array}
  */
-ol.ColorRamp.v1 = new Array(
-    66, 120, 40, 255,
-    129, 195, 31, 255,
-    255, 255, 204, 255,
-    244, 189, 69, 255,
-    102, 51, 12, 255,
-    102, 51, 0, 255);
+ol.ColorRamp.hypso1 = new Array(
+    172, 208, 165, 255,
+    148, 191, 139, 255,
+    168, 198, 143, 255,
+    189, 204, 150, 255,
+    209, 215, 171, 255,
+    225, 228, 181, 255,
+    239, 235, 192, 255,
+    232, 225, 182, 255,
+    222, 214, 163, 255,
+    211, 202, 157, 255,
+    202, 185, 130, 255,
+    195, 167, 107, 255,
+    185, 152, 90, 255,
+    170, 135, 83, 255,
+    172, 154, 124, 255,
+    186, 174, 154, 255,
+    202, 195, 184, 255,
+    224, 222, 216, 255,
+    245, 244, 242, 255
+);
 
 /**
  * @public
  * @const 
  * @type {Array}
  */
-ol.ColorRamp.hypsometry = [ol.ColorRamp.v0, ol.ColorRamp.v1];
+ol.ColorRamp.hypsometry = [ol.ColorRamp.hypso0, ol.ColorRamp.hypso1];
 
 /**
  * @public
  * @const 
  * @type {Array}
  */
-ol.ColorRamp.bathymetry = new Array(
+ol.ColorRamp.bathy0 = new Array(
     0, 156, 176, 255,
     1, 145, 170, 255,
     3, 135, 164, 255,
@@ -77,5 +91,30 @@ ol.ColorRamp.bathymetry = new Array(
     16, 40, 111, 255,
     18, 30, 105, 255,
     20, 20, 100, 255
-
 );
+
+/**
+ * @public
+ * @const 
+ * @type {Array}
+ */
+ol.ColorRamp.bathy1 = new Array(
+    216, 242, 254, 255,
+    198, 236, 255, 255,
+    185, 227, 255, 255,
+    172, 219, 251, 255,
+    161, 210, 247, 255,
+    150, 201, 240, 255,
+    141, 193, 234, 255,
+    132, 185, 227, 255,
+    121, 178, 222, 255,
+    113, 171, 216, 255
+);
+
+
+/**
+ * @public
+ * @const 
+ * @type {Array}
+ */
+ol.ColorRamp.bathymetry = [ol.ColorRamp.bathy0, ol.ColorRamp.bathy1];
