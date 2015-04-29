@@ -18,6 +18,7 @@ var configSchema = new Schema({
     terrainInteraction: Boolean,
     waterBodies: Boolean,
     viewRotation: Number,
+    viewRotationEnabled: Boolean,        
     viewCenter: [Number],
     viewCenterConstraint: [Number],    
     viewZoomConstraint: [Number],        
