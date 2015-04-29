@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var configSchema = new Schema({
+    title: String,
     ambientLight: Number,
     colorScale: [Number],
     colorRamp: Number,
