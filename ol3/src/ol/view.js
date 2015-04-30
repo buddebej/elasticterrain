@@ -229,7 +229,7 @@ goog.exportProperty(
     ol.View.prototype.setRotationEnabled);
 
 /**
- * @return {boolean}
+ * @return {boolean|undefined}
  * @public
  */
 ol.View.prototype.getRotationEnabled = function() {

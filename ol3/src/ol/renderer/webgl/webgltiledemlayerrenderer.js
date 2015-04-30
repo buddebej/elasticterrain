@@ -121,7 +121,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.tilePadding_ = 100;
+    this.tilePadding_ = 200;
 
     /**
      * Timeout for loading of tiles = max rendering calls per execution
@@ -506,6 +506,13 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
     var tileRange = tileGrid.getTileRangeForExtentAndResolution(extent, tileResolution);
     var framebufferExtent;
 
+    // LOAD SHADERS
+    var program = context.getProgram(this.fragmentShader_, this.vertexShader_);
+    context.useProgram(program);
+    if (goog.isNull(this.locations_)) {
+        this.locations_ = new ol.renderer.webgl.tiledemlayer.shader.Locations(gl, program);
+    }
+
     if (!goog.isNull(this.renderedTileRange_) && this.renderedTileRange_.equals(tileRange) && this.renderedRevision_ == tileSource.getRevision()) {
         // DO NOTHING, RE-RENDERING NOT NEEDED
         framebufferExtent = this.renderedFramebufferExtent_;
@@ -526,13 +533,6 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
         this.bindFramebuffer(frameState, framebufferDimension);
         gl.viewport(0, 0, framebufferDimension, framebufferDimension);
-
-        // LOAD SHADERS
-        var program = context.getProgram(this.fragmentShader_, this.vertexShader_);
-        context.useProgram(program);
-        if (goog.isNull(this.locations_)) {
-            this.locations_ = new ol.renderer.webgl.tiledemlayer.shader.Locations(gl, program);
-        }
 
         // CLEAR BUFFERS
         gl.clearColor(0, 0, 0, 0);
@@ -854,13 +854,16 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             }
         }
         // TEST IF EVERYTHING IS LOADED
-        if (allTilesLoaded || this.timeoutCounter_ > this.timeoutCounterMax_) {
+        // render at elast two passes (for correct minMax computation)
+        // until every tile is loaded and rendered or until timeout value is reached
+        if (this.timeoutCounter_ > 1 && (allTilesLoaded || this.timeoutCounter_ > this.timeoutCounterMax_)) {
             this.renderedTileRange_ = tileRange;
             this.renderedFramebufferExtent_ = framebufferExtent;
             this.renderedRevision_ = tileSource.getRevision();
             // goog.asserts.assert(this.timeoutCounter_ < this.timeoutCounterMax_, 'Loading of tiles timed out.');
             // console.log('extent: ', this.renderedFramebufferExtent_);
             // console.log('resolution: ',viewState.resolution);
+            // console.log(this.minElevationInExtent,this.maxElevationInExtent);
             this.timeoutCounter_ = 0;
         } else {
             this.renderedTileRange_ = null;
