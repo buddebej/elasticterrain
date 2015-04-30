@@ -355,6 +355,7 @@ goog.inherits(ol.interaction.DragShearIntegrated, ol.interaction.Pointer);
  */
 
 ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) {
+
     if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
         goog.asserts.assert(this.targetPointers.length >= 1);
 
@@ -400,6 +401,7 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
             this.shearingStatus = ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING;
             this.springLength = 0;
         }
+        this.demRenderer.setFreezeMinMax(false);
         return true;
     }
     return false;
@@ -434,6 +436,8 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         minMax = this.demRenderer.getCurrentMinMax();
         this.minElevation = minMax[0];
         this.maxElevation = minMax[1];
+
+        this.demRenderer.setFreezeMinMax(true);
 
         // compute local minMax only when needed
         if (ol.Elevation.MinMaxNeighborhoodSize >= 0) {

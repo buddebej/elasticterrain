@@ -143,7 +143,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
     this.tileGrid_ = null;
 
     /**
-     * Max Zoomlevel of DEM Layer
+     * Max Zoomlevel of DEM Layer for z-Ordering in Shader
      * @private
      * @type {number}
      */
@@ -173,6 +173,12 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      */
     this.minLocalElevation = ol.Elevation.MAX;
 
+    /**
+     * @private
+     * @type {boolean}
+     */
+    this.freezeMinMax = false;
+
 };
 
 goog.inherits(ol.renderer.webgl.TileDemLayer, ol.renderer.webgl.Layer);
@@ -194,6 +200,14 @@ ol.renderer.webgl.TileDemLayer.prototype.disposeInternal = function() {
 ol.renderer.webgl.TileDemLayer.prototype.handleWebGLContextLost = function() {
     goog.base(this, 'handleWebGLContextLost');
     this.locations_ = null;
+};
+
+/**
+ * @public
+ * @param {boolean} state State
+ */
+ol.renderer.webgl.TileDemLayer.prototype.setFreezeMinMax = function(state) {
+    this.freezeMinMax = state;
 };
 
 /**
@@ -242,7 +256,7 @@ ol.renderer.webgl.TileDemLayer.prototype.getCurrentMinMax = function() {
  * @param {Array} tileMinMax : min max elevation of a tile
  */
 ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tileMinMax) {
-    if (goog.isDef(tileMinMax)) {
+    if (goog.isDef(tileMinMax) && !this.freezeMinMax) {
         if (tileMinMax[0] < this.minElevationInExtent && tileMinMax[1] < ol.Elevation.MAX && tileMinMax[1] !== 0 && tileMinMax[0] !== 0) {
             this.minElevationInExtent = tileMinMax[0];
         }
@@ -256,8 +270,10 @@ ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tileMinM
  * @private
  */
 ol.renderer.webgl.TileDemLayer.prototype.resetCurrentMinMax = function() {
-    this.minElevationInExtent = ol.Elevation.MAX;
-    this.maxElevationInExtent = ol.Elevation.MIN;
+    if (!this.freezeMinMax) {
+        this.minElevationInExtent = ol.Elevation.MAX;
+        this.maxElevationInExtent = ol.Elevation.MIN;
+    }
 };
 
 /**
