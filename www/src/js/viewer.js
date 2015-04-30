@@ -52,12 +52,13 @@ var Viewer = function(config, layers, container) {
 
     // hide all over-layers except the given id
     this.hideLayersExcept = function(id) {
-        $.each(this.layers, function(val, obj) {
-            if (!obj.base) { // don't hide dem base layer
-                if (obj === this.layers[id]) {
-                    obj.data.setVisible(true);
+        Object.keys(this.layers).forEach(function(key) {
+            var layer = this.layers[key];
+            if (!layer.base) { // don't hide dem base layer
+                if (layer.id === id) {
+                    layer.data.setVisible(true);
                 } else {
-                    obj.data.setVisible(false);
+                    layer.data.setVisible(false);
                 }
             }
         }.bind(this));
@@ -65,9 +66,9 @@ var Viewer = function(config, layers, container) {
 
     // apply preload level (zoomlevel 1 to maxZoom) for enabled layers
     this.setLayerPreload = function(maxZoom) {
-        $.each(this.layers, function(val, obj) {
-            obj.data.setPreload(maxZoom);
-        });
+        Object.keys(this.layers).forEach(function(key) {
+            this.layers[key].data.setPreload(maxZoom);
+        }.bind(this));
     };
 
     // wrapper for config.set    
@@ -99,11 +100,11 @@ var Viewer = function(config, layers, container) {
 
     // apply current config to renderer and map view
     this.update = function() {
-        this.view.setCenterConstraint(this.config.get('viewCenterConstraint'));        
+        this.view.setCenterConstraint(this.config.get('viewCenterConstraint'));
         this.view.setCenter(ol.proj.transform(this.config.get('viewCenter'), 'EPSG:4326', 'EPSG:3857'));
         this.view.setRotation(this.toRadians(this.config.get('viewRotation')));
-        this.view.setRotationEnabled(this.config.get('viewRotationEnabled')); 
-        this.view.setZoomConstraint(this.config.get('viewZoomConstraint'));                       
+        this.view.setRotationEnabled(this.config.get('viewRotationEnabled'));
+        this.view.setZoomConstraint(this.config.get('viewZoomConstraint'));
         this.view.setZoom(this.config.get('viewZoom'));
         this.dem.setAmbientLight(this.config.get('ambientLight'));
         this.dem.setColorScale(this.config.get('colorScale'));
@@ -160,7 +161,6 @@ var Viewer = function(config, layers, container) {
     // INIT
     // hide all overlay maps (disables preloading and caching)
     this.setLayerPreload(3);
-    this.hideLayersExcept(null);
     // apply initial config
     this.update();
 };
