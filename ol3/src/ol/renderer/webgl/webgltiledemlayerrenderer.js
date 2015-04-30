@@ -109,7 +109,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.tilePadding_ = 50;
+    this.tilePadding_ = 150;
 
     /**
      * @private
@@ -123,6 +123,13 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @type {number}
      */
     this.timeoutCounterMax_ = 450;
+
+    /**
+     * Max Zoomlevel of DEM Layer for z-Ordering in Shader
+     * @private
+     * @type {number}
+     */
+    this.maxShearing_ = 1000000;
 
     /**
      * @private
@@ -590,9 +597,13 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         var shearX, shearY, shearingFactor;
         if (tileDemLayer.getTerrainInteraction()) {
             // from current terrain interaction
+            var shearLimit = 150 * tileGrid.getResolution(z); //this.maxShearing_ * tileDemLayer.getResolution();
             shearingFactor = tileDemLayer.getTerrainShearing();
-            shearX = shearingFactor.x;
-            shearY = shearingFactor.y;
+            // 280
+            // console.log(tileDemLayer.getResolution());
+
+            shearX = goog.math.clamp(shearingFactor.x, -shearLimit, shearLimit);
+            shearY = goog.math.clamp(shearingFactor.y, -shearLimit, shearLimit);
 
         } else {
             // from obliqueInclination angle and current rotation
