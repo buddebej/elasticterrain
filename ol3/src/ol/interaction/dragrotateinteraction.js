@@ -105,14 +105,15 @@ ol.interaction.DragRotate.handleUpEvent_ = function(mapBrowserEvent) {
  * @private
  */
 ol.interaction.DragRotate.handleDownEvent_ = function(mapBrowserEvent) {
-  if (!ol.events.condition.mouseOnly(mapBrowserEvent)) {
+  var map = mapBrowserEvent.map;
+  var view = map.getView();
+  if (!ol.events.condition.mouseOnly(mapBrowserEvent) || !view.getRotationEnabled()) {
     return false;
   }
 
   var browserEvent = mapBrowserEvent.browserEvent;
   if (browserEvent.isMouseActionButton() && this.condition_(mapBrowserEvent)) {
-    var map = mapBrowserEvent.map;
-    map.getView().setHint(ol.ViewHint.INTERACTING, 1);
+    view.setHint(ol.ViewHint.INTERACTING, 1);
     map.render();
     this.lastAngle_ = undefined;
     return true;

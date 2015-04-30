@@ -103,7 +103,7 @@ var Viewer = function(config, layers, container) {
         this.view.setCenterConstraint(this.config.get('viewCenterConstraint'));
         this.view.setCenter(ol.proj.transform(this.config.get('viewCenter'), 'EPSG:4326', 'EPSG:3857'));
         this.view.setRotation(this.toRadians(this.config.get('viewRotation')));
-        this.view.setRotationEnabled(this.config.get('viewRotationEnabled'));
+        this.view.setRotationConstraint(this.config.get('viewRotationEnabled'));
         this.view.setZoomConstraint(this.config.get('viewZoomConstraint'));
         this.view.setZoom(this.config.get('viewZoom'));
         this.dem.setAmbientLight(this.config.get('ambientLight'));

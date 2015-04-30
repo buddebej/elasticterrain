@@ -217,16 +217,16 @@ goog.exportProperty(
  * @param {boolean} state State.
  * @public
  */
-ol.View.prototype.setRotationEnabled = function(state) {
+ol.View.prototype.setRotationConstraint = function(state) {
     if (goog.isDef(state)) {
-        this.options.enableRotation = state;
+        this.options.enableRotation = state; 
         this.constraints_['rotation'] = ol.View.createRotationConstraint_(this.options);
     }
 };
 goog.exportProperty(
     ol.View.prototype,
-    'setRotationEnabled',
-    ol.View.prototype.setRotationEnabled);
+    'setRotationConstraint',
+    ol.View.prototype.setRotationConstraint);
 
 /**
  * @return {boolean|undefined}
@@ -862,6 +862,7 @@ ol.View.createResolutionConstraint_ = function(options) {
 ol.View.createRotationConstraint_ = function(options) {
     var enableRotation = goog.isDef(options.enableRotation) ?
         options.enableRotation : true;
+
     if (enableRotation) {
         var constrainRotation = options.constrainRotation;
         if (!goog.isDef(constrainRotation) || constrainRotation === true) {
