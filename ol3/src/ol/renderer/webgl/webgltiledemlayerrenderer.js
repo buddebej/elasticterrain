@@ -105,29 +105,17 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
     this.renderedRevision_ = -1;
 
     /**
+     * Padding around visible extent in pixel    
      * @private
-     * @type {WebGLTexture}
+     * @type {number}
      */
-    this.textureHypsometricColors_ = null;
-
-    /**
-     * @private
-     * @type {WebGLTexture}
-     */
-    this.textureBathymetricColors_ = null;
+    this.tilePadding_ = 50;
 
     /**
      * @private
      * @type {number}
      */
     this.timeoutCounter_ = 0;
-
-    /**
-     * Padding around visible extent in pixel    
-     * @private
-     * @type {number}
-     */
-    this.tilePadding_ = 200;
 
     /**
      * Timeout for loading of tiles = max rendering calls per execution
@@ -171,13 +159,13 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.maxLocalElevation = ol.Elevation.MIN;
+    this.tempMinElevation = ol.Elevation.MIN;
 
     /**
      * @private
      * @type {number}
      */
-    this.minLocalElevation = ol.Elevation.MAX;
+    this.tempMaxElevation = ol.Elevation.MAX;
 
     /**
      * @private
@@ -258,15 +246,28 @@ ol.renderer.webgl.TileDemLayer.prototype.getCurrentMinMax = function() {
 };
 
 /**
+ * Returns true when a tile center is not beyond the visible extent. 
+ * Parts of the tile may be invisible or parts of invisible tiles may be excluded due to the center condition.
+ * @private
+ * @param {ol.Tile} tile Tile
+ * @return {boolean}
+ */
+ol.renderer.webgl.TileDemLayer.prototype.isVisible = function(tile) {
+    if (goog.isDef(tile)) {
+        var tileCenter = this.tileGrid_.getTileCoordCenter(tile.tileCoord);
+        return ol.extent.containsCoordinate(this.visibleFramebufferExtent_, tileCenter);
+    } else {
+        return false;
+    }
+};
+
+/**
  * @private
  * @param {ol.Tile} tile Tile
  */
 ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tile) {
     if (goog.isDef(tile) && !this.freezeMinMax) {
-
-        var tileCenter = this.tileGrid_.getTileCoordCenter(tile.tileCoord);
-        // ignore minMax values if tile is beyond visible extent
-        if (ol.extent.containsCoordinate(this.visibleFramebufferExtent_, tileCenter)) {
+        if (this.isVisible(tile)) {
             var tileMinMax = tile.getMinMaxElevations();
             if (tileMinMax[0] < this.minElevationInExtent && tileMinMax[1] < ol.Elevation.MAX && tileMinMax[1] !== 0 && tileMinMax[0] !== 0) {
                 this.minElevationInExtent = tileMinMax[0];
@@ -638,13 +639,12 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         gl.uniform1f(this.locations_.u_maxElevation, this.maxElevationInExtent);
 
         // COLORING
-        // create lookup texture only once
-        if (goog.isNull(this.textureHypsometricColors_)) {
-            this.textureHypsometricColors_ = gl.createTexture();
-        }
+
+        // hypsometric colors
+        var textureHypsometricColors_ = gl.createTexture();
         var arrayHypsometryColors = new Uint8Array(ol.ColorRamp.hypsometry[tileDemLayer.getColorRamp()]);
         gl.activeTexture(goog.webgl.TEXTURE2);
-        gl.bindTexture(goog.webgl.TEXTURE_2D, this.textureHypsometricColors_);
+        gl.bindTexture(goog.webgl.TEXTURE_2D, textureHypsometricColors_);
 
         // read color ramp array
         gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayHypsometryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayHypsometryColors);
@@ -654,13 +654,11 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
         gl.uniform1i(this.locations_.u_hypsoColors, 2);
 
-        // create lookup texture only once
-        if (goog.isNull(this.textureBathymetricColors_)) {
-            this.textureBathymetricColors_ = gl.createTexture();
-        }
+        // bathymetric colors
+        var textureBathymetricColors_ = gl.createTexture();
         var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry[tileDemLayer.getColorRamp()]);
         gl.activeTexture(goog.webgl.TEXTURE3);
-        gl.bindTexture(goog.webgl.TEXTURE_2D, this.textureBathymetricColors_);
+        gl.bindTexture(goog.webgl.TEXTURE_2D, textureBathymetricColors_);
 
         // read color ramp array
         gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayBathymetryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayBathymetryColors);
@@ -878,10 +876,18 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     defUniformOffset(tile, this);
                     goog.vec.Vec4.setFromValues(u_tileOffset, sx, sy, tx, ty);
                     gl.uniform4fv(this.locations_.u_tileOffset, u_tileOffset);
+
+                    // FIXME
+                    // bind dummy texture 1 to avoid webGl errors
+                    gl.activeTexture(goog.webgl.TEXTURE1);
+                    mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                    gl.uniform1i(this.locations_.u_overlayTexture, 1);
+
                     // TILE TEXTURE
                     gl.activeTexture(goog.webgl.TEXTURE0);
                     mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
                     gl.uniform1i(this.locations_.u_texture, 0);
+
                     // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                     gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
                     this.updateCurrentMinMax(tile);
