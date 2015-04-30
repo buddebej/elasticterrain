@@ -159,8 +159,8 @@ var Viewer = function(config, layers, container) {
 
     // INIT
     // hide all overlay maps (disables preloading and caching)
+    this.setLayerPreload(3);
     this.hideLayersExcept(null);
-    this.setLayerPreload(5);
     // apply initial config
     this.update();
 };

@@ -23,7 +23,7 @@ var Config = function() {
         stackedCardboard: true, // bool
         waterBodies: false, // bool
         colorScale: [0, 4000], // min:max [m]  
-        colorRamp: 0, // id   
+        colorRamp: 1, // id   
 
         // debug         
         resolution: 0.2, // 0;1
