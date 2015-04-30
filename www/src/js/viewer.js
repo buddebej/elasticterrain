@@ -99,12 +99,12 @@ var Viewer = function(config, layers, container) {
 
     // apply current config to renderer and map view
     this.update = function() {
+        this.view.setCenterConstraint(this.config.get('viewCenterConstraint'));        
         this.view.setCenter(ol.proj.transform(this.config.get('viewCenter'), 'EPSG:4326', 'EPSG:3857'));
-        this.view.setCenterConstraint(this.config.get('viewCenterConstraint'));
         this.view.setRotation(this.toRadians(this.config.get('viewRotation')));
-        this.view.setRotationEnabled(this.config.get('viewRotationEnabled'));        
+        this.view.setRotationEnabled(this.config.get('viewRotationEnabled')); 
+        this.view.setZoomConstraint(this.config.get('viewZoomConstraint'));                       
         this.view.setZoom(this.config.get('viewZoom'));
-        this.view.setZoomConstraint(this.config.get('viewZoomConstraint'));        
         this.dem.setAmbientLight(this.config.get('ambientLight'));
         this.dem.setColorScale(this.config.get('colorScale'));
         this.dem.setColorRamp(this.config.get('colorRamp'));
@@ -160,7 +160,7 @@ var Viewer = function(config, layers, container) {
     // INIT
     // hide all overlay maps (disables preloading and caching)
     this.hideLayersExcept(null);
-    this.setLayerPreload(2);
+    this.setLayerPreload(5);
     // apply initial config
     this.update();
 };
