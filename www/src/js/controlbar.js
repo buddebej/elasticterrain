@@ -46,7 +46,13 @@ var ControlBar = function(viewer) {
         SELECT_CONFIG = $('.configSelect'),
         SELECT_NEIGHBORHOOD_SIZE = $('.minMaxRadiusSelect'),
         INFOCONTENT = $('.infoBox .content'),
-        INFOMENUE = $('.infoBox .menue');
+        INFOMENUE = $('.infoBox .menue'),
+
+        SWITCH_SAVE_ZOOM = $('.saveLimitZoomlevelSwitch'),
+        SWITCH_SAVE_EXTENT = $('.saveLimitExtentSwitch'),
+        SWITCH_SAVE_ROTATION = $('.saveLimitRotationSwitch'),
+        TEXT_SAVE_TITLE = $('.configTitleText'),
+        BUTTON_SAVE_CONFIG = $('.saveconfig');
 
     // config control bar
     ui.options = {
@@ -60,6 +66,10 @@ var ControlBar = function(viewer) {
 
     // config available control boxes
     ui.controls = {
+        info: {
+            enabled: true,
+            collapsed: false
+        },
         config: {
             enabled: false,
             collapsed: true
@@ -90,9 +100,9 @@ var ControlBar = function(viewer) {
             enabled: true,
             collapsed: true
         },
-        info: {
+        saveConfig: {
             enabled: true,
-            collapsed: false
+            collapsed: true
         }
     };
 
@@ -131,17 +141,17 @@ var ControlBar = function(viewer) {
         });
     }();
 
-    // disable control when switch in control header is triggered
-    ui.controlDeactivate = function(c) {
-        c.inactive = true;
-        c.head.addClass('controlHeaderInactive');
+    // enable or disable control 
+    ui.controlActive = function(c, state) {
+        if (!state) {
+            c.inactive = true;
+            c.head.addClass('controlHeaderInactive');
+        } else {
+            c.inactive = false;
+            c.head.removeClass('controlHeaderInactive');
+        }
     };
 
-    // enable control when switch in control header is triggered
-    ui.controlActivate = function(c) {
-        c.inactive = false;
-        c.head.removeClass('controlHeaderInactive');
-    };
 
     ui.collapseAll = function() {
         $.each(ui.controls, function(key, val) {
@@ -163,13 +173,14 @@ var ControlBar = function(viewer) {
         KNOB_ZENITH.val(viewer.get('lightZenith')).trigger('change');
         KNOB_ROTATION.val(viewer.get('viewRotation')).trigger('change');
 
+        ui.controlActive(ui.controls.rotation, viewer.get('viewRotationEnabled'));
         SWITCH_WATERBODIES.prop(CHECKED, viewer.get('waterBodies'));
         SWITCH_STACKED_CARDBOARD.prop(CHECKED, viewer.get('stackedCardboard'));
         SWITCH_SHADING.prop(CHECKED, viewer.get('shading')).setState(viewer.get('shading'));
         SWITCH_SHEARING_INTERACTION.prop(CHECKED, viewer.get('terrainInteraction'));
         SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
 
-        SLIDER_AMBIENT_LIGHT.slider({ 
+        SLIDER_AMBIENT_LIGHT.slider({
             value: toSlider(viewer.get('ambientLight'))
         });
         SLIDER_COLOR.slider({
@@ -208,6 +219,8 @@ var ControlBar = function(viewer) {
 
 
     // LOAD PREDEFINED CONFIGURATIONS
+    ui.configManager = null;
+
     // update select box with configs from newStore
     ui.updateConfigStore = function(newStore) {
         viewer.setConfigStore(newStore);
@@ -221,7 +234,7 @@ var ControlBar = function(viewer) {
 
         // populate select box with available configs
         $.each(viewer.getConfigStore(), function(val, obj) {
-            var name = obj.viewCenter[1].toFixed(2) + ', ' + obj.viewCenter[0].toFixed(2) + ' (z ' + obj.viewZoom + ')';
+            var name = (obj.title !== "") ? obj.title : obj.viewCenter[1].toFixed(2) + ', ' + obj.viewCenter[0].toFixed(2) + ' (z ' + obj.viewZoom + ')';
             SELECT_CONFIG.append($('<option></option>').val(val).html(name));
         });
     };
@@ -240,6 +253,28 @@ var ControlBar = function(viewer) {
         viewer.update();
     }.bind(this));
 
+    BUTTON_SAVE_CONFIG.reset = function() {
+        SWITCH_SAVE_ZOOM.prop(CHECKED, false);
+        SWITCH_SAVE_EXTENT.prop(CHECKED, false);
+        SWITCH_SAVE_ROTATION.prop(CHECKED, true);
+        TEXT_SAVE_TITLE.val('');
+    };
+
+    // SAVE PREDEFINED CONFIGURATIONS
+    BUTTON_SAVE_CONFIG.click(function() {
+        var z = viewer.view.getZoom(),
+            extent = viewer.view.calculateExtent(viewer.map.getSize()),
+            zoomConstraint = (SWITCH_SAVE_ZOOM.prop(CHECKED)) ? [z, z] : viewer.get('viewZoomConstraint'),
+            centerConstraint = (SWITCH_SAVE_EXTENT.prop(CHECKED)) ? extent : [],
+            rotationConstraint = SWITCH_SAVE_ROTATION.prop(CHECKED),
+            constraints = {
+                center: centerConstraint,
+                rotation: rotationConstraint,
+                zoom: zoomConstraint
+            };
+        ui.configManager.saveConfig(TEXT_SAVE_TITLE.val(), constraints);
+        BUTTON_SAVE_CONFIG.reset();
+    });
 
     // PLAN OBLIQUE 
     // set inclination for planoblique relief
@@ -350,12 +385,12 @@ var ControlBar = function(viewer) {
         if (!state) {
             viewer.set('shading', false);
             checkbox.prop(CHECKED, false);
-            ui.controlDeactivate(ui.controls.shading);
+            ui.controlActive(ui.controls.shading, false);
             ui.controls.shading.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         } else {
             viewer.set('shading', true);
             checkbox.prop(CHECKED, true);
-            ui.controlActivate(ui.controls.shading);
+            ui.controlActive(ui.controls.shading, true);
             ui.controls.shading.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
         viewer.render();
@@ -429,7 +464,7 @@ var ControlBar = function(viewer) {
         if (!state) {
             viewer.set('terrainInteraction', false);
             viewer.shearingInteraction.setActive(false);
-            ui.controlDeactivate(ui.controls.shearing);
+            ui.controlActive(ui.controls.shearing, false);
             checkbox.prop(CHECKED, false);
             ui.controls.shearing.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
             ui.controls.inclination.cont.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
@@ -437,7 +472,7 @@ var ControlBar = function(viewer) {
             viewer.set('terrainInteraction', true);
             viewer.shearingInteraction.setActive(true);
             checkbox.prop(CHECKED, true);
-            ui.controlActivate(ui.controls.shearing);
+            ui.controlActive(ui.controls.shearing, true);
             ui.controls.shearing.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
             ui.controls.inclination.cont.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }

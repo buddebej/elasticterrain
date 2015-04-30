@@ -1,6 +1,8 @@
 var ConfigManager = function(controlBar, viewer) {
     'use strict';
 
+    controlBar.configManager = this;
+
     var url = viewer.config.dbUrl,
         dataType = 'json';
 
@@ -22,10 +24,21 @@ var ConfigManager = function(controlBar, viewer) {
         });
     };
     ol.inherits(this.saveConfigButton, ol.control.Control);
-    viewer.map.addControl(new this.saveConfigButton());
+    // viewer.map.addControl(new this.saveConfigButton());
 
-    var saveConfig = function() {
+    this.saveConfig = function(title, constraints) {
         var newConfig = viewer.config.get();
+
+        // add title attribute when specified
+        if (typeof title !== 'undefined') {
+            newConfig.title = title;
+        }
+        if (typeof constraints !== 'undefined') {
+            newConfig.viewZoomConstraint = constraints.zoom;
+            newConfig.viewCenterConstraint = constraints.center;
+            newConfig.viewRotationEnabled = constraints.rotation;            
+        }
+
         // delete id element to avoid duplicates in database. every saved config gets a unique id.
         delete newConfig._id;
         $.ajax({
@@ -34,30 +47,30 @@ var ConfigManager = function(controlBar, viewer) {
             data: newConfig,
             success: function(data) {
                 // reload configStore
-                loadAllConfigs();
-                console.log(data.message);         
-            },
+                this.loadAllConfigs();
+                console.log(data.message);
+            }.bind(this),
             error: function(data) {
-                console.log('could not write config to database');            
-            },            
+                console.log('could not write config to database');
+            },
             dataType: dataType
         });
     };
 
-    var loadAllConfigs = function() {
+    this.loadAllConfigs = function() {
         $.ajax({
             type: 'GET',
             url: url,
             success: function(data) {
-                controlBar.updateConfigStore(data);                
+                controlBar.updateConfigStore(data);
             },
             error: function(data) {
-                console.log('could not read configs from database');            
-            },            
+                console.log('could not read configs from database');
+            },
             dataType: dataType
         });
     };
 
     // load all available configs and push to gui selectbox
-    loadAllConfigs();
+    this.loadAllConfigs();
 };

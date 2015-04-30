@@ -2,7 +2,6 @@ var Config = function() {
     'use strict';
 
     // static config
-    this.domContainer = 'map';
     this.dbUrl = 'http://54.69.7.112:8000/api/configs';
     // dynamic config 
     // can be saved and loaded by configManager
@@ -32,7 +31,7 @@ var Config = function() {
 
         // view
         viewRotation: 0, // 0:360
-        viewRotationEnabled: false, // 0:360
+        viewRotationEnabled: true, // 0:360
 
         viewCenter: [17, 37], // center of map in latlon 
         // potsdam 13.04,52.40
@@ -65,7 +64,6 @@ var Config = function() {
 
     this.set = function(attr, val) {
         this.dynamic[attr] = val;
-        // console.log(attr,val);
     };
 
     this.get = function(attr) {
@@ -74,5 +72,6 @@ var Config = function() {
 
     this.swap = function(newConfig) {
         this.dynamic = newConfig;
+        // console.log(newConfig);
     };
 };

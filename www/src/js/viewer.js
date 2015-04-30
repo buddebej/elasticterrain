@@ -1,4 +1,4 @@
-var Viewer = function(config, layers) {
+var Viewer = function(config, layers, container) {
     'use strict';
 
     this.config = config;
@@ -17,14 +17,14 @@ var Viewer = function(config, layers) {
             maxZoom: this.config.get('viewZoomConstraint')[1],
             minZoom: this.config.get('viewZoomConstraint')[0]
         }),
-        target: this.config.domContainer,
+        target: container,
         renderer: 'webgl',
         layers: layers.getData()
     });
 
     this.view = this.map.getView();
 
-    this.view.setHighlevelAreas(layers.getDem().highLevelAreas, layers.getDem().highLevelThreshold);
+    this.view.setHighlevelAreas(layers.getDem().highLevelAreas);
 
     // render map with current config
     this.render = function() {
