@@ -129,7 +129,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.maxShearing_ = 1000000;
+    this.maxShearing_ = 150;
 
     /**
      * @private
@@ -276,11 +276,13 @@ ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tile) {
     if (goog.isDef(tile) && !this.freezeMinMax) {
         if (this.isVisible(tile)) {
             var tileMinMax = tile.getMinMaxElevations();
-            if (tileMinMax[0] < this.minElevationInExtent && tileMinMax[1] < ol.Elevation.MAX && tileMinMax[1] !== 0 && tileMinMax[0] !== 0) {
-                this.minElevationInExtent = tileMinMax[0];
-            }
-            if (tileMinMax[1] > this.maxElevationInExtent && tileMinMax[1] < ol.Elevation.MAX) {
-                this.maxElevationInExtent = tileMinMax[1];
+            if (goog.isDef(tileMinMax) && tileMinMax.length > 1) {
+                if (tileMinMax[0] < this.minElevationInExtent && tileMinMax[1] < ol.Elevation.MAX && tileMinMax[1] !== 0 && tileMinMax[0] !== 0) {
+                    this.minElevationInExtent = tileMinMax[0];
+                }
+                if (tileMinMax[1] > this.maxElevationInExtent && tileMinMax[1] < ol.Elevation.MAX) {
+                    this.maxElevationInExtent = tileMinMax[1];
+                }
             }
         }
     }
@@ -597,10 +599,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         var shearX, shearY, shearingFactor;
         if (tileDemLayer.getTerrainInteraction()) {
             // from current terrain interaction
-            var shearLimit = 150 * tileGrid.getResolution(z); //this.maxShearing_ * tileDemLayer.getResolution();
+            var shearLimit = this.maxShearing_ * tileGrid.getResolution(z);
             shearingFactor = tileDemLayer.getTerrainShearing();
-            // 280
-            // console.log(tileDemLayer.getResolution());
 
             shearX = goog.math.clamp(shearingFactor.x, -shearLimit, shearLimit);
             shearY = goog.math.clamp(shearingFactor.y, -shearLimit, shearLimit);
