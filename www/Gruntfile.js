@@ -7,7 +7,7 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     cwd: 'src/',
-                    src: ['data/**', 'ressources/font-awesome/**', 'ressources/images/**', 'ressources/css/images/**', 'index.html'],
+                    src: ['data/**', 'resources/font-awesome/**', 'resources/images/**', 'resources/css/images/**', 'index.html'],
                     dest: 'dist/'
                 }]
             },
@@ -26,12 +26,12 @@ module.exports = function(grunt) {
                 dest: 'dist/temp.js'
             },
             lib: {
-                src: ['src/ressources/js/*.js', 'dist/ol.js', 'dist/temp_min.js'],
+                src: ['src/resources/js/*.js', 'dist/ol.js', 'dist/temp_min.js'],
                 dest: 'dist/app.min.js'
             },
             css: {
-                src: ['src/ressources/css/*.css'],
-                dest: 'dist/ressources/css/app.css'
+                src: ['src/resources/css/*.css'],
+                dest: 'dist/resources/css/app.css'
             }
         },
         removeLoggingCalls: {
