@@ -94,6 +94,12 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
 
     /**
      * @private
+     * @type {ol.Extent}
+     */
+    this.visibleFramebufferExtent_ = null;
+
+    /**
+     * @private
      * @type {number}
      */
     this.renderedRevision_ = -1;
@@ -253,15 +259,21 @@ ol.renderer.webgl.TileDemLayer.prototype.getCurrentMinMax = function() {
 
 /**
  * @private
- * @param {Array} tileMinMax : min max elevation of a tile
+ * @param {ol.Tile} tile Tile
  */
-ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tileMinMax) {
-    if (goog.isDef(tileMinMax) && !this.freezeMinMax) {
-        if (tileMinMax[0] < this.minElevationInExtent && tileMinMax[1] < ol.Elevation.MAX && tileMinMax[1] !== 0 && tileMinMax[0] !== 0) {
-            this.minElevationInExtent = tileMinMax[0];
-        }
-        if (tileMinMax[1] > this.maxElevationInExtent && tileMinMax[1] < ol.Elevation.MAX) {
-            this.maxElevationInExtent = tileMinMax[1];
+ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tile) {
+    if (goog.isDef(tile) && !this.freezeMinMax) {
+
+        var tileCenter = this.tileGrid_.getTileCoordCenter(tile.tileCoord);
+        // ignore minMax values if tile is beyond visible extent
+        if (ol.extent.containsCoordinate(this.visibleFramebufferExtent_, tileCenter)) {
+            var tileMinMax = tile.getMinMaxElevations();
+            if (tileMinMax[0] < this.minElevationInExtent && tileMinMax[1] < ol.Elevation.MAX && tileMinMax[1] !== 0 && tileMinMax[0] !== 0) {
+                this.minElevationInExtent = tileMinMax[0];
+            }
+            if (tileMinMax[1] > this.maxElevationInExtent && tileMinMax[1] < ol.Elevation.MAX) {
+                this.maxElevationInExtent = tileMinMax[1];
+            }
         }
     }
 };
@@ -292,7 +304,7 @@ ol.renderer.webgl.TileDemLayer.prototype.clearTileCache = function() {
 ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
 
     // compute local coordinates of a segment within a tile (see imagetile.js)
-    var getSegmentCoord = function(tc) {
+    var getSegmentCoord = function(tc, segmentsXY) {
             // Tile minX, minY, maxX, maxY
             var tileExtent = this.tileGrid_.getTileCoordExtent(tc),
 
@@ -300,7 +312,6 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
                 tileLengthXCoord = tileExtent[2] - tileExtent[0],
                 tileLengthYCoord = tileExtent[3] - tileExtent[1],
 
-                segmentsXY = clickedTile.numberOfSegments / 4,
                 segmentSizeRel = 1 / segmentsXY,
                 segmentSizeAbsX = tileLengthXCoord * segmentSizeRel,
                 segmentSizeAbsY = tileLengthYCoord * segmentSizeRel,
@@ -375,68 +386,75 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
         // tile key for clicked tile
         clickedXyzKey = ol.tilecoord.getKeyZXY(clickedTileCoord[0], clickedTileCoord[1], clickedTileCoord[2]),
         // handle for tile that was clicked
-        clickedTile = this.tileCache_.get(clickedXyzKey),
-        // segment coordinates for clicked segment within tile (see imagetile.js)
-        clickedSegmentCoord = getSegmentCoord(clickedTileCoord),
-        // minMax for clicked segment
-        clickedSegmentMinMax = clickedTile.getSegmentMinMaxElevations(clickedSegmentCoord),
-        // number of segments per tile in XY direction
-        tileSegmentsXY = clickedTile.segmentsXY,
-        // matrix for coordinates of neighbor tiles relative to clicked tile
-        neighborTilesCoordinates = createAdjacentNeighborMatrix(clickedTileCoord[1], clickedTileCoord[2], false),
-        // matrix for coordinates of neighbor segments relative to clicked segment
-        neighborSegmentsCoordinates = createAdjacentNeighborMatrix(clickedSegmentCoord[0] + tileSegmentsXY, clickedSegmentCoord[1] + tileSegmentsXY, true),
-        // number of segments in global segment array
-        neighborSegmentsXY = neighborhoodSize * tileSegmentsXY,
-        // array for all segments in one array for entire neighborhood
-        neighborSegmentStore = make2dArray(neighborSegmentsXY),
-        localMinMax = [0.0, 0.0];
+        clickedTile = null;
+    // test if tile is in cache
+    if (this.tileCache_.containsKey(clickedXyzKey)) {
+        clickedTile = this.tileCache_.get(clickedXyzKey);
+        var // number of segments per tile in XY direction
+            tileSegmentsXY = clickedTile.segmentsXY,
+            // segment coordinates for clicked segment within tile (see imagetile.js)
+            clickedSegmentCoord = getSegmentCoord(clickedTileCoord, tileSegmentsXY),
+            // minMax for clicked segment
+            clickedSegmentMinMax = clickedTile.getSegmentMinMaxElevations(clickedSegmentCoord),
 
-    if (ol.Elevation.MinMaxNeighborhoodSize === 0) {
-        // compute only single segment minmax
-        localMinMax = clickedSegmentMinMax;
+            // matrix for coordinates of neighbor tiles relative to clicked tile
+            neighborTilesCoordinates = createAdjacentNeighborMatrix(clickedTileCoord[1], clickedTileCoord[2], false),
+            // matrix for coordinates of neighbor segments relative to clicked segment
+            neighborSegmentsCoordinates = createAdjacentNeighborMatrix(clickedSegmentCoord[0] + tileSegmentsXY, clickedSegmentCoord[1] + tileSegmentsXY, true),
+            // number of segments in global segment array
+            neighborSegmentsXY = neighborhoodSize * tileSegmentsXY,
+            // array for all segments in one array for entire neighborhood
+            neighborSegmentStore = make2dArray(neighborSegmentsXY),
+            localMinMax = [0.0, 0.0];
+
+        if (ol.Elevation.MinMaxNeighborhoodSize === 0) {
+            // compute only single segment minmax
+            localMinMax = clickedSegmentMinMax;
+        } else {
+            // compute neighborhood segment minMax
+            // loop through destination tile segments store and get copies of all tile segments 
+            for (var segmentRow = 0; segmentRow < neighborSegmentsXY; segmentRow++) {
+                for (var segmentCol = 0; segmentCol < neighborSegmentsXY; segmentCol++) {
+                    var // compute row and column of tile that contains the segment
+                        tileRow = goog.math.safeFloor(segmentRow / tileSegmentsXY),
+                        tileCol = goog.math.safeFloor(segmentCol / tileSegmentsXY),
+                        tile = null,
+                        xyzKey = ol.tilecoord.getKeyZXY(clickedTileCoord[0], neighborTilesCoordinates[tileRow][tileCol].x, neighborTilesCoordinates[tileRow][tileCol].y);
+                    // get handle for the relevant tile
+                    if (this.tileCache_.containsKey(xyzKey)) {
+                        tile = this.tileCache_.get(xyzKey);
+                        // get the segments
+                        var nSegments = tile.getSegments(),
+                            // copy the corresponding segment from the tile segment store to the global segment store
+                            segmentCopy = nSegments[goog.math.safeFloor(segmentCol / neighborhoodSize)][goog.math.safeFloor(segmentRow / neighborhoodSize)];
+                        neighborSegmentStore[segmentCol][segmentRow] = segmentCopy;
+                    }
+                }
+            }
+
+            var segmentCounter = 0;
+            // read minMax for relevant segments
+            for (var segmentRow = 0; segmentRow < neighborhoodSize; segmentRow++) {
+                for (var segmentCol = 0; segmentCol < neighborhoodSize; segmentCol++) {
+
+                    var segmentX = neighborSegmentsCoordinates[segmentRow][segmentCol].x,
+                        segmentY = neighborSegmentsCoordinates[segmentRow][segmentCol].y;
+
+                    if (goog.isDef(neighborSegmentStore[segmentX][segmentY])) {
+                        localMinMax[0] += neighborSegmentStore[segmentX][segmentY][0];
+                        localMinMax[1] += neighborSegmentStore[segmentX][segmentY][1];
+                        segmentCounter++;
+                    }
+                }
+            }
+            // average minMax values
+            localMinMax[0] = localMinMax[0] / segmentCounter;
+            localMinMax[1] = localMinMax[1] / segmentCounter;
+        }
+        return localMinMax;
     } else {
-        // compute neighborhood segment minMax
-        // loop through destination tile segments store and get copies of all tile segments 
-        for (var segmentRow = 0; segmentRow < neighborSegmentsXY; segmentRow++) {
-            for (var segmentCol = 0; segmentCol < neighborSegmentsXY; segmentCol++) {
-                var // compute row and column of tile that contains the segment
-                    tileRow = goog.math.safeFloor(segmentRow / tileSegmentsXY),
-                    tileCol = goog.math.safeFloor(segmentCol / tileSegmentsXY),
-                    tile = null,
-                    xyzKey = ol.tilecoord.getKeyZXY(clickedTileCoord[0], neighborTilesCoordinates[tileRow][tileCol].x, neighborTilesCoordinates[tileRow][tileCol].y);
-                // get handle for the relevant tile
-                if (this.tileCache_.containsKey(xyzKey)) {
-                    tile = this.tileCache_.get(xyzKey);
-                    // get the segments
-                    var nSegments = tile.getSegments(),
-                        // copy the corresponding segment from the tile segment store to the global segment store
-                        segmentCopy = nSegments[goog.math.safeFloor(segmentCol / neighborhoodSize)][goog.math.safeFloor(segmentRow / neighborhoodSize)];
-                    neighborSegmentStore[segmentCol][segmentRow] = segmentCopy;
-                }
-            }
-        }
-
-        var segmentCounter = 0;
-        // read minMax for relevant segments
-        for (var segmentRow = 0; segmentRow < neighborhoodSize; segmentRow++) {
-            for (var segmentCol = 0; segmentCol < neighborhoodSize; segmentCol++) {
-
-                var segmentX = neighborSegmentsCoordinates[segmentRow][segmentCol].x,
-                    segmentY = neighborSegmentsCoordinates[segmentRow][segmentCol].y;
-
-                if (goog.isDef(neighborSegmentStore[segmentX][segmentY])) {
-                    localMinMax[0] += neighborSegmentStore[segmentX][segmentY][0];
-                    localMinMax[1] += neighborSegmentStore[segmentX][segmentY][1];
-                    segmentCounter++;
-                }
-            }
-        }
-        // average minMax values
-        localMinMax[0] = localMinMax[0] / segmentCounter;
-        localMinMax[1] = localMinMax[1] / segmentCounter;
+        return [this.minElevationInExtent, this.maxElevationInExtent];
     }
-    return localMinMax;
 };
 
 
@@ -513,6 +531,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         y: this.tilePadding_
     };
     if (tileResolution == viewState.resolution) {
+        this.visibleFramebufferExtent_ = ol.extent.getForViewAndSize(center, tileResolution, viewState.rotation, [frameState.size[0], frameState.size[1]]);
         center = this.snapCenterToPixel(center, tileResolution, [frameState.size[0] - padding.x, frameState.size[1] - padding.y]);
         extent = ol.extent.getForViewAndSize(center, tileResolution, viewState.rotation, [frameState.size[0] + padding.x, frameState.size[1] + padding.y]);
     } else {
@@ -809,7 +828,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
                             // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                             gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                            this.updateCurrentMinMax(tilesToDraw[tileKey].getMinMaxElevations());
+                            this.updateCurrentMinMax(tilesToDraw[tileKey]);
                         }
                     }
                 }
@@ -865,7 +884,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     gl.uniform1i(this.locations_.u_texture, 0);
                     // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                     gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                    this.updateCurrentMinMax(tile.getMinMaxElevations());
+                    this.updateCurrentMinMax(tile);
                 }
             }
         }
