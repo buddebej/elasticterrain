@@ -176,8 +176,8 @@ var ControlBar = function(viewer) {
         ui.controlActive(ui.controls.rotation, viewer.get('viewRotationEnabled'));
         SWITCH_WATERBODIES.prop(CHECKED, viewer.get('waterBodies'));
         SWITCH_STACKED_CARDBOARD.prop(CHECKED, viewer.get('stackedCardboard'));
-        SWITCH_SHADING.prop(CHECKED, viewer.get('shading')).setState(viewer.get('shading'));
-        SWITCH_SHEARING_INTERACTION.prop(CHECKED, viewer.get('terrainInteraction'));
+        SWITCH_SHADING.setState(viewer.get('shading'));
+        SWITCH_SHEARING_INTERACTION.setState(viewer.get('terrainInteraction'));
         SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
 
         SLIDER_AMBIENT_LIGHT.slider({
@@ -380,24 +380,25 @@ var ControlBar = function(viewer) {
 
 
     // SHADING
-    SWITCH_SHADING.setState = function(state) {
-        var checkbox = SWITCH_SHADING.find($('input'));
-        if (!state) {
-            viewer.set('shading', false);
-            checkbox.prop(CHECKED, false);
-            ui.controlActive(ui.controls.shading, false);
+    SWITCH_SHADING.collapse = function(state) {
+        if (state) {
             ui.controls.shading.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         } else {
-            viewer.set('shading', true);
-            checkbox.prop(CHECKED, true);
-            ui.controlActive(ui.controls.shading, true);
             ui.controls.shading.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+        }
+    };
+    SWITCH_SHADING.setState = function(state) {
+        viewer.set('shading', state);
+        SWITCH_SHADING.prop(CHECKED, state);
+        ui.controlActive(ui.controls.shading, state);
+        if (!state) {
+            SWITCH_SHADING.collapse(true);
         }
         viewer.render();
     };
     //  turn shading on / off
     SWITCH_SHADING.click(function() {
-        SWITCH_SHADING.setState(!viewer.dem.getShading());
+        SWITCH_SHADING.setState(!viewer.get('shading'));
     });
 
     KNOB_AZIMUTH.knob({
@@ -458,29 +459,55 @@ var ControlBar = function(viewer) {
         }
     });
 
-    // switch to activate terrain interactions
-    SWITCH_SHEARING_INTERACTION.setState = function(state) {
-        var checkbox = SWITCH_SHEARING_INTERACTION.find($('input'));
-        if (!state) {
-            viewer.set('terrainInteraction', false);
-            viewer.shearingInteraction.setActive(false);
-            ui.controlActive(ui.controls.shearing, false);
-            checkbox.prop(CHECKED, false);
+    // TERRAIN INTERACTION
+    SWITCH_SHEARING_INTERACTION.collapse = function(state) {
+        if (state) {
             ui.controls.shearing.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
             ui.controls.inclination.cont.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         } else {
-            viewer.set('terrainInteraction', true);
-            viewer.shearingInteraction.setActive(true);
-            checkbox.prop(CHECKED, true);
-            ui.controlActive(ui.controls.shearing, true);
             ui.controls.shearing.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
-            ui.controls.inclination.cont.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
     };
-    //  turn shading on / off
+    SWITCH_SHEARING_INTERACTION.setState = function(state) {
+        viewer.set('terrainInteraction', state);
+        viewer.shearingInteraction.setActive(state);
+        SWITCH_SHEARING_INTERACTION.prop(CHECKED, state);
+        ui.controlActive(ui.controls.shearing, state);
+        if (!state) {
+            SWITCH_SHEARING_INTERACTION.collapse(true);
+        } else{
+            ui.controls.inclination.cont.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+        }
+        viewer.render();
+    };
+    //  turn shearing on / off
     SWITCH_SHEARING_INTERACTION.click(function() {
         SWITCH_SHEARING_INTERACTION.setState(!viewer.get('terrainInteraction'));
     });
+
+    // // switch to activate terrain interactions
+    // SWITCH_SHEARING_INTERACTION.setState = function(state) {
+    //     var checkbox = SWITCH_SHEARING_INTERACTION.find($('input'));
+    //     if (!state) {
+    //         viewer.set('terrainInteraction', false);
+    //         viewer.shearingInteraction.setActive(false);
+    //         ui.controlActive(ui.controls.shearing, false);
+    //         checkbox.prop(CHECKED, false);
+    //         ui.controls.shearing.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+    //         ui.controls.inclination.cont.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+    //     } else {
+    //         viewer.set('terrainInteraction', true);
+    //         viewer.shearingInteraction.setActive(true);
+    //         checkbox.prop(CHECKED, true);
+    //         ui.controlActive(ui.controls.shearing, true);
+    //         ui.controls.shearing.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+    //         ui.controls.inclination.cont.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+    //     }
+    // };
+    // //  turn shading on / off
+    // SWITCH_SHEARING_INTERACTION.click(function() {
+    //     SWITCH_SHEARING_INTERACTION.setState(!viewer.get('terrainInteraction'));
+    // });
 
 
     SLIDER_SPRING_COEFFICIENT.slider({
