@@ -587,7 +587,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
         // INTIAL CHECK FOR OVERLAY
         if (!goog.isNull(tileDemLayer.getOverlayTiles())) { // check if a Layer was defined for overlay
-            this.overlay.Id = map.getLayers().getArray().indexOf(tileDemLayer.getOverlayTiles());
+            this.overlay.Id = map.getLayers().getArray().indexOf(tileDemLayer.getOverlayTiles().data);
             if (this.overlay.Id >= 0) {
                 this.overlay.Active = true;
             }

@@ -120,7 +120,7 @@ var Viewer = function(config, layers, container) {
         this.dem.setObliqueInclination(this.config.get('obliqueInclination'));
         this.dem.setWaterBodies(this.config.get('waterBodies'));
         this.dem.setTerrainInteraction(this.config.get('terrainInteraction'));
-        this.dem.setOverlayTiles((this.config.get('texture') !== 'hypso') ? this.layers[this.config.get('texture')].data : null);
+        this.dem.setOverlayTiles((this.config.get('texture') !== 'hypso') ? this.layers[this.config.get('texture')] : null);
         this.shearingInteraction.setOptions(this.getShearingInteractionOptions());
         this.shearingInteraction.setActive(this.config.get('terrainInteraction'));
         this.render();
@@ -135,7 +135,7 @@ var Viewer = function(config, layers, container) {
             maxInnerShearingPx: this.config.get('iMaxInnerShearingPx'),
             maxOuterShearingPx: this.config.get('iMaxOuterShearingPx'),
             staticShearFadeOutAnimationSpeed: this.config.get('iStaticShearFadeOutAnimationSpeed'),
-            minMaxNeighborhoodSize: this.config.get('iminMaxNeighborhoodSize'),
+            minMaxNeighborhoodSize: this.config.get('iMinMaxNeighborhoodSize'),
             hybridDampingDuration:  this.config.get('iHybridDampingDuration')
         };
     }.bind(this);
