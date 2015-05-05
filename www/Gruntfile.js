@@ -35,13 +35,9 @@ module.exports = function(grunt) {
             }
         },
         removeLoggingCalls: {
-            // the files inside which you want to remove the console statements 
             files: ['dist/temp.js'],
             options: {
-                // an array of method names to remove 
                 methods: ['log', 'info', 'assert'],
-
-                // replacement strategy 
                 strategy: function(consoleStatement) {
                     // comments console calls statements 
                     // return '/* ' + consoleStatement + '*/';
@@ -52,7 +48,7 @@ module.exports = function(grunt) {
         replace: {
             dist: {
                 src: ['dist/temp.js'],
-                overwrite: true, // overwrite matched source files
+                overwrite: true,
                 replacements: [{
                     from: "url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png",
                     to: "url: 'data/tiles/{z}/{x}/{y}.png"
@@ -81,8 +77,6 @@ module.exports = function(grunt) {
         },
     });
 
-
-    // Load the plugin that provides the 'uglify' task.
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-copy');

@@ -34,7 +34,8 @@ goog.require('ol.Elevation');
  maxInnerShearingPx: number,
  maxOuterShearingPx: number,
  staticShearFadeOutAnimationSpeed: number,
- minMaxNeighborhoodSize: number}} */
+ minMaxNeighborhoodSize: number,
+ hybridDampingDuration: number }} */
 ol.interaction.DragShearIntegratedOptions;
 
 
@@ -199,7 +200,6 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
 
         // FIXME this constant should not be here. This could be a configurable parameter.
         // Duration of the animation that fades the length of the spring between static and hybrid shearing.
-        var STATIC_TO_HYBRID_DAMPING_DURATION_S = 0.3;
 
         var currentTime = new Date(),
             timeSinceHybridShearingStart = 0;
@@ -209,11 +209,11 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
 
         // A damping factor for fading the length of the spring between static and hybrid shearing.
         // When the cursor leaves circle with radius maxOuterShearingMeters, the damping factor is
-        // 1. It fades to 0 within the time interval defined by STATIC_TO_HYBRID_DAMPING_DURATION_S.
+        // 1. It fades to 0 within the time interval defined by this.options['hybridDampingDuration'].
         var hybridShearingStartDamping = 1;
         if (this.shearingStatus === ol.interaction.State.HYBRID_SHEARING) {
-            if (timeSinceHybridShearingStart <= STATIC_TO_HYBRID_DAMPING_DURATION_S) {
-                hybridShearingStartDamping = 1 - timeSinceHybridShearingStart / STATIC_TO_HYBRID_DAMPING_DURATION_S;
+            if (timeSinceHybridShearingStart <= this.options['hybridDampingDuration']) {
+                hybridShearingStartDamping = 1 - timeSinceHybridShearingStart / this.options['hybridDampingDuration'];
             } else {
                 // the damping animation is over
                 hybridShearingStartDamping = 0;
@@ -504,6 +504,8 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
     goog.asserts.assert(goog.isDef(options.maxOuterShearingPx));
     goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
     goog.asserts.assert(goog.isDef(options.minMaxNeighborhoodSize));
+    goog.asserts.assert(goog.isDef(options.hybridDampingDuration) && options.hybridDampingDuration > 0.0);
+
     this.options = options;
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);

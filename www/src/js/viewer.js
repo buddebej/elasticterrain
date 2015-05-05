@@ -135,7 +135,8 @@ var Viewer = function(config, layers, container) {
             maxInnerShearingPx: this.config.get('iMaxInnerShearingPx'),
             maxOuterShearingPx: this.config.get('iMaxOuterShearingPx'),
             staticShearFadeOutAnimationSpeed: this.config.get('iStaticShearFadeOutAnimationSpeed'),
-            minMaxNeighborhoodSize: this.config.get('iminMaxNeighborhoodSize')
+            minMaxNeighborhoodSize: this.config.get('iminMaxNeighborhoodSize'),
+            hybridDampingDuration:  this.config.get('iHybridDampingDuration')
         };
     }.bind(this);
 

@@ -57,7 +57,8 @@ var Config = function() {
         iFrictionForce: 0.17, // 0:1             
         iMaxInnerShearingPx: 10.0, // radius in pixel
         iMaxOuterShearingPx: 10.0, // radius in pixel
-        iStaticShearFadeOutAnimationSpeed: 1.0
+        iStaticShearFadeOutAnimationSpeed: 1.0,
+        iHybridDampingDuration: 0.3
     };
 
     this.dynamic = this.init;
@@ -72,6 +73,6 @@ var Config = function() {
 
     this.swap = function(newConfig) {
         this.dynamic = newConfig;
-        // console.log(newConfig);
+        console.log(newConfig);
     };
 };

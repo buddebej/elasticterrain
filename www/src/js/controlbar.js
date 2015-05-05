@@ -38,6 +38,7 @@ var ControlBar = function(viewer) {
         SLIDER_SPRING_COEFFICIENT = $('.springCoefficientSlider'),
         SLIDER_SPRING_FRICTION = $('.springFrictionSlider'),
         SLIDER_SPRING_FADEOUT = $('.springFadeoutSlider'),
+        SLIDER_HYBRID_DAMPING = $('.springHybridDamping'),
         SLIDER_SPRING_INNRAD = $('.springInnerRadiusSlider'),
         SLIDER_SPRING_OUTRAD = $('.springOuterRadiusSlider'),
         SLIDER_RESOLUTION = $('.resolutionSlider'),
@@ -198,14 +199,17 @@ var ControlBar = function(viewer) {
         SLIDER_SPRING_FRICTION.slider({
             value: toSlider(viewer.get('iFrictionForce'), 500)
         });
-        SLIDER_SPRING_FADEOUT.slider({
-            value: toSlider(viewer.get('iStaticShearFadeOutAnimationSpeed'), 50)
-        });
         SLIDER_SPRING_INNRAD.slider({
             value: viewer.get('iMaxInnerShearingPx')
         });
         SLIDER_SPRING_OUTRAD.slider({
             value: viewer.get('iMaxOuterShearingPx')
+        });
+        SLIDER_SPRING_FADEOUT.slider({
+            value: toSlider(viewer.get('iStaticShearFadeOutAnimationSpeed'), 50)
+        });
+        SLIDER_HYBRID_DAMPING.slider({
+            value: toSlider(viewer.get('iHybridDampingDuration'), 50)
         });
         SLIDER_RESOLUTION.slider({
             value: toSlider(viewer.get('resolution'))
@@ -475,7 +479,7 @@ var ControlBar = function(viewer) {
         ui.controlActive(ui.controls.shearing, state);
         if (!state) {
             SWITCH_SHEARING_INTERACTION.collapse(true);
-        } else{
+        } else {
             ui.controls.inclination.cont.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
         viewer.render();
@@ -517,13 +521,6 @@ var ControlBar = function(viewer) {
             viewer.set('iSpringCoefficient', fromSlider(ui.value, 500));
         }
     });
-    SLIDER_SPRING_FADEOUT.slider({
-        min: 0,
-        max: 100,
-        slide: function(event, ui) {
-            viewer.set('iStaticShearFadeOutAnimationSpeed', fromSlider(ui.value, 50));
-        }
-    });
     SLIDER_SPRING_FRICTION.slider({
         min: 0,
         max: 100,
@@ -543,6 +540,20 @@ var ControlBar = function(viewer) {
         max: 150,
         slide: function(event, ui) {
             viewer.set('iMaxOuterShearingPx', ui.value);
+        }
+    });
+    SLIDER_SPRING_FADEOUT.slider({
+        min: 0,
+        max: 100,
+        slide: function(event, ui) {
+            viewer.set('iStaticShearFadeOutAnimationSpeed', fromSlider(ui.value, 50));
+        }
+    });
+    SLIDER_HYBRID_DAMPING.slider({
+        min: 0,
+        max: 100,
+        slide: function(event, ui) {
+            viewer.set('iHybridDampingDuration', fromSlider(ui.value, 50));
         }
     });
     SELECT_NEIGHBORHOOD_SIZE.change(function() {
