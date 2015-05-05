@@ -69,7 +69,7 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
     };
 
     /** @type {ol.interaction.DragShearIntegratedOptions} */
-    this.options;
+    this.options = {};
     this.setOptions(options);
 
     goog.asserts.assertInstanceof(map, ol.Map, 'dragShearIntegrated expects map object');
@@ -497,15 +497,22 @@ goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'disable', ol.
  * @param {ol.interaction.DragShearIntegratedOptions} options
  */
 ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
-    goog.asserts.assert(goog.isDef(options.threshold));
-    goog.asserts.assert(goog.isDef(options.springCoefficient));
-    goog.asserts.assert(goog.isDef(options.frictionForce));
-    goog.asserts.assert(goog.isDef(options.maxInnerShearingPx));
-    goog.asserts.assert(goog.isDef(options.maxOuterShearingPx));
-    goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
-    goog.asserts.assert(goog.isDef(options.minMaxNeighborhoodSize));
-    goog.asserts.assert(goog.isDef(options.hybridDampingDuration) && options.hybridDampingDuration > 0.0);
+    this.options.threshold = (goog.isDef(options.threshold)) ? options.threshold : 0.333;
+    this.options.springCoefficient = (goog.isDef(options.springCoefficient)) ? options.springCoefficient : 0.08;
+    this.options.frictionForce = (goog.isDef(options.frictionForce)) ? options.frictionForce : 0.17;             
+    this.options.maxInnerShearingPx = (goog.isDef(options.maxInnerShearingPx)) ? options.maxInnerShearingPx : 10.0;
+    this.options.maxOuterShearingPx = (goog.isDef(options.maxOuterShearingPx)) ? options.maxOuterShearingPx : 10.0;
+    this.options.staticShearFadeOutAnimationSpeed = (goog.isDef(options.staticShearFadeOutAnimationSpeed)) ? options.staticShearFadeOutAnimationSpeed : 1.0;
+    this.options.hybridDampingDuration = (goog.isDef(options.hybridDampingDuration) && options.hybridDampingDuration > 0.0) ? options.hybridDampingDuration : 0.3;
+    this.options.minMaxNeighborhoodSize = (goog.isDef(options.minMaxNeighborhoodSize)) ? options.minMaxNeighborhoodSize : 16;               
 
-    this.options = options;
+    goog.asserts.assert(goog.isDef(this.options.threshold));
+    goog.asserts.assert(goog.isDef(this.options.springCoefficient));
+    goog.asserts.assert(goog.isDef(this.options.frictionForce));
+    goog.asserts.assert(goog.isDef(this.options.maxInnerShearingPx));
+    goog.asserts.assert(goog.isDef(this.options.maxOuterShearingPx));
+    goog.asserts.assert(goog.isDef(this.options.staticShearFadeOutAnimationSpeed));
+    goog.asserts.assert(goog.isDef(this.options.hybridDampingDuration) && options.hybridDampingDuration > 0.0);
+    goog.asserts.assert(goog.isDef(this.options.minMaxNeighborhoodSize));
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);
