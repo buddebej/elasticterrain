@@ -7,7 +7,7 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     cwd: 'src/',
-                    src: ['data/**', 'resources/font-awesome/**', 'resources/images/**', 'resources/css/images/**', 'index.html'],
+                    src: ['data/blank.png', 'resources/font-awesome/**', 'resources/images/**', 'resources/css/images/**', 'index.html'],
                     dest: 'dist/'
                 }]
             },
