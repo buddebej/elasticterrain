@@ -125,6 +125,15 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
     this.timeoutCounterMax_ = 450;
 
     /**
+     * Min rendering calls per execution
+     * In some cases at least 1 or 2 runs are needed 
+     * to compute the minMax values of all tiles reliably
+     * @private
+     * @type {number}
+     */
+    this.timeoutCounterMin_ = 2;
+
+    /**
      * Max Zoomlevel of DEM Layer for z-Ordering in Shader
      * @private
      * @type {number}
@@ -913,7 +922,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         // TEST IF EVERYTHING IS LOADED
         // render at elast two passes (for correct minMax computation)
         // until every tile is loaded and rendered or until timeout value is reached
-        if (this.timeoutCounter_ > 1 && (allTilesLoaded || this.timeoutCounter_ > this.timeoutCounterMax_)) {
+        if (this.timeoutCounter_ > this.timeoutCounterMin_ && (allTilesLoaded || this.timeoutCounter_ > this.timeoutCounterMax_)) {
             this.renderedTileRange_ = tileRange;
             this.renderedFramebufferExtent_ = framebufferExtent;
             this.renderedRevision_ = tileSource.getRevision();
