@@ -11,8 +11,8 @@ var Layers = function() {
         enabled: true,
         data: new ol.layer.TileDem({
             source: new ol.source.XYZ({
-                url: '../www/src/data/tiles/{z}/{x}/{y}.png',                                
-                // url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png',
+                // url: '../www/src/data/tiles/{z}/{x}/{y}.png',                                
+                url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png',
                 // url: 'data/tiles/{z}/{x}/{y}.png',                
                 dem: true
             })
