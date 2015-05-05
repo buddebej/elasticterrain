@@ -229,10 +229,9 @@ ol.renderer.webgl.Map.prototype.bindTileTexture =
           goog.webgl.RGBA, goog.webgl.RGBA,
           goog.webgl.UNSIGNED_BYTE, clipTileCanvas);
     } else {
-
-        gl.texImage2D(goog.webgl.TEXTURE_2D, 0,
-          goog.webgl.RGBA, goog.webgl.RGBA,
-          goog.webgl.UNSIGNED_BYTE, tile.getImage());
+      gl.texImage2D(goog.webgl.TEXTURE_2D, 0,
+        goog.webgl.RGBA, goog.webgl.RGBA,
+        goog.webgl.UNSIGNED_BYTE, tile.getImage());
     }
  
     gl.texParameteri(
@@ -435,6 +434,7 @@ ol.renderer.webgl.Map.prototype.handleWebGLContextRestored = function() {
  */
 ol.renderer.webgl.Map.prototype.initializeGL_ = function() {
   var gl = this.gl_;
+  gl.activeTexture(goog.webgl.TEXTURE0);  
   gl.disable(goog.webgl.BLEND);
   gl.disable(goog.webgl.SCISSOR_TEST);
   gl.enable(goog.webgl.DEPTH_TEST);  
@@ -512,6 +512,7 @@ ol.renderer.webgl.Map.prototype.renderFrame = function(frameState) {
   }
 
   gl.bindFramebuffer(goog.webgl.FRAMEBUFFER, null);
+  gl.activeTexture(goog.webgl.TEXTURE0);  
 
   gl.clearColor(0, 0, 0, 0);
   gl.clear(goog.webgl.COLOR_BUFFER_BIT);

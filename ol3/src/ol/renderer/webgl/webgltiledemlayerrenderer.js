@@ -629,7 +629,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         // u_shading: pass flag to activate Shading
         gl.uniform1f(this.locations_.u_shading, tileDemLayer.getShading() === true ? 1.0 : 0.0);
         // u_ShadingOpacity: pass ShadingOpacity
-        gl.uniform1f(this.locations_.u_shadingOpacity, tileDemLayer.getShadingOpacity());
+        gl.uniform1f(this.locations_.u_hsDarkness, tileDemLayer.getShadingOpacity());
         // u_hsExaggeration: pass ShadingExaggeration
         gl.uniform1f(this.locations_.u_hsExaggeration, tileDemLayer.getShadingExaggeration());
 
@@ -654,7 +654,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         // hypsometric colors
         var textureHypsometricColors_ = gl.createTexture();
         var arrayHypsometryColors = new Uint8Array(ol.ColorRamp.hypsometry[tileDemLayer.getColorRamp()]);
-        gl.activeTexture(goog.webgl.TEXTURE2);
+        gl.activeTexture(goog.webgl.TEXTURE1);
         gl.bindTexture(goog.webgl.TEXTURE_2D, textureHypsometricColors_);
 
         // read color ramp array
@@ -663,12 +663,12 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
         gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
         gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
-        gl.uniform1i(this.locations_.u_hypsoColors, 2);
+        gl.uniform1i(this.locations_.u_hypsoColors, 1);
 
         // bathymetric colors
         var textureBathymetricColors_ = gl.createTexture();
         var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry[tileDemLayer.getColorRamp()]);
-        gl.activeTexture(goog.webgl.TEXTURE3);
+        gl.activeTexture(goog.webgl.TEXTURE2);
         gl.bindTexture(goog.webgl.TEXTURE_2D, textureBathymetricColors_);
 
         // read color ramp array
@@ -677,7 +677,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
         gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
         gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
-        gl.uniform1i(this.locations_.u_bathyColors, 3);
+        gl.uniform1i(this.locations_.u_bathyColors, 2);
 
         // MESH 
         // check if mesh resolution has changed
@@ -814,26 +814,30 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
                     // draw only when dem tile is available
                     if (tilesToDraw.hasOwnProperty(tileKey)) {
-                        if (tilesToDraw[tileKey].getState() == ol.TileState.LOADED) {
+                        // check if tiles are loaded
+                        if (tilesToDraw[tileKey].getState() == ol.TileState.LOADED && overlayTilesToDraw[tileKey].getState() == ol.TileState.LOADED) {
                             overlayTile = overlayTilesToDraw[tileKey];
-
-                            // overlay texture             
-                            gl.activeTexture(goog.webgl.TEXTURE1);
-                            mapRenderer.bindTileTexture(overlayTile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.LINEAR, goog.webgl.LINEAR);
-                            gl.uniform1i(this.locations_.u_overlayTexture, 1);
-
-                            // dem texture
-                            gl.activeTexture(goog.webgl.TEXTURE0);
-                            mapRenderer.bindTileTexture(tilesToDraw[tileKey], tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                            gl.uniform1i(this.locations_.u_texture, 0);
 
                             // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
                             gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom_ + 1)));
-                            // pass zoomlevel of this tile and zoomlevel of current view
-                            gl.uniform2f(this.locations_.u_zoom, zs[i], (goog.isDef(viewZoom)) ? viewZoom : zs[i]);
+                            // pass zoomlevel of this tile 
+                            gl.uniform1f(this.locations_.u_zoom, zs[i]);
 
                             // determine offset for each tile in target framebuffer
                             defUniformOffset(overlayTile, this);
+
+                            // dem texture
+                            gl.activeTexture(goog.webgl.TEXTURE3);
+                            mapRenderer.bindTileTexture(tilesToDraw[tileKey], tilePixelSize, 0, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                            gl.uniform1i(this.locations_.u_demTex, 3);
+
+                            // overlay texture             
+                            gl.activeTexture(goog.webgl.TEXTURE4);
+                            mapRenderer.bindTileTexture(overlayTile, tilePixelSize, 0, goog.webgl.LINEAR, goog.webgl.LINEAR);
+                            gl.uniform1i(this.locations_.u_mapTex, 4);
+
+                            // set active destination texture (framebuffer)
+                            gl.activeTexture(goog.webgl.TEXTURE0);
 
                             // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                             gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
@@ -880,24 +884,25 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
                     // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
                     gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom_ + 1)));
-                    // pass zoomlevel of this tile and zoomlevel of current view
-                    gl.uniform2f(this.locations_.u_zoom, zs[i], (goog.isDef(viewZoom)) ? viewZoom : zs[i]);
+                    // pass zoomlevel of this tile 
+                    gl.uniform1f(this.locations_.u_zoom, zs[i]);
 
                     // determine offset for each tile in target framebuffer
                     defUniformOffset(tile, this);
                     goog.vec.Vec4.setFromValues(u_tileOffset, sx, sy, tx, ty);
                     gl.uniform4fv(this.locations_.u_tileOffset, u_tileOffset);
 
-                    // FIXME
-                    // bind dummy texture 1 to avoid webGl errors
-                    gl.activeTexture(goog.webgl.TEXTURE1);
-                    mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                    gl.uniform1i(this.locations_.u_overlayTexture, 1);
+                    // dem texture
+                    gl.activeTexture(goog.webgl.TEXTURE3);
+                    mapRenderer.bindTileTexture(tile, tilePixelSize, 0, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                    gl.uniform1i(this.locations_.u_demTex, 3);
 
-                    // TILE TEXTURE
+                    // FIXME
+                    // bind dem tile as dummy overlay 
+                    gl.uniform1i(this.locations_.u_mapTex, 3);
+
+                    // set active destination texture (framebuffer)
                     gl.activeTexture(goog.webgl.TEXTURE0);
-                    mapRenderer.bindTileTexture(tile, tilePixelSize, tileGutter * pixelRatio, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                    gl.uniform1i(this.locations_.u_texture, 0);
 
                     // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
                     gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);

@@ -22,13 +22,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // texture with encoded elevation values
-uniform sampler2D u_texture;
-
-// texture with overlay map
-uniform sampler2D u_overlayTexture;
-
-// flag for active overlay texture
-uniform bool u_overlayActive;
+uniform sampler2D u_demTex;
 
 // length of one tile in meter at equator
 uniform float u_tileSizeM;
@@ -42,18 +36,14 @@ uniform float u_maxElevation;
 // temporary variable for coord transfer to fragment shader
 varying vec2 v_texCoord;
 
-// current shearing factor
-uniform vec2 u_scaleFactor;
-
-// zoom level
-// x is zoomlevel of current tile, y is current zoomlevel of view
-uniform vec2 u_zoom;   
+// zoomlevel of current tile
+uniform float u_zoom;   
 
 // decodes input data elevation value using texture colors from two channels combined
 float decodeElevation(in vec2 colorChannels) {
     // use float decoding for higher zoomlevels
     float decimalDecode = 1.0;
-    if(u_zoom.x > 12.0){
+    if(u_zoom > 12.0){
         decimalDecode = 0.01;
     }
     float elevationM = ((colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0)*decimalDecode;    
@@ -70,6 +60,9 @@ attribute vec2 a_position;
 
 // tile offset in current framebuffer view
 uniform vec4 u_tileOffset;
+
+// current shearing factor
+uniform vec2 u_scaleFactor;
 
 // current depth depends on zoomlevel
 uniform float u_z;
@@ -90,37 +83,21 @@ void main(void) {
     v_texCoord.y = 1.0 - v_texCoord.y;
 
     // read and decode elevation for current vertex
-    float absElevation = decodeElevation(vec2(texture2D(u_texture, v_texCoord.xy).xy));
+    float absElevation = decodeElevation(vec2(texture2D(u_demTex, v_texCoord.xy).xy));
     
     // normalize elevation for current minimum and maximum
     float nElevation = (absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
     float zOrderElevation = absElevation/100.0;
-
-    vec2 shearing = u_scaleFactor.xy;
-    if(u_zoom.y != u_zoom.x){
-        shearing = vec2(0.0,0.0);
-    }
-
-    if(u_overlayActive){
-        // FIXME 
-        // sometimes the overlay texture is mistaken for the elevation model
-        // we could use different shaders for rendering with and without overlay
-        // or we can find a reliable test in the function that serves the overlay textures
-        if(texture2D(u_overlayTexture, v_texCoord) != texture2D(u_texture, v_texCoord)){
-            gl_Position = vec4((a_position+(nElevation * shearing.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
-                                u_z-(zOrderElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
-                                1.0);
-        }
-    } else {
-        // shift vertex positions by given shearing factors
-        // z value has to be inverted to get a left handed coordinate system and to make the depth test work
-        gl_Position = vec4((a_position+(nElevation * shearing.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
-                            u_z-(zOrderElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
-                            1.0);
-    }
+ 
+    gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
+                        u_z-(zOrderElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
+                        1.0);
 }
 
 //! FRAGMENT
+
+// texture with overlay map
+uniform sampler2D u_mapTex;
 
 // color ramp texture to look up hypsometric tints
 uniform sampler2D u_hypsoColors;
@@ -140,6 +117,9 @@ uniform bool u_testing;
 // flag for testing mode
 uniform bool u_stackedCardb; 
 
+// flag for active overlay texture
+uniform bool u_overlayActive;
+
 // scale threshold values to adapt color ramp 
 // u_colorScale.x is lower threshold, u_colorScale.y is upper threshold
 uniform vec2 u_colorScale;
@@ -148,7 +128,7 @@ uniform vec2 u_colorScale;
 uniform vec3 u_light; 
 
 // hillShading Opacity for Blending
-uniform float u_shadingOpacity; 
+uniform float u_hsDarkness; 
 
 // hillShading Exaggeration
 uniform float u_hsExaggeration; 
@@ -183,7 +163,7 @@ void main(void) {
 
         // use different tile border decoding for zoomlevel 12 data
         // to fix this, tiles for zoomlevel 12 have to be recomputed (a long and boring process)
-        if(u_zoom.x == 12.0){
+        if(u_zoom == 12.0){
             if(atEastBorder){ // eastern border of tile                
                 m_texCoord.x = m_texCoord.x - CELLSIZE;
             }
@@ -206,50 +186,50 @@ void main(void) {
         vec2 nAbove = vec2(m_texCoord.x, m_texCoord.y+CELLSIZE);
         vec2 nBelow = vec2(m_texCoord.x, m_texCoord.y-CELLSIZE);
         // read and decode elevation values from tile texture
-        float absElevation = decodeElevation(vec2(texture2D(u_texture, m_texCoord.xy).xy));
+        float absElevation = decodeElevation(vec2(texture2D(u_demTex, m_texCoord.xy).xy));
 
         // read neighboring values
-        float neighborRight = decodeElevation(vec2(texture2D(u_texture, nRight).xy));
-        float neighborLeft  = decodeElevation(vec2(texture2D(u_texture, nLeft).xy));
-        float neighborAbove = decodeElevation(vec2(texture2D(u_texture, nAbove).xy));
-        float neighborBelow = decodeElevation(vec2(texture2D(u_texture, nBelow).xy));    
+        float neighborRight = decodeElevation(vec2(texture2D(u_demTex, nRight).xy));
+        float neighborLeft  = decodeElevation(vec2(texture2D(u_demTex, nLeft).xy));
+        float neighborAbove = decodeElevation(vec2(texture2D(u_demTex, nAbove).xy));
+        float neighborBelow = decodeElevation(vec2(texture2D(u_demTex, nBelow).xy));    
 
         // use different tile border decoding for zoomlevel 12 data
         // to fix this, tiles for zoomlevel 12 have to be recomputed (a long and boring process) 
-        if(u_zoom.x != 12.0){
+        if(u_zoom != 12.0){
             // display tile borders properly: use alternative decoding
             // last eight rows of blue channel contain neighbor values
             if(atNorthBorder){ 
-                float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(256))).b; // row 256          
-                float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(251))).b; // row 251
+                float valA = texture2D(u_demTex, vec2(m_texCoord.x, rowToCell(256))).b; // row 256          
+                float valB = texture2D(u_demTex, vec2(m_texCoord.x, rowToCell(251))).b; // row 251
                 neighborBelow = decodeElevation(vec2(valB, valA));
             }
 
             if(atSouthBorder){  
-                float valA = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(254))).b; // row 254        
-                float valB = texture2D(u_texture, vec2(m_texCoord.x, rowToCell(250))).b; // row 250
+                float valA = texture2D(u_demTex, vec2(m_texCoord.x, rowToCell(254))).b; // row 254        
+                float valB = texture2D(u_demTex, vec2(m_texCoord.x, rowToCell(250))).b; // row 250
                 neighborAbove = decodeElevation(vec2(valB, valA));            
             }
 
             if(atEastBorder){ 
-                float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(253))).b; // row 253         
-                float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(249))).b; // row 249 
+                float valA = texture2D(u_demTex, vec2(m_texCoord.y, rowToCell(253))).b; // row 253         
+                float valB = texture2D(u_demTex, vec2(m_texCoord.y, rowToCell(249))).b; // row 249 
                 neighborRight = decodeElevation(vec2(valB, valA));            
             }
 
             if(atWestBorder){  
-                float valA = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(252))).b; // row 252         
-                float valB = texture2D(u_texture, vec2(m_texCoord.y, rowToCell(248))).b; // row 248 
+                float valA = texture2D(u_demTex, vec2(m_texCoord.y, rowToCell(252))).b; // row 252         
+                float valB = texture2D(u_demTex, vec2(m_texCoord.y, rowToCell(248))).b; // row 248 
                 neighborLeft = decodeElevation(vec2(valB, valA));            
             }      
         }   
 
         // cardboard stack
         if(u_stackedCardb && !u_overlayActive && absElevation<0.0){
-            // neighborRight = decodeElevation(vec2(0.0, texture2D(u_texture, nRight).g));
-            // neighborLeft  = decodeElevation(vec2(0.0, texture2D(u_texture, nLeft).g));
-            neighborAbove = decodeElevation(vec2(0.0, texture2D(u_texture, nAbove).g));            
-            // neighborBelow = decodeElevation(vec2(0.0, texture2D(u_texture, nBelow).g));
+            // neighborRight = decodeElevation(vec2(0.0, texture2D(u_demTex, nRight).g));
+            // neighborLeft  = decodeElevation(vec2(0.0, texture2D(u_demTex, nLeft).g));
+            neighborAbove = decodeElevation(vec2(0.0, texture2D(u_demTex, nAbove).g));            
+            // neighborBelow = decodeElevation(vec2(0.0, texture2D(u_demTex, nBelow).g));
         }               
 
     // texture
@@ -257,7 +237,7 @@ void main(void) {
 
         if(u_overlayActive){
              // use overlay texture color
-             fragColor = texture2D(u_overlayTexture, m_texCoord);
+             fragColor = texture2D(u_mapTex, m_texCoord);
         } else {
             // lookup a hypsometric color   
 
@@ -268,10 +248,18 @@ void main(void) {
                 float relativeElevation = 0.0;
 
                 if(absElevation > 0.1){
-                    relativeElevation = absElevation/u_maxElevation;
+                    if(u_minElevation > 0.1){
+                        relativeElevation = (absElevation-u_minElevation)/(u_maxElevation-u_minElevation);
+                    } else {
+                        relativeElevation = absElevation/u_maxElevation;
+                    }
                     fragColor = abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation)));
                 } else {
-                    relativeElevation = abs(absElevation/u_minElevation);
+                    if(u_maxElevation < 0.1){
+                        relativeElevation = abs((absElevation-u_minElevation)/(u_maxElevation-u_minElevation));
+                    } else {
+                        relativeElevation = abs(absElevation/u_minElevation);
+                    }
                     fragColor = abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation)));
                 }
                                   
@@ -281,10 +269,10 @@ void main(void) {
                     vec4 waterBlue = vec4(0.03,0.47,0.67,1.0);
 
                     // compute other neighbors for water surface test
-                    float n01 = decodeElevation(vec2(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
-                    float n02 = decodeElevation(vec2(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
-                    float n03 = decodeElevation(vec2(texture2D(u_texture, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y-CELLSIZE)).xy));
-                    float n04 = decodeElevation(vec2(texture2D(u_texture, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));         
+                    float n01 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
+                    float n02 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
+                    float n03 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y-CELLSIZE)).xy));
+                    float n04 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));         
 
                     if(absElevation>0.0 && 
                        n01 == absElevation && 
@@ -322,7 +310,7 @@ void main(void) {
             hillShade = clamp(u_ambient_light * 1.0 + (hillShade + 1.0) * 0.5, 0.0, 1.0);
 
             // remap image tonality
-            hillShade = pow(hillShade, 1.0 / (1.0 + u_shadingOpacity * 2.0));
+            hillShade = pow(hillShade, 1.0 / (1.0 + u_hsDarkness * 2.0));
 
             // avoid black shadows
             hillShade = max(hillShade, 0.25);
