@@ -69,7 +69,7 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
     };
 
     /** @type {ol.interaction.DragShearIntegratedOptions} */
-    this.options = {};
+    this.options;
     this.setOptions(options);
 
     goog.asserts.assertInstanceof(map, ol.Map, 'dragShearIntegrated expects map object');
@@ -458,9 +458,6 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         mapCenter = this.view.getCenter();
         this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
         this.startDragElevation = this.demRenderer.getElevation(mapBrowserEvent.coordinate, this.view.getZoom());
-        // clamp values for extremely deep areas to avoid strong disturbing shearing
-        goog.asserts.assert(!goog.isNull(this.startDragElevation));
-        this.startDragElevation = goog.math.clamp(this.startDragElevation, -3500.0, ol.Elevation.MAX);
         this.startCenter = [mapCenter[0], mapCenter[1]];
         this.currentCenter = [mapCenter[0], mapCenter[1]];
         this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
@@ -497,22 +494,16 @@ goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'disable', ol.
  * @param {ol.interaction.DragShearIntegratedOptions} options
  */
 ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
-    this.options.threshold = (goog.isDef(options.threshold)) ? options.threshold : 0.333;
-    this.options.springCoefficient = (goog.isDef(options.springCoefficient)) ? options.springCoefficient : 0.08;
-    this.options.frictionForce = (goog.isDef(options.frictionForce)) ? options.frictionForce : 0.17;             
-    this.options.maxInnerShearingPx = (goog.isDef(options.maxInnerShearingPx)) ? options.maxInnerShearingPx : 10.0;
-    this.options.maxOuterShearingPx = (goog.isDef(options.maxOuterShearingPx)) ? options.maxOuterShearingPx : 10.0;
-    this.options.staticShearFadeOutAnimationSpeed = (goog.isDef(options.staticShearFadeOutAnimationSpeed)) ? options.staticShearFadeOutAnimationSpeed : 1.0;
-    this.options.hybridDampingDuration = (goog.isDef(options.hybridDampingDuration) && options.hybridDampingDuration > 0.0) ? options.hybridDampingDuration : 0.3;
-    this.options.minMaxNeighborhoodSize = (goog.isDef(options.minMaxNeighborhoodSize)) ? options.minMaxNeighborhoodSize : 16;               
 
-    goog.asserts.assert(goog.isDef(this.options.threshold));
-    goog.asserts.assert(goog.isDef(this.options.springCoefficient));
-    goog.asserts.assert(goog.isDef(this.options.frictionForce));
-    goog.asserts.assert(goog.isDef(this.options.maxInnerShearingPx));
-    goog.asserts.assert(goog.isDef(this.options.maxOuterShearingPx));
-    goog.asserts.assert(goog.isDef(this.options.staticShearFadeOutAnimationSpeed));
-    goog.asserts.assert(goog.isDef(this.options.hybridDampingDuration) && options.hybridDampingDuration > 0.0);
-    goog.asserts.assert(goog.isDef(this.options.minMaxNeighborhoodSize));
+    goog.asserts.assert(goog.isDef(options.threshold));
+    goog.asserts.assert(goog.isDef(options.springCoefficient));
+    goog.asserts.assert(goog.isDef(options.frictionForce));
+    goog.asserts.assert(goog.isDef(options.maxInnerShearingPx));
+    goog.asserts.assert(goog.isDef(options.maxOuterShearingPx));
+    goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
+    // goog.asserts.assert(goog.isDef(options.hybridDampingDuration) && options.hybridDampingDuration > 0.0);
+    goog.asserts.assert(goog.isDef(options.minMaxNeighborhoodSize));
+
+    this.options = options;
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);
