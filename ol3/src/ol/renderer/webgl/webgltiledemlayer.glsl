@@ -27,12 +27,6 @@ uniform sampler2D u_demTex;
 // length of one tile in meter at equator
 uniform float u_tileSizeM;
 
-// min Elevation in current Extent
-uniform float u_minElevation; 
-
-// max Elevation in current Extent
-uniform float u_maxElevation;
-
 // temporary variable for coord transfer to fragment shader
 varying vec2 v_texCoord;
 
@@ -58,11 +52,14 @@ float decodeElevation(in vec2 colorChannels) {
 // vertex coordinates for tile mesh
 attribute vec2 a_position;
 
-// tile offset in current framebuffer view
-uniform vec4 u_tileOffset;
-
 // current shearing factor
 uniform vec2 u_scaleFactor;
+
+// static minMax Elevations in current Extent
+uniform vec2 u_minMax; 
+
+// tile offset in current framebuffer view
+uniform vec4 u_tileOffset;
 
 // current depth depends on zoomlevel
 uniform float u_z;
@@ -86,7 +83,7 @@ void main(void) {
     float absElevation = decodeElevation(vec2(texture2D(u_demTex, v_texCoord.xy).xy));
     
     // normalize elevation for current minimum and maximum
-    float nElevation = (absElevation-u_minElevation)/(u_maxElevation-u_minElevation); 
+    float nElevation = (absElevation-u_minMax.x)/(u_minMax.y-u_minMax.x); 
     float zOrderElevation = absElevation/100.0;
  
     gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
@@ -123,6 +120,9 @@ uniform bool u_overlayActive;
 // scale threshold values to adapt color ramp 
 // u_colorScale.x is lower threshold, u_colorScale.y is upper threshold
 uniform vec2 u_colorScale;
+
+// animated minMax Elevations in current Extent 
+uniform vec2 u_minMaxFade;
 
 // direction of light source
 uniform vec3 u_light; 
@@ -242,23 +242,23 @@ void main(void) {
             // lookup a hypsometric color   
 
                 // scaling of color ramp
-                float colorMin = 1.0-u_colorScale.x*1.0;
-                float colorMax = u_colorScale.y*1.0;   
+                // float colorMin = 1.0-u_colorScale.x*1.0;
+                // float colorMax = u_colorScale.y*1.0;   
 
                 float relativeElevation = 0.0;
 
                 if(absElevation > 0.1){
-                    if(u_minElevation > 0.1){
-                        relativeElevation = (absElevation-u_minElevation)/(u_maxElevation-u_minElevation);
+                    if(u_minMaxFade.x > 0.1){
+                        relativeElevation = (absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x);
                     } else {
-                        relativeElevation = absElevation/u_maxElevation;
+                        relativeElevation = absElevation/u_minMaxFade.y;
                     }
                     fragColor = abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation)));
                 } else {
-                    if(u_maxElevation < 0.1){
-                        relativeElevation = abs((absElevation-u_minElevation)/(u_maxElevation-u_minElevation));
+                    if(u_minMaxFade.y < 0.1){
+                        relativeElevation = abs((absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x));
                     } else {
-                        relativeElevation = abs(absElevation/u_minElevation);
+                        relativeElevation = abs(absElevation/u_minMaxFade.x);
                     }
                     fragColor = abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation)));
                 }
@@ -334,7 +334,7 @@ void main(void) {
             vec4 lighten = vec4(1.2,1.2,1.2,1.0);
 
             // highlight maxima and minima 
-            // float criticalEl = u_minElevation + (u_maxElevation - u_minElevation) * u_critElThreshold;
+            // float criticalEl = u_minMax.x + (u_minMax.y - u_minMax.x) * u_critElThreshold;
            
             // display minima in gray
             // if(absElevation < criticalEl){
