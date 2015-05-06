@@ -401,6 +401,7 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
             this.shearingStatus = ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING;
             this.springLength = 0;
         }
+        // unlock minMax
         this.demRenderer.setFreezeMinMax(false);
         return true;
     }
@@ -433,10 +434,11 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         }
 
         // get global max and min for visible extent
-        minMax = this.demRenderer.getCurrentMinMax();
+        minMax = this.demRenderer.getStaticMinMax();
         this.minElevation = minMax[0];
         this.maxElevation = minMax[1];
 
+        // lock minMax to make sure the shader uses the same minMax values as this interaction
         this.demRenderer.setFreezeMinMax(true);
 
         // compute local minMax only when needed
@@ -502,7 +504,7 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
     goog.asserts.assert(goog.isDef(options.maxOuterShearingPx));
     goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
     // goog.asserts.assert(goog.isDef(options.hybridDampingDuration) && options.hybridDampingDuration > 0.0);
-    goog.asserts.assert(goog.isDef(options.minMaxNeighborhoodSize));
+    // goog.asserts.assert(goog.isDef(options.minMaxNeighborhoodSize));
 
     this.options = options;
 };

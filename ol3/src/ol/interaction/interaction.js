@@ -235,6 +235,7 @@ ol.interaction.Interaction.zoomWithoutConstraints =
         duration: opt_duration,
         easing: ol.easing.easeOut
       }));
+      // map.afterRender(view.updateDemLayer_);
       if (goog.isDef(opt_anchor)) {
         map.beforeRender(ol.animation.pan({
           source: currentCenter,

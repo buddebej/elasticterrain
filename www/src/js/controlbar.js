@@ -489,31 +489,6 @@ var ControlBar = function(viewer) {
         SWITCH_SHEARING_INTERACTION.setState(!viewer.get('terrainInteraction'));
     });
 
-    // // switch to activate terrain interactions
-    // SWITCH_SHEARING_INTERACTION.setState = function(state) {
-    //     var checkbox = SWITCH_SHEARING_INTERACTION.find($('input'));
-    //     if (!state) {
-    //         viewer.set('terrainInteraction', false);
-    //         viewer.shearingInteraction.setActive(false);
-    //         ui.controlActive(ui.controls.shearing, false);
-    //         checkbox.prop(CHECKED, false);
-    //         ui.controls.shearing.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
-    //         ui.controls.inclination.cont.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
-    //     } else {
-    //         viewer.set('terrainInteraction', true);
-    //         viewer.shearingInteraction.setActive(true);
-    //         checkbox.prop(CHECKED, true);
-    //         ui.controlActive(ui.controls.shearing, true);
-    //         ui.controls.shearing.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
-    //         ui.controls.inclination.cont.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
-    //     }
-    // };
-    // //  turn shading on / off
-    // SWITCH_SHEARING_INTERACTION.click(function() {
-    //     SWITCH_SHEARING_INTERACTION.setState(!viewer.get('terrainInteraction'));
-    // });
-
-
     SLIDER_SPRING_COEFFICIENT.slider({
         min: 0,
         max: 100,
@@ -583,7 +558,7 @@ var ControlBar = function(viewer) {
     });
 
     // update gui rotation knob, when rotated with alt+shift+mouse
-    viewer.map.on('postrender', function() {
+    KNOB_ROTATION.updateKnob = function(){
         var alpha = viewer.view.getRotation();
         var deg = viewer.toStep(viewer.toDegrees(alpha % (2.0 * Math.PI)));
         if (alpha < 0.0) {
@@ -592,6 +567,10 @@ var ControlBar = function(viewer) {
             alpha = deg;
         }
         KNOB_ROTATION.val(alpha).trigger('change');
+    };
+
+    viewer.map.on('postrender', function() {
+        KNOB_ROTATION.updateKnob();
     });
 
 

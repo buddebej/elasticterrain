@@ -122,7 +122,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.timeoutCounterMax = 1000;
+    this.timeoutCounterMax = 800;
 
     /**
      * Min rendering calls per execution
@@ -143,6 +143,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
     /**
      * Animation Speed for changing minMax values
      * Smaller values = higher speed
+     * FIXME: this should be solved in a way that every animation has the same speed, depending on a timer
      * @private
      * @type {number}
      */
@@ -167,6 +168,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      */
     this.maxZoom = 19;
 
+    // minMax values 
     /**
      * @private
      * @type {number}
@@ -178,6 +180,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @type {number}
      */
     this.min = ol.Elevation.MAX;
+
 
     /**
      * @private
@@ -191,6 +194,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      */
     this.minElevationInExtent = -2500;
 
+    // animated minMax for hypsometric color fading
     /**
      * @private
      * @type {number}
@@ -202,6 +206,23 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @type {number}
      */
     this.animatedMinElevation = this.minElevationInExtent;
+
+
+    // static minMax for shearing normalization
+    // these variables are locked from the beginning to the end of a single shearing interaction
+    // FIXME find a better way to do this.
+
+    /**
+     * @private
+     * @type {number}
+     */
+    this.staticMaxElevation = this.maxElevationInExtent;
+
+    /**
+     * @private
+     * @type {number}
+     */
+    this.staticMinElevation = this.minElevationInExtent;
 
     /**
      * @private
@@ -289,8 +310,8 @@ ol.renderer.webgl.TileDemLayer.prototype.getElevation = function(xy, z) {
  * @public
  * @return {Array} min max elevation of current extent
  */
-ol.renderer.webgl.TileDemLayer.prototype.getCurrentMinMax = function() {
-    return [this.minElevationInExtent, this.maxElevationInExtent];
+ol.renderer.webgl.TileDemLayer.prototype.getStaticMinMax = function() {
+    return [this.staticMinElevation, this.staticMaxElevation];
 };
 
 /**
@@ -314,7 +335,7 @@ ol.renderer.webgl.TileDemLayer.prototype.isVisible = function(tile) {
  * @param {ol.Tile} tile Tile
  */
 ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tile) {
-    if (goog.isDef(tile) && !this.freezeMinMax) {
+    if (goog.isDef(tile)) {
         // if tile in visible extent
         if (this.isVisible(tile)) {
             var tileMinMax = tile.getMinMaxElevations();
@@ -322,25 +343,27 @@ ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tile) {
             // if minMax available
             if (goog.isDef(tileMinMax) && tileMinMax.length > 1) {
 
-                // if minMax not at sealevel
+                // ignore some invalid or no-data elevation values in the high resolution tiles
                 if (tileMinMax[1] !== 0 && tileMinMax[0] !== 0) {
 
                     // if tile min smaller than current min
                     if (tileMinMax[0] < this.min) {
                         this.min = tileMinMax[0];
-                        // if (this.min > ol.Elevation.MAX) {
-                            this.minElevationInExtent = tileMinMax[0];
-                            this.deltaMin = this.minElevationInExtent - this.animatedMinElevation;
-                        // }
+                        this.minElevationInExtent = this.min;
+                        this.deltaMin = this.minElevationInExtent - this.animatedMinElevation;
+                        if(!this.freezeMinMax){
+                            this.staticMinElevation = this.min;
+                        }
                     }
 
                     // if tile max bigger than current max
                     if (tileMinMax[1] > this.max) {
                         this.max = tileMinMax[1];
-                        // if (this.max > ol.Elevation.MIN) {
-                            this.maxElevationInExtent = tileMinMax[1];
-                            this.deltaMax = this.maxElevationInExtent - this.animatedMaxElevation;
-                        // }
+                        this.maxElevationInExtent = tileMinMax[1];
+                        this.deltaMax = this.maxElevationInExtent - this.animatedMaxElevation;
+                        if(!this.freezeMinMax){
+                            this.staticMaxElevation = this.max;
+                        }                        
                     }
                 }
             }
@@ -352,10 +375,8 @@ ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tile) {
  * @private
  */
 ol.renderer.webgl.TileDemLayer.prototype.resetCurrentMinMax = function() {
-    if (!this.freezeMinMax) {
-        this.min = ol.Elevation.MAX;
-        this.max = ol.Elevation.MIN;
-    }
+    this.min = ol.Elevation.MAX;
+    this.max = ol.Elevation.MIN;
 };
 
 /**
@@ -701,11 +722,13 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             lightY = Math.sin(zenithRad) * Math.cos(azimuthRad),
             lightX = Math.sin(zenithRad) * Math.sin(azimuthRad);
         gl.uniform3f(this.locations_.u_light, lightX, lightY, lightZ);
+
         // u_ambient_light: pass intensity for an ambient light source
         gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());
 
         gl.uniform2f(this.locations_.u_minMaxFade, this.animatedMinElevation, this.animatedMaxElevation);
-        gl.uniform2f(this.locations_.u_minMax, this.minElevationInExtent, this.maxElevationInExtent);
+        gl.uniform2f(this.locations_.u_minMax, this.staticMinElevation, this.staticMaxElevation);
+        this.resetCurrentMinMax();
 
         // COLORING
 
@@ -972,12 +995,14 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
         // the timeoutCounter makes sure that there are no more rendering passes then needed
         // and it forces a minimum number of rendering passes, which is necessary in some situations
-        var timeout = (this.timeoutCounter <= this.timeoutCounterMax && this.timeoutCounter >= this.timeoutCounterMin);
 
         // check for completed minMax fading animation
-        var minMaxAnimationFinished = (this.minMaxAnimationSpeed <= this.timeoutCounter);
+        var minMaxAnimationFinished = ((Math.abs(this.deltaMax) <= 1 && Math.abs(this.deltaMin) <= 1));
 
-        if (!minMaxAnimationFinished || !allTilesLoaded || !timeout) {
+        // first rendering pass; deltaMax and deltaMin are empty
+        var minMaxAnimationInit = (this.deltaMax === 0 && this.deltaMin === 0);
+
+        if ((!minMaxAnimationFinished || minMaxAnimationInit || this.timeoutCounter <= this.timeoutCounterMin) && this.timeoutCounter <= this.timeoutCounterMax) {
             // continue rendering & tile loading loop
 
             this.renderedTileRange = null;
@@ -1009,17 +1034,14 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             // goog.asserts.assert(this.timeoutCounter < this.timeoutCounterMax, 'Loading of tiles timed out.');
             // console.log('extent: ', this.renderedFramebufferExtent);
             // console.log('resolution: ',viewState.resolution);
-            // console.log(this.timeoutCounter);
+            console.log('passes: ',this.timeoutCounter);
 
             // set new animatedMinMaxElevations
-            if (!this.freezeMinMax) {
-                this.animatedMaxElevation = this.maxElevationInExtent;
-                this.animatedMinElevation = this.minElevationInExtent;
-            }
+            this.animatedMaxElevation = this.maxElevationInExtent;
+            this.animatedMinElevation = this.minElevationInExtent;
 
             // reset min max observer to make sure that potential lower / higher points 
             // in the next pass can be found by this.updateCurrentMinMax
-            this.resetCurrentMinMax();
 
             this.renderedTileRange = tileRange;
             this.renderedFramebufferExtent = framebufferExtent;

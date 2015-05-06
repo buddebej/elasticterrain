@@ -22,14 +22,17 @@ var Viewer = function(config, layers, container) {
         layers: layers.getData()
     });
 
-    this.view = this.map.getView();
-
-    this.view.setHighlevelAreas(layers.getDem().highLevelAreas);
 
     // render map with current config
     this.render = function() {
         this.dem.redraw();
-    };
+    }.bind(this);
+
+    this.view = this.map.getView();
+
+    this.view.setHighlevelAreas(layers.getDem().highLevelAreas);
+
+    this.map.on('postrender', function() {this.render();});
 
     // round given number to closest step
     this.DEGREE_STEP = 1.0;
