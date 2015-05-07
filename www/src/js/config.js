@@ -51,7 +51,6 @@ var Config = function() {
 
         // shearingInteraction 
         terrainInteraction: true, // bool
-        iMinMaxNeighborhoodSize: 16, // 0:1               
         iShearingThreshold: 0.333, // in pixel
         iSpringCoefficient: 0.08, // 0:1
         iFrictionForce: 0.17, // 0:1             

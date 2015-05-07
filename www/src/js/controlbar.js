@@ -45,7 +45,6 @@ var ControlBar = function(viewer) {
         SELECT_TEXTURE = $('.textureSelect'),
         SELECT_COLOR_RAMP = $('.colorRampSelect'),
         SELECT_CONFIG = $('.configSelect'),
-        SELECT_NEIGHBORHOOD_SIZE = $('.minMaxRadiusSelect'),
         INFOCONTENT = $('.infoBox .content'),
         INFOMENUE = $('.infoBox .menue'),
 
@@ -217,8 +216,6 @@ var ControlBar = function(viewer) {
 
         SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
         SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
-        SELECT_NEIGHBORHOOD_SIZE.find('option[value=' + viewer.get('iminMaxNeighborhoodSize') + ']').attr('selected', true);
-
     };
 
 
@@ -531,10 +528,7 @@ var ControlBar = function(viewer) {
             viewer.set('iHybridDampingDuration', fromSlider(ui.value, 50));
         }
     });
-    SELECT_NEIGHBORHOOD_SIZE.change(function() {
-        viewer.set('iminMaxNeighborhoodSize', parseInt(SELECT_NEIGHBORHOOD_SIZE.find($('option:selected')).val()));
-    });
-
+  
     // ROTATION 
     KNOB_ROTATION.knob({
         'width': 60,

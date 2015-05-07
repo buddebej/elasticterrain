@@ -34,7 +34,6 @@ goog.require('ol.Elevation');
  maxInnerShearingPx: number,
  maxOuterShearingPx: number,
  staticShearFadeOutAnimationSpeed: number,
- minMaxNeighborhoodSize: number,
  hybridDampingDuration: number }} */
 ol.interaction.DragShearIntegratedOptions;
 
@@ -104,9 +103,6 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
 
     /** @type {number|null} */
     this.startDragElevation = 0;
-
-    /** @type {number} */
-    this.minMaxNeighborhoodSize = this.options.minMaxNeighborhoodSize;
 
     /** @type {number} */
     this.minElevation = ol.Elevation.MIN;
@@ -426,13 +422,6 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
 
     if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
 
-        // pass new minMaxNeighborhoodSize values and clear cache if changed
-        if (goog.isDef(this.minMaxNeighborhoodSize) && ol.Elevation.MinMaxNeighborhoodSize !== this.options['minMaxNeighborhoodSize']) {
-            this.demRenderer.clearTileCache();
-            this.demLayer.redraw();
-            ol.Elevation.setMinMaxNeighborhoodSize(this.options['minMaxNeighborhoodSize']);
-        }
-
         // get global max and min for visible extent
         minMax = this.demRenderer.getStaticMinMax();
         this.minElevation = minMax[0];
@@ -504,7 +493,6 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
     goog.asserts.assert(goog.isDef(options.maxOuterShearingPx));
     goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
     // goog.asserts.assert(goog.isDef(options.hybridDampingDuration) && options.hybridDampingDuration > 0.0);
-    // goog.asserts.assert(goog.isDef(options.minMaxNeighborhoodSize));
 
     this.options = options;
 };
