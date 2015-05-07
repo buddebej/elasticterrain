@@ -220,9 +220,13 @@ for glsl_src in GLSL_SRC:
         @target(glsl_src.replace('.glsl', 'shader.js'), glsl_src,
                 'src/ol/webgl/shader.mustache', 'bin/pyglslunit.py')
         def shader_src(t):
+            templatePath = 'src/ol/webgl/shader.mustache'
+            # use different template for dem shader
+            if glsl_src=='src/ol/renderer/webgl/webgltiledemlayer.glsl':
+                  templatePath = 'src/ol/webgl/demshader.mustache'
             t.run('%(PYTHON)s', 'bin/pyglslunit.py',
                   '--input', glsl_src,
-                  '--template', 'src/ol/webgl/shader.mustache',
+                  '--template', templatePath,
                   '--output', t.name)
     shader_src_helper(glsl_src)
 

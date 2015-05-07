@@ -236,6 +236,7 @@ ol.renderer.webgl.Layer.prototype.composeFrame =
         ));
   }
   gl.uniform1f(locations.u_opacity, layerState.opacity);
+  gl.activeTexture(goog.webgl.TEXTURE0);
   gl.bindTexture(goog.webgl.TEXTURE_2D, this.getTexture());
   gl.drawArrays(goog.webgl.TRIANGLE_STRIP, 0, 4);
 

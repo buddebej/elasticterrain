@@ -54,8 +54,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {ol.webgl.shader.Fragment}
      */
-    this.fragmentShader_ =
-        ol.renderer.webgl.tiledemlayer.shader.Fragment.getInstance();
+    this.fragmentShader_ = ol.renderer.webgl.tiledemlayer.shader.FragmentColors.getInstance();
 
     /**
      * @private
@@ -109,29 +108,13 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.tilePadding = 512;
+    this.tilePadding = 200;
 
     /**
      * @private
      * @type {number}
      */
-    this.timeoutCounter = 0;
-
-    /**
-     * Timeout for loading of tiles = max rendering calls per execution
-     * @private
-     * @type {number}
-     */
-    this.timeoutCounterMax = 800;
-
-    /**
-     * Min rendering calls per execution
-     * In some cases at least 1 or 2 runs are needed 
-     * to compute the minMax values of all tiles reliably
-     * @private
-     * @type {number}
-     */
-    this.timeoutCounterMin = 10;
+    this.renderCounter = 0;
 
     /**
      * Max Zoomlevel of DEM Layer for z-Ordering in Shader
@@ -351,7 +334,7 @@ ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tile) {
                         this.min = tileMinMax[0];
                         this.minElevationInExtent = this.min;
                         this.deltaMin = this.minElevationInExtent - this.animatedMinElevation;
-                        if(!this.freezeMinMax){
+                        if (!this.freezeMinMax) {
                             this.staticMinElevation = this.min;
                         }
                     }
@@ -361,9 +344,9 @@ ol.renderer.webgl.TileDemLayer.prototype.updateCurrentMinMax = function(tile) {
                         this.max = tileMinMax[1];
                         this.maxElevationInExtent = tileMinMax[1];
                         this.deltaMax = this.maxElevationInExtent - this.animatedMaxElevation;
-                        if(!this.freezeMinMax){
+                        if (!this.freezeMinMax) {
                             this.staticMaxElevation = this.max;
-                        }                        
+                        }
                     }
                 }
             }
@@ -630,12 +613,18 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
     var tileRange = tileGrid.getTileRangeForExtentAndResolution(extent, tileResolution);
     var framebufferExtent;
 
+    if(this.overlay.Active){
+        this.fragmentShader_ = ol.renderer.webgl.tiledemlayer.shader.FragmentOverlay.getInstance();
+    } else {
+        this.fragmentShader_ = ol.renderer.webgl.tiledemlayer.shader.FragmentColors.getInstance();
+    }
+
     // LOAD SHADERS
     var program = context.getProgram(this.fragmentShader_, this.vertexShader_);
     context.useProgram(program);
-    if (goog.isNull(this.locations_)) {
-        this.locations_ = new ol.renderer.webgl.tiledemlayer.shader.Locations(gl, program);
-    }
+    // if (goog.isNull(this.locations_)) {
+    this.locations_ = new ol.renderer.webgl.tiledemlayer.shader.Locations(gl, program);
+    // }
 
     if (!goog.isNull(this.renderedTileRange) && this.renderedTileRange.equals(tileRange) && this.renderedRevision == tileSource.getRevision()) {
         // DO NOTHING, RE-RENDERING NOT NEEDED
@@ -659,7 +648,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         gl.viewport(0, 0, framebufferDimension, framebufferDimension);
 
         // CLEAR BUFFERS
-        gl.clearColor(0, 0, 0, 0);
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
         gl.clear(goog.webgl.COLOR_BUFFER_BIT);
         gl.clearDepth(1.0);
         gl.clear(goog.webgl.DEPTH_BUFFER_BIT);
@@ -895,8 +884,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     // draw only when dem tile is available
                     if (tilesToDraw.hasOwnProperty(tileKey)) {
                         // check if tiles are loaded
-                        if (tilesToDraw[tileKey].getState() == ol.TileState.LOADED && overlayTilesToDraw[tileKey].getState() == ol.TileState.LOADED) {
+                        if (tilesToDraw[tileKey].getState() == ol.TileState.LOADED) {
                             overlayTile = overlayTilesToDraw[tileKey];
+                            tile = tilesToDraw[tileKey];
 
                             // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
                             gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom + 1)));
@@ -904,11 +894,11 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                             gl.uniform1f(this.locations_.u_zoom, zs[i]);
 
                             // determine offset for each tile in target framebuffer
-                            defUniformOffset(overlayTile, this);
+                            defUniformOffset(tile, this);
 
                             // dem texture
                             gl.activeTexture(goog.webgl.TEXTURE3);
-                            mapRenderer.bindTileTexture(tilesToDraw[tileKey], tilePixelSize, 0, goog.webgl.NEAREST, goog.webgl.NEAREST);
+                            mapRenderer.bindTileTexture(tile, tilePixelSize, 0, goog.webgl.NEAREST, goog.webgl.NEAREST);
                             gl.uniform1i(this.locations_.u_demTex, 3);
 
                             // overlay texture             
@@ -916,12 +906,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                             mapRenderer.bindTileTexture(overlayTile, tilePixelSize, 0, goog.webgl.LINEAR, goog.webgl.LINEAR);
                             gl.uniform1i(this.locations_.u_mapTex, 4);
 
-                            // set active destination texture (framebuffer)
-                            gl.activeTexture(goog.webgl.TEXTURE0);
-
-                            // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
+                            // draw triangle mesh for each tile
                             gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
-                            this.updateCurrentMinMax(tilesToDraw[tileKey]);
+                            this.updateCurrentMinMax(tile);
                         }
                     }
                 }
@@ -977,14 +964,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     mapRenderer.bindTileTexture(tile, tilePixelSize, 0, goog.webgl.NEAREST, goog.webgl.NEAREST);
                     gl.uniform1i(this.locations_.u_demTex, 3);
 
-                    // FIXME
-                    // bind dem tile as dummy overlay 
-                    gl.uniform1i(this.locations_.u_mapTex, 3);
-
-                    // set active destination texture (framebuffer)
-                    gl.activeTexture(goog.webgl.TEXTURE0);
-
-                    // draw triangle mesh. getCount is number of triangles * 2, method added in webgl.buffer
+                    // draw triangle mesh for each tile
                     gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
                     this.updateCurrentMinMax(tile);
                 }
@@ -993,16 +973,13 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
         // LOOP CONTROL
 
-        // the timeoutCounter makes sure that there are no more rendering passes then needed
-        // and it forces a minimum number of rendering passes, which is necessary in some situations
-
         // check for completed minMax fading animation
         var minMaxAnimationFinished = ((Math.abs(this.deltaMax) <= 1 && Math.abs(this.deltaMin) <= 1));
 
         // first rendering pass; deltaMax and deltaMin are empty
         var minMaxAnimationInit = (this.deltaMax === 0 && this.deltaMin === 0);
 
-        if ((!minMaxAnimationFinished || minMaxAnimationInit || this.timeoutCounter <= this.timeoutCounterMin) && this.timeoutCounter <= this.timeoutCounterMax) {
+        if (!minMaxAnimationFinished || minMaxAnimationInit || !allTilesLoaded) {
             // continue rendering & tile loading loop
 
             this.renderedTileRange = null;
@@ -1026,15 +1003,15 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             // console.log('deltaMax', this.deltaMax / this.minMaxAnimationSpeed, 'animated max ', this.animatedMaxElevation, 'dest max ', this.maxElevationInExtent);
             // console.log('deltaMin', this.deltaMin/this.minMaxAnimationSpeed, 'animated min ', this.animatedMinElevation, 'dest min ', this.minElevationInExtent);
 
-            this.timeoutCounter++;
+            this.renderCounter++;
 
         } else {
             // stop rendering & tile loading loop
 
-            // goog.asserts.assert(this.timeoutCounter < this.timeoutCounterMax, 'Loading of tiles timed out.');
+            // goog.asserts.assert(this.renderCounter < this.renderCounterMax, 'Loading of tiles timed out.');
             // console.log('extent: ', this.renderedFramebufferExtent);
             // console.log('resolution: ',viewState.resolution);
-            console.log('passes: ',this.timeoutCounter);
+            console.log('passes: ', this.renderCounter);
 
             // set new animatedMinMaxElevations
             this.animatedMaxElevation = this.maxElevationInExtent;
@@ -1046,7 +1023,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             this.renderedTileRange = tileRange;
             this.renderedFramebufferExtent = framebufferExtent;
             this.renderedRevision = tileSource.getRevision();
-            this.timeoutCounter = 0;
+            this.renderCounter = 0;
         }
     }
 

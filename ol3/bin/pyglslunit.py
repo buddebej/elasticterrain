@@ -49,7 +49,7 @@ def main(argv):
     nextShortName = ord('a')
     shortNames = {}
 
-    common, vertex, fragment = [], [], []
+    common, vertex, fragment, fragmentColors, fragmentOverlay = [], [], [], [], []
     attributes, uniforms, varyings = {}, {}, {}
     block = None
     for line in open(options.input, 'rU'):
@@ -70,10 +70,18 @@ def main(argv):
             if m:
                 block = vertex
                 continue
-            m = re.match(r'//!\s+FRAGMENT\s*\Z', line)
+            m = re.match(r'//!\s+FRAGMENT\s*\Z', line)            
             if m:
                 block = fragment
                 continue
+            m = re.match(r'//!\s+FRAGMENT_COLORS\s*\Z', line)
+            if m:
+                block = fragmentColors
+                continue
+            m = re.match(r'//!\s+FRAGMENT_OVERLAY\s*\Z', line)
+            if m:
+                block = fragmentOverlay
+                continue                
         else:
             if block is None:
                 assert line.rstrip() == ''
@@ -104,8 +112,12 @@ def main(argv):
                     shortNames[varying] = shortName
 
     context['getOriginalFragmentSource'] = js_escape(''.join(common + fragment))
+    context['getOriginalFragmentColorsSource'] = js_escape(''.join(common + fragmentColors))
+    context['getOriginalFragmentOverlaySource'] = js_escape(''.join(common + fragmentOverlay))    
     context['getOriginalVertexSource'] = js_escape(''.join(common + vertex))
-    context['getFragmentSource'] = glsl_compress(''.join(common + fragment), shortNames)
+    context['getFragmentSource'] = glsl_compress(''.join(common + fragment), shortNames)    
+    context['getFragmentColorsSource'] = glsl_compress(''.join(common + fragmentColors), shortNames)
+    context['getFragmentOverlaySource'] = glsl_compress(''.join(common + fragmentOverlay), shortNames)
     context['getVertexSource'] = glsl_compress(''.join(common + vertex), shortNames)
     context['getAttributes'] = [attributes[a] for a in sorted(attributes.keys())]
     context['getUniforms'] = [uniforms[u] for u in sorted(uniforms.keys())]
