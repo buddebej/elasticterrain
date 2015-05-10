@@ -111,9 +111,6 @@ uniform bool u_testing;
 // flag for testing mode
 uniform bool u_stackedCardb; 
 
-// flag for active overlay texture
-uniform bool u_overlayActive;
-
 // scale threshold values to adapt color ramp 
 // u_colorScale.x is lower threshold, u_colorScale.y is upper threshold
 uniform vec2 u_colorScale;
@@ -219,19 +216,10 @@ void main(void) {
                 float valB = texture2D(u_demTex, vec2(m_texCoord.y, rowToCell(248))).b; // row 248 
                 neighborLeft = decodeElevation(vec2(valB, valA));            
             }      
-        }   
-
-        // cardboard stack
-        if(u_stackedCardb && !u_overlayActive && absElevation<0.0){
-            // neighborRight = decodeElevation(vec2(0.0, texture2D(u_demTex, nRight).g));
-            // neighborLeft  = decodeElevation(vec2(0.0, texture2D(u_demTex, nLeft).g));
-            neighborAbove = decodeElevation(vec2(0.0, texture2D(u_demTex, nAbove).g));            
-            // neighborBelow = decodeElevation(vec2(0.0, texture2D(u_demTex, nBelow).g));
         }               
 
-    vec4 fragColor;
-
     // lookup a hypsometric color   
+    vec4 fragColor;
 
         // scaling of color ramp
         // float colorMin = 1.0-u_colorScale.x*1.0;
@@ -277,16 +265,22 @@ void main(void) {
                neighborBelow == absElevation) 
             {
                 fragColor = waterBlue; 
-            }
-        
+            }   
         } 
         
 
     // computation of shading
         if(u_shading){
-
             // apply exaggeration
             float exaggerationFactor = max(u_hsExaggeration*10.0,1.0);
+
+            // cardboard stack
+            if(u_stackedCardb && absElevation<0.0){
+                // neighborRight = decodeElevation(vec2(0.0, texture2D(u_demTex, nRight).g));
+                // neighborLeft  = decodeElevation(vec2(0.0, texture2D(u_demTex, nLeft).g));
+                neighborAbove = decodeElevation(vec2(0.0, texture2D(u_demTex, nAbove).g));            
+                // neighborBelow = decodeElevation(vec2(0.0, texture2D(u_demTex, nBelow).g));
+            }   
 
             // compute normal with values from four neighbors
             vec3 normal = vec3(  neighborLeft - neighborRight,
@@ -309,7 +303,6 @@ void main(void) {
 
             // mix with hypsometric color
             gl_FragColor = vec4(hillShade,hillShade,hillShade,1.0)*fragColor;
-
 
         } else {
             // apply hypsometric color without hillshading
@@ -364,17 +357,8 @@ void main(void) {
 
 //! FRAGMENT_OVERLAY
 
-// color ramp texture to look up hypsometric tints
-uniform sampler2D u_hypsoColors;
-
-// color ramp texture to look up bathymetric tints
-uniform sampler2D u_bathyColors;
-
 // texture with overlay map
 uniform sampler2D u_mapTex;
-
-// flag for coloring inland waterbodies
-uniform bool u_waterBodies; 
 
 // flag for hillShading
 uniform bool u_shading; 
@@ -384,16 +368,6 @@ uniform bool u_testing;
 
 // flag for testing mode
 uniform bool u_stackedCardb; 
-
-// flag for active overlay texture
-uniform bool u_overlayActive;
-
-// scale threshold values to adapt color ramp 
-// u_colorScale.x is lower threshold, u_colorScale.y is upper threshold
-uniform vec2 u_colorScale;
-
-// animated minMax Elevations in current Extent 
-uniform vec2 u_minMaxFade;
 
 // direction of light source
 uniform vec3 u_light; 
@@ -494,27 +468,20 @@ void main(void) {
                 neighborLeft = decodeElevation(vec2(valB, valA));            
             }      
         }   
-
-        // cardboard stack
-        if(u_stackedCardb && !u_overlayActive && absElevation<0.0){
-            // neighborRight = decodeElevation(vec2(0.0, texture2D(u_demTex, nRight).g));
-            // neighborLeft  = decodeElevation(vec2(0.0, texture2D(u_demTex, nLeft).g));
-            neighborAbove = decodeElevation(vec2(0.0, texture2D(u_demTex, nAbove).g));            
-            // neighborBelow = decodeElevation(vec2(0.0, texture2D(u_demTex, nBelow).g));
-        }               
-
-    // texture
-        vec4 fragColor;
-        // use overlay texture color
-        // fragColor = vec4(1.0,1.0,1.0,1.0);
-        fragColor = texture2D(u_mapTex, m_texCoord);
-       
-
+      
     // computation of shading
         if(u_shading){
 
             // apply exaggeration
             float exaggerationFactor = max(u_hsExaggeration*10.0,1.0);
+
+            // cardboard stack
+            if(u_stackedCardb && absElevation<0.0){
+                // neighborRight = decodeElevation(vec2(0.0, texture2D(u_demTex, nRight).g));
+                // neighborLeft  = decodeElevation(vec2(0.0, texture2D(u_demTex, nLeft).g));
+                neighborAbove = decodeElevation(vec2(0.0, texture2D(u_demTex, nAbove).g));            
+                // neighborBelow = decodeElevation(vec2(0.0, texture2D(u_demTex, nBelow).g));
+            }  
 
             // compute normal with values from four neighbors
             vec3 normal = vec3(  neighborLeft - neighborRight,
@@ -535,13 +502,12 @@ void main(void) {
             // avoid black shadows
             hillShade = max(hillShade, 0.25);
 
-            // mix with hypsometric color
-            gl_FragColor = vec4(hillShade,hillShade,hillShade,1.0)*fragColor;
-
+            // mix with map texture
+            gl_FragColor = vec4(hillShade,hillShade,hillShade,1.0)*texture2D(u_mapTex, m_texCoord);     
 
         } else {
-            // apply hypsometric color without hillshading
-            gl_FragColor = fragColor;
+            // apply map texture
+            gl_FragColor = texture2D(u_mapTex, m_texCoord);
         }
 
     // testing mode

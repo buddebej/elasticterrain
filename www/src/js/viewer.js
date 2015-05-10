@@ -32,8 +32,6 @@ var Viewer = function(config, layers, container) {
 
     this.view.setHighlevelAreas(layers.getDem().highLevelAreas);
 
-    this.map.on('postrender', function() {this.render();});
-
     // round given number to closest step
     this.DEGREE_STEP = 1.0;
     this.toStep = function(n) {

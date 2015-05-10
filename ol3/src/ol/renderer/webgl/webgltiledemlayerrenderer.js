@@ -570,6 +570,7 @@ ol.renderer.webgl.TileDemLayer.prototype.getTileMesh = function(meshResolution) 
  * @inheritDoc
  */
 ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, layerState, context) {
+
     // INIT
     var mapRenderer = this.getWebGLMapRenderer();
     var map = mapRenderer.map_;
@@ -597,7 +598,6 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
     var center = viewState.center;
     var extent;
 
-    // increase tile extent 
     var padding = {
         x: this.tilePadding,
         y: this.tilePadding
@@ -613,25 +613,34 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
     var tileRange = tileGrid.getTileRangeForExtentAndResolution(extent, tileResolution);
     var framebufferExtent;
 
-    if(this.overlay.Active){
-        this.fragmentShader_ = ol.renderer.webgl.tiledemlayer.shader.FragmentOverlay.getInstance();
+
+    // OVERLAY
+    if (!goog.isNull(tileDemLayer.getOverlayTiles())) { // check if a Layer was defined for overlay
+        this.overlay.Id = map.getLayers().getArray().indexOf(tileDemLayer.getOverlayTiles().data);
+        if (this.overlay.Id >= 0) {
+            this.overlay.Active = true;
+            this.fragmentShader_ = ol.renderer.webgl.tiledemlayer.shader.FragmentOverlay.getInstance();
+        }
     } else {
+        this.overlay.Active = false;
         this.fragmentShader_ = ol.renderer.webgl.tiledemlayer.shader.FragmentColors.getInstance();
     }
+
 
     // LOAD SHADERS
     var program = context.getProgram(this.fragmentShader_, this.vertexShader_);
     context.useProgram(program);
-    // if (goog.isNull(this.locations_)) {
     this.locations_ = new ol.renderer.webgl.tiledemlayer.shader.Locations(gl, program);
-    // }
+
+    console.log('looping...');
 
     if (!goog.isNull(this.renderedTileRange) && this.renderedTileRange.equals(tileRange) && this.renderedRevision == tileSource.getRevision()) {
+
         // DO NOTHING, RE-RENDERING NOT NEEDED
         framebufferExtent = this.renderedFramebufferExtent;
     } else {
-        // (RE-)RENDER COMPLETE VIEWPORT 
-        // COMPUTE EXTENT OF FRAMEBUFFER
+
+        // RENDER ENTIRE VIEWPORT 
         var tileRangeSize = tileRange.getSize();
         var maxDimension = Math.max(tileRangeSize[0] * tilePixelSize, tileRangeSize[1] * tilePixelSize);
         var framebufferDimension = ol.math.roundUpToPowerOfTwo(maxDimension);
@@ -643,9 +652,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             minX, minY,
             minX + framebufferExtentDimension, minY + framebufferExtentDimension
         ];
-
         this.bindFramebuffer(frameState, framebufferDimension);
         gl.viewport(0, 0, framebufferDimension, framebufferDimension);
+
 
         // CLEAR BUFFERS
         gl.clearColor(0.0, 0.0, 0.0, 0.0);
@@ -653,57 +662,47 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         gl.clearDepth(1.0);
         gl.clear(goog.webgl.DEPTH_BUFFER_BIT);
 
-        // INTIAL CHECK FOR OVERLAY
-        if (!goog.isNull(tileDemLayer.getOverlayTiles())) { // check if a Layer was defined for overlay
-            this.overlay.Id = map.getLayers().getArray().indexOf(tileDemLayer.getOverlayTiles().data);
-            if (this.overlay.Id >= 0) {
-                this.overlay.Active = true;
-            }
-        } else {
-            this.overlay.Active = false;
-        }
+
+        // SHADER PARAMETERS
+        // u_testing: flag to activate testing mode
+        gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
+        // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
+        gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, z));
+        // u_minMax: static minMax values
+        gl.uniform2f(this.locations_.u_minMax, this.staticMinElevation, this.staticMaxElevation);
+        // reset global minMax for next rendering
+        this.resetCurrentMinMax();
+
 
         // TERRAIN SHEARING
         var shearX, shearY, shearingFactor;
         if (tileDemLayer.getTerrainInteraction()) {
-            // from current terrain interaction
+            // dynamic shearing / terrain interaction
             var shearLimit = this.maxShearing * tileGrid.getResolution(z);
             shearingFactor = tileDemLayer.getTerrainShearing();
-
             shearX = goog.math.clamp(shearingFactor.x, -shearLimit, shearLimit);
             shearY = goog.math.clamp(shearingFactor.y, -shearLimit, shearLimit);
-
         } else {
-            // from obliqueInclination angle and current rotation
+            // static shearing / planoblique Inclination 
             shearingFactor = (1.0 / Math.tan(goog.math.toRadians(tileDemLayer.getObliqueInclination()))) * (this.maxElevationInExtent - this.minElevationInExtent);
             shearX = shearingFactor * Math.sin(-viewState.rotation);
             shearY = shearingFactor * Math.cos(-viewState.rotation);
         }
-
         // u_scaleFactor: factors for plan oblique shearing
         gl.uniform2f(this.locations_.u_scaleFactor, shearX, shearY);
-        // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
-        gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, z));
+        
 
-        // FRAGMENT SHADER PARAMETER
-        // u_overlayActive: Is overlay active?
-        gl.uniform1f(this.locations_.u_overlayActive, this.overlay.Active === true ? 1.0 : 0.0);
-        // u_colorScale: pass colorScale factor to adapt color ramp dynamically
-        gl.uniform2f(this.locations_.u_colorScale, tileDemLayer.getColorScale()[0], tileDemLayer.getColorScale()[1]);
-        // u_stackedCardb: pass stackedCardboard flag
+        // SHADING
+        // u_shading: flag to activate Shading
+        gl.uniform1f(this.locations_.u_shading, tileDemLayer.getShading() === true ? 1.0 : 0.0);        
+        // u_stackedCardb: stackedCardboard flag
         gl.uniform1f(this.locations_.u_stackedCardb, tileDemLayer.getStackedCardboard() === true ? 1.0 : 0.0);
-        // u_waterBodies: pass waterBodies to toggle rendering of inland waterBodies
-        gl.uniform1f(this.locations_.u_waterBodies, tileDemLayer.getWaterBodies() === true ? 1.0 : 0.0);
-        // u_shading: pass flag to activate Shading
-        gl.uniform1f(this.locations_.u_shading, tileDemLayer.getShading() === true ? 1.0 : 0.0);
-        // u_ShadingOpacity: pass ShadingOpacity
+        // u_ShadingOpacity: ShadingOpacity
         gl.uniform1f(this.locations_.u_hsDarkness, tileDemLayer.getShadingOpacity());
-        // u_hsExaggeration: pass ShadingExaggeration
+        // u_hsExaggeration: ShadingExaggeration
         gl.uniform1f(this.locations_.u_hsExaggeration, tileDemLayer.getShadingExaggeration());
-
-        // u_testing: pass flag to activate testing mode
-        gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
-
+        // u_ambient_light: intensity for an ambient light source
+        gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());        
         // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
         var zenithRad = goog.math.toRadians(90.0 - tileDemLayer.getLightZenith()),
             azimuthRad = goog.math.toRadians(tileDemLayer.getLightAzimuth()) + viewState.rotation,
@@ -711,45 +710,46 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             lightY = Math.sin(zenithRad) * Math.cos(azimuthRad),
             lightX = Math.sin(zenithRad) * Math.sin(azimuthRad);
         gl.uniform3f(this.locations_.u_light, lightX, lightY, lightZ);
-
-        // u_ambient_light: pass intensity for an ambient light source
-        gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());
-
-        gl.uniform2f(this.locations_.u_minMaxFade, this.animatedMinElevation, this.animatedMaxElevation);
-        gl.uniform2f(this.locations_.u_minMax, this.staticMinElevation, this.staticMaxElevation);
-        this.resetCurrentMinMax();
+        
 
         // COLORING
+        if (!this.overlay.Active) {
+            // u_minMaxFade: animated minMax for animated color transitions
+            gl.uniform2f(this.locations_.u_minMaxFade, this.animatedMinElevation, this.animatedMaxElevation);
 
-        // hypsometric colors
-        var textureHypsometricColors_ = gl.createTexture();
-        var arrayHypsometryColors = new Uint8Array(ol.ColorRamp.hypsometry[tileDemLayer.getColorRamp()]);
-        gl.activeTexture(goog.webgl.TEXTURE1);
-        gl.bindTexture(goog.webgl.TEXTURE_2D, textureHypsometricColors_);
+            // u_colorScale: colorScale factor to adapt color ramp dynamically
+            gl.uniform2f(this.locations_.u_colorScale, tileDemLayer.getColorScale()[0], tileDemLayer.getColorScale()[1]);
 
-        // read color ramp array
-        gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayHypsometryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayHypsometryColors);
-        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER, goog.webgl.LINEAR);
-        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
-        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
-        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
-        gl.uniform1i(this.locations_.u_hypsoColors, 1);
+            // u_waterBodies: waterBodies to toggle rendering of inland waterBodies
+            gl.uniform1f(this.locations_.u_waterBodies, tileDemLayer.getWaterBodies() === true ? 1.0 : 0.0);
 
-        // bathymetric colors
-        var textureBathymetricColors_ = gl.createTexture();
-        var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry[tileDemLayer.getColorRamp()]);
-        gl.activeTexture(goog.webgl.TEXTURE2);
-        gl.bindTexture(goog.webgl.TEXTURE_2D, textureBathymetricColors_);
+            // hypsometric colors
+            var textureHypsometricColors_ = gl.createTexture();
+            var arrayHypsometryColors = new Uint8Array(ol.ColorRamp.hypsometry[tileDemLayer.getColorRamp()]);
+            gl.activeTexture(goog.webgl.TEXTURE1);
+            gl.bindTexture(goog.webgl.TEXTURE_2D, textureHypsometricColors_);
+            gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayHypsometryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayHypsometryColors);
+            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER, goog.webgl.LINEAR);
+            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
+            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
+            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
+            gl.uniform1i(this.locations_.u_hypsoColors, 1);
 
-        // read color ramp array
-        gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayBathymetryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayBathymetryColors);
-        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER, goog.webgl.LINEAR);
-        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
-        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
-        gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
-        gl.uniform1i(this.locations_.u_bathyColors, 2);
+            // bathymetric colors
+            var textureBathymetricColors_ = gl.createTexture();
+            var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry[tileDemLayer.getColorRamp()]);
+            gl.activeTexture(goog.webgl.TEXTURE2);
+            gl.bindTexture(goog.webgl.TEXTURE_2D, textureBathymetricColors_);
+            gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayBathymetryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayBathymetryColors);
+            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MIN_FILTER, goog.webgl.LINEAR);
+            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_MAG_FILTER, goog.webgl.LINEAR);
+            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_S, goog.webgl.CLAMP_TO_EDGE);
+            gl.texParameteri(goog.webgl.TEXTURE_2D, goog.webgl.TEXTURE_WRAP_T, goog.webgl.CLAMP_TO_EDGE);
+            gl.uniform1i(this.locations_.u_bathyColors, 2);
+        }
 
-        // MESH 
+
+        // TRIANGLE MESH FOR EACH TILE
         // check if mesh resolution has changed
         if (!goog.isObject(this.tileMesh_) || this.tileMesh_.resolution != tileDemLayer.getResolution()) {
             // drop old buffers
@@ -758,14 +758,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 context.deleteBuffer(this.tileMesh_.indexBuffer);
             }
             // compute mesh for current resolution
-            /**
-             * @private
-             * @type {Object.<string, ol.webgl.Buffer>}
-             */
+            /** @type {Object.<string, ol.webgl.Buffer>} */
             this.tileMesh_ = this.getTileMesh(goog.math.safeCeil(tileDemLayer.getResolution() * 128));
             this.tileMesh_.resolution = tileDemLayer.getResolution();
         }
-
         // Write the vertex coordinates to the buffer object
         context.bindBuffer(goog.webgl.ARRAY_BUFFER, this.tileMesh_.vertexBuffer);
         gl.enableVertexAttribArray(this.locations_.a_position);
@@ -773,8 +769,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         // Write the indices to the buffer object
         context.bindBuffer(goog.webgl.ELEMENT_ARRAY_BUFFER, this.tileMesh_.indexBuffer);
 
-        // SELECT TILE IMAGES AND BIND AS TEXTURES
 
+        // SELECT TILE IMAGES AND BIND AS TEXTURES
         /** @type {Object.<number, Object.<string, ol.Tile>>} */
         var tilesToDrawByZ = {};
         tilesToDrawByZ[z] = {};
@@ -805,7 +801,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         var overlayTilesToDrawByZ = {};
         var overlayTile, overlayTileState, overlayTilesToDraw;
 
-        // determines offset for each tile in target framebuffer and passes uniform to shader
+        // determines offset for each tile in target framebuffer andes uniform to shader
         var defUniformOffset = function(tile, renderer) {
             tileExtent = tileGrid.getTileCoordExtent(tile.tileCoord, tmpExtent);
             //minX, maxX, minY, maxY
@@ -821,10 +817,11 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             gl.uniform4fv(renderer.locations_.u_tileOffset, u_tileOffset);
         };
 
+
         // CREATE TEXTURE QUEUE AND DRAW TILES
         if (this.overlay.Active) {
-            // RENDER TILES WITH OVERLAY
 
+            // RENDER TILES WITH OVERLAY
             // type cast because ol.Map stores layers only as layer.Base, which does not offer getSources()
             this.overlay.Tiles = /** @type {ol.layer.Tile} */ (map.getLayers().getArray()[this.overlay.Id]);
             goog.asserts.assertInstanceof(this.overlay.Tiles, ol.layer.Tile);
@@ -888,23 +885,23 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                             overlayTile = overlayTilesToDraw[tileKey];
                             tile = tilesToDraw[tileKey];
 
-                            // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
+                            // original zoom level of current tile for reverse z-ordering to avoid artifacts 
                             gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom + 1)));
-                            // pass zoomlevel of this tile 
+                            // zoomlevel of this tile 
                             gl.uniform1f(this.locations_.u_zoom, zs[i]);
 
                             // determine offset for each tile in target framebuffer
                             defUniformOffset(tile, this);
 
                             // dem texture
-                            gl.activeTexture(goog.webgl.TEXTURE3);
+                            gl.activeTexture(goog.webgl.TEXTURE1);
                             mapRenderer.bindTileTexture(tile, tilePixelSize, 0, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                            gl.uniform1i(this.locations_.u_demTex, 3);
+                            gl.uniform1i(this.locations_.u_demTex, 1);
 
                             // overlay texture             
-                            gl.activeTexture(goog.webgl.TEXTURE4);
+                            gl.activeTexture(goog.webgl.TEXTURE2);
                             mapRenderer.bindTileTexture(overlayTile, tilePixelSize, 0, goog.webgl.LINEAR, goog.webgl.LINEAR);
-                            gl.uniform1i(this.locations_.u_mapTex, 4);
+                            gl.uniform1i(this.locations_.u_mapTex, 2);
 
                             // draw triangle mesh for each tile
                             gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
@@ -914,8 +911,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 }
             }
         } else {
-            // RENDER TILES WITHOUT OVERLAY
 
+            // RENDER TILES WITHOUT OVERLAY
             for (x = tileRange.minX; x <= tileRange.maxX; ++x) {
                 for (y = tileRange.minY; y <= tileRange.maxY; ++y) {
                     tile = tileSource.getTile(z, x, y, pixelRatio, projection);
@@ -949,9 +946,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 for (tileKey in tilesToDraw) {
                     tile = tilesToDraw[tileKey];
 
-                    // pass original zoom level of current tile for reverse z-ordering to avoid artifacts 
+                    // original zoom level of current tile for reverse z-ordering to avoid artifacts 
                     gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom + 1)));
-                    // pass zoomlevel of this tile 
+                    // zoomlevel of this tile 
                     gl.uniform1f(this.locations_.u_zoom, zs[i]);
 
                     // determine offset for each tile in target framebuffer
@@ -971,20 +968,13 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             }
         }
 
-        // LOOP CONTROL
 
-        // check for completed minMax fading animation
+        // LOOP CONTROL
+        // check for completed animatedMinMax fading animation
         var minMaxAnimationFinished = ((Math.abs(this.deltaMax) <= 1 && Math.abs(this.deltaMin) <= 1));
 
-        // first rendering pass; deltaMax and deltaMin are empty
-        var minMaxAnimationInit = (this.deltaMax === 0 && this.deltaMin === 0);
-
-        if (!minMaxAnimationFinished || minMaxAnimationInit || !allTilesLoaded) {
+        if (!minMaxAnimationFinished || !allTilesLoaded) {
             // continue rendering & tile loading loop
-
-            this.renderedTileRange = null;
-            this.renderedRevision = -1;
-            frameState.animate = true;
 
             if (goog.isNull(this.animatedMinElevation)) {
                 this.animatedMinElevation = this.minElevationInExtent;
@@ -1000,11 +990,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 this.animatedMinElevation = this.animatedMinElevation + this.deltaMin / this.minMaxAnimationSpeed;
             }
 
-            // console.log('deltaMax', this.deltaMax / this.minMaxAnimationSpeed, 'animated max ', this.animatedMaxElevation, 'dest max ', this.maxElevationInExtent);
-            // console.log('deltaMin', this.deltaMin/this.minMaxAnimationSpeed, 'animated min ', this.animatedMinElevation, 'dest min ', this.minElevationInExtent);
-
+            this.renderedTileRange = null;
+            this.renderedRevision = -1;
+            frameState.animate = true;
             this.renderCounter++;
-
         } else {
             // stop rendering & tile loading loop
 
@@ -1016,9 +1005,6 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             // set new animatedMinMaxElevations
             this.animatedMaxElevation = this.maxElevationInExtent;
             this.animatedMinElevation = this.minElevationInExtent;
-
-            // reset min max observer to make sure that potential lower / higher points 
-            // in the next pass can be found by this.updateCurrentMinMax
 
             this.renderedTileRange = tileRange;
             this.renderedFramebufferExtent = framebufferExtent;
