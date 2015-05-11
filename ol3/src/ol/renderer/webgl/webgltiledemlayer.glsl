@@ -91,6 +91,10 @@ void main(void) {
                         1.0);
 }
 
+//! FRAGMENT_COMMON
+
+// FIXME! THIS DOES NOT WORK (UNIFORM ERRORS IN CHROME)
+
 //! FRAGMENT_COLORS
 
 // color ramp texture to look up hypsometric tints
@@ -108,7 +112,7 @@ uniform bool u_shading;
 // flag for testing mode
 uniform bool u_testing;    
 
-// flag for testing mode
+// flag for contour lines
 uniform bool u_stackedCardb; 
 
 // scale threshold values to adapt color ramp 
@@ -267,6 +271,30 @@ void main(void) {
             }
         } 
         
+        // color for water surfaces in flat terrain
+        if(u_waterBodies) {
+            // vec4 waterBlue = vec4(0.4058823529,0.6725490196,0.8970588235,1.0);
+            vec4 waterBlue = vec4(0.03,0.47,0.67,1.0);
+
+            // compute other neighbors for water surface test
+            float n01 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
+            float n02 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
+            float n03 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y-CELLSIZE)).xy));
+            float n04 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));         
+
+            if(absElevation>0.0 && 
+               n01 == absElevation && 
+               n02 == absElevation && 
+               n03 == absElevation && 
+               n04 == absElevation && 
+               neighborRight == absElevation && 
+               neighborLeft == absElevation && 
+               neighborAbove == absElevation && 
+               neighborBelow == absElevation) 
+            {
+                fragColor = waterBlue; 
+            }   
+        } 
 
     // computation of shading
         if(u_shading){
@@ -365,7 +393,7 @@ uniform bool u_shading;
 // flag for testing mode
 uniform bool u_testing;    
 
-// flag for testing mode
+// flag for contour lines
 uniform bool u_stackedCardb; 
 
 // direction of light source

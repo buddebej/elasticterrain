@@ -663,17 +663,6 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         gl.clear(goog.webgl.DEPTH_BUFFER_BIT);
 
 
-        // SHADER PARAMETERS
-        // u_testing: flag to activate testing mode
-        gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
-        // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
-        gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, z));
-        // u_minMax: static minMax values
-        gl.uniform2f(this.locations_.u_minMax, this.staticMinElevation, this.staticMaxElevation);
-        // reset global minMax for next rendering
-        this.resetCurrentMinMax();
-
-
         // TERRAIN SHEARING
         var shearX, shearY, shearingFactor;
         if (tileDemLayer.getTerrainInteraction()) {
@@ -711,6 +700,17 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             lightX = Math.sin(zenithRad) * Math.sin(azimuthRad);
         gl.uniform3f(this.locations_.u_light, lightX, lightY, lightZ);
         
+
+        // SHADER PARAMETERS
+        // u_testing: flag to activate testing mode
+        gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
+        // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
+        gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, z));
+        // u_minMax: static minMax values
+        gl.uniform2f(this.locations_.u_minMax, this.staticMinElevation, this.staticMaxElevation);
+        // reset global minMax for next rendering
+        this.resetCurrentMinMax();
+
 
         // COLORING
         if (!this.overlay.Active) {
