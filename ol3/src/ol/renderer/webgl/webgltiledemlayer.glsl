@@ -218,54 +218,53 @@ void main(void) {
             }      
         }               
 
-    // lookup a hypsometric color   
     vec4 fragColor;
 
-        // scaling of color ramp
-        // float colorMin = 1.0-u_colorScale.x*1.0;
-        // float colorMax = u_colorScale.y*1.0;   
+    float relativeElevation = 0.0;
 
-        float relativeElevation = 0.0;
+    // use dynamic colors when u_colorScale.xy == globalMAX and globalMIN
+        if(u_colorScale == vec2(-11000.0,9000.0)){
 
-        if(absElevation > 0.1){
-            if(u_minMaxFade.x > 0.1){
-                relativeElevation = (absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x);
+            // dynamic and animated colors
+            if(absElevation > 0.1){
+                if(u_minMaxFade.x > 0.1){
+                    relativeElevation = (absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x);
+                } else {
+                    relativeElevation = absElevation/u_minMaxFade.y;
+                }
+                fragColor = abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation)));
             } else {
-                relativeElevation = absElevation/u_minMaxFade.y;
+                if(u_minMaxFade.y < 0.1){
+                    relativeElevation = abs((absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x));
+                } else {
+                    relativeElevation = abs(absElevation/u_minMaxFade.x);
+                }
+                fragColor = abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation)));
             }
-            fragColor = abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation)));
         } else {
-            if(u_minMaxFade.y < 0.1){
-                relativeElevation = abs((absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x));
+
+            // static colors based on colorScale minMax
+
+            float colorMin = u_colorScale.x;
+            float colorMax = u_colorScale.y;
+
+            // fragColor = vec4(0.0,0.0,0.0,0.0);
+
+            if(absElevation > 0.1){
+                if(colorMin > 0.1){
+                    relativeElevation = (absElevation-colorMin)/(colorMax-colorMin);
+                } else {
+                    relativeElevation = absElevation/colorMax;
+                }
+                fragColor = abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation)));
             } else {
-                relativeElevation = abs(absElevation/u_minMaxFade.x);
+                if(colorMax < 0.1){
+                    relativeElevation = abs((absElevation-colorMin)/(colorMax-colorMin));
+                } else {
+                    relativeElevation = abs(absElevation/colorMin);
+                }
+                fragColor = abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation)));
             }
-            fragColor = abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation)));
-        }
-                          
-        // color for water surfaces in flat terrain
-        if(u_waterBodies) {
-            // vec4 waterBlue = vec4(0.4058823529,0.6725490196,0.8970588235,1.0);
-            vec4 waterBlue = vec4(0.03,0.47,0.67,1.0);
-
-            // compute other neighbors for water surface test
-            float n01 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
-            float n02 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));
-            float n03 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x+CELLSIZE, m_texCoord.y-CELLSIZE)).xy));
-            float n04 = decodeElevation(vec2(texture2D(u_demTex, vec2(m_texCoord.x-CELLSIZE, m_texCoord.y+CELLSIZE)).xy));         
-
-            if(absElevation>0.0 && 
-               n01 == absElevation && 
-               n02 == absElevation && 
-               n03 == absElevation && 
-               n04 == absElevation && 
-               neighborRight == absElevation && 
-               neighborLeft == absElevation && 
-               neighborAbove == absElevation && 
-               neighborBelow == absElevation) 
-            {
-                fragColor = waterBlue; 
-            }   
         } 
         
 

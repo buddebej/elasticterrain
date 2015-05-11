@@ -22,7 +22,7 @@ var Config = function() {
         // hypsometric colors
         stackedCardboard: false, // bool
         waterBodies: true, // bool
-        colorScale: [0, 4000], // min:max [m]  
+        colorScale: [-11000, 9000], // min:max [m]  
         colorRamp: 1, // id   
 
         // debug         
