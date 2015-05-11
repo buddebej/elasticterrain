@@ -116,12 +116,12 @@ def main(argv):
                     shortNames[varying] = shortName
 
     context['getOriginalFragmentSource'] = js_escape(''.join(common + fragment))
-    context['getOriginalFragmentColorsSource'] = js_escape(''.join(common + fragmentCommon + fragmentColors))
-    context['getOriginalFragmentOverlaySource'] = js_escape(''.join(common + fragmentCommon + fragmentOverlay))    
+    context['getOriginalFragmentColorsSource'] = js_escape(''.join(common + fragmentColors + fragmentCommon))
+    context['getOriginalFragmentOverlaySource'] = js_escape(''.join(common + fragmentOverlay + fragmentCommon))    
     context['getOriginalVertexSource'] = js_escape(''.join(common + vertex))
     context['getFragmentSource'] = glsl_compress(''.join(common + fragment), shortNames)    
-    context['getFragmentColorsSource'] = glsl_compress(''.join(common + fragmentCommon + fragmentColors), shortNames)
-    context['getFragmentOverlaySource'] = glsl_compress(''.join(common + fragmentCommon + fragmentOverlay), shortNames)
+    context['getFragmentColorsSource'] = glsl_compress(''.join(common + fragmentColors + fragmentCommon), shortNames)
+    context['getFragmentOverlaySource'] = glsl_compress(''.join(common + fragmentOverlay + fragmentCommon), shortNames)
     context['getVertexSource'] = glsl_compress(''.join(common + vertex), shortNames)
     context['getAttributes'] = [attributes[a] for a in sorted(attributes.keys())]
     context['getUniforms'] = [uniforms[u] for u in sorted(uniforms.keys())]

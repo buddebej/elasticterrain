@@ -632,7 +632,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
     context.useProgram(program);
     this.locations_ = new ol.renderer.webgl.tiledemlayer.shader.Locations(gl, program);
 
-    console.log('looping...');
+    // console.log('looping...');
 
     if (!goog.isNull(this.renderedTileRange) && this.renderedTileRange.equals(tileRange) && this.renderedRevision == tileSource.getRevision()) {
 
@@ -683,9 +683,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
         // SHADING
         // u_shading: flag to activate Shading
-        gl.uniform1f(this.locations_.u_shading, tileDemLayer.getShading() === true ? 1.0 : 0.0);        
+        gl.uniform1i(this.locations_.u_shading, tileDemLayer.getShading() === true ? 1 : 0);        
         // u_stackedCardb: stackedCardboard flag
-        gl.uniform1f(this.locations_.u_stackedCardb, tileDemLayer.getStackedCardboard() === true ? 1.0 : 0.0);
+        gl.uniform1i(this.locations_.u_stackedCardb, tileDemLayer.getStackedCardboard() === true ? 1 : 0);
         // u_ShadingOpacity: ShadingOpacity
         gl.uniform1f(this.locations_.u_hsDarkness, tileDemLayer.getShadingOpacity());
         // u_hsExaggeration: ShadingExaggeration
@@ -703,7 +703,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
         // SHADER PARAMETERS
         // u_testing: flag to activate testing mode
-        gl.uniform1f(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1.0 : 0.0);
+        gl.uniform1i(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1 : 0);
         // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
         gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, z));
         // u_minMax: static minMax values
@@ -721,7 +721,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             gl.uniform2f(this.locations_.u_colorScale, tileDemLayer.getColorScale()[0], tileDemLayer.getColorScale()[1]);
 
             // u_waterBodies: waterBodies to toggle rendering of inland waterBodies
-            gl.uniform1f(this.locations_.u_waterBodies, tileDemLayer.getWaterBodies() === true ? 1.0 : 0.0);
+            gl.uniform1i(this.locations_.u_waterBodies, tileDemLayer.getWaterBodies() === true ? 1 : 0);
 
             // hypsometric colors
             var textureHypsometricColors_ = gl.createTexture();
@@ -1000,7 +1000,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             // goog.asserts.assert(this.renderCounter < this.renderCounterMax, 'Loading of tiles timed out.');
             // console.log('extent: ', this.renderedFramebufferExtent);
             // console.log('resolution: ',viewState.resolution);
-            console.log('passes: ', this.renderCounter);
+            // console.log('passes: ', this.renderCounter);
 
             // set new animatedMinMaxElevations
             this.animatedMaxElevation = this.maxElevationInExtent;
