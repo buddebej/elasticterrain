@@ -11,3 +11,4 @@ www/dist/*
 !www/data/blank.png
 .DS_Store
 backend/node_modules/
+userstudy/*
