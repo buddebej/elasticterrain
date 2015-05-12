@@ -1,10 +1,3 @@
-body {
-    background-color: #111111;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-}
-
 input,
 select {
     padding: 0.1em;
@@ -15,11 +8,6 @@ select {
     width: 80%;
     margin-top: 0.5em;
     font-family: 'Open Sans', sans-serif;
-}
-
-.narrow {
-    width: 40%;
-    margin-left: 65px;
 }
 
 h3 {
@@ -33,15 +21,6 @@ h3 {
     width: 100%;
     position: absolute;
     overflow: hidden;
-}
-
-.map {
-    height: 100%;
-    width: 100%;
-    z-index: 100;
-    position: absolute;
-    border-right: 1px solid #444;
-    background-color: #000;
 }
 
 .controlBar {
@@ -201,43 +180,6 @@ h3 {
     height: 80px;
 }
 
-.saveConfigButton {
-    top: 50px;
-    right: .5em;
-    position: absolute;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 4px;
-    padding: 2px;
-}
-
-.loadConfigButton {
-    top: 100px;
-    right: .5em;
-    position: absolute;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 4px;
-    padding: 2px;
-}
-
-.indicator {
-    padding: 4px;
-    width: auto;
-    min-width: 170px;
-    text-align: center;
-    background: rgba(0, 60, 136, 0.6);
-    font-size: 8pt;
-    right: 8px;
-    bottom: 8px;
-    position: absolute;
-    color: #eee;
-    font-family: 'Open Sans', sans-serif;
-    -webkit-tap-highlight-color: none;
-    border-radius: 4px;
-}
-
-.hidden {
-    visibility: hidden;
-}
 
 .floatBox {
     float: left;
@@ -408,48 +350,4 @@ h3 {
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
     right: 0px;
-}
-
-.webglMissing {
-    font-family: 'Open Sans', sans-serif;
-    margin: auto;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: url('../images/elasticterrain_preview.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    text-align: center;
-    z-index: 101;
-}
-
-.webglMissing p {
-    text-align: left;
-    margin: auto;
-    padding: 5em;
-    border: #cccccc 4px solid;
-    margin-top: 10%;
-    width: 20%;
-    background-color: #efefef;
-    opacity: 0.9;
-    font: 9pt Verdana;
-    line-height: 2em;
-}
-
-.webglMissing span {
-    font-font-weight: bolder;
-    font-size: 20pt;
-}
-
-.webglMissing a:link,
-a:visited,
-a:active {
-    color: #000000;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.webglMissing a:hover {
-    color: #000000;
-    text-decoration: underline;
 }
