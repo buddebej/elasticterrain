@@ -72,6 +72,5 @@ var Config = function() {
 
     this.swap = function(newConfig) {
         this.dynamic = newConfig;
-        // console.log(newConfig);
     };
 };

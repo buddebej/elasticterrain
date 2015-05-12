@@ -1,10 +1,12 @@
-var ConfigManager = function(controlBar, viewer) {
+var ConfigManager = function(viewer, controlBar) {
     'use strict';
 
-    controlBar.configManager = this;
+    if (typeof(controlBar) !== 'undefined') {
+        controlBar.configManager = this;
+    }
 
-    var url = viewer.config.dbUrl,
-        dataType = 'json';
+    this.url = viewer.config.dbUrl;
+    this.dataType = 'json';
 
     this.saveConfigButton = function() {
         var anchor = document.createElement('button');
@@ -36,14 +38,14 @@ var ConfigManager = function(controlBar, viewer) {
         if (typeof constraints !== 'undefined') {
             newConfig.viewZoomConstraint = constraints.zoom;
             newConfig.viewCenterConstraint = constraints.center;
-            newConfig.viewRotationEnabled = constraints.rotation;            
+            newConfig.viewRotationEnabled = constraints.rotation;
         }
 
         // delete id element to avoid duplicates in database. every saved config gets a unique id.
         delete newConfig._id;
         $.ajax({
             type: 'POST',
-            url: url,
+            url: this.url,
             data: newConfig,
             success: function(data) {
                 // reload configStore
@@ -53,23 +55,28 @@ var ConfigManager = function(controlBar, viewer) {
             error: function(data) {
                 console.log('could not write config to database');
             },
-            dataType: dataType
+            dataType: this.dataType,
+            context: this
         });
-    };
+    }.bind(this);
 
     this.loadAllConfigs = function() {
         $.ajax({
             type: 'GET',
-            url: url,
+            url: this.url,
             success: function(data) {
-                controlBar.updateConfigStore(data);
+                viewer.setConfigStore(data);
+                if (typeof(controlBar) !== 'undefined') {
+                    controlBar.updateConfigStore();
+                }
             },
             error: function(data) {
                 console.log('could not read configs from database');
             },
-            dataType: dataType
+            dataType: this.dataType,
+            context: this
         });
-    };
+    }.bind(this);
 
     // load all available configs and push to gui selectbox
     this.loadAllConfigs();

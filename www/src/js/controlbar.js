@@ -61,7 +61,8 @@ var ControlBar = function(viewer) {
         enabled: true,
         controlAnimation: 'blind', // animation of collapsing and expanding
         controlAnimationSpeed: 300, // animation of collapsing and expanding
-        maxElevation: 8600, // max value for scaling of hypsometric color ramp
+        maxElevation: 9000, // max value for scaling of hypsometric color ramp
+        minElevation: -11000, // max value for scaling of hypsometric color ramp        
     };
 
     // config available control boxes
@@ -224,8 +225,6 @@ var ControlBar = function(viewer) {
 
     // update select box with configs from newStore
     ui.updateConfigStore = function(newStore) {
-        viewer.setConfigStore(newStore);
-
         // show control
         ui.controls.config.cont.show();
 
