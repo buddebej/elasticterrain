@@ -458,6 +458,7 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         this.vx_t_1 = this.vy_t_1 = 0;
         this.shear(0, 0);
         this.shearingStatus = ol.interaction.State.NO_SHEARING;
+        this.frameState.animate = false;
     } else {
         // compute shearing distance
         var shearX = this.distanceX,
