@@ -30,7 +30,7 @@ module.exports = function(grunt) {
                 dest: 'dist/app.min.js'
             },
             css: {
-                src: ['src/resources/css/*.css'],
+                src: ['src/resources/css/ol.css','src/resources/css/jquery-ui.min.css','src/resources/css/base.css','src/resources/css/controlbar.css'],
                 dest: 'dist/resources/css/app.css'
             }
         },

@@ -252,7 +252,6 @@ var ControlBar = function(viewer) {
             viewer.swapConfig(this.config.init);
         }
         ui.updateControlTools();
-        // viewer.update();
     }.bind(this));
 
     BUTTON_SAVE_CONFIG.reset = function() {
