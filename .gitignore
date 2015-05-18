@@ -12,3 +12,4 @@ www/dist/*
 .DS_Store
 backend/node_modules/
 userstudy/*
+ol3/userstudy
