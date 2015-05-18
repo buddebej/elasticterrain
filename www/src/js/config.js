@@ -22,6 +22,7 @@ var Config = function() {
         // hypsometric colors
         stackedCardboard: false, // bool
         waterBodies: true, // bool
+        dynamicColors: true, // bool
         colorScale: [-11000, 9000], // min:max [m]  
         colorRamp: 1, // id   
 
@@ -67,7 +68,19 @@ var Config = function() {
     };
 
     this.get = function(attr) {
-        return (attr !== undefined) ? this.dynamic[attr] : this.dynamic;
+        if (attr !== undefined){
+            // return single attribute
+            if(!this.dynamic.hasOwnProperty(attr)){
+                // use default value 
+                return this.init[attr];
+            } else {
+                return this.dynamic[attr];
+            }
+
+        } else {
+            // return entire config
+            return this.dynamic;
+        } 
     };
 
     this.swap = function(newConfig) {

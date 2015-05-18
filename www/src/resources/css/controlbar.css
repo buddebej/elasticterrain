@@ -16,13 +16,6 @@ h3 {
     font-size: 11pt;
 }
 
-.container {
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    overflow: hidden;
-}
-
 .controlBar {
     height: 100%;
     width: 310px;

@@ -28,6 +28,7 @@ var ControlBar = function(viewer) {
         KNOB_ROTATION1 = $('.rotationKnob1'),
         SWITCH_SHADING = $('.shadingSwitch'),
         SWITCH_WATERBODIES = $('.waterBodiesSwitch'),
+        SWITCH_DYNAMIC_COLORS = $('.dynamicColorsSwitch'),
         SWITCH_STACKED_CARDBOARD = $('.stackedCardboardSwitch'),
         SWITCH_SHEARING_INTERACTION = $('.shearingInteractionsSwitch'),
         SWITCH_DEBUG = $('.debugModeSwitch'),
@@ -176,6 +177,7 @@ var ControlBar = function(viewer) {
 
         ui.controlActive(ui.controls.rotation, viewer.get('viewRotationEnabled'));
         SWITCH_WATERBODIES.prop(CHECKED, viewer.get('waterBodies'));
+        SWITCH_DYNAMIC_COLORS.setState(viewer.get('dynamicColors'));
         SWITCH_STACKED_CARDBOARD.prop(CHECKED, viewer.get('stackedCardboard'));
         SWITCH_SHADING.setState(viewer.get('shading'));
         SWITCH_SHEARING_INTERACTION.setState(viewer.get('terrainInteraction'));
@@ -245,12 +247,12 @@ var ControlBar = function(viewer) {
         var option = SELECT_CONFIG.find($('option:selected')).val();
         if (option !== 'default') {
             var configCopy = $.extend(true, {}, viewer.getConfigStore()[option]);
-            this.config.swap(configCopy);
+            viewer.swapConfig(configCopy);
         } else {
-            this.config.swap(this.config.init);
+            viewer.swapConfig(this.config.init);
         }
         ui.updateControlTools();
-        viewer.update();
+        // viewer.update();
     }.bind(this));
 
     BUTTON_SAVE_CONFIG.reset = function() {
@@ -343,38 +345,45 @@ var ControlBar = function(viewer) {
         viewer.set('colorRamp', parseInt(SELECT_COLOR_RAMP.find($('option:selected')).val()));
     });
 
+
+    SWITCH_DYNAMIC_COLORS.setState = function(state) {
+        viewer.set('dynamicColors', state);
+        SWITCH_DYNAMIC_COLORS.prop(CHECKED, state);
+        if (state) {
+            $('.staticColorsScale').hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+        } else {
+            $('.staticColorsScale').show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+        }
+        viewer.render();
+    };
+    SWITCH_DYNAMIC_COLORS.click(function() {
+        SWITCH_DYNAMIC_COLORS.setState(!viewer.get('dynamicColors'));
+    });
+
+
     // slider to stretch hypsometric colors  
     SLIDER_COLOR.slider({
-        min: 0,
+        min: ui.options.minElevation,
         max: ui.options.maxElevation,
         range: true,
-        slide: function(event, ui) {
-            viewer.set('colorScale', ui.values);
+        slide: function(event, slider) {
+            viewer.set('colorScale', slider.values);
+            console.log(slider.values);
         }
     });
 
     // detection of inland waterbodies
     SWITCH_WATERBODIES.click(function() {
         var checkbox = SWITCH_WATERBODIES.find($('input'));
-        if (viewer.get('waterBodies')) {
-            viewer.set('waterBodies', false);
-            checkbox.prop(CHECKED, false);
-        } else {
-            viewer.set('waterBodies', true);
-            checkbox.prop(CHECKED, true);
-        }
+        viewer.set('waterBodies', !viewer.get('waterBodies'));
+        checkbox.prop(CHECKED, !viewer.get('waterBodies'));
         viewer.render();
     });
 
     SWITCH_STACKED_CARDBOARD.click(function() {
         var checkbox = SWITCH_STACKED_CARDBOARD.find($('input'));
-        if (viewer.get('stackedCardboard')) {
-            viewer.set('stackedCardboard', false);
-            checkbox.prop(CHECKED, false);
-        } else {
-            viewer.set('stackedCardboard', true);
-            checkbox.prop(CHECKED, true);
-        }
+        viewer.set('stackedCardboard', !viewer.get('stackedCardboard'));
+        checkbox.prop(CHECKED, !viewer.get('stackedCardboard'));
         viewer.render();
     });
 
@@ -438,24 +447,24 @@ var ControlBar = function(viewer) {
     SLIDER_AMBIENT_LIGHT.slider({
         min: -100,
         max: 100,
-        slide: function(event, ui) {
-            viewer.set('ambientLight', fromSlider(ui.value, 200.0));
+        slide: function(event, slider) {
+            viewer.set('ambientLight', fromSlider(slider.value, 200.0));
         }
     });
 
     SLIDER_DARKNESS.slider({
         min: 0,
         max: 100,
-        slide: function(event, ui) {
-            viewer.set('shadingDarkness', fromSlider(ui.value));
+        slide: function(event, slider) {
+            viewer.set('shadingDarkness', fromSlider(slider.value));
         }
     });
 
     SLIDER_EXAGGERATION.slider({
         min: 0,
         max: 100,
-        slide: function(event, ui) {
-            viewer.set('shadingExaggeration', fromSlider(ui.value));
+        slide: function(event, slider) {
+            viewer.set('shadingExaggeration', fromSlider(slider.value));
         }
     });
 
@@ -488,46 +497,46 @@ var ControlBar = function(viewer) {
     SLIDER_SPRING_COEFFICIENT.slider({
         min: 0,
         max: 100,
-        slide: function(event, ui) {
-            viewer.set('iSpringCoefficient', fromSlider(ui.value, 500));
+        slide: function(event, slider) {
+            viewer.set('iSpringCoefficient', fromSlider(slider.value, 500));
         }
     });
     SLIDER_SPRING_FRICTION.slider({
         min: 0,
         max: 100,
-        slide: function(event, ui) {
-            viewer.set('iFrictionForce', fromSlider(ui.value, 500));
+        slide: function(event, slider) {
+            viewer.set('iFrictionForce', fromSlider(slider.value, 500));
         }
     });
     SLIDER_SPRING_INNRAD.slider({
         min: 0,
         max: 150,
-        slide: function(event, ui) {
-            viewer.set('iMaxInnerShearingPx', ui.value);
+        slide: function(event, slider) {
+            viewer.set('iMaxInnerShearingPx', slider.value);
         }
     });
     SLIDER_SPRING_OUTRAD.slider({
         min: 0,
         max: 150,
-        slide: function(event, ui) {
-            viewer.set('iMaxOuterShearingPx', ui.value);
+        slide: function(event, slider) {
+            viewer.set('iMaxOuterShearingPx', slider.value);
         }
     });
     SLIDER_SPRING_FADEOUT.slider({
         min: 0,
         max: 100,
-        slide: function(event, ui) {
-            viewer.set('iStaticShearFadeOutAnimationSpeed', fromSlider(ui.value, 50));
+        slide: function(event, slider) {
+            viewer.set('iStaticShearFadeOutAnimationSpeed', fromSlider(slider.value, 50));
         }
     });
     SLIDER_HYBRID_DAMPING.slider({
         min: 0,
         max: 100,
-        slide: function(event, ui) {
-            viewer.set('iHybridDampingDuration', fromSlider(ui.value, 50));
+        slide: function(event, slider) {
+            viewer.set('iHybridDampingDuration', fromSlider(slider.value, 50));
         }
     });
-  
+
     // ROTATION 
     KNOB_ROTATION.knob({
         'width': 60,
@@ -551,7 +560,7 @@ var ControlBar = function(viewer) {
     });
 
     // update gui rotation knob, when rotated with alt+shift+mouse
-    KNOB_ROTATION.updateKnob = function(){
+    KNOB_ROTATION.updateKnob = function() {
         var alpha = viewer.view.getRotation();
         var deg = viewer.toStep(viewer.toDegrees(alpha % (2.0 * Math.PI)));
         if (alpha < 0.0) {
@@ -570,13 +579,8 @@ var ControlBar = function(viewer) {
     // DEBUG    
     SWITCH_DEBUG.click(function() {
         var checkbox = SWITCH_DEBUG.find($('input'));
-        if (viewer.get('debug')) {
-            viewer.set('debug', false);
-            checkbox.prop(CHECKED, false);
-        } else {
-            viewer.set('debug', true);
-            checkbox.prop(CHECKED, true);
-        }
+        viewer.set('debug', !viewer.get('debug'));
+        checkbox.prop(CHECKED, !viewer.get('debug'));
         viewer.render();
     });
 
@@ -584,8 +588,8 @@ var ControlBar = function(viewer) {
     SLIDER_RESOLUTION.slider({
         min: 1,
         max: 100,
-        slide: function(event, ui) {
-            viewer.set('resolution', fromSlider(ui.value, 100));
+        slide: function(event, slider) {
+            viewer.set('resolution', fromSlider(slider.value, 100));
         }
     });
 

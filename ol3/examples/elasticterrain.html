@@ -6,7 +6,7 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <link rel="stylesheet" href="../www/src/resources/css/ol.css" type="text/css">
     <link rel="stylesheet" href="../www/src/resources/css/jquery-ui.min.css" />
-    <link rel="stylesheet" href="../www/src/resources/css/app.css" type="text/css" />    
+    <link rel="stylesheet" href="../www/src/resources/css/app.css" type="text/css" />
     <link rel="stylesheet" href="../www/src/resources/css/controlbar.css" type="text/css" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css' />
     <link rel="stylesheet" href="../www/src/resources/font-awesome/css/font-awesome.min.css">
@@ -26,7 +26,7 @@
                     <div class="menue">
                         <div id="minfo" class="item">What is this?</div>
                         <div id="mdata" class="item">Data</div>
-                        <div id="mproblems" class="item">Problems</div>                                                
+                        <div id="mproblems" class="item">Problems</div>
                         <div id="mabout" class="item">About</div>
                     </div>
                     <div class="content">
@@ -87,8 +87,18 @@
                             <option value="0">ColorRamp 1</option>
                             <option value="1">ColorRamp 2</option>
                         </select>
-                         <div class="vcenter">
-                            Scale of Color Ramp
+                        <div class="switchBox">
+                            <div class="onoffswitch">
+                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox dynamicColorsSwitch" id="switchDynamicColors">
+                                <label class="onoffswitch-label" for="switchDynamicColors">
+                                    <span class="onoffswitch-inner"></span>
+                                    <span class="onoffswitch-switch"></span>
+                                </label>
+                            </div>
+                            <span class="checkboxLabel">Dynamic Colors.</span>
+                        </div>
+                        <div class="vcenter staticColorsScale">
+                            Static Colors.
                             <div class="colorSlider floatingSlider"></div>
                         </div>
                         <div class="switchBox">

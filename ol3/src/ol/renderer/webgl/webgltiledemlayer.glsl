@@ -307,6 +307,8 @@ uniform bool u_stackedCardb;
 // u_colorScale.x is lower threshold, u_colorScale.y is upper threshold
 uniform vec2 u_colorScale;
 
+uniform bool u_dynamicColors;
+
 // animated minMax Elevations in current Extent 
 uniform vec2 u_minMaxFade;
 
@@ -316,8 +318,8 @@ vec4 getFragColor(in float CELLSIZE, in float absElevation, in vec2 texCoord){
 
     float relativeElevation = 0.0;
 
-    // use dynamic colors when u_colorScale.xy == globalMAX and globalMIN
-        if(u_colorScale == vec2(-11000.0,9000.0)){
+    // use dynamic colors
+        if(u_dynamicColors){
 
             // dynamic and animated colors
             if(absElevation > 0.1){

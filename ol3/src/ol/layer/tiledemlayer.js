@@ -10,6 +10,7 @@ goog.require('ol.layer.Layer');
 ol.layer.TileDemProperty = {
   AMBIENT_LIGHT: 'ambientLight',
   COLOR_RAMP: 'colorRamp',
+  DYNAMIC_COLORS: 'dynamicColors',
   COLOR_SCALE: 'colorScale',  
   STACKED_CARDBOARD: 'stackedCardboard',
   SHADING : 'shading',
@@ -24,7 +25,6 @@ ol.layer.TileDemProperty = {
   TERRAIN_INTERACTION: 'terrainInteraction',
   TERRAIN_SHEARING: 'terrainShearing',    
   WATER_BODIES: 'waterBodies',
-
   PRELOAD: 'preload',
   USE_INTERIM_TILES_ON_ERROR: 'useInterimTilesOnError'
 };
@@ -57,6 +57,7 @@ ol.layer.TileDem = function(opt_options) {
 
   this.setAmbientLight(goog.isDef(options.ambientLight) ? options.ambientLight : 0.0);
   this.setColorRamp(goog.isDef(options.colorRamp) ? options.colorRamp : 0);  
+  this.setDynamicColors(goog.isDef(options.dynamicColors) ? options.dynamicColors : true);    
   this.setColorScale(goog.isDef(options.colorScale) ? options.colorScale : [0.0,1.0]);  
   this.setStackedCardboard(goog.isDef(options.stackedCardboard) ? options.stackedCardboard : true);  
   this.setShading(goog.isDef(options.shading) ? options.shading : true);
@@ -71,7 +72,6 @@ ol.layer.TileDem = function(opt_options) {
   this.setResolution(goog.isDef(options.resolution) ? options.resolution : 0.25);
   this.setTesting(goog.isDef(options.testing) ? options.testing : false);
   this.setWaterBodies(goog.isDef(options.waterBodies) ? options.waterBodies : true);
-
   this.setPreload(goog.isDef(options.preload) ? options.preload : 0);
   this.setUseInterimTilesOnError(goog.isDef(options.useInterimTilesOnError) ? options.useInterimTilesOnError : true);
 
@@ -161,6 +161,30 @@ goog.exportProperty(
 
 
 /**
+ * @param {boolean} dynamicColors DynamicColors.
+ */
+ol.layer.TileDem.prototype.setDynamicColors = function(dynamicColors) {
+  this.set(ol.layer.TileDemProperty.DYNAMIC_COLORS, dynamicColors);
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'setDynamicColors',
+  ol.layer.TileDem.prototype.setDynamicColors);
+/**
+ * @return {boolean} DynamicColors.
+ */
+ol.layer.TileDem.prototype.getDynamicColors = function() {
+  return /** @type {boolean} */ (
+    this.get(ol.layer.TileDemProperty.DYNAMIC_COLORS));
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'getDynamicColors',
+  ol.layer.TileDem.prototype.getDynamicColors);
+
+
+
+  /**
  * @param {number} colorRamp ColorRamp.
  */
 ol.layer.TileDem.prototype.setColorRamp = function(colorRamp) {

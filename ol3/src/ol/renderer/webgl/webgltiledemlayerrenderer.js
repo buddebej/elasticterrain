@@ -717,6 +717,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             // u_minMaxFade: animated minMax for animated color transitions
             gl.uniform2f(this.locations_.u_minMaxFade, this.animatedMinElevation, this.animatedMaxElevation);
 
+            // u_dynamicColors: dynamicColors flag
+            gl.uniform1i(this.locations_.u_dynamicColors, tileDemLayer.getDynamicColors() === true ? 1 : 0);
+
             // u_colorScale: colorScale factor to adapt color ramp dynamically
             gl.uniform2f(this.locations_.u_colorScale, tileDemLayer.getColorScale()[0], tileDemLayer.getColorScale()[1]);
 

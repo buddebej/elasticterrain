@@ -109,6 +109,7 @@ var Viewer = function(config, layers, container) {
         this.view.setZoom(this.config.get('viewZoom'));
         this.dem.setAmbientLight(this.config.get('ambientLight'));
         this.dem.setColorScale(this.config.get('colorScale'));
+        this.dem.setDynamicColors(this.config.get('dynamicColors'));        
         this.dem.setColorRamp(this.config.get('colorRamp'));
         this.dem.setStackedCardboard(this.config.get('stackedCardboard'));
         this.dem.setShading(this.config.get('shading'));

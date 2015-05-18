@@ -10,7 +10,7 @@
     <!-- build:css resources/css/app.css -->
     <link rel="stylesheet" href="resources/css/jquery-ui.min.css" type="text/css" />
     <link rel="stylesheet" href="resources/css/ol.css" type="text/css" />
-    <link rel="stylesheet" href="resources/css/app.css" type="text/css" />    
+    <link rel="stylesheet" href="resources/css/app.css" type="text/css" />
     <link rel="stylesheet" href="resources/css/controlbar.css" type="text/css" />
     <!-- /build -->
     <!-- build:remove -->
@@ -31,10 +31,9 @@
                     <div class="menue">
                         <div id="minfo" class="item">What is this?</div>
                         <div id="mdata" class="item">Data</div>
-                        <div id="mproblems" class="item">Problems</div>                        
+                        <div id="mproblems" class="item">Problems</div>
                         <div id="mabout" class="item">About</div>
-                    </div>                            
-
+                    </div>
                     <div class="content">
                         <div class="minfo topborder">
                             This is the Elastic Terrain Map.
@@ -94,8 +93,18 @@
                             <option value="0">ColorRamp 1</option>
                             <option value="1">ColorRamp 2</option>
                         </select>
-                         <div class="vcenter">
-                            Scale of Color Ramp
+                        <div class="switchBox">
+                            <div class="onoffswitch">
+                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox dynamicColorsSwitch" id="switchDynamicColors">
+                                <label class="onoffswitch-label" for="switchDynamicColors">
+                                    <span class="onoffswitch-inner"></span>
+                                    <span class="onoffswitch-switch"></span>
+                                </label>
+                            </div>
+                            <span class="checkboxLabel">Dynamic Colors.</span>
+                        </div>
+                        <div class="vcenter">
+                            Static Colors.
                             <div class="colorSlider floatingSlider"></div>
                         </div>
                         <div class="switchBox">
@@ -191,11 +200,11 @@
                     <div class="vcenter">
                         Static Shearing Fadeout
                         <div class="springFadeoutSlider floatingSlider"></div>
-                    </div> 
+                    </div>
                     <div class="vcenter">
                         Static to Hybrid Damping
                         <div class="springHybridDamping floatingSlider"></div>
-                    </div>                                            
+                    </div>
                 </div>
             </div>
             <div class="control debug">
