@@ -87,8 +87,8 @@ ol.control.MousePositionDem = function(demLayer) {
    */
   this.lastMouseMovePixel_ = null;
 
-
-
+  // hide on init before first mouse move on map
+  this.hide();
 };
 goog.inherits(ol.control.MousePositionDem, ol.control.Control);
 
