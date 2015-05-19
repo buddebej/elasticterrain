@@ -17,7 +17,7 @@ var Viewer = function(config, layers, container) {
             maxZoom: this.config.get('viewZoomConstraint')[1],
             minZoom: this.config.get('viewZoomConstraint')[0]
         }),
-        target: container,
+        target: container.attr('id'),
         renderer: 'webgl',
         layers: layers.getData()
     });
@@ -26,11 +26,17 @@ var Viewer = function(config, layers, container) {
 
     this.view.setHighlevelAreas(layers.getDem().highLevelAreas);
 
-    this.removeControls = function() {
+    this.disableControls = function() {
         $.each(this.mapControls, function(i, v) {
             this.map.removeControl(v);
         }.bind(this));
     }.bind(this);
+
+    this.enableControls = function() {
+        $.each(this.mapControls, function(i, v) {
+            this.map.addControl(v);
+        }.bind(this));
+    }.bind(this);    
 
     // render map with current config
     this.render = function() {

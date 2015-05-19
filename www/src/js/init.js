@@ -25,7 +25,7 @@ $(document).ready(function() {
 
         config = new Config();
         layers = new Layers(); 
-        viewer = new Viewer(config, layers, 'map');
+        viewer = new Viewer(config, layers, $('#map'));
         controlBar = new ControlBar(viewer);
         configManager = new ConfigManager(viewer, controlBar);
 
