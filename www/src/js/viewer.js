@@ -8,11 +8,11 @@ var Viewer = function(config, layers, container) {
     // get handle for base layer with elevation data
     this.dem = layers.getDem().data;
 
+    this.mapControls = [new ol.control.Zoom(), new ol.control.Rotate(), new ol.control.ScaleLine(), new ol.control.MousePositionDem(this.dem)];
+
     // init ol map object
     this.map = new ol.Map({
-        controls: ol.control.defaults({
-            attribution: false
-        }).extend([new ol.control.ScaleLine(), new ol.control.MousePositionDem(this.dem)]),
+        controls: this.mapControls,
         view: new ol.View({
             maxZoom: this.config.get('viewZoomConstraint')[1],
             minZoom: this.config.get('viewZoomConstraint')[0]
@@ -22,15 +22,20 @@ var Viewer = function(config, layers, container) {
         layers: layers.getData()
     });
 
+    this.view = this.map.getView();
+
+    this.view.setHighlevelAreas(layers.getDem().highLevelAreas);
+
+    this.removeControls = function() {
+        $.each(this.mapControls, function(i, v) {
+            this.map.removeControl(v);
+        }.bind(this));
+    }.bind(this);
 
     // render map with current config
     this.render = function() {
         this.dem.redraw();
     }.bind(this);
-
-    this.view = this.map.getView();
-
-    this.view.setHighlevelAreas(layers.getDem().highLevelAreas);
 
     // round given number to closest step
     this.DEGREE_STEP = 1.0;
@@ -109,7 +114,7 @@ var Viewer = function(config, layers, container) {
         this.view.setZoom(this.config.get('viewZoom'));
         this.dem.setAmbientLight(this.config.get('ambientLight'));
         this.dem.setColorScale(this.config.get('colorScale'));
-        this.dem.setDynamicColors(this.config.get('dynamicColors'));        
+        this.dem.setDynamicColors(this.config.get('dynamicColors'));
         this.dem.setColorRamp(this.config.get('colorRamp'));
         this.dem.setStackedCardboard(this.config.get('stackedCardboard'));
         this.dem.setShading(this.config.get('shading'));
@@ -138,7 +143,7 @@ var Viewer = function(config, layers, container) {
             maxOuterShearingPx: this.config.get('iMaxOuterShearingPx'),
             staticShearFadeOutAnimationSpeed: this.config.get('iStaticShearFadeOutAnimationSpeed'),
             minMaxNeighborhoodSize: this.config.get('iMinMaxNeighborhoodSize'),
-            hybridDampingDuration:  this.config.get('iHybridDampingDuration')
+            hybridDampingDuration: this.config.get('iHybridDampingDuration')
         };
     }.bind(this);
 
