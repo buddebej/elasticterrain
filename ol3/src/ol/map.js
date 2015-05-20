@@ -101,9 +101,9 @@ ol.OL3_LOGO_URL = 'data:image/png;base64,' +
  * @type {Array.<ol.RendererType>}
  */
 ol.DEFAULT_RENDERER_TYPES = [
-  ol.RendererType.CANVAS,
-  ol.RendererType.WEBGL,
-  ol.RendererType.DOM
+    ol.RendererType.CANVAS,
+    ol.RendererType.WEBGL,
+    ol.RendererType.DOM
 ];
 
 
@@ -111,10 +111,10 @@ ol.DEFAULT_RENDERER_TYPES = [
  * @enum {string}
  */
 ol.MapProperty = {
-  LAYERGROUP: 'layergroup',
-  SIZE: 'size',
-  TARGET: 'target',
-  VIEW: 'view'
+    LAYERGROUP: 'layergroup',
+    SIZE: 'size',
+    TARGET: 'target',
+    VIEW: 'view'
 };
 
 
@@ -161,312 +161,312 @@ ol.MapProperty = {
  */
 ol.Map = function(options) {
 
-  goog.base(this);
+    goog.base(this);
 
-  var optionsInternal = ol.Map.createOptionsInternal(options);
+    var optionsInternal = ol.Map.createOptionsInternal(options);
 
-  /**
-   * @type {boolean}
-   * @private
-   */
-  this.loadTilesWhileAnimating_ = goog.isDef(options.loadTilesWhileAnimating) ?
-      options.loadTilesWhileAnimating : false;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    this.loadTilesWhileAnimating_ = goog.isDef(options.loadTilesWhileAnimating) ?
+        options.loadTilesWhileAnimating : false;
 
-  /**
-   * @type {boolean}
-   * @private
-   */
-  this.loadTilesWhileInteracting_ =
-      goog.isDef(options.loadTilesWhileInteracting) ?
-          options.loadTilesWhileInteracting : false;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    this.loadTilesWhileInteracting_ =
+        goog.isDef(options.loadTilesWhileInteracting) ?
+        options.loadTilesWhileInteracting : false;
 
-  /**
-   * @private
-   * @type {number}
-   */
-  this.pixelRatio_ = goog.isDef(options.pixelRatio) ?
-      options.pixelRatio : ol.has.DEVICE_PIXEL_RATIO;
+    /**
+     * @private
+     * @type {number}
+     */
+    this.pixelRatio_ = goog.isDef(options.pixelRatio) ?
+        options.pixelRatio : ol.has.DEVICE_PIXEL_RATIO;
 
-  /**
-   * @private
-   * @type {Object}
-   */
-  this.logos_ = optionsInternal.logos;
+    /**
+     * @private
+     * @type {Object}
+     */
+    this.logos_ = optionsInternal.logos;
 
-  /**
-   * @private
-   * @type {goog.async.AnimationDelay}
-   */
-  this.animationDelay_ =
-      new goog.async.AnimationDelay(this.renderFrame_, undefined, this);
-  this.registerDisposable(this.animationDelay_);
+    /**
+     * @private
+     * @type {goog.async.AnimationDelay}
+     */
+    this.animationDelay_ =
+        new goog.async.AnimationDelay(this.renderFrame_, undefined, this);
+    this.registerDisposable(this.animationDelay_);
 
-  /**
-   * @private
-   * @type {goog.vec.Mat4.Number}
-   */
-  this.coordinateToPixelMatrix_ = goog.vec.Mat4.createNumber();
+    /**
+     * @private
+     * @type {goog.vec.Mat4.Number}
+     */
+    this.coordinateToPixelMatrix_ = goog.vec.Mat4.createNumber();
 
-  /**
-   * @private
-   * @type {goog.vec.Mat4.Number}
-   */
-  this.pixelToCoordinateMatrix_ = goog.vec.Mat4.createNumber();
+    /**
+     * @private
+     * @type {goog.vec.Mat4.Number}
+     */
+    this.pixelToCoordinateMatrix_ = goog.vec.Mat4.createNumber();
 
-  /**
-   * @private
-   * @type {number}
-   */
-  this.frameIndex_ = 0;
+    /**
+     * @private
+     * @type {number}
+     */
+    this.frameIndex_ = 0;
 
-  /**
-   * @private
-   * @type {?olx.FrameState}
-   */
-  this.frameState_ = null;
+    /**
+     * @private
+     * @type {?olx.FrameState}
+     */
+    this.frameState_ = null;
 
-  /**
-   * The extent at the previous 'moveend' event.
-   * @private
-   * @type {ol.Extent}
-   */
-  this.previousExtent_ = ol.extent.createEmpty();
+    /**
+     * The extent at the previous 'moveend' event.
+     * @private
+     * @type {ol.Extent}
+     */
+    this.previousExtent_ = ol.extent.createEmpty();
 
-  /**
-   * @private
-   * @type {goog.events.Key}
-   */
-  this.viewPropertyListenerKey_ = null;
+    /**
+     * @private
+     * @type {goog.events.Key}
+     */
+    this.viewPropertyListenerKey_ = null;
 
-  /**
-   * @private
-   * @type {Array.<goog.events.Key>}
-   */
-  this.layerGroupPropertyListenerKeys_ = null;
+    /**
+     * @private
+     * @type {Array.<goog.events.Key>}
+     */
+    this.layerGroupPropertyListenerKeys_ = null;
 
-  /**
-   * @private
-   * @type {Element}
-   */
-  this.viewport_ = goog.dom.createDom(goog.dom.TagName.DIV, 'ol-viewport');
-  this.viewport_.style.position = 'relative';
-  this.viewport_.style.overflow = 'hidden';
-  this.viewport_.style.width = '100%';
-  this.viewport_.style.height = '100%';
-  // prevent page zoom on IE >= 10 browsers
-  this.viewport_.style.msTouchAction = 'none';
-  if (ol.has.TOUCH) {
-    this.viewport_.className = 'ol-touch';
-  }
+    /**
+     * @private
+     * @type {Element}
+     */
+    this.viewport_ = goog.dom.createDom(goog.dom.TagName.DIV, 'ol-viewport');
+    this.viewport_.style.position = 'relative';
+    this.viewport_.style.overflow = 'hidden';
+    this.viewport_.style.width = '100%';
+    this.viewport_.style.height = '100%';
+    // prevent page zoom on IE >= 10 browsers
+    this.viewport_.style.msTouchAction = 'none';
+    if (ol.has.TOUCH) {
+        this.viewport_.className = 'ol-touch';
+    }
 
-  /**
-   * @private
-   * @type {Element}
-   */
-  this.overlayContainer_ = goog.dom.createDom(goog.dom.TagName.DIV,
-      'ol-overlaycontainer');
-  goog.dom.appendChild(this.viewport_, this.overlayContainer_);
+    /**
+     * @private
+     * @type {Element}
+     */
+    this.overlayContainer_ = goog.dom.createDom(goog.dom.TagName.DIV,
+        'ol-overlaycontainer');
+    goog.dom.appendChild(this.viewport_, this.overlayContainer_);
 
-  /**
-   * @private
-   * @type {Element}
-   */
-  this.overlayContainerStopEvent_ = goog.dom.createDom(goog.dom.TagName.DIV,
-      'ol-overlaycontainer-stopevent');
-  goog.events.listen(this.overlayContainerStopEvent_, [
-    goog.events.EventType.CLICK,
-    goog.events.EventType.DBLCLICK,
-    goog.events.EventType.MOUSEDOWN,
-    goog.events.EventType.TOUCHSTART,
-    goog.events.EventType.MSPOINTERDOWN,
-    ol.MapBrowserEvent.EventType.POINTERDOWN,
-    goog.userAgent.GECKO ? 'DOMMouseScroll' : 'mousewheel'
-  ], goog.events.Event.stopPropagation);
-  goog.dom.appendChild(this.viewport_, this.overlayContainerStopEvent_);
+    /**
+     * @private
+     * @type {Element}
+     */
+    this.overlayContainerStopEvent_ = goog.dom.createDom(goog.dom.TagName.DIV,
+        'ol-overlaycontainer-stopevent');
+    goog.events.listen(this.overlayContainerStopEvent_, [
+        goog.events.EventType.CLICK,
+        goog.events.EventType.DBLCLICK,
+        goog.events.EventType.MOUSEDOWN,
+        goog.events.EventType.TOUCHSTART,
+        goog.events.EventType.MSPOINTERDOWN,
+        ol.MapBrowserEvent.EventType.POINTERDOWN,
+        goog.userAgent.GECKO ? 'DOMMouseScroll' : 'mousewheel'
+    ], goog.events.Event.stopPropagation);
+    goog.dom.appendChild(this.viewport_, this.overlayContainerStopEvent_);
 
-  var mapBrowserEventHandler = new ol.MapBrowserEventHandler(this);
-  goog.events.listen(mapBrowserEventHandler,
-      goog.object.getValues(ol.MapBrowserEvent.EventType),
-      this.handleMapBrowserEvent, false, this);
-  this.registerDisposable(mapBrowserEventHandler);
+    var mapBrowserEventHandler = new ol.MapBrowserEventHandler(this);
+    goog.events.listen(mapBrowserEventHandler,
+        goog.object.getValues(ol.MapBrowserEvent.EventType),
+        this.handleMapBrowserEvent, false, this);
+    this.registerDisposable(mapBrowserEventHandler);
 
-  /**
-   * @private
-   * @type {Element|Document}
-   */
-  this.keyboardEventTarget_ = optionsInternal.keyboardEventTarget;
+    /**
+     * @private
+     * @type {Element|Document}
+     */
+    this.keyboardEventTarget_ = optionsInternal.keyboardEventTarget;
 
-  /**
-   * @private
-   * @type {goog.events.KeyHandler}
-   */
-  this.keyHandler_ = new goog.events.KeyHandler();
-  goog.events.listen(this.keyHandler_, goog.events.KeyHandler.EventType.KEY,
-      this.handleBrowserEvent, false, this);
-  this.registerDisposable(this.keyHandler_);
+    /**
+     * @private
+     * @type {goog.events.KeyHandler}
+     */
+    this.keyHandler_ = new goog.events.KeyHandler();
+    goog.events.listen(this.keyHandler_, goog.events.KeyHandler.EventType.KEY,
+        this.handleBrowserEvent, false, this);
+    this.registerDisposable(this.keyHandler_);
 
-  var mouseWheelHandler = new goog.events.MouseWheelHandler(this.viewport_);
-  goog.events.listen(mouseWheelHandler,
-      goog.events.MouseWheelHandler.EventType.MOUSEWHEEL,
-      this.handleBrowserEvent, false, this);
-  this.registerDisposable(mouseWheelHandler);
+    var mouseWheelHandler = new goog.events.MouseWheelHandler(this.viewport_);
+    goog.events.listen(mouseWheelHandler,
+        goog.events.MouseWheelHandler.EventType.MOUSEWHEEL,
+        this.handleBrowserEvent, false, this);
+    this.registerDisposable(mouseWheelHandler);
 
-  /**
-   * @type {ol.Collection.<ol.control.Control>}
-   * @private
-   */
-  this.controls_ = optionsInternal.controls;
+    /**
+     * @type {ol.Collection.<ol.control.Control>}
+     * @private
+     */
+    this.controls_ = optionsInternal.controls;
 
-  /**
-   * @type {ol.Collection.<ol.interaction.Interaction>}
-   * @private
-   */
-  this.interactions_ = optionsInternal.interactions;
+    /**
+     * @type {ol.Collection.<ol.interaction.Interaction>}
+     * @private
+     */
+    this.interactions_ = optionsInternal.interactions;
 
-  /**
-   * @type {ol.Collection.<ol.Overlay>}
-   * @private
-   */
-  this.overlays_ = optionsInternal.overlays;
+    /**
+     * @type {ol.Collection.<ol.Overlay>}
+     * @private
+     */
+    this.overlays_ = optionsInternal.overlays;
 
-  /**
-   * @type {ol.renderer.Map}
-   * @private
-   */
-  this.renderer_ =
-      new optionsInternal.rendererConstructor(this.viewport_, this);
-  this.registerDisposable(this.renderer_);
+    /**
+     * @type {ol.renderer.Map}
+     * @private
+     */
+    this.renderer_ =
+        new optionsInternal.rendererConstructor(this.viewport_, this);
+    this.registerDisposable(this.renderer_);
 
-  /**
-   * @private
-   */
-  this.viewportSizeMonitor_ = new goog.dom.ViewportSizeMonitor();
-  this.registerDisposable(this.viewportSizeMonitor_);
+    /**
+     * @private
+     */
+    this.viewportSizeMonitor_ = new goog.dom.ViewportSizeMonitor();
+    this.registerDisposable(this.viewportSizeMonitor_);
 
-  goog.events.listen(this.viewportSizeMonitor_, goog.events.EventType.RESIZE,
-      this.updateSize, false, this);
+    goog.events.listen(this.viewportSizeMonitor_, goog.events.EventType.RESIZE,
+        this.updateSize, false, this);
 
-  /**
-   * @private
-   * @type {ol.Coordinate}
-   */
-  this.focus_ = null;
+    /**
+     * @private
+     * @type {ol.Coordinate}
+     */
+    this.focus_ = null;
 
-  /**
-   * @private
-   * @type {Array.<ol.PreRenderFunction>}
-   */
-  this.preRenderFunctions_ = [];
+    /**
+     * @private
+     * @type {Array.<ol.PreRenderFunction>}
+     */
+    this.preRenderFunctions_ = [];
 
-  /**
-   * @private
-   * @type {Array.<ol.PostRenderFunction>}
-   */
-  this.postRenderFunctions_ = [];
+    /**
+     * @private
+     * @type {Array.<ol.PostRenderFunction>}
+     */
+    this.postRenderFunctions_ = [];
 
-  /**
-   * @private
-   * @type {ol.TileQueue}
-   */
-  this.tileQueue_ = new ol.TileQueue(
-      goog.bind(this.getTilePriority, this),
-      goog.bind(this.handleTileChange_, this));
+    /**
+     * @private
+     * @type {ol.TileQueue}
+     */
+    this.tileQueue_ = new ol.TileQueue(
+        goog.bind(this.getTilePriority, this),
+        goog.bind(this.handleTileChange_, this));
 
-  /**
-   * Uids of features to skip at rendering time.
-   * @type {Object.<string, boolean>}
-   * @private
-   */
-  this.skippedFeatureUids_ = {};
+    /**
+     * Uids of features to skip at rendering time.
+     * @type {Object.<string, boolean>}
+     * @private
+     */
+    this.skippedFeatureUids_ = {};
 
-  goog.events.listen(
-      this, ol.Object.getChangeEventType(ol.MapProperty.LAYERGROUP),
-      this.handleLayerGroupChanged_, false, this);
-  goog.events.listen(this, ol.Object.getChangeEventType(ol.MapProperty.VIEW),
-      this.handleViewChanged_, false, this);
-  goog.events.listen(this, ol.Object.getChangeEventType(ol.MapProperty.SIZE),
-      this.handleSizeChanged_, false, this);
-  goog.events.listen(this, ol.Object.getChangeEventType(ol.MapProperty.TARGET),
-      this.handleTargetChanged_, false, this);
+    goog.events.listen(
+        this, ol.Object.getChangeEventType(ol.MapProperty.LAYERGROUP),
+        this.handleLayerGroupChanged_, false, this);
+    goog.events.listen(this, ol.Object.getChangeEventType(ol.MapProperty.VIEW),
+        this.handleViewChanged_, false, this);
+    goog.events.listen(this, ol.Object.getChangeEventType(ol.MapProperty.SIZE),
+        this.handleSizeChanged_, false, this);
+    goog.events.listen(this, ol.Object.getChangeEventType(ol.MapProperty.TARGET),
+        this.handleTargetChanged_, false, this);
 
-  // setProperties will trigger the rendering of the map if the map
-  // is "defined" already.
-  this.setProperties(optionsInternal.values);
+    // setProperties will trigger the rendering of the map if the map
+    // is "defined" already.
+    this.setProperties(optionsInternal.values);
 
-  this.controls_.forEach(
-      /**
-       * @param {ol.control.Control} control Control.
-       * @this {ol.Map}
-       */
-      function(control) {
-        control.setMap(this);
-      }, this);
+    this.controls_.forEach(
+        /**
+         * @param {ol.control.Control} control Control.
+         * @this {ol.Map}
+         */
+        function(control) {
+            control.setMap(this);
+        }, this);
 
-  goog.events.listen(this.controls_, ol.CollectionEventType.ADD,
-      /**
-       * @param {ol.CollectionEvent} event Collection event.
-       */
-      function(event) {
-        event.element.setMap(this);
-      }, false, this);
+    goog.events.listen(this.controls_, ol.CollectionEventType.ADD,
+        /**
+         * @param {ol.CollectionEvent} event Collection event.
+         */
+        function(event) {
+            event.element.setMap(this);
+        }, false, this);
 
-  goog.events.listen(this.controls_, ol.CollectionEventType.REMOVE,
-      /**
-       * @param {ol.CollectionEvent} event Collection event.
-       */
-      function(event) {
-        event.element.setMap(null);
-      }, false, this);
+    goog.events.listen(this.controls_, ol.CollectionEventType.REMOVE,
+        /**
+         * @param {ol.CollectionEvent} event Collection event.
+         */
+        function(event) {
+            event.element.setMap(null);
+        }, false, this);
 
-  this.interactions_.forEach(
-      /**
-       * @param {ol.interaction.Interaction} interaction Interaction.
-       * @this {ol.Map}
-       */
-      function(interaction) {
-        interaction.setMap(this);
-      }, this);
+    this.interactions_.forEach(
+        /**
+         * @param {ol.interaction.Interaction} interaction Interaction.
+         * @this {ol.Map}
+         */
+        function(interaction) {
+            interaction.setMap(this);
+        }, this);
 
-  goog.events.listen(this.interactions_, ol.CollectionEventType.ADD,
-      /**
-       * @param {ol.CollectionEvent} event Collection event.
-       */
-      function(event) {
-        event.element.setMap(this);
-      }, false, this);
+    goog.events.listen(this.interactions_, ol.CollectionEventType.ADD,
+        /**
+         * @param {ol.CollectionEvent} event Collection event.
+         */
+        function(event) {
+            event.element.setMap(this);
+        }, false, this);
 
-  goog.events.listen(this.interactions_, ol.CollectionEventType.REMOVE,
-      /**
-       * @param {ol.CollectionEvent} event Collection event.
-       */
-      function(event) {
-        event.element.setMap(null);
-      }, false, this);
+    goog.events.listen(this.interactions_, ol.CollectionEventType.REMOVE,
+        /**
+         * @param {ol.CollectionEvent} event Collection event.
+         */
+        function(event) {
+            event.element.setMap(null);
+        }, false, this);
 
-  this.overlays_.forEach(
-      /**
-       * @param {ol.Overlay} overlay Overlay.
-       * @this {ol.Map}
-       */
-      function(overlay) {
-        overlay.setMap(this);
-      }, this);
+    this.overlays_.forEach(
+        /**
+         * @param {ol.Overlay} overlay Overlay.
+         * @this {ol.Map}
+         */
+        function(overlay) {
+            overlay.setMap(this);
+        }, this);
 
-  goog.events.listen(this.overlays_, ol.CollectionEventType.ADD,
-      /**
-       * @param {ol.CollectionEvent} event Collection event.
-       */
-      function(event) {
-        event.element.setMap(this);
-      }, false, this);
+    goog.events.listen(this.overlays_, ol.CollectionEventType.ADD,
+        /**
+         * @param {ol.CollectionEvent} event Collection event.
+         */
+        function(event) {
+            event.element.setMap(this);
+        }, false, this);
 
-  goog.events.listen(this.overlays_, ol.CollectionEventType.REMOVE,
-      /**
-       * @param {ol.CollectionEvent} event Collection event.
-       */
-      function(event) {
-        event.element.setMap(null);
-      }, false, this);
+    goog.events.listen(this.overlays_, ol.CollectionEventType.REMOVE,
+        /**
+         * @param {ol.CollectionEvent} event Collection event.
+         */
+        function(event) {
+            event.element.setMap(null);
+        }, false, this);
 
 };
 goog.inherits(ol.Map, ol.Object);
@@ -478,9 +478,9 @@ goog.inherits(ol.Map, ol.Object);
  * @api stable
  */
 ol.Map.prototype.addControl = function(control) {
-  var controls = this.getControls();
-  goog.asserts.assert(goog.isDef(controls));
-  controls.push(control);
+    var controls = this.getControls();
+    goog.asserts.assert(goog.isDef(controls));
+    controls.push(control);
 };
 
 
@@ -490,9 +490,9 @@ ol.Map.prototype.addControl = function(control) {
  * @api stable
  */
 ol.Map.prototype.addInteraction = function(interaction) {
-  var interactions = this.getInteractions();
-  goog.asserts.assert(goog.isDef(interactions));
-  interactions.push(interaction);
+    var interactions = this.getInteractions();
+    goog.asserts.assert(goog.isDef(interactions));
+    interactions.push(interaction);
 };
 
 
@@ -502,8 +502,8 @@ ol.Map.prototype.addInteraction = function(interaction) {
  * @api stable
  */
 ol.Map.prototype.addLayer = function(layer) {
-  var layers = this.getLayerGroup().getLayers();
-  layers.push(layer);
+    var layers = this.getLayerGroup().getLayers();
+    layers.push(layer);
 };
 
 
@@ -513,9 +513,9 @@ ol.Map.prototype.addLayer = function(layer) {
  * @api stable
  */
 ol.Map.prototype.addOverlay = function(overlay) {
-  var overlays = this.getOverlays();
-  goog.asserts.assert(goog.isDef(overlays));
-  overlays.push(overlay);
+    var overlays = this.getOverlays();
+    goog.asserts.assert(goog.isDef(overlays));
+    overlays.push(overlay);
 };
 
 
@@ -527,8 +527,8 @@ ol.Map.prototype.addOverlay = function(overlay) {
  * @api
  */
 ol.Map.prototype.beforeRender = function(var_args) {
-  this.render();
-  Array.prototype.push.apply(this.preRenderFunctions_, arguments);
+    this.render();
+    Array.prototype.push.apply(this.preRenderFunctions_, arguments);
 };
 
 
@@ -537,7 +537,7 @@ ol.Map.prototype.beforeRender = function(var_args) {
  * @return {boolean} Whether the preRenderFunction has been found and removed.
  */
 ol.Map.prototype.removePreRenderFunction = function(preRenderFunction) {
-  return goog.array.remove(this.preRenderFunctions_, preRenderFunction);
+    return goog.array.remove(this.preRenderFunctions_, preRenderFunction);
 };
 
 
@@ -546,9 +546,20 @@ ol.Map.prototype.removePreRenderFunction = function(preRenderFunction) {
  * @inheritDoc
  */
 ol.Map.prototype.disposeInternal = function() {
-  goog.dom.removeNode(this.viewport_);
-  goog.base(this, 'disposeInternal');
+    goog.dom.removeNode(this.viewport_);
+    goog.base(this, 'disposeInternal');
 };
+
+/**
+ * @public
+ */
+ol.Map.prototype.destroy = function() {
+    this.disposeInternal();
+};
+goog.exportProperty(
+    ol.Map.prototype,
+    'destroy',
+    ol.Map.prototype.destroy);
 
 
 /**
@@ -575,18 +586,18 @@ ol.Map.prototype.disposeInternal = function() {
  */
 ol.Map.prototype.forEachFeatureAtPixel =
     function(pixel, callback, opt_this, opt_layerFilter, opt_this2) {
-  if (goog.isNull(this.frameState_)) {
-    return;
-  }
-  var coordinate = this.getCoordinateFromPixel(pixel);
-  var thisArg = goog.isDef(opt_this) ? opt_this : null;
-  var layerFilter = goog.isDef(opt_layerFilter) ?
-      opt_layerFilter : goog.functions.TRUE;
-  var thisArg2 = goog.isDef(opt_this2) ? opt_this2 : null;
-  return this.renderer_.forEachFeatureAtPixel(
-      coordinate, this.frameState_, callback, thisArg,
-      layerFilter, thisArg2);
-};
+        if (goog.isNull(this.frameState_)) {
+            return;
+        }
+        var coordinate = this.getCoordinateFromPixel(pixel);
+        var thisArg = goog.isDef(opt_this) ? opt_this : null;
+        var layerFilter = goog.isDef(opt_layerFilter) ?
+            opt_layerFilter : goog.functions.TRUE;
+        var thisArg2 = goog.isDef(opt_this2) ? opt_this2 : null;
+        return this.renderer_.forEachFeatureAtPixel(
+            coordinate, this.frameState_, callback, thisArg,
+            layerFilter, thisArg2);
+    };
 
 
 /**
@@ -596,7 +607,7 @@ ol.Map.prototype.forEachFeatureAtPixel =
  * @api stable
  */
 ol.Map.prototype.getEventCoordinate = function(event) {
-  return this.getCoordinateFromPixel(this.getEventPixel(event));
+    return this.getCoordinateFromPixel(this.getEventPixel(event));
 };
 
 
@@ -607,22 +618,22 @@ ol.Map.prototype.getEventCoordinate = function(event) {
  * @api stable
  */
 ol.Map.prototype.getEventPixel = function(event) {
-  // goog.style.getRelativePosition is based on event.targetTouches,
-  // but touchend and touchcancel events have no targetTouches when
-  // the last finger is removed from the screen.
-  // So we ourselves compute the position of touch events.
-  // See https://github.com/google/closure-library/pull/323
-  if (goog.isDef(event.changedTouches)) {
-    var touch = event.changedTouches[0];
-    var viewportPosition = goog.style.getClientPosition(this.viewport_);
-    return [
-      touch.clientX - viewportPosition.x,
-      touch.clientY - viewportPosition.y
-    ];
-  } else {
-    var eventPosition = goog.style.getRelativePosition(event, this.viewport_);
-    return [eventPosition.x, eventPosition.y];
-  }
+    // goog.style.getRelativePosition is based on event.targetTouches,
+    // but touchend and touchcancel events have no targetTouches when
+    // the last finger is removed from the screen.
+    // So we ourselves compute the position of touch events.
+    // See https://github.com/google/closure-library/pull/323
+    if (goog.isDef(event.changedTouches)) {
+        var touch = event.changedTouches[0];
+        var viewportPosition = goog.style.getClientPosition(this.viewport_);
+        return [
+            touch.clientX - viewportPosition.x,
+            touch.clientY - viewportPosition.y
+        ];
+    } else {
+        var eventPosition = goog.style.getRelativePosition(event, this.viewport_);
+        return [eventPosition.x, eventPosition.y];
+    }
 };
 
 
@@ -636,8 +647,8 @@ ol.Map.prototype.getEventPixel = function(event) {
  * @api stable
  */
 ol.Map.prototype.getTarget = function() {
-  return /** @type {Element|string|undefined} */ (
-      this.get(ol.MapProperty.TARGET));
+    return /** @type {Element|string|undefined} */ (
+        this.get(ol.MapProperty.TARGET));
 };
 goog.exportProperty(
     ol.Map.prototype,
@@ -653,8 +664,8 @@ goog.exportProperty(
  * @api
  */
 ol.Map.prototype.getTargetElement = function() {
-  var target = this.getTarget();
-  return goog.isDef(target) ? goog.dom.getElement(target) : null;
+    var target = this.getTarget();
+    return goog.isDef(target) ? goog.dom.getElement(target) : null;
 };
 
 
@@ -664,13 +675,13 @@ ol.Map.prototype.getTargetElement = function() {
  * @api stable
  */
 ol.Map.prototype.getCoordinateFromPixel = function(pixel) {
-  var frameState = this.frameState_;
-  if (goog.isNull(frameState)) {
-    return null;
-  } else {
-    var vec2 = pixel.slice();
-    return ol.vec.Mat4.multVec2(frameState.pixelToCoordinateMatrix, vec2, vec2);
-  }
+    var frameState = this.frameState_;
+    if (goog.isNull(frameState)) {
+        return null;
+    } else {
+        var vec2 = pixel.slice();
+        return ol.vec.Mat4.multVec2(frameState.pixelToCoordinateMatrix, vec2, vec2);
+    }
 };
 
 
@@ -679,7 +690,7 @@ ol.Map.prototype.getCoordinateFromPixel = function(pixel) {
  * @api stable
  */
 ol.Map.prototype.getControls = function() {
-  return this.controls_;
+    return this.controls_;
 };
 
 
@@ -688,7 +699,7 @@ ol.Map.prototype.getControls = function() {
  * @api stable
  */
 ol.Map.prototype.getOverlays = function() {
-  return this.overlays_;
+    return this.overlays_;
 };
 
 
@@ -702,7 +713,7 @@ ol.Map.prototype.getOverlays = function() {
  * @api stable
  */
 ol.Map.prototype.getInteractions = function() {
-  return this.interactions_;
+    return this.interactions_;
 };
 
 
@@ -713,7 +724,7 @@ ol.Map.prototype.getInteractions = function() {
  * @api stable
  */
 ol.Map.prototype.getLayerGroup = function() {
-  return /** @type {ol.layer.Group} */ (this.get(ol.MapProperty.LAYERGROUP));
+    return /** @type {ol.layer.Group} */ (this.get(ol.MapProperty.LAYERGROUP));
 };
 goog.exportProperty(
     ol.Map.prototype,
@@ -727,8 +738,8 @@ goog.exportProperty(
  * @api stable
  */
 ol.Map.prototype.getLayers = function() {
-  var layers = this.getLayerGroup().getLayers();
-  return layers;
+    var layers = this.getLayerGroup().getLayers();
+    return layers;
 };
 
 
@@ -738,13 +749,13 @@ ol.Map.prototype.getLayers = function() {
  * @api stable
  */
 ol.Map.prototype.getPixelFromCoordinate = function(coordinate) {
-  var frameState = this.frameState_;
-  if (goog.isNull(frameState)) {
-    return null;
-  } else {
-    var vec2 = coordinate.slice(0, 2);
-    return ol.vec.Mat4.multVec2(frameState.coordinateToPixelMatrix, vec2, vec2);
-  }
+    var frameState = this.frameState_;
+    if (goog.isNull(frameState)) {
+        return null;
+    } else {
+        var vec2 = coordinate.slice(0, 2);
+        return ol.vec.Mat4.multVec2(frameState.coordinateToPixelMatrix, vec2, vec2);
+    }
 };
 
 
@@ -753,7 +764,7 @@ ol.Map.prototype.getPixelFromCoordinate = function(coordinate) {
  * @return {ol.renderer.Map} Renderer
  */
 ol.Map.prototype.getRenderer = function() {
-  return this.renderer_;
+    return this.renderer_;
 };
 
 
@@ -764,7 +775,7 @@ ol.Map.prototype.getRenderer = function() {
  * @api stable
  */
 ol.Map.prototype.getSize = function() {
-  return /** @type {ol.Size|undefined} */ (this.get(ol.MapProperty.SIZE));
+    return /** @type {ol.Size|undefined} */ (this.get(ol.MapProperty.SIZE));
 };
 goog.exportProperty(
     ol.Map.prototype,
@@ -780,7 +791,7 @@ goog.exportProperty(
  * @api stable
  */
 ol.Map.prototype.getView = function() {
-  return /** @type {ol.View} */ (this.get(ol.MapProperty.VIEW));
+    return /** @type {ol.View} */ (this.get(ol.MapProperty.VIEW));
 };
 goog.exportProperty(
     ol.Map.prototype,
@@ -793,7 +804,7 @@ goog.exportProperty(
  * @api stable
  */
 ol.Map.prototype.getViewport = function() {
-  return this.viewport_;
+    return this.viewport_;
 };
 
 
@@ -804,7 +815,7 @@ ol.Map.prototype.getViewport = function() {
  * events.
  */
 ol.Map.prototype.getOverlayContainer = function() {
-  return this.overlayContainer_;
+    return this.overlayContainer_;
 };
 
 
@@ -815,7 +826,7 @@ ol.Map.prototype.getOverlayContainer = function() {
  * {@link ol.MapBrowserEvent}.
  */
 ol.Map.prototype.getOverlayContainerStopEvent = function() {
-  return this.overlayContainerStopEvent_;
+    return this.overlayContainerStopEvent_;
 };
 
 
@@ -828,27 +839,27 @@ ol.Map.prototype.getOverlayContainerStopEvent = function() {
  */
 ol.Map.prototype.getTilePriority =
     function(tile, tileSourceKey, tileCenter, tileResolution) {
-  // Filter out tiles at higher zoom levels than the current zoom level, or that
-  // are outside the visible extent.
-  var frameState = this.frameState_;
-  if (goog.isNull(frameState) || !(tileSourceKey in frameState.wantedTiles)) {
-    return ol.structs.PriorityQueue.DROP;
-  }
-  var coordKey = ol.tilecoord.toString(tile.tileCoord);
-  if (!frameState.wantedTiles[tileSourceKey][coordKey]) {
-    return ol.structs.PriorityQueue.DROP;
-  }
-  // Prioritize the highest zoom level tiles closest to the focus.
-  // Tiles at higher zoom levels are prioritized using Math.log(tileResolution).
-  // Within a zoom level, tiles are prioritized by the distance in pixels
-  // between the center of the tile and the focus.  The factor of 65536 means
-  // that the prioritization should behave as desired for tiles up to
-  // 65536 * Math.log(2) = 45426 pixels from the focus.
-  var deltaX = tileCenter[0] - frameState.focus[0];
-  var deltaY = tileCenter[1] - frameState.focus[1];
-  return 65536 * Math.log(tileResolution) +
-      Math.sqrt(deltaX * deltaX + deltaY * deltaY) / tileResolution;
-};
+        // Filter out tiles at higher zoom levels than the current zoom level, or that
+        // are outside the visible extent.
+        var frameState = this.frameState_;
+        if (goog.isNull(frameState) || !(tileSourceKey in frameState.wantedTiles)) {
+            return ol.structs.PriorityQueue.DROP;
+        }
+        var coordKey = ol.tilecoord.toString(tile.tileCoord);
+        if (!frameState.wantedTiles[tileSourceKey][coordKey]) {
+            return ol.structs.PriorityQueue.DROP;
+        }
+        // Prioritize the highest zoom level tiles closest to the focus.
+        // Tiles at higher zoom levels are prioritized using Math.log(tileResolution).
+        // Within a zoom level, tiles are prioritized by the distance in pixels
+        // between the center of the tile and the focus.  The factor of 65536 means
+        // that the prioritization should behave as desired for tiles up to
+        // 65536 * Math.log(2) = 45426 pixels from the focus.
+        var deltaX = tileCenter[0] - frameState.focus[0];
+        var deltaY = tileCenter[1] - frameState.focus[1];
+        return 65536 * Math.log(tileResolution) +
+            Math.sqrt(deltaX * deltaX + deltaY * deltaY) / tileResolution;
+    };
 
 
 /**
@@ -856,9 +867,9 @@ ol.Map.prototype.getTilePriority =
  * @param {string=} opt_type Type.
  */
 ol.Map.prototype.handleBrowserEvent = function(browserEvent, opt_type) {
-  var type = opt_type || browserEvent.type;
-  var mapBrowserEvent = new ol.MapBrowserEvent(type, this, browserEvent);
-  this.handleMapBrowserEvent(mapBrowserEvent);
+    var type = opt_type || browserEvent.type;
+    var mapBrowserEvent = new ol.MapBrowserEvent(type, this, browserEvent);
+    this.handleMapBrowserEvent(mapBrowserEvent);
 };
 
 
@@ -866,29 +877,29 @@ ol.Map.prototype.handleBrowserEvent = function(browserEvent, opt_type) {
  * @param {ol.MapBrowserEvent} mapBrowserEvent The event to handle.
  */
 ol.Map.prototype.handleMapBrowserEvent = function(mapBrowserEvent) {
-  if (goog.isNull(this.frameState_)) {
-    // With no view defined, we cannot translate pixels into geographical
-    // coordinates so interactions cannot be used.
-    return;
-  }
-  this.focus_ = mapBrowserEvent.coordinate;
-  mapBrowserEvent.frameState = this.frameState_;
-  var interactions = this.getInteractions();
-  goog.asserts.assert(goog.isDef(interactions));
-  var interactionsArray = interactions.getArray();
-  var i;
-  if (this.dispatchEvent(mapBrowserEvent) !== false) {
-    for (i = interactionsArray.length - 1; i >= 0; i--) {
-      var interaction = interactionsArray[i];
-      if (!interaction.getActive()) {
-        continue;
-      }
-      var cont = interaction.handleEvent(mapBrowserEvent);
-      if (!cont) {
-        break;
-      }
+    if (goog.isNull(this.frameState_)) {
+        // With no view defined, we cannot translate pixels into geographical
+        // coordinates so interactions cannot be used.
+        return;
     }
-  }
+    this.focus_ = mapBrowserEvent.coordinate;
+    mapBrowserEvent.frameState = this.frameState_;
+    var interactions = this.getInteractions();
+    goog.asserts.assert(goog.isDef(interactions));
+    var interactionsArray = interactions.getArray();
+    var i;
+    if (this.dispatchEvent(mapBrowserEvent) !== false) {
+        for (i = interactionsArray.length - 1; i >= 0; i--) {
+            var interaction = interactionsArray[i];
+            if (!interaction.getActive()) {
+                continue;
+            }
+            var cont = interaction.handleEvent(mapBrowserEvent);
+            if (!cont) {
+                break;
+            }
+        }
+    }
 };
 
 
@@ -897,50 +908,50 @@ ol.Map.prototype.handleMapBrowserEvent = function(mapBrowserEvent) {
  */
 ol.Map.prototype.handlePostRender = function() {
 
-  var frameState = this.frameState_;
+    var frameState = this.frameState_;
 
-  // Manage the tile queue
-  // Image loads are expensive and a limited resource, so try to use them
-  // efficiently:
-  // * When the view is static we allow a large number of parallel tile loads
-  //   to complete the frame as quickly as possible.
-  // * When animating or interacting, image loads can cause janks, so we reduce
-  //   the maximum number of loads per frame and limit the number of parallel
-  //   tile loads to remain reactive to view changes and to reduce the chance of
-  //   loading tiles that will quickly disappear from view.
-  var tileQueue = this.tileQueue_;
-  if (!tileQueue.isEmpty()) {
-    var maxTotalLoading = 16;
-    var maxNewLoads = maxTotalLoading;
-    var tileSourceCount = 0;
-    if (!goog.isNull(frameState)) {
-      var hints = frameState.viewHints;
-      if (hints[ol.ViewHint.ANIMATING]) {
-        maxTotalLoading = this.loadTilesWhileAnimating_ === true ?
-            8 : 0;
-        maxNewLoads = 2;
-      }
-      if (hints[ol.ViewHint.INTERACTING]) {
-        maxTotalLoading = this.loadTilesWhileInteracting_ === true ?
-            8 : 0;
-        maxNewLoads = 2;
-      }
-      tileSourceCount = goog.object.getCount(frameState.wantedTiles);
+    // Manage the tile queue
+    // Image loads are expensive and a limited resource, so try to use them
+    // efficiently:
+    // * When the view is static we allow a large number of parallel tile loads
+    //   to complete the frame as quickly as possible.
+    // * When animating or interacting, image loads can cause janks, so we reduce
+    //   the maximum number of loads per frame and limit the number of parallel
+    //   tile loads to remain reactive to view changes and to reduce the chance of
+    //   loading tiles that will quickly disappear from view.
+    var tileQueue = this.tileQueue_;
+    if (!tileQueue.isEmpty()) {
+        var maxTotalLoading = 16;
+        var maxNewLoads = maxTotalLoading;
+        var tileSourceCount = 0;
+        if (!goog.isNull(frameState)) {
+            var hints = frameState.viewHints;
+            if (hints[ol.ViewHint.ANIMATING]) {
+                maxTotalLoading = this.loadTilesWhileAnimating_ === true ?
+                    8 : 0;
+                maxNewLoads = 2;
+            }
+            if (hints[ol.ViewHint.INTERACTING]) {
+                maxTotalLoading = this.loadTilesWhileInteracting_ === true ?
+                    8 : 0;
+                maxNewLoads = 2;
+            }
+            tileSourceCount = goog.object.getCount(frameState.wantedTiles);
+        }
+        maxTotalLoading *= tileSourceCount;
+        maxNewLoads *= tileSourceCount;
+        if (tileQueue.getTilesLoading() < maxTotalLoading) {
+            tileQueue.reprioritize(); // FIXME only call if view has changed
+            tileQueue.loadMoreTiles(maxTotalLoading, maxNewLoads);
+        }
     }
-    maxTotalLoading *= tileSourceCount;
-    maxNewLoads *= tileSourceCount;
-    if (tileQueue.getTilesLoading() < maxTotalLoading) {
-      tileQueue.reprioritize(); // FIXME only call if view has changed
-      tileQueue.loadMoreTiles(maxTotalLoading, maxNewLoads);
-    }
-  }
 
-  var postRenderFunctions = this.postRenderFunctions_;
-  var i, ii;
-  for (i = 0, ii = postRenderFunctions.length; i < ii; ++i) {
-    postRenderFunctions[i](this, frameState);
-  }
-  postRenderFunctions.length = 0;
+    var postRenderFunctions = this.postRenderFunctions_;
+    var i, ii;
+    for (i = 0, ii = postRenderFunctions.length; i < ii; ++i) {
+        postRenderFunctions[i](this, frameState);
+    }
+    postRenderFunctions.length = 0;
 };
 
 
@@ -948,7 +959,7 @@ ol.Map.prototype.handlePostRender = function() {
  * @private
  */
 ol.Map.prototype.handleSizeChanged_ = function() {
-  this.render();
+    this.render();
 };
 
 
@@ -956,34 +967,34 @@ ol.Map.prototype.handleSizeChanged_ = function() {
  * @private
  */
 ol.Map.prototype.handleTargetChanged_ = function() {
-  // target may be undefined, null, a string or an Element.
-  // If it's a string we convert it to an Element before proceeding.
-  // If it's not now an Element we remove the viewport from the DOM.
-  // If it's an Element we append the viewport element to it.
+    // target may be undefined, null, a string or an Element.
+    // If it's a string we convert it to an Element before proceeding.
+    // If it's not now an Element we remove the viewport from the DOM.
+    // If it's an Element we append the viewport element to it.
 
-  var target = this.getTarget();
+    var target = this.getTarget();
 
-  /**
-   * @type {Element}
-   */
-  var targetElement = goog.isDef(target) ?
-      goog.dom.getElement(target) : null;
+    /**
+     * @type {Element}
+     */
+    var targetElement = goog.isDef(target) ?
+        goog.dom.getElement(target) : null;
 
-  this.keyHandler_.detach();
+    this.keyHandler_.detach();
 
-  if (goog.isNull(targetElement)) {
-    goog.dom.removeNode(this.viewport_);
-  } else {
-    goog.dom.appendChild(targetElement, this.viewport_);
+    if (goog.isNull(targetElement)) {
+        goog.dom.removeNode(this.viewport_);
+    } else {
+        goog.dom.appendChild(targetElement, this.viewport_);
 
-    var keyboardEventTarget = goog.isNull(this.keyboardEventTarget_) ?
-        targetElement : this.keyboardEventTarget_;
-    this.keyHandler_.attach(keyboardEventTarget);
-  }
+        var keyboardEventTarget = goog.isNull(this.keyboardEventTarget_) ?
+            targetElement : this.keyboardEventTarget_;
+        this.keyHandler_.attach(keyboardEventTarget);
+    }
 
-  this.updateSize();
-  // updateSize calls setSize, so no need to call this.render
-  // ourselves here.
+    this.updateSize();
+    // updateSize calls setSize, so no need to call this.render
+    // ourselves here.
 };
 
 
@@ -991,7 +1002,7 @@ ol.Map.prototype.handleTargetChanged_ = function() {
  * @private
  */
 ol.Map.prototype.handleTileChange_ = function() {
-  this.render();
+    this.render();
 };
 
 
@@ -999,7 +1010,7 @@ ol.Map.prototype.handleTileChange_ = function() {
  * @private
  */
 ol.Map.prototype.handleViewPropertyChanged_ = function() {
-  this.render();
+    this.render();
 };
 
 
@@ -1007,17 +1018,17 @@ ol.Map.prototype.handleViewPropertyChanged_ = function() {
  * @private
  */
 ol.Map.prototype.handleViewChanged_ = function() {
-  if (!goog.isNull(this.viewPropertyListenerKey_)) {
-    goog.events.unlistenByKey(this.viewPropertyListenerKey_);
-    this.viewPropertyListenerKey_ = null;
-  }
-  var view = this.getView();
-  if (!goog.isNull(view)) {
-    this.viewPropertyListenerKey_ = goog.events.listen(
-        view, ol.ObjectEventType.PROPERTYCHANGE,
-        this.handleViewPropertyChanged_, false, this);
-  }
-  this.render();
+    if (!goog.isNull(this.viewPropertyListenerKey_)) {
+        goog.events.unlistenByKey(this.viewPropertyListenerKey_);
+        this.viewPropertyListenerKey_ = null;
+    }
+    var view = this.getView();
+    if (!goog.isNull(view)) {
+        this.viewPropertyListenerKey_ = goog.events.listen(
+            view, ol.ObjectEventType.PROPERTYCHANGE,
+            this.handleViewPropertyChanged_, false, this);
+    }
+    this.render();
 };
 
 
@@ -1026,8 +1037,8 @@ ol.Map.prototype.handleViewChanged_ = function() {
  * @private
  */
 ol.Map.prototype.handleLayerGroupMemberChanged_ = function(event) {
-  goog.asserts.assertInstanceof(event, goog.events.Event);
-  this.render();
+    goog.asserts.assertInstanceof(event, goog.events.Event);
+    this.render();
 };
 
 
@@ -1036,8 +1047,8 @@ ol.Map.prototype.handleLayerGroupMemberChanged_ = function(event) {
  * @private
  */
 ol.Map.prototype.handleLayerGroupPropertyChanged_ = function(event) {
-  goog.asserts.assertInstanceof(event, ol.ObjectEvent);
-  this.render();
+    goog.asserts.assertInstanceof(event, ol.ObjectEvent);
+    this.render();
 };
 
 
@@ -1045,25 +1056,25 @@ ol.Map.prototype.handleLayerGroupPropertyChanged_ = function(event) {
  * @private
  */
 ol.Map.prototype.handleLayerGroupChanged_ = function() {
-  if (!goog.isNull(this.layerGroupPropertyListenerKeys_)) {
-    var length = this.layerGroupPropertyListenerKeys_.length;
-    for (var i = 0; i < length; ++i) {
-      goog.events.unlistenByKey(this.layerGroupPropertyListenerKeys_[i]);
+    if (!goog.isNull(this.layerGroupPropertyListenerKeys_)) {
+        var length = this.layerGroupPropertyListenerKeys_.length;
+        for (var i = 0; i < length; ++i) {
+            goog.events.unlistenByKey(this.layerGroupPropertyListenerKeys_[i]);
+        }
+        this.layerGroupPropertyListenerKeys_ = null;
     }
-    this.layerGroupPropertyListenerKeys_ = null;
-  }
-  var layerGroup = this.getLayerGroup();
-  if (goog.isDefAndNotNull(layerGroup)) {
-    this.layerGroupPropertyListenerKeys_ = [
-      goog.events.listen(
-          layerGroup, ol.ObjectEventType.PROPERTYCHANGE,
-          this.handleLayerGroupPropertyChanged_, false, this),
-      goog.events.listen(
-          layerGroup, goog.events.EventType.CHANGE,
-          this.handleLayerGroupMemberChanged_, false, this)
-    ];
-  }
-  this.render();
+    var layerGroup = this.getLayerGroup();
+    if (goog.isDefAndNotNull(layerGroup)) {
+        this.layerGroupPropertyListenerKeys_ = [
+            goog.events.listen(
+                layerGroup, ol.ObjectEventType.PROPERTYCHANGE,
+                this.handleLayerGroupPropertyChanged_, false, this),
+            goog.events.listen(
+                layerGroup, goog.events.EventType.CHANGE,
+                this.handleLayerGroupMemberChanged_, false, this)
+        ];
+    }
+    this.render();
 };
 
 
@@ -1074,21 +1085,21 @@ ol.Map.prototype.handleLayerGroupChanged_ = function() {
  * @return {boolean} Is defined.
  */
 ol.Map.prototype.isDef = function() {
-  if (!goog.dom.contains(document, this.viewport_)) {
-    return false;
-  }
-  if (!goog.style.isElementShown(this.viewport_)) {
-    return false;
-  }
-  var size = this.getSize();
-  if (!goog.isDefAndNotNull(size) || size[0] <= 0 || size[1] <= 0) {
-    return false;
-  }
-  var view = this.getView();
-  if (goog.isNull(view) || !view.isDef()) {
-    return false;
-  }
-  return true;
+    if (!goog.dom.contains(document, this.viewport_)) {
+        return false;
+    }
+    if (!goog.style.isElementShown(this.viewport_)) {
+        return false;
+    }
+    var size = this.getSize();
+    if (!goog.isDefAndNotNull(size) || size[0] <= 0 || size[1] <= 0) {
+        return false;
+    }
+    var view = this.getView();
+    if (goog.isNull(view) || !view.isDef()) {
+        return false;
+    }
+    return true;
 };
 
 
@@ -1096,7 +1107,7 @@ ol.Map.prototype.isDef = function() {
  * @return {boolean} Is rendered.
  */
 ol.Map.prototype.isRendered = function() {
-  return !goog.isNull(this.frameState_);
+    return !goog.isNull(this.frameState_);
 };
 
 
@@ -1105,7 +1116,7 @@ ol.Map.prototype.isRendered = function() {
  * @api stable
  */
 ol.Map.prototype.renderSync = function() {
-  this.animationDelay_.fire();
+    this.animationDelay_.fire();
 };
 
 
@@ -1115,9 +1126,9 @@ ol.Map.prototype.renderSync = function() {
  * @api stable
  */
 ol.Map.prototype.render = function() {
-  if (!this.animationDelay_.isActive()) {
-    this.animationDelay_.start();
-  }
+    if (!this.animationDelay_.isActive()) {
+        this.animationDelay_.start();
+    }
 };
 
 
@@ -1129,12 +1140,12 @@ ol.Map.prototype.render = function() {
  * @api stable
  */
 ol.Map.prototype.removeControl = function(control) {
-  var controls = this.getControls();
-  goog.asserts.assert(goog.isDef(controls));
-  if (goog.isDef(controls.remove(control))) {
-    return control;
-  }
-  return undefined;
+    var controls = this.getControls();
+    goog.asserts.assert(goog.isDef(controls));
+    if (goog.isDef(controls.remove(control))) {
+        return control;
+    }
+    return undefined;
 };
 
 
@@ -1146,13 +1157,13 @@ ol.Map.prototype.removeControl = function(control) {
  * @api stable
  */
 ol.Map.prototype.removeInteraction = function(interaction) {
-  var removed;
-  var interactions = this.getInteractions();
-  goog.asserts.assert(goog.isDef(interactions));
-  if (goog.isDef(interactions.remove(interaction))) {
-    removed = interaction;
-  }
-  return removed;
+    var removed;
+    var interactions = this.getInteractions();
+    goog.asserts.assert(goog.isDef(interactions));
+    if (goog.isDef(interactions.remove(interaction))) {
+        removed = interaction;
+    }
+    return removed;
 };
 
 
@@ -1164,8 +1175,8 @@ ol.Map.prototype.removeInteraction = function(interaction) {
  * @api stable
  */
 ol.Map.prototype.removeLayer = function(layer) {
-  var layers = this.getLayerGroup().getLayers();
-  return layers.remove(layer);
+    var layers = this.getLayerGroup().getLayers();
+    return layers.remove(layer);
 };
 
 
@@ -1177,12 +1188,12 @@ ol.Map.prototype.removeLayer = function(layer) {
  * @api stable
  */
 ol.Map.prototype.removeOverlay = function(overlay) {
-  var overlays = this.getOverlays();
-  goog.asserts.assert(goog.isDef(overlays));
-  if (goog.isDef(overlays.remove(overlay))) {
-    return overlay;
-  }
-  return undefined;
+    var overlays = this.getOverlays();
+    goog.asserts.assert(goog.isDef(overlays));
+    if (goog.isDef(overlays.remove(overlay))) {
+        return overlay;
+    }
+    return undefined;
 };
 
 
@@ -1192,100 +1203,101 @@ ol.Map.prototype.removeOverlay = function(overlay) {
  */
 ol.Map.prototype.renderFrame_ = function(time) {
 
-  var i, ii, viewState;
+    var i, ii, viewState;
 
-  /**
-   * Check whether a size has non-zero width and height.  Note that this
-   * function is here because the compiler doesn't recognize that size is
-   * defined in the frameState assignment below when the same code is inline in
-   * the condition below.  The compiler inlines this function itself, so the
-   * resulting code is the same.
-   *
-   * @param {ol.Size} size The size to test.
-   * @return {boolean} Has non-zero width and height.
-   */
-  function hasArea(size) {
-    return size[0] > 0 && size[1] > 0;
-  }
-
-  var size = this.getSize();
-  var view = this.getView();
-  /** @type {?olx.FrameState} */
-  var frameState = null;
-  if (goog.isDef(size) && hasArea(size) &&
-      !goog.isNull(view) && view.isDef()) {
-    var viewHints = view.getHints();
-    var layerStatesArray = this.getLayerGroup().getLayerStatesArray();
-    var layerStates = {};
-    for (i = 0, ii = layerStatesArray.length; i < ii; ++i) {
-      layerStates[goog.getUid(layerStatesArray[i].layer)] = layerStatesArray[i];
+    /**
+     * Check whether a size has non-zero width and height.  Note that this
+     * function is here because the compiler doesn't recognize that size is
+     * defined in the frameState assignment below when the same code is inline in
+     * the condition below.  The compiler inlines this function itself, so the
+     * resulting code is the same.
+     *
+     * @param {ol.Size} size The size to test.
+     * @return {boolean} Has non-zero width and height.
+     */
+    function hasArea(size) {
+        return size[0] > 0 && size[1] > 0;
     }
-    viewState = view.getState();
-    frameState = /** @type {olx.FrameState} */ ({
-      animate: false,
-      attributions: {},
-      coordinateToPixelMatrix: this.coordinateToPixelMatrix_,
-      extent: null,
-      focus: goog.isNull(this.focus_) ? viewState.center : this.focus_,
-      index: this.frameIndex_++,
-      layerStates: layerStates,
-      layerStatesArray: layerStatesArray,
-      logos: goog.object.clone(this.logos_),
-      pixelRatio: this.pixelRatio_,
-      pixelToCoordinateMatrix: this.pixelToCoordinateMatrix_,
-      postRenderFunctions: [],
-      size: size,
-      skippedFeatureUids: this.skippedFeatureUids_,
-      tileQueue: this.tileQueue_,
-      time: time,
-      usedTiles: {},
-      viewState: viewState,
-      viewHints: viewHints,
-      wantedTiles: {}
-    });
-  }
 
-  if (!goog.isNull(frameState)) {
-    var preRenderFunctions = this.preRenderFunctions_;
-    var n = 0, preRenderFunction;
-    for (i = 0, ii = preRenderFunctions.length; i < ii; ++i) {
-      preRenderFunction = preRenderFunctions[i];
-      if (preRenderFunction(this, frameState)) {
-        preRenderFunctions[n++] = preRenderFunction;
-      }
+    var size = this.getSize();
+    var view = this.getView();
+    /** @type {?olx.FrameState} */
+    var frameState = null;
+    if (goog.isDef(size) && hasArea(size) &&
+        !goog.isNull(view) && view.isDef()) {
+        var viewHints = view.getHints();
+        var layerStatesArray = this.getLayerGroup().getLayerStatesArray();
+        var layerStates = {};
+        for (i = 0, ii = layerStatesArray.length; i < ii; ++i) {
+            layerStates[goog.getUid(layerStatesArray[i].layer)] = layerStatesArray[i];
+        }
+        viewState = view.getState();
+        frameState = /** @type {olx.FrameState} */ ({
+            animate: false,
+            attributions: {},
+            coordinateToPixelMatrix: this.coordinateToPixelMatrix_,
+            extent: null,
+            focus: goog.isNull(this.focus_) ? viewState.center : this.focus_,
+            index: this.frameIndex_++,
+            layerStates: layerStates,
+            layerStatesArray: layerStatesArray,
+            logos: goog.object.clone(this.logos_),
+            pixelRatio: this.pixelRatio_,
+            pixelToCoordinateMatrix: this.pixelToCoordinateMatrix_,
+            postRenderFunctions: [],
+            size: size,
+            skippedFeatureUids: this.skippedFeatureUids_,
+            tileQueue: this.tileQueue_,
+            time: time,
+            usedTiles: {},
+            viewState: viewState,
+            viewHints: viewHints,
+            wantedTiles: {}
+        });
     }
-    preRenderFunctions.length = n;
 
-    frameState.extent = ol.extent.getForViewAndSize(viewState.center,
-        viewState.resolution, viewState.rotation, frameState.size);
-  }
+    if (!goog.isNull(frameState)) {
+        var preRenderFunctions = this.preRenderFunctions_;
+        var n = 0,
+            preRenderFunction;
+        for (i = 0, ii = preRenderFunctions.length; i < ii; ++i) {
+            preRenderFunction = preRenderFunctions[i];
+            if (preRenderFunction(this, frameState)) {
+                preRenderFunctions[n++] = preRenderFunction;
+            }
+        }
+        preRenderFunctions.length = n;
 
-  this.frameState_ = frameState;
-  this.renderer_.renderFrame(frameState);
-
-  if (!goog.isNull(frameState)) {
-    if (frameState.animate) {
-      this.render();
+        frameState.extent = ol.extent.getForViewAndSize(viewState.center,
+            viewState.resolution, viewState.rotation, frameState.size);
     }
-    Array.prototype.push.apply(
-        this.postRenderFunctions_, frameState.postRenderFunctions);
 
-    var idle = this.preRenderFunctions_.length === 0 &&
-        !frameState.viewHints[ol.ViewHint.ANIMATING] &&
-        !frameState.viewHints[ol.ViewHint.INTERACTING] &&
-        !ol.extent.equals(frameState.extent, this.previousExtent_);
+    this.frameState_ = frameState;
+    this.renderer_.renderFrame(frameState);
 
-    if (idle) {
-      this.dispatchEvent(
-          new ol.MapEvent(ol.MapEventType.MOVEEND, this, frameState));
-      ol.extent.clone(frameState.extent, this.previousExtent_);
+    if (!goog.isNull(frameState)) {
+        if (frameState.animate) {
+            this.render();
+        }
+        Array.prototype.push.apply(
+            this.postRenderFunctions_, frameState.postRenderFunctions);
+
+        var idle = this.preRenderFunctions_.length === 0 &&
+            !frameState.viewHints[ol.ViewHint.ANIMATING] &&
+            !frameState.viewHints[ol.ViewHint.INTERACTING] &&
+            !ol.extent.equals(frameState.extent, this.previousExtent_);
+
+        if (idle) {
+            this.dispatchEvent(
+                new ol.MapEvent(ol.MapEventType.MOVEEND, this, frameState));
+            ol.extent.clone(frameState.extent, this.previousExtent_);
+        }
     }
-  }
 
-  this.dispatchEvent(
-      new ol.MapEvent(ol.MapEventType.POSTRENDER, this, frameState));
+    this.dispatchEvent(
+        new ol.MapEvent(ol.MapEventType.POSTRENDER, this, frameState));
 
-  goog.async.nextTick(this.handlePostRender, this);
+    goog.async.nextTick(this.handlePostRender, this);
 
 };
 
@@ -1298,7 +1310,7 @@ ol.Map.prototype.renderFrame_ = function(time) {
  * @api stable
  */
 ol.Map.prototype.setLayerGroup = function(layerGroup) {
-  this.set(ol.MapProperty.LAYERGROUP, layerGroup);
+    this.set(ol.MapProperty.LAYERGROUP, layerGroup);
 };
 goog.exportProperty(
     ol.Map.prototype,
@@ -1313,7 +1325,7 @@ goog.exportProperty(
  * @api
  */
 ol.Map.prototype.setSize = function(size) {
-  this.set(ol.MapProperty.SIZE, size);
+    this.set(ol.MapProperty.SIZE, size);
 };
 goog.exportProperty(
     ol.Map.prototype,
@@ -1329,7 +1341,7 @@ goog.exportProperty(
  * @api stable
  */
 ol.Map.prototype.setTarget = function(target) {
-  this.set(ol.MapProperty.TARGET, target);
+    this.set(ol.MapProperty.TARGET, target);
 };
 goog.exportProperty(
     ol.Map.prototype,
@@ -1344,7 +1356,7 @@ goog.exportProperty(
  * @api stable
  */
 ol.Map.prototype.setView = function(view) {
-  this.set(ol.MapProperty.VIEW, view);
+    this.set(ol.MapProperty.VIEW, view);
 };
 goog.exportProperty(
     ol.Map.prototype,
@@ -1356,9 +1368,9 @@ goog.exportProperty(
  * @param {ol.Feature} feature Feature.
  */
 ol.Map.prototype.skipFeature = function(feature) {
-  var featureUid = goog.getUid(feature).toString();
-  this.skippedFeatureUids_[featureUid] = true;
-  this.render();
+    var featureUid = goog.getUid(feature).toString();
+    this.skippedFeatureUids_[featureUid] = true;
+    this.render();
 };
 
 
@@ -1368,19 +1380,19 @@ ol.Map.prototype.skipFeature = function(feature) {
  * @api stable
  */
 ol.Map.prototype.updateSize = function() {
-  var target = this.getTarget();
+    var target = this.getTarget();
 
-  /**
-   * @type {Element}
-   */
-  var targetElement = goog.isDef(target) ? goog.dom.getElement(target) : null;
+    /**
+     * @type {Element}
+     */
+    var targetElement = goog.isDef(target) ? goog.dom.getElement(target) : null;
 
-  if (goog.isNull(targetElement)) {
-    this.setSize(undefined);
-  } else {
-    var size = goog.style.getContentBoxSize(targetElement);
-    this.setSize([size.width, size.height]);
-  }
+    if (goog.isNull(targetElement)) {
+        this.setSize(undefined);
+    } else {
+        var size = goog.style.getContentBoxSize(targetElement);
+        this.setSize([size.width, size.height]);
+    }
 };
 
 
@@ -1388,9 +1400,9 @@ ol.Map.prototype.updateSize = function() {
  * @param {ol.Feature} feature Feature.
  */
 ol.Map.prototype.unskipFeature = function(feature) {
-  var featureUid = goog.getUid(feature).toString();
-  delete this.skippedFeatureUids_[featureUid];
-  this.render();
+    var featureUid = goog.getUid(feature).toString();
+    delete this.skippedFeatureUids_[featureUid];
+    this.render();
 };
 
 
@@ -1413,135 +1425,137 @@ ol.MapOptionsInternal;
  */
 ol.Map.createOptionsInternal = function(options) {
 
-  /**
-   * @type {Element|Document}
-   */
-  var keyboardEventTarget = null;
-  if (goog.isDef(options.keyboardEventTarget)) {
-    // cannot use goog.dom.getElement because its argument cannot be
-    // of type Document
-    keyboardEventTarget = goog.isString(options.keyboardEventTarget) ?
-        document.getElementById(options.keyboardEventTarget) :
-        options.keyboardEventTarget;
-  }
-
-  /**
-   * @type {Object.<string, *>}
-   */
-  var values = {};
-
-  var logos = {};
-  if (!goog.isDef(options.logo) ||
-      (goog.isBoolean(options.logo) && options.logo)) {
-    logos[ol.OL3_LOGO_URL] = ol.OL3_URL;
-  } else {
-    var logo = options.logo;
-    if (goog.isString(logo)) {
-      logos[logo] = '';
-    } else if (goog.isObject(logo)) {
-      goog.asserts.assertString(logo.href);
-      goog.asserts.assertString(logo.src);
-      logos[logo.src] = logo.href;
+    /**
+     * @type {Element|Document}
+     */
+    var keyboardEventTarget = null;
+    if (goog.isDef(options.keyboardEventTarget)) {
+        // cannot use goog.dom.getElement because its argument cannot be
+        // of type Document
+        keyboardEventTarget = goog.isString(options.keyboardEventTarget) ?
+            document.getElementById(options.keyboardEventTarget) :
+            options.keyboardEventTarget;
     }
-  }
 
-  var layerGroup = (options.layers instanceof ol.layer.Group) ?
-      options.layers : new ol.layer.Group({layers: options.layers});
-  values[ol.MapProperty.LAYERGROUP] = layerGroup;
+    /**
+     * @type {Object.<string, *>}
+     */
+    var values = {};
 
-  values[ol.MapProperty.TARGET] = options.target;
-
-  values[ol.MapProperty.VIEW] = goog.isDef(options.view) ?
-      options.view : new ol.View();
-
-  /**
-   * @type {function(new: ol.renderer.Map, Element, ol.Map)}
-   */
-  var rendererConstructor = ol.renderer.Map;
-
-  /**
-   * @type {Array.<ol.RendererType>}
-   */
-  var rendererTypes;
-  if (goog.isDef(options.renderer)) {
-    if (goog.isArray(options.renderer)) {
-      rendererTypes = options.renderer;
-    } else if (goog.isString(options.renderer)) {
-      rendererTypes = [options.renderer];
+    var logos = {};
+    if (!goog.isDef(options.logo) ||
+        (goog.isBoolean(options.logo) && options.logo)) {
+        logos[ol.OL3_LOGO_URL] = ol.OL3_URL;
     } else {
-      goog.asserts.fail('Incorrect format for renderer option');
+        var logo = options.logo;
+        if (goog.isString(logo)) {
+            logos[logo] = '';
+        } else if (goog.isObject(logo)) {
+            goog.asserts.assertString(logo.href);
+            goog.asserts.assertString(logo.src);
+            logos[logo.src] = logo.href;
+        }
     }
-  } else {
-    rendererTypes = ol.DEFAULT_RENDERER_TYPES;
-  }
 
-  var i, ii;
-  for (i = 0, ii = rendererTypes.length; i < ii; ++i) {
-    /** @type {ol.RendererType} */
-    var rendererType = rendererTypes[i];
-    if (ol.ENABLE_CANVAS && rendererType == ol.RendererType.CANVAS) {
-      if (ol.has.CANVAS) {
-        rendererConstructor = ol.renderer.canvas.Map;
-        break;
-      }
-    } else if (ol.ENABLE_DOM && rendererType == ol.RendererType.DOM) {
-      if (ol.has.DOM) {
-        rendererConstructor = ol.renderer.dom.Map;
-        break;
-      }
-    } else if (ol.ENABLE_WEBGL && rendererType == ol.RendererType.WEBGL) {
-      if (ol.has.WEBGL) {
-        rendererConstructor = ol.renderer.webgl.Map;
-        break;
-      }
-    }
-  }
+    var layerGroup = (options.layers instanceof ol.layer.Group) ?
+        options.layers : new ol.layer.Group({
+            layers: options.layers
+        });
+    values[ol.MapProperty.LAYERGROUP] = layerGroup;
 
-  var controls;
-  if (goog.isDef(options.controls)) {
-    if (goog.isArray(options.controls)) {
-      controls = new ol.Collection(options.controls.slice());
+    values[ol.MapProperty.TARGET] = options.target;
+
+    values[ol.MapProperty.VIEW] = goog.isDef(options.view) ?
+        options.view : new ol.View();
+
+    /**
+     * @type {function(new: ol.renderer.Map, Element, ol.Map)}
+     */
+    var rendererConstructor = ol.renderer.Map;
+
+    /**
+     * @type {Array.<ol.RendererType>}
+     */
+    var rendererTypes;
+    if (goog.isDef(options.renderer)) {
+        if (goog.isArray(options.renderer)) {
+            rendererTypes = options.renderer;
+        } else if (goog.isString(options.renderer)) {
+            rendererTypes = [options.renderer];
+        } else {
+            goog.asserts.fail('Incorrect format for renderer option');
+        }
     } else {
-      goog.asserts.assertInstanceof(options.controls, ol.Collection);
-      controls = options.controls;
+        rendererTypes = ol.DEFAULT_RENDERER_TYPES;
     }
-  } else {
-    controls = ol.control.defaults();
-  }
 
-  var interactions;
-  if (goog.isDef(options.interactions)) {
-    if (goog.isArray(options.interactions)) {
-      interactions = new ol.Collection(options.interactions.slice());
+    var i, ii;
+    for (i = 0, ii = rendererTypes.length; i < ii; ++i) {
+        /** @type {ol.RendererType} */
+        var rendererType = rendererTypes[i];
+        if (ol.ENABLE_CANVAS && rendererType == ol.RendererType.CANVAS) {
+            if (ol.has.CANVAS) {
+                rendererConstructor = ol.renderer.canvas.Map;
+                break;
+            }
+        } else if (ol.ENABLE_DOM && rendererType == ol.RendererType.DOM) {
+            if (ol.has.DOM) {
+                rendererConstructor = ol.renderer.dom.Map;
+                break;
+            }
+        } else if (ol.ENABLE_WEBGL && rendererType == ol.RendererType.WEBGL) {
+            if (ol.has.WEBGL) {
+                rendererConstructor = ol.renderer.webgl.Map;
+                break;
+            }
+        }
+    }
+
+    var controls;
+    if (goog.isDef(options.controls)) {
+        if (goog.isArray(options.controls)) {
+            controls = new ol.Collection(options.controls.slice());
+        } else {
+            goog.asserts.assertInstanceof(options.controls, ol.Collection);
+            controls = options.controls;
+        }
     } else {
-      goog.asserts.assertInstanceof(options.interactions, ol.Collection);
-      interactions = options.interactions;
+        controls = ol.control.defaults();
     }
-  } else {
-    interactions = ol.interaction.defaults();
-  }
 
-  var overlays;
-  if (goog.isDef(options.overlays)) {
-    if (goog.isArray(options.overlays)) {
-      overlays = new ol.Collection(options.overlays.slice());
+    var interactions;
+    if (goog.isDef(options.interactions)) {
+        if (goog.isArray(options.interactions)) {
+            interactions = new ol.Collection(options.interactions.slice());
+        } else {
+            goog.asserts.assertInstanceof(options.interactions, ol.Collection);
+            interactions = options.interactions;
+        }
     } else {
-      goog.asserts.assertInstanceof(options.overlays, ol.Collection);
-      overlays = options.overlays;
+        interactions = ol.interaction.defaults();
     }
-  } else {
-    overlays = new ol.Collection();
-  }
 
-  return {
-    controls: controls,
-    interactions: interactions,
-    keyboardEventTarget: keyboardEventTarget,
-    logos: logos,
-    overlays: overlays,
-    rendererConstructor: rendererConstructor,
-    values: values
-  };
+    var overlays;
+    if (goog.isDef(options.overlays)) {
+        if (goog.isArray(options.overlays)) {
+            overlays = new ol.Collection(options.overlays.slice());
+        } else {
+            goog.asserts.assertInstanceof(options.overlays, ol.Collection);
+            overlays = options.overlays;
+        }
+    } else {
+        overlays = new ol.Collection();
+    }
+
+    return {
+        controls: controls,
+        interactions: interactions,
+        keyboardEventTarget: keyboardEventTarget,
+        logos: logos,
+        overlays: overlays,
+        rendererConstructor: rendererConstructor,
+        values: values
+    };
 
 };
 
@@ -1550,9 +1564,9 @@ ol.proj.common.add();
 
 
 if (goog.DEBUG) {
-  (function() {
-    goog.debug.Console.autoInstall();
-    var logger = goog.log.getLogger('ol');
-    logger.setLevel(goog.log.Level.FINEST);
-  })();
+    (function() {
+        goog.debug.Console.autoInstall();
+        var logger = goog.log.getLogger('ol');
+        logger.setLevel(goog.log.Level.FINEST);
+    })();
 }
