@@ -96,7 +96,9 @@ var Viewer = function(config, layers, container) {
 
     // wrapper for config.swap
     this.swapConfig = function(newStore) {
-        config.swap(newStore);
+        // use a copy of config for read only access during runtime  
+        var configCopy = $.extend(true, {}, newStore);        
+        config.swap(configCopy);
         this.update();
     };
 

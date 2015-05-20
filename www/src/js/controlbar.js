@@ -243,11 +243,9 @@ var ControlBar = function(viewer) {
 
     // on config select change
     SELECT_CONFIG.change(function() {
-        // use a copy of config for read only access during runtime
         var option = SELECT_CONFIG.find($('option:selected')).val();
         if (option !== 'default') {
-            var configCopy = $.extend(true, {}, viewer.getConfigStore()[option]);
-            viewer.swapConfig(configCopy);
+            viewer.swapConfig(viewer.getConfigStore()[option]);
         } else {
             viewer.swapConfig(this.config.init);
         }
