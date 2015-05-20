@@ -173,16 +173,6 @@ h3 {
     height: 80px;
 }
 
-
-.floatBox {
-    float: left;
-    width: 75px;
-}
-
-.clearFloat {
-    clear: both;
-}
-
 .vcenter {
     vertical-align: middle;
     padding-top: 8px;

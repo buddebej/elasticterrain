@@ -59,6 +59,19 @@ html, body {
     visibility: hidden;
 }
 
+.floatBox {
+    float: left;
+    width: 75px;
+}
+
+.floatLeft{
+    float: left;
+}
+
+.clearFloat {
+    clear: both;
+}
+
 .webglMissing {
     font-family: 'Open Sans', sans-serif;
     margin: auto;
