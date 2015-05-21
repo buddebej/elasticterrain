@@ -196,22 +196,22 @@ var ControlBar = function(viewer) {
             value: toSlider(viewer.get('shadingExaggeration'))
         });
         SLIDER_SPRING_COEFFICIENT.slider({
-            value: toSlider(viewer.get('iSpringCoefficient'), 500)
+            value: toSlider(viewer.get('springCoefficient'), 500)
         });
         SLIDER_SPRING_FRICTION.slider({
-            value: toSlider(viewer.get('iFrictionForce'), 500)
+            value: toSlider(viewer.get('frictionForce'), 500)
         });
         SLIDER_SPRING_INNRAD.slider({
-            value: viewer.get('iMaxInnerShearingPx')
+            value: viewer.get('maxInnerShearingPx')
         });
         SLIDER_SPRING_OUTRAD.slider({
-            value: viewer.get('iMaxOuterShearingPx')
+            value: viewer.get('maxOuterShearingPx')
         });
         SLIDER_SPRING_FADEOUT.slider({
-            value: toSlider(viewer.get('iStaticShearFadeOutAnimationSpeed'), 50)
+            value: toSlider(viewer.get('staticShearFadeOutAnimationSpeed'), 50)
         });
         SLIDER_HYBRID_DAMPING.slider({
-            value: toSlider(viewer.get('iHybridDampingDuration'), 50)
+            value: toSlider(viewer.get('hybridDampingDuration'), 50)
         });
         SLIDER_RESOLUTION.slider({
             value: toSlider(viewer.get('resolution'))
@@ -495,42 +495,42 @@ var ControlBar = function(viewer) {
         min: 0,
         max: 100,
         slide: function(event, slider) {
-            viewer.set('iSpringCoefficient', fromSlider(slider.value, 500));
+            viewer.set('springCoefficient', fromSlider(slider.value, 500));
         }
     });
     SLIDER_SPRING_FRICTION.slider({
         min: 0,
         max: 100,
         slide: function(event, slider) {
-            viewer.set('iFrictionForce', fromSlider(slider.value, 500));
+            viewer.set('frictionForce', fromSlider(slider.value, 500));
         }
     });
     SLIDER_SPRING_INNRAD.slider({
         min: 0,
         max: 150,
         slide: function(event, slider) {
-            viewer.set('iMaxInnerShearingPx', slider.value);
+            viewer.set('maxInnerShearingPx', slider.value);
         }
     });
     SLIDER_SPRING_OUTRAD.slider({
         min: 0,
         max: 150,
         slide: function(event, slider) {
-            viewer.set('iMaxOuterShearingPx', slider.value);
+            viewer.set('maxOuterShearingPx', slider.value);
         }
     });
     SLIDER_SPRING_FADEOUT.slider({
         min: 0,
         max: 100,
         slide: function(event, slider) {
-            viewer.set('iStaticShearFadeOutAnimationSpeed', fromSlider(slider.value, 50));
+            viewer.set('staticShearFadeOutAnimationSpeed', fromSlider(slider.value, 50));
         }
     });
     SLIDER_HYBRID_DAMPING.slider({
         min: 0,
         max: 100,
         slide: function(event, slider) {
-            viewer.set('iHybridDampingDuration', fromSlider(slider.value, 50));
+            viewer.set('hybridDampingDuration', fromSlider(slider.value, 50));
         }
     });
 
