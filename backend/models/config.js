@@ -25,13 +25,12 @@ var configSchema = new Schema({
     viewCenterConstraint: [Number],    
     viewZoomConstraint: [Number],        
     viewZoom: Number,
-    iminMaxNeighborhoodSize: Number,
-    iShearingThreshold: Number,
-    iSpringCoefficient: Number,
-    iFrictionForce: Number,
-    iMaxInnerShearingPx: Number,
-    iMaxOuterShearingPx: Number,
-    iStaticShearFadeOutAnimationSpeed: Number
+    shearingThreshold: Number,
+    springCoefficient: Number,
+    frictionForce: Number,
+    maxInnerShearingPx: Number,
+    maxOuterShearingPx: Number,
+    staticShearFadeOutAnimationSpeed: Number
 });
 
 module.exports = mongoose.model('Config', configSchema);

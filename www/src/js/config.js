@@ -52,13 +52,13 @@ var Config = function() {
 
         // shearingInteraction 
         terrainInteraction: true, // bool
-        iShearingThreshold: 0.333, // in pixel
-        iSpringCoefficient: 0.08, // 0:1
-        iFrictionForce: 0.17, // 0:1             
-        iMaxInnerShearingPx: 10.0, // radius in pixel
-        iMaxOuterShearingPx: 10.0, // radius in pixel
-        iStaticShearFadeOutAnimationSpeed: 1.0,
-        iHybridDampingDuration: 0.3
+        shearingThreshold: 0.333, // in pixel
+        springCoefficient: 0.08, // 0:1
+        frictionForce: 0.17, // 0:1             
+        maxInnerShearingPx: 10.0, // radius in pixel
+        maxOuterShearingPx: 10.0, // radius in pixel
+        staticShearFadeOutAnimationSpeed: 1.0,
+        hybridDampingDuration: 0.3
     };
 
     this.dynamic = this.init;

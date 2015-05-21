@@ -144,14 +144,14 @@ var Viewer = function(config, layers, container) {
     // return shearingInteractionOptions from config
     this.getShearingInteractionOptions = function() {
         return {
-            threshold: this.config.get('iShearingThreshold'),
-            springCoefficient: this.config.get('iSpringCoefficient'),
-            frictionForce: this.config.get('iFrictionForce'),
-            maxInnerShearingPx: this.config.get('iMaxInnerShearingPx'),
-            maxOuterShearingPx: this.config.get('iMaxOuterShearingPx'),
-            staticShearFadeOutAnimationSpeed: this.config.get('iStaticShearFadeOutAnimationSpeed'),
-            minMaxNeighborhoodSize: this.config.get('iMinMaxNeighborhoodSize'),
-            hybridDampingDuration: this.config.get('iHybridDampingDuration')
+            threshold: this.config.get('shearingThreshold'),
+            springCoefficient: this.config.get('springCoefficient'),
+            frictionForce: this.config.get('frictionForce'),
+            maxInnerShearingPx: this.config.get('maxInnerShearingPx'),
+            maxOuterShearingPx: this.config.get('maxOuterShearingPx'),
+            staticShearFadeOutAnimationSpeed: this.config.get('staticShearFadeOutAnimationSpeed'),
+            minMaxNeighborhoodSize: this.config.get('minMaxNeighborhoodSize'),
+            hybridDampingDuration: this.config.get('hybridDampingDuration')
         };
     }.bind(this);
 
