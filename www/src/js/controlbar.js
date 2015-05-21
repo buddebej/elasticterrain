@@ -6,14 +6,23 @@ var ControlBar = function(viewer) {
     this.config = viewer.config;
 
     // HELPER FUNCTIONS
-    var toSlider = function(v, k) {
-            var m = (k !== undefined) ? k : 100.0;
-            return v * m;
-        },
-        fromSlider = function(v, k) {
-            var m = (k !== undefined) ? k : 100.0;
-            return v / m;
+    this.initSlider = function(container, attr) {
+        var constraints = this.config.getConstraints(attr);
+        container.slider({
+            min: 0,
+            max: 100,
+            slide: function(event, slider) {
+                var normalizedValue = slider.value * ((constraints[1] - constraints[0]) / 100) + constraints[0];
+                viewer.set(attr, normalizedValue);
+            }
+        });
+        container.update = function() {
+            var normalizedValue = 100 * (viewer.get(attr) - constraints[0]) / (constraints[1] - constraints[0]);
+            this.slider({
+                value: normalizedValue
+            });
         };
+    };
 
     // SELECT DOM ELEMENTS
     var MAP = $('.map'),
@@ -183,39 +192,21 @@ var ControlBar = function(viewer) {
         SWITCH_SHEARING_INTERACTION.setState(viewer.get('terrainInteraction'));
         SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
 
-        SLIDER_AMBIENT_LIGHT.slider({
-            value: toSlider(viewer.get('ambientLight'))
-        });
+        
         SLIDER_COLOR.slider({
             values: viewer.get('colorScale')
         });
-        SLIDER_DARKNESS.slider({
-            value: toSlider(viewer.get('shadingDarkness'))
-        });
-        SLIDER_EXAGGERATION.slider({
-            value: toSlider(viewer.get('shadingExaggeration'))
-        });
-        SLIDER_SPRING_COEFFICIENT.slider({
-            value: toSlider(viewer.get('springCoefficient'), 500)
-        });
-        SLIDER_SPRING_FRICTION.slider({
-            value: toSlider(viewer.get('frictionForce'), 500)
-        });
-        SLIDER_SPRING_INNRAD.slider({
-            value: viewer.get('maxInnerShearingPx')
-        });
-        SLIDER_SPRING_OUTRAD.slider({
-            value: viewer.get('maxOuterShearingPx')
-        });
-        SLIDER_SPRING_FADEOUT.slider({
-            value: toSlider(viewer.get('staticShearFadeOutAnimationSpeed'), 50)
-        });
-        SLIDER_HYBRID_DAMPING.slider({
-            value: toSlider(viewer.get('hybridDampingDuration'), 50)
-        });
-        SLIDER_RESOLUTION.slider({
-            value: toSlider(viewer.get('resolution'))
-        });
+        SLIDER_AMBIENT_LIGHT.update();
+        SLIDER_DARKNESS.update();
+        SLIDER_EXAGGERATION.update();
+        SLIDER_SPRING_COEFFICIENT.update();
+        SLIDER_SPRING_FRICTION.update();
+        SLIDER_SPRING_INNRAD.update();
+        SLIDER_SPRING_OUTRAD.update();
+        SLIDER_SPRING_FADEOUT.update();
+        SLIDER_HYBRID_DAMPING.update();
+        SLIDER_RESOLUTION.update();
+        
 
         SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
         SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
@@ -441,29 +432,9 @@ var ControlBar = function(viewer) {
         }
     });
 
-    SLIDER_AMBIENT_LIGHT.slider({
-        min: -100,
-        max: 100,
-        slide: function(event, slider) {
-            viewer.set('ambientLight', fromSlider(slider.value, 200.0));
-        }
-    });
-
-    SLIDER_DARKNESS.slider({
-        min: 0,
-        max: 100,
-        slide: function(event, slider) {
-            viewer.set('shadingDarkness', fromSlider(slider.value));
-        }
-    });
-
-    SLIDER_EXAGGERATION.slider({
-        min: 0,
-        max: 100,
-        slide: function(event, slider) {
-            viewer.set('shadingExaggeration', fromSlider(slider.value));
-        }
-    });
+    this.initSlider(SLIDER_AMBIENT_LIGHT, 'ambientLight');
+    this.initSlider(SLIDER_DARKNESS, 'shadingDarkness');
+    this.initSlider(SLIDER_EXAGGERATION, 'shadingExaggeration');
 
     // TERRAIN INTERACTION
     SWITCH_SHEARING_INTERACTION.collapse = function(state) {
@@ -491,48 +462,12 @@ var ControlBar = function(viewer) {
         SWITCH_SHEARING_INTERACTION.setState(!viewer.get('terrainInteraction'));
     });
 
-    SLIDER_SPRING_COEFFICIENT.slider({
-        min: 0,
-        max: 100,
-        slide: function(event, slider) {
-            viewer.set('springCoefficient', fromSlider(slider.value, 500));
-        }
-    });
-    SLIDER_SPRING_FRICTION.slider({
-        min: 0,
-        max: 100,
-        slide: function(event, slider) {
-            viewer.set('frictionForce', fromSlider(slider.value, 500));
-        }
-    });
-    SLIDER_SPRING_INNRAD.slider({
-        min: 0,
-        max: 150,
-        slide: function(event, slider) {
-            viewer.set('maxInnerShearingPx', slider.value);
-        }
-    });
-    SLIDER_SPRING_OUTRAD.slider({
-        min: 0,
-        max: 150,
-        slide: function(event, slider) {
-            viewer.set('maxOuterShearingPx', slider.value);
-        }
-    });
-    SLIDER_SPRING_FADEOUT.slider({
-        min: 0,
-        max: 100,
-        slide: function(event, slider) {
-            viewer.set('staticShearFadeOutAnimationSpeed', fromSlider(slider.value, 50));
-        }
-    });
-    SLIDER_HYBRID_DAMPING.slider({
-        min: 0,
-        max: 100,
-        slide: function(event, slider) {
-            viewer.set('hybridDampingDuration', fromSlider(slider.value, 50));
-        }
-    });
+    this.initSlider(SLIDER_SPRING_COEFFICIENT, 'springCoefficient');
+    this.initSlider(SLIDER_SPRING_FRICTION, 'frictionForce');
+    this.initSlider(SLIDER_SPRING_INNRAD, 'maxInnerShearingPx');
+    this.initSlider(SLIDER_SPRING_OUTRAD, 'maxOuterShearingPx');
+    this.initSlider(SLIDER_SPRING_FADEOUT, 'staticShearFadeOutAnimationSpeed');
+    this.initSlider(SLIDER_HYBRID_DAMPING, 'hybridDampingDuration');
 
     // ROTATION 
     KNOB_ROTATION.knob({
@@ -581,14 +516,7 @@ var ControlBar = function(viewer) {
         viewer.render();
     });
 
-    // change resolution of rendered tiles
-    SLIDER_RESOLUTION.slider({
-        min: 1,
-        max: 100,
-        slide: function(event, slider) {
-            viewer.set('resolution', fromSlider(slider.value, 100));
-        }
-    });
+    this.initSlider(SLIDER_RESOLUTION, 'resolution');
 
     // export
     var exportPNGElement = document.getElementById('export-png');

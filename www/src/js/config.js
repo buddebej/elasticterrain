@@ -43,34 +43,50 @@ var Config = function() {
         //[0, 2504688.542848654, 5009377.085697311, 7514065.628545965]
         // vienna [1790460.950551968, 6124746.202434603, 1868732.4675159885, 6203017.719398623]
         // berlin [1428455.184593372, 6848757.734351791, 1584998.218521413, 7005300.768279833]
-          
+
         viewZoom: 5, // zoomlevel
-        viewZoomConstraint: [1,12], // [minZoom, maxZoom]
-        
+        viewZoomConstraint: [1, 12], // [minZoom, maxZoom]
+
         // static plan oblique
         obliqueInclination: 90.0, // 0:90
 
         // shearingInteraction 
-        terrainInteraction: true, // bool
-        shearingThreshold: 0.333, // in pixel
-        springCoefficient: 0.08, // 0:1
-        frictionForce: 0.17, // 0:1             
-        maxInnerShearingPx: 10.0, // radius in pixel
-        maxOuterShearingPx: 10.0, // radius in pixel
+        terrainInteraction: true, 
+        shearingThreshold: 0.333, 
+        springCoefficient: 0.1, 
+        frictionForce: 0.17,             
+        maxInnerShearingPx: 10.0, 
+        maxOuterShearingPx: 10.0, 
         staticShearFadeOutAnimationSpeed: 1.0,
         hybridDampingDuration: 0.3
     };
 
     this.dynamic = this.init;
 
+    // minMax values for slider controls
+    this.sliderConstraints = {
+        ambientLight: [-0.5, 0.5],
+        shadingDarkness: [0.0, 1.0],
+        shadingExaggeration: [0.0, 1.0],
+        shearingThreshold: [0.0, 1.0],
+        springCoefficient: [0.0, 0.4],
+        frictionForce: [0.0, 0.5],
+        maxInnerShearingPx: [0.0, 100.0],
+        maxOuterShearingPx: [0.0, 100.0],
+        staticShearFadeOutAnimationSpeed: [0.0, 2.0],
+        hybridDampingDuration: [0.0, 1.0],
+        resolution: [0.1, 1.0]
+    };
+
+
     this.set = function(attr, val) {
         this.dynamic[attr] = val;
     };
 
     this.get = function(attr) {
-        if (attr !== undefined){
+        if (attr !== undefined) {
             // return single attribute
-            if(!this.dynamic.hasOwnProperty(attr)){
+            if (!this.dynamic.hasOwnProperty(attr)) {
                 // use default value 
                 return this.init[attr];
             } else {
@@ -80,7 +96,17 @@ var Config = function() {
         } else {
             // return entire config
             return this.dynamic;
-        } 
+        }
+    };
+
+    this.getConstraints = function(attr) {
+        if (attr !== undefined) {
+            if (this.sliderConstraints.hasOwnProperty(attr)) {
+                return this.sliderConstraints[attr];
+            } else {
+                return [0.0, 1.0];
+            }
+        }
     };
 
     this.swap = function(newConfig) {
