@@ -7,17 +7,22 @@ var ControlBar = function(viewer) {
 
     // HELPER FUNCTIONS
     this.initSlider = function(container, attr) {
+        var sliderSize = 200;
         var constraints = this.config.getConstraints(attr);
+        // init jquery ui slider
         container.slider({
             min: 0,
-            max: 100,
+            max: sliderSize,
             slide: function(event, slider) {
-                var normalizedValue = slider.value * ((constraints[1] - constraints[0]) / 100) + constraints[0];
+                // provide a normalized value based on parameter constraints defined in config.js
+                var normalizedValue = slider.value * ((constraints[1] - constraints[0]) / sliderSize) + constraints[0];
                 viewer.set(attr, normalizedValue);
             }
         });
+        // slider value updater
         container.update = function() {
-            var normalizedValue = 100 * (viewer.get(attr) - constraints[0]) / (constraints[1] - constraints[0]);
+            // provide a normalized value based on parameter constraints defined in config.js            
+            var normalizedValue = sliderSize * (viewer.get(attr) - constraints[0]) / (constraints[1] - constraints[0]);
             this.slider({
                 value: normalizedValue
             });
