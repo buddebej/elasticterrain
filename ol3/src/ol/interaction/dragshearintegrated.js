@@ -143,6 +143,14 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
     this.lastRenderTime = null;
 
     /** @type {number}
+     * Average FPS value */
+    this.fpsMean = 0;
+
+    /** @type {number}
+     * Counter for active animation */
+    this.animationFrameCounter = 0;
+
+    /** @type {number}
      * Time when static shearing changed to hybrid shearing in milliseconds. */
     this.hybridShearingStartTimeMS = -1;
 
@@ -284,6 +292,8 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         this.lastRenderTime = null;
         this.distanceX = this.distanceY = 0;
         this.vx_t_1 = this.vy_t_1 = 0;
+        this.animationFrameCounter = 0;
+        this.fpsMean = 0;
 
         return true;
     }
@@ -326,6 +336,16 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);
 
 /**
+ * Get average fps 
+ * @return {number}
+ */
+ol.interaction.DragShearIntegrated.prototype.getFps = function() {
+    return this.fpsMean / this.animationFrameCounter;
+};
+goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'getFps', ol.interaction.DragShearIntegrated.prototype.getFps);
+
+
+/**
  * Apply shearing to model and trigger rendering
  * @param {number} shearX
  * @param {number} shearY   
@@ -343,6 +363,7 @@ ol.interaction.DragShearIntegrated.prototype.shear = function(shearX, shearY) {
  * Animates shearing & panning according to currentDragPositionPx
  */
 ol.interaction.DragShearIntegrated.prototype.animation = function() {
+
     var
     // mouse position [meters]
         currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx),
@@ -438,9 +459,14 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         // minimum acceleration
         aTol = vTol / dTsec / 100, // 100 is an empirical factor
         stopAnimation = this.shearingStatus !== ol.interaction.State.STATIC_SHEARING && a < aTol && v < vTol;
-    //if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
+
+    // if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
     //  console.log("FPS", Math.round(1 / dTsec), "v", Math.round(v), "\tvTol", Math.round(vTol), "\ta", Math.round(a), "\taTol", Math.round(aTol));
-    //}
+    // }
+
+    // compute average fps for userstudy
+    this.animationFrameCounter++;
+    this.fpsMean = this.fpsMean + Math.round(1 / dTsec); //(this.fpsMean + Math.round(1 / dTsec)) / this.animationFrameCounter;
 
     // Recompute distances after the new velocity is applied.
     this.distanceX -= dx;
@@ -458,7 +484,7 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         this.vx_t_1 = this.vy_t_1 = 0;
         this.shear(0, 0);
         this.shearingStatus = ol.interaction.State.NO_SHEARING;
-        this.frameState.animate = false;
+        // this.frameState.animate = false;
     } else {
         // compute shearing distance
         var shearX = this.distanceX,
@@ -500,7 +526,7 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         }
 
         // set global animating hint to avoid lags due to loading tiles
-        this.frameState.animate = true;
+        // this.frameState.animate = true;
         this.frameState.viewHints[ol.ViewHint.ANIMATING] += 1;
         // trigger the next frame rendering            
         this.animationDelay.start();
