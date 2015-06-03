@@ -108,7 +108,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.tilePadding = 200;
+    this.tilePadding = 300;
 
     /**
      * @private

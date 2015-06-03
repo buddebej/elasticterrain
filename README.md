@@ -3,7 +3,7 @@ Elastic Terrain Map
 
 The Elastic Terrain Map is able to render digital elevation models using webgl and offers various methods to explore terrain.
 
-Demo: [EU Mirror](http://eu.elasticterrain.xyz), [EU Mirror](http://us-west.elasticterrain.xyz)
+[Demo](http://elasticterrain.xyz)
 
 The program works with a set of tiles that can be computed from all common digital elevation models using [dem2tiles](https://github.com/buddebej/dem2tiles).
 
