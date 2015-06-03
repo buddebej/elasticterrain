@@ -197,7 +197,7 @@ var ControlBar = function(viewer) {
         SWITCH_SHEARING_INTERACTION.setState(viewer.get('terrainInteraction'));
         SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
 
-        
+
         SLIDER_COLOR.slider({
             values: viewer.get('colorScale')
         });
@@ -211,7 +211,7 @@ var ControlBar = function(viewer) {
         SLIDER_SPRING_FADEOUT.update();
         SLIDER_HYBRID_DAMPING.update();
         SLIDER_RESOLUTION.update();
-        
+
 
         SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
         SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
@@ -565,15 +565,11 @@ var ControlBar = function(viewer) {
             viewer.map.updateSize();
         };
         var showControlBar = function() {
-            CONTROL_BAR.show();
             MAP.animate({
                 width: $(document).width() - CONTROL_BAR.outerWidth()
             }, {
                 duration: ui.options.controlAnimationSpeed,
                 step: updateMapSize,
-                complete: function() {
-                    CONTROL_BAR.css('z-index', '100');
-                }
             });
             ui.options.collapsed = false;
             $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
@@ -583,11 +579,7 @@ var ControlBar = function(viewer) {
                 width: '100%'
             }, {
                 duration: ui.options.controlAnimationSpeed,
-                step: updateMapSize,
-                complete: function() {
-                    CONTROL_BAR.hide();
-                    CONTROL_BAR.css('z-index', '-100');
-                }
+                step: updateMapSize
             });
             ui.options.collapsed = true;
             $('#controlButton').html('<i class="fa fa-cog"></i>');
