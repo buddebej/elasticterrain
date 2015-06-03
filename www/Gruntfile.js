@@ -22,11 +22,11 @@ module.exports = function(grunt) {
         },
         concat: {
             dist: {
-                src: ['src/js/*.js'],
+                src: ['src/js/*.js', '!src/js/analytics.js'],
                 dest: 'dist/temp.js'
             },
             lib: {
-                src: ['src/resources/js/*.js', 'dist/ol.js', 'dist/temp_min.js'],
+                src: ['src/resources/js/*.js', 'dist/ol.js', 'dist/temp_min.js', 'src/js/analytics.js'],
                 dest: 'dist/app.min.js'
             },
             css: {
