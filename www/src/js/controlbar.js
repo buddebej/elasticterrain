@@ -565,6 +565,7 @@ var ControlBar = function(viewer) {
             viewer.map.updateSize();
         };
         var showControlBar = function() {
+            CONTROL_BAR.fadeIn();
             MAP.animate({
                 width: $(document).width() - CONTROL_BAR.outerWidth()
             }, {
@@ -579,7 +580,10 @@ var ControlBar = function(viewer) {
                 width: '100%'
             }, {
                 duration: ui.options.controlAnimationSpeed,
-                step: updateMapSize
+                step: updateMapSize,
+                complete: function() {
+                    CONTROL_BAR.fadeOut();
+                },
             });
             ui.options.collapsed = true;
             $('#controlButton').html('<i class="fa fa-cog"></i>');
