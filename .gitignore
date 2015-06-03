@@ -8,6 +8,7 @@ ol3/src/ol/renderer/webgl/webgltiledemlayershader.js
 www/src/data/*
 www/node_modules/
 www/dist/*
+www/src/js/analytics.js
 !www/src/data/blank.png
 .DS_Store
 backend/node_modules/
