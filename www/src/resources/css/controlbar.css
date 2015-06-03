@@ -147,7 +147,7 @@ h3 {
 
 .info .content {
     clear: both;
-    color: #888;
+    color: #ccc;
     -webkit-touch-callout: all;
     -webkit-user-select: all;
     -khtml-user-select: all;
@@ -165,7 +165,7 @@ h3 {
     padding: 0;
     margin: 0;
     margin-bottom: 5px;
-    color: #888;
+    color: #ccc;
 }
 
 .logoContainer {
