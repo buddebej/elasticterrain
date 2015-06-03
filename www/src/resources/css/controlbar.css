@@ -227,6 +227,7 @@ h3 {
     width: 7px;
     border-radius: 2px;
     background: #4479E3;
+    z-index: 0;
 }
 
 .ui-slider-range {
