@@ -30,7 +30,8 @@ var configSchema = new Schema({
     frictionForce: Number,
     maxInnerShearingPx: Number,
     maxOuterShearingPx: Number,
-    staticShearFadeOutAnimationSpeed: Number
+    staticShearFadeOutAnimationSpeed: Number,
+    hybridDampingDuration: Number
 });
 
 module.exports = mongoose.model('Config', configSchema);
