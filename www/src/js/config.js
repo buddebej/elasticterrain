@@ -27,7 +27,7 @@ var Config = function() {
         colorRamp: 1, // id   
 
         // debug         
-        resolution: 0.2, // 0;1
+        resolution: 0.25, // 0;1
         debug: false, // bool       
 
         // view
@@ -53,11 +53,11 @@ var Config = function() {
         // shearingInteraction 
         terrainInteraction: true, 
         shearingThreshold: 0.333, 
-        springCoefficient: 0.1, 
-        frictionForce: 0.17,             
-        maxInnerShearingPx: 10.0, 
-        maxOuterShearingPx: 10.0, 
-        staticShearFadeOutAnimationSpeed: 1.0,
+        springCoefficient: 0.11, 
+        frictionForce: 0.27,             
+        maxInnerShearingPx: 49.0, 
+        maxOuterShearingPx: 49.0, 
+        staticShearFadeOutAnimationSpeed: 0.74,
         hybridDampingDuration: 0.3
     };
 
