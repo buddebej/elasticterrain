@@ -237,8 +237,6 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
             var decimalDegToDegMin = function(d, lng) {
                 // If user pans further then 180E or 180W adapt d
                 if (lng) {
-                    console.log(d);
-
                     while (Math.abs(d) > 180) {
                         d = (d > 0) ? d - 360 : d + 360;
                     }
