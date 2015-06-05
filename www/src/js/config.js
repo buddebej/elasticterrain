@@ -67,14 +67,14 @@ var Config = function() {
     this.sliderConstraints = {
         ambientLight: [-0.5, 0.5],
         shadingDarkness: [0.0, 1.0],
-        shadingExaggeration: [0.0, 1.0],
+        shadingExaggeration: [0.0, 1.5],
         shearingThreshold: [0.0, 1.0],
         springCoefficient: [0.0, 0.4],
         frictionForce: [0.0, 0.5],
-        maxInnerShearingPx: [0.0, 100.0],
-        maxOuterShearingPx: [0.0, 100.0],
-        staticShearFadeOutAnimationSpeed: [0.0, 2.0],
-        hybridDampingDuration: [0.0, 1.0],
+        maxInnerShearingPx: [0.0, 120.0],
+        maxOuterShearingPx: [0.0, 120.0],
+        staticShearFadeOutAnimationSpeed: [0.1, 2.0],
+        hybridDampingDuration: [0.1, 1.0],
         resolution: [0.1, 1.0]
     };
 
