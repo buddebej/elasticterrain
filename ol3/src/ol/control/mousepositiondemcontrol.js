@@ -19,7 +19,7 @@ goog.require('ol.proj.Projection');
  * @enum {string}
  */
 ol.control.MousePositionDemProperty = {
-  PROJECTION: 'projection'
+    PROJECTION: 'projection'
 };
 
 
@@ -36,59 +36,59 @@ ol.control.MousePositionDemProperty = {
  * @api stable
  */
 ol.control.MousePositionDem = function(demLayer) {
-  
-  var className = 'indicator ol-unselectable';
 
-  var element = goog.dom.createDom(goog.dom.TagName.DIV, className);
+    var className = 'indicator ol-unselectable';
 
-  var render = ol.control.MousePositionDem.render;
+    var element = goog.dom.createDom(goog.dom.TagName.DIV, className);
 
-  goog.base(this, {
-    element: element,
-    render: render
-  });
+    var render = ol.control.MousePositionDem.render;
 
-  
-  this.setProjection(ol.proj.get('EPSG:4326'));
+    goog.base(this, {
+        element: element,
+        render: render
+    });
 
-  /**
-   * @private
-   * @type {ol.layer.TileDem}
-   */
-  this.demLayer_ = demLayer;
 
-  /**
-   * @private
-   * @type {string}
-   */
-  this.undefinedHTML_ = '';
+    this.setProjection(ol.proj.get('EPSG:4326'));
 
-  /**
-   * @private
-   * @type {string}
-   */
-  this.renderedHTML_ = element.innerHTML;
+    /**
+     * @private
+     * @type {ol.layer.TileDem}
+     */
+    this.demLayer_ = demLayer;
 
-  /**
-   * @private
-   * @type {ol.proj.Projection}
-   */
-  this.mapProjection_ = null;
+    /**
+     * @private
+     * @type {string}
+     */
+    this.undefinedHTML_ = '';
 
-  /**
-   * @private
-   * @type {?ol.TransformFunction}
-   */
-  this.transform_ = null;
+    /**
+     * @private
+     * @type {string}
+     */
+    this.renderedHTML_ = element.innerHTML;
 
-  /**
-   * @private
-   * @type {ol.Pixel}
-   */
-  this.lastMouseMovePixel_ = null;
+    /**
+     * @private
+     * @type {ol.proj.Projection}
+     */
+    this.mapProjection_ = null;
 
-  // hide on init before first mouse move on map
-  this.hide();
+    /**
+     * @private
+     * @type {?ol.TransformFunction}
+     */
+    this.transform_ = null;
+
+    /**
+     * @private
+     * @type {ol.Pixel}
+     */
+    this.lastMouseMovePixel_ = null;
+
+    // hide on init before first mouse move on map
+    this.hide();
 };
 goog.inherits(ol.control.MousePositionDem, ol.control.Control);
 
@@ -99,16 +99,16 @@ goog.inherits(ol.control.MousePositionDem, ol.control.Control);
  * @api
  */
 ol.control.MousePositionDem.render = function(mapEvent) {
-  var frameState = mapEvent.frameState;
-  if (goog.isNull(frameState)) {
-    this.mapProjection_ = null;
-  } else {
-    if (this.mapProjection_ != frameState.viewState.projection) {
-      this.mapProjection_ = frameState.viewState.projection;
-      this.transform_ = null;
+    var frameState = mapEvent.frameState;
+    if (goog.isNull(frameState)) {
+        this.mapProjection_ = null;
+    } else {
+        if (this.mapProjection_ != frameState.viewState.projection) {
+            this.mapProjection_ = frameState.viewState.projection;
+            this.transform_ = null;
+        }
     }
-  }
-  this.updateHTML_(this.lastMouseMovePixel_);
+    this.updateHTML_(this.lastMouseMovePixel_);
 };
 
 /**
@@ -118,8 +118,8 @@ ol.control.MousePositionDem.render = function(mapEvent) {
  * @api stable
  */
 ol.control.MousePositionDem.prototype.getProjection = function() {
-  return /** @type {ol.proj.Projection|undefined} */ (
-      this.get(ol.control.MousePositionDemProperty.PROJECTION));
+    return /** @type {ol.proj.Projection|undefined} */ (
+        this.get(ol.control.MousePositionDemProperty.PROJECTION));
 };
 goog.exportProperty(
     ol.control.MousePositionDem.prototype,
@@ -132,10 +132,10 @@ goog.exportProperty(
  * @protected
  */
 ol.control.MousePositionDem.prototype.handleMouseMove = function(browserEvent) {
-  var map = this.getMap();
-  this.lastMouseMovePixel_ = map.getEventPixel(browserEvent.getBrowserEvent());
-  this.updateHTML_(this.lastMouseMovePixel_);
-  this.show();
+    var map = this.getMap();
+    this.lastMouseMovePixel_ = map.getEventPixel(browserEvent.getBrowserEvent());
+    this.updateHTML_(this.lastMouseMovePixel_);
+    this.show();
 };
 
 
@@ -143,8 +143,8 @@ ol.control.MousePositionDem.prototype.handleMouseMove = function(browserEvent) {
  * hides indicator div
  */
 ol.control.MousePositionDem.prototype.hide = function() {
-    if(this.element.className !== 'indicator ol-unselectable hidden')
-    this.element.className = 'indicator ol-unselectable hidden';
+    if (this.element.className !== 'indicator ol-unselectable hidden')
+        this.element.className = 'indicator ol-unselectable hidden';
 };
 goog.exportProperty(
     ol.control.MousePositionDem.prototype,
@@ -155,8 +155,8 @@ goog.exportProperty(
  * shows indicator div
  */
 ol.control.MousePositionDem.prototype.show = function() {
-    if(this.element.className !== 'indicator ol-unselectable')  
-    this.element.className = 'indicator ol-unselectable';
+    if (this.element.className !== 'indicator ol-unselectable')
+        this.element.className = 'indicator ol-unselectable';
 };
 goog.exportProperty(
     ol.control.MousePositionDem.prototype,
@@ -170,9 +170,9 @@ goog.exportProperty(
  * @protected
  */
 ol.control.MousePositionDem.prototype.handleMouseOut = function(browserEvent) {
-  this.updateHTML_(null);
-  this.lastMouseMovePixel_ = null;
-  this.hide();
+    this.updateHTML_(null);
+    this.lastMouseMovePixel_ = null;
+    this.hide();
 };
 
 
@@ -181,16 +181,16 @@ ol.control.MousePositionDem.prototype.handleMouseOut = function(browserEvent) {
  * @api stable
  */
 ol.control.MousePositionDem.prototype.setMap = function(map) {
-  goog.base(this, 'setMap', map);
-  if (!goog.isNull(map)) {
-    var viewport = map.getViewport();
-    this.listenerKeys.push(
-        goog.events.listen(viewport, goog.events.EventType.MOUSEMOVE,
-            this.handleMouseMove, false, this),
-        goog.events.listen(viewport, goog.events.EventType.MOUSEOUT,
-            this.handleMouseOut, false, this)
-    );
-  }
+    goog.base(this, 'setMap', map);
+    if (!goog.isNull(map)) {
+        var viewport = map.getViewport();
+        this.listenerKeys.push(
+            goog.events.listen(viewport, goog.events.EventType.MOUSEMOVE,
+                this.handleMouseMove, false, this),
+            goog.events.listen(viewport, goog.events.EventType.MOUSEOUT,
+                this.handleMouseOut, false, this)
+        );
+    }
 };
 
 
@@ -201,7 +201,7 @@ ol.control.MousePositionDem.prototype.setMap = function(map) {
  * @api stable
  */
 ol.control.MousePositionDem.prototype.setProjection = function(projection) {
-  this.set(ol.control.MousePositionDemProperty.PROJECTION, projection);
+    this.set(ol.control.MousePositionDemProperty.PROJECTION, projection);
 };
 
 
@@ -210,51 +210,53 @@ ol.control.MousePositionDem.prototype.setProjection = function(projection) {
  * @private
  */
 ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
-  var html = this.undefinedHTML_;
-  var elevation = '';
-  var latlon = '';
+    var html = this.undefinedHTML_;
+    var elevation = '';
+    var latlon = '';
 
-  if (!goog.isNull(pixel) && !goog.isNull(this.mapProjection_)) {
-    if (goog.isNull(this.transform_)) {
-      var projection = this.getProjection();
-      if (goog.isDef(projection)) {
-        this.transform_ = ol.proj.getTransformFromProjections(
-            this.mapProjection_, projection);
-      } else {
-        this.transform_ = ol.proj.identityTransform;
-      }
-    }
-    var map = this.getMap();
-    var coordinate = map.getCoordinateFromPixel(pixel);
-
-    if (!goog.isNull(coordinate)) {
-      elevation = /** @type {ol.renderer.webgl.TileDemLayer} */(map.getRenderer().getLayerRenderer(this.demLayer_)).getElevation(coordinate,map.getView().getZoom());
-      elevation = (elevation === -11000) ? '' : elevation.toFixed(1) + ' m, ';
-
-      this.transform_(coordinate, coordinate);  
- 
-      // transform decimal coordinates to lat lon expressed by degrees and minutes : 47°22′N 8°33′E
-      var decimalDegToDegMin = function(d, lng){
-          // If user pans further then 180E or 180W adapt d
-          if(lng){
-            while(Math.abs(d)>180){
-              d=d-360;
+    if (!goog.isNull(pixel) && !goog.isNull(this.mapProjection_)) {
+        if (goog.isNull(this.transform_)) {
+            var projection = this.getProjection();
+            if (goog.isDef(projection)) {
+                this.transform_ = ol.proj.getTransformFromProjections(
+                    this.mapProjection_, projection);
+            } else {
+                this.transform_ = ol.proj.identityTransform;
             }
-          }
-          var coord = {
-              dir : d<0?lng?'W':'S':lng?'E':'N',
-              deg : 0|(d<0?d=-d:d),
-              min : 0|d%1*60
-          };
-          return coord.deg+'°'+coord.min+'′'+coord.dir;
-      };
-   
-      latlon = decimalDegToDegMin(coordinate[1],false) + '  ' + decimalDegToDegMin(coordinate[0],true);
-      html = elevation + latlon;
-    } 
-  }
-  if (!goog.isDef(this.renderedHTML_) || html != this.renderedHTML_) {
-    this.element.innerHTML = html;
-    this.renderedHTML_ = html;
-  }
+        }
+        var map = this.getMap();
+        var coordinate = map.getCoordinateFromPixel(pixel);
+
+        if (!goog.isNull(coordinate)) {
+            elevation = /** @type {ol.renderer.webgl.TileDemLayer} */ (map.getRenderer().getLayerRenderer(this.demLayer_)).getElevation(coordinate, map.getView().getZoom());
+            elevation = (elevation === -11000) ? '' : elevation.toFixed(1) + ' m, ';
+
+            this.transform_(coordinate, coordinate);
+
+            // transform decimal coordinates to lat lon expressed by degrees and minutes : 47°22′N 8°33′E
+            var decimalDegToDegMin = function(d, lng) {
+                // If user pans further then 180E or 180W adapt d
+                if (lng) {
+                    console.log(d);
+
+                    while (Math.abs(d) > 180) {
+                        d = (d > 0) ? d - 360 : d + 360;
+                    }
+                }
+                var coord = {
+                    dir: d < 0 ? lng ? 'W' : 'S' : lng ? 'E' : 'N',
+                    deg: 0 | (d < 0 ? d = -d : d),
+                    min: 0 | d % 1 * 60
+                };
+                return coord.deg + '°' + coord.min + '′' + coord.dir;
+            };
+
+            latlon = decimalDegToDegMin(coordinate[1], false) + '  ' + decimalDegToDegMin(coordinate[0], true);
+            html = elevation + latlon;
+        }
+    }
+    if (!goog.isDef(this.renderedHTML_) || html != this.renderedHTML_) {
+        this.element.innerHTML = html;
+        this.renderedHTML_ = html;
+    }
 };

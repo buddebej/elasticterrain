@@ -45,7 +45,7 @@ var Config = function() {
         // berlin [1428455.184593372, 6848757.734351791, 1584998.218521413, 7005300.768279833]
 
         viewZoom: 5, // zoomlevel
-        viewZoomConstraint: [1, 12], // [minZoom, maxZoom]
+        viewZoomConstraint: [2, 12], // [minZoom, maxZoom]
 
         // static plan oblique
         obliqueInclination: 90.0, // 0:90
