@@ -236,16 +236,24 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
             // transform decimal coordinates to lat lon expressed by degrees and minutes : 47°22′N 8°33′E
             var decimalDegToDegMin = function(d, lng) {
                 // If user pans further then 180E or 180W adapt d
+                var coord = {};
                 if (lng) {
                     while (Math.abs(d) > 180) {
-                        d = (d > 0) ? d - 360 : d + 360;
+                        d = (d < -180) ? d + 360 : d - 360;
                     }
+                    coord = {
+                        dir: d < 0 ? 'W' : 'E',
+                        deg: 0 | (d < 0 ? d = -d : d),
+                        min: 0 | d % 1 * 60
+                    };
+                } else {
+                    coord = {
+                        dir: d < 0 ? 'S' : 'N',
+                        deg: 0 | (d < 0 ? d = -d : d),
+                        min: 0 | d % 1 * 60
+                    };
                 }
-                var coord = {
-                    dir: d < 0 ? lng ? 'W' : 'S' : lng ? 'E' : 'N',
-                    deg: 0 | (d < 0 ? d = -d : d),
-                    min: 0 | d % 1 * 60
-                };
+
                 return coord.deg + '°' + coord.min + '′' + coord.dir;
             };
 
