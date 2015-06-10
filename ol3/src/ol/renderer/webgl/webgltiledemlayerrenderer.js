@@ -71,7 +71,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
     /**
      * OverlayTiles
      * @private
-     * @type {Object.<string, boolean|number|ol.layer.Tile|ol.source.TileImage|function(boolean):boolean>} 
+     * @type {Object.<string, boolean|number|ol.layer.Tile|ol.source.TileImage>} 
      */
     this.overlay = {
         'Active': false,
@@ -79,6 +79,13 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
         'Tiles': null,
         'Source': null
     };
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    this.hybridOverlay = false;
+
     /**
      * @private
      * @type {ol.TileRange}
@@ -619,10 +626,12 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         this.overlay.Id = map.getLayers().getArray().indexOf(tileDemLayer.getOverlayTiles().data);
         if (this.overlay.Id >= 0) {
             this.overlay.Active = true;
-            this.fragmentShader_ = ol.renderer.webgl.tiledemlayer.shader.FragmentOverlay.getInstance();
+            this.hybridOverlay = (tileDemLayer.getOverlayTiles().hasOwnProperty('hybrid'));
+            this.fragmentShader_ = (this.hybridOverlay) ? ol.renderer.webgl.tiledemlayer.shader.FragmentHybrid.getInstance() : ol.renderer.webgl.tiledemlayer.shader.FragmentOverlay.getInstance();
         }
     } else {
         this.overlay.Active = false;
+        this.hybridOverlay = false;
         this.fragmentShader_ = ol.renderer.webgl.tiledemlayer.shader.FragmentColors.getInstance();
     }
 
@@ -679,11 +688,11 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         }
         // u_scaleFactor: factors for plan oblique shearing
         gl.uniform2f(this.locations_.u_scaleFactor, shearX, shearY);
-        
+
 
         // SHADING
         // u_shading: flag to activate Shading
-        gl.uniform1i(this.locations_.u_shading, tileDemLayer.getShading() === true ? 1 : 0);        
+        gl.uniform1i(this.locations_.u_shading, tileDemLayer.getShading() === true ? 1 : 0);
         // u_stackedCardb: stackedCardboard flag
         gl.uniform1i(this.locations_.u_stackedCardb, tileDemLayer.getStackedCardboard() === true ? 1 : 0);
         // u_ShadingOpacity: ShadingOpacity
@@ -691,7 +700,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
         // u_hsExaggeration: ShadingExaggeration
         gl.uniform1f(this.locations_.u_hsExaggeration, tileDemLayer.getShadingExaggeration());
         // u_ambient_light: intensity for an ambient light source
-        gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());        
+        gl.uniform1f(this.locations_.u_ambient_light, tileDemLayer.getAmbientLight());
         // u_light: compute light direction from Zenith and Azimuth and dependend of current map rotation
         var zenithRad = goog.math.toRadians(90.0 - tileDemLayer.getLightZenith()),
             azimuthRad = goog.math.toRadians(tileDemLayer.getLightAzimuth()) + viewState.rotation,
@@ -699,7 +708,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             lightY = Math.sin(zenithRad) * Math.cos(azimuthRad),
             lightX = Math.sin(zenithRad) * Math.sin(azimuthRad);
         gl.uniform3f(this.locations_.u_light, lightX, lightY, lightZ);
-        
+
 
         // SHADER PARAMETERS
         // u_testing: flag to activate testing mode
@@ -713,7 +722,13 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
 
         // COLORING
-        if (!this.overlay.Active) {
+        if (!this.overlay.Active || this.hybridOverlay) {
+
+            if (this.hybridOverlay) {
+                // define blending method for hypsometric + texture hybrid
+                gl.uniform1i(this.locations_.u_blendingMethod, tileDemLayer.getOverlayTiles()['hybrid'][1]); 
+            }
+
             // u_minMaxFade: animated minMax for animated color transitions
             gl.uniform2f(this.locations_.u_minMaxFade, this.animatedMinElevation, this.animatedMaxElevation);
 
@@ -728,7 +743,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
             // hypsometric colors
             var textureHypsometricColors_ = gl.createTexture();
-            var arrayHypsometryColors = new Uint8Array(ol.ColorRamp.hypsometry[tileDemLayer.getColorRamp()]);
+            // read selected color-ramp index from gui or from hybrid layer preset
+            var hypsoRamp = (this.hybridOverlay) ? tileDemLayer.getOverlayTiles()['hybrid'][0] : tileDemLayer.getColorRamp();
+            var arrayHypsometryColors = new Uint8Array(ol.ColorRamp.hypsometry[hypsoRamp]);
             gl.activeTexture(goog.webgl.TEXTURE1);
             gl.bindTexture(goog.webgl.TEXTURE_2D, textureHypsometricColors_);
             gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayHypsometryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayHypsometryColors);
@@ -740,7 +757,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
             // bathymetric colors
             var textureBathymetricColors_ = gl.createTexture();
-            var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry[tileDemLayer.getColorRamp()]);
+            // read selected color-ramp index from gui or from hybrid layer preset
+            var bathyRamp = (this.hybridOverlay) ? tileDemLayer.getOverlayTiles()['hybrid'][0] : tileDemLayer.getColorRamp();
+            var arrayBathymetryColors = new Uint8Array(ol.ColorRamp.bathymetry[bathyRamp]);
             gl.activeTexture(goog.webgl.TEXTURE2);
             gl.bindTexture(goog.webgl.TEXTURE_2D, textureBathymetricColors_);
             gl.texImage2D(goog.webgl.TEXTURE_2D, 0, goog.webgl.RGBA, 1, arrayBathymetryColors.length / 4, 0, goog.webgl.RGBA, goog.webgl.UNSIGNED_BYTE, arrayBathymetryColors);
@@ -897,14 +916,14 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                             defUniformOffset(tile, this);
 
                             // dem texture
-                            gl.activeTexture(goog.webgl.TEXTURE1);
+                            gl.activeTexture(goog.webgl.TEXTURE3);
                             mapRenderer.bindTileTexture(tile, tilePixelSize, 0, goog.webgl.NEAREST, goog.webgl.NEAREST);
-                            gl.uniform1i(this.locations_.u_demTex, 1);
+                            gl.uniform1i(this.locations_.u_demTex, 3);
 
                             // overlay texture             
-                            gl.activeTexture(goog.webgl.TEXTURE2);
+                            gl.activeTexture(goog.webgl.TEXTURE4);
                             mapRenderer.bindTileTexture(overlayTile, tilePixelSize, 0, goog.webgl.LINEAR, goog.webgl.LINEAR);
-                            gl.uniform1i(this.locations_.u_mapTex, 2);
+                            gl.uniform1i(this.locations_.u_mapTex, 4);
 
                             // draw triangle mesh for each tile
                             gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);

@@ -401,3 +401,136 @@ uniform bool u_stackedCardb;
 vec4 getFragColor(in float CELLSIZE, in float absElevation, in vec2 texCoord){
     return texture2D(u_mapTex, texCoord);
 }
+
+//! FRAGMENT_HYBRID
+
+// texture with overlay map
+uniform sampler2D u_mapTex;
+
+// flag for hillShading
+uniform bool u_shading; 
+
+// flag for testing mode
+uniform bool u_testing;    
+
+// flag for contour lines
+uniform bool u_stackedCardb; 
+
+// color ramp texture to look up hypsometric tints
+uniform sampler2D u_hypsoColors;
+
+// color ramp texture to look up bathymetric tints
+uniform sampler2D u_bathyColors;
+
+// flag for coloring inland waterbodies
+uniform bool u_waterBodies; 
+
+// scale threshold values to adapt color ramp 
+// u_colorScale.x is lower threshold, u_colorScale.y is upper threshold
+uniform vec2 u_colorScale;
+
+// flag for dynamic colors
+uniform bool u_dynamicColors;
+
+// blending method for hypso + texture blending
+uniform int u_blendingMethod;
+
+// animated minMax Elevations in current Extent 
+uniform vec2 u_minMaxFade;
+
+vec4 doBlend(in vec4 baseMap, in vec4 hypso, in float ff){
+        vec4 blended;
+        vec4 two = vec4(2.0,2.0,2.0,2.0);
+        vec4 one = vec4(1.0,1.0,1.0,1.0);
+        vec4 onehalf = vec4(1.2,1.2,1.2,1.2);
+
+        if(u_blendingMethod == 0){
+            vec4 f1 = vec4(ff,ff,ff,ff);
+            vec4 f2 = vec4(0.7,0.7,0.7,0.7);
+            blended = onehalf*(baseMap*f1+hypso*f2);
+        }
+
+        // blend in dark labels and lighten overall colors : osm hybrid
+        if(u_blendingMethod == 1){
+            if(baseMap.x > ff|| baseMap.y > ff|| baseMap.z > ff){
+                blended = onehalf * hypso * baseMap;
+            } else {
+                blended = one - two * (one - baseMap) * ( one - hypso);
+            }
+        }
+        
+        return blended;
+}
+
+vec4 getFragColor(in float CELLSIZE, in float absElevation, in vec2 texCoord){
+    
+    vec4 fragColor;
+    float relativeElevation = 0.0;
+    vec4 aerial = texture2D(u_mapTex, texCoord);    
+
+     // use dynamic colors
+        if(u_dynamicColors){
+
+            // dynamic and animated colors
+            if(absElevation > 0.1){
+                if(u_minMaxFade.x > 0.1){
+                    relativeElevation = (absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x);
+                } else {
+                    relativeElevation = absElevation/u_minMaxFade.y;
+                }
+                fragColor = doBlend(aerial,abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation))), 0.4);
+            } else {
+                if(u_minMaxFade.y < 0.1){
+                    relativeElevation = abs((absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x));
+                } else {
+                    relativeElevation = abs(absElevation/u_minMaxFade.x);
+                }
+                fragColor = doBlend(aerial,abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation))), 0.4);
+            }
+        } else {
+
+            // static colors based on colorScale minMax
+            float colorMin = u_colorScale.x;
+            float colorMax = u_colorScale.y;
+
+            if(absElevation > 0.1){
+                if(colorMin > 0.1){
+                    relativeElevation = (absElevation-colorMin)/(colorMax-colorMin);
+                } else {
+                    relativeElevation = absElevation/colorMax;
+                }
+                fragColor = doBlend(aerial,abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation))), 0.4);
+            } else {
+                if(colorMax < 0.1){
+                    relativeElevation = abs((absElevation-colorMin)/(colorMax-colorMin));
+                } else {
+                    relativeElevation = abs(absElevation/colorMin);
+                }
+                fragColor = doBlend(aerial,abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation))), 0.4);
+            }
+        } 
+        
+        // color for water surfaces in flat terrain
+        if(u_waterBodies) {
+            // vec4 waterBlue = vec4(0.4058823529,0.6725490196,0.8970588235,1.0);
+            vec4 waterBlue = vec4(0.03,0.47,0.67,1.0);
+
+            // compute other neighbors for water surface test
+            float n01 = decodeElevation(vec2(texture2D(u_demTex, vec2(texCoord.x+CELLSIZE, texCoord.y+CELLSIZE)).xy));
+            float n02 = decodeElevation(vec2(texture2D(u_demTex, vec2(texCoord.x-CELLSIZE, texCoord.y+CELLSIZE)).xy));
+            float n03 = decodeElevation(vec2(texture2D(u_demTex, vec2(texCoord.x+CELLSIZE, texCoord.y-CELLSIZE)).xy));
+            float n04 = decodeElevation(vec2(texture2D(u_demTex, vec2(texCoord.x-CELLSIZE, texCoord.y+CELLSIZE)).xy));         
+
+            if(absElevation>0.0 && 
+               n01 == absElevation && 
+               n02 == absElevation && 
+               n03 == absElevation && 
+               n04 == absElevation) 
+            {
+                fragColor = doBlend(aerial,waterBlue, 0.7);
+            }   
+        } 
+
+        return fragColor;
+
+}

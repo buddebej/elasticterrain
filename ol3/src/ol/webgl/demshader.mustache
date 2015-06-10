@@ -77,6 +77,41 @@ goog.addSingletonGetter({{className}}FragmentOverlay);
 
 /**
  * @constructor
+ * @extends {ol.webgl.shader.Fragment}
+ * @struct
+ */
+{{className}}FragmentHybrid = function() {
+  goog.base(this, {{className}}FragmentHybrid.SOURCE);
+};
+goog.inherits({{className}}FragmentHybrid, ol.webgl.shader.Fragment);
+goog.addSingletonGetter({{className}}FragmentHybrid);
+
+
+/**
+ * @const
+ * @type {string}
+ */
+{{className}}FragmentHybrid.DEBUG_SOURCE = 'precision highp float;\n{{{getOriginalFragmentHybridSource}}}';
+
+
+/**
+ * @const
+ * @type {string}
+ */
+{{className}}FragmentHybrid.OPTIMIZED_SOURCE = 'precision highp float;{{{getFragmentHybridSource}}}';
+
+
+/**
+ * @const
+ * @type {string}
+ */
+{{className}}FragmentHybrid.SOURCE = goog.DEBUG ?
+    {{className}}FragmentHybrid.DEBUG_SOURCE :
+    {{className}}FragmentHybrid.OPTIMIZED_SOURCE;
+
+
+/**
+ * @constructor
  * @extends {ol.webgl.shader.Vertex}
  * @struct
  */

@@ -49,7 +49,7 @@ def main(argv):
     nextShortName = ord('a')
     shortNames = {}
 
-    common, vertex, fragment, fragmentCommon, fragmentColors, fragmentOverlay = [], [], [], [], [], []
+    common, vertex, fragment, fragmentCommon, fragmentColors, fragmentOverlay, fragmentHybrid = [], [], [], [], [], [], []
     attributes, uniforms, varyings = {}, {}, {}
     block = None
     for line in open(options.input, 'rU'):
@@ -85,7 +85,11 @@ def main(argv):
             m = re.match(r'//!\s+FRAGMENT_OVERLAY\s*\Z', line)
             if m:
                 block = fragmentOverlay
-                continue                
+                continue 
+            m = re.match(r'//!\s+FRAGMENT_HYBRID\s*\Z', line)
+            if m:
+                block = fragmentHybrid
+                continue                                 
         else:
             if block is None:
                 assert line.rstrip() == ''
@@ -118,10 +122,12 @@ def main(argv):
     context['getOriginalFragmentSource'] = js_escape(''.join(common + fragment))
     context['getOriginalFragmentColorsSource'] = js_escape(''.join(common + fragmentColors + fragmentCommon))
     context['getOriginalFragmentOverlaySource'] = js_escape(''.join(common + fragmentOverlay + fragmentCommon))    
+    context['getOriginalFragmentHybridSource'] = js_escape(''.join(common + fragmentHybrid + fragmentCommon))        
     context['getOriginalVertexSource'] = js_escape(''.join(common + vertex))
     context['getFragmentSource'] = glsl_compress(''.join(common + fragment), shortNames)    
     context['getFragmentColorsSource'] = glsl_compress(''.join(common + fragmentColors + fragmentCommon), shortNames)
     context['getFragmentOverlaySource'] = glsl_compress(''.join(common + fragmentOverlay + fragmentCommon), shortNames)
+    context['getFragmentHybridSource'] = glsl_compress(''.join(common + fragmentHybrid + fragmentCommon), shortNames)    
     context['getVertexSource'] = glsl_compress(''.join(common + vertex), shortNames)
     context['getAttributes'] = [attributes[a] for a in sorted(attributes.keys())]
     context['getUniforms'] = [uniforms[u] for u in sorted(uniforms.keys())]

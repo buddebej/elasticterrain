@@ -26,8 +26,20 @@ var Layers = function() {
     this.layers_available = [{
         title: 'Bing Aerial',
         id: 'bingaerial',
+        pos: 3,
+        enabled: true,
+        data: new ol.layer.Tile({
+            source: new ol.source.BingMaps({
+                key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
+                imagerySet: 'Aerial'
+            })
+        }),
+    }, {
+        title: '--- Aerial Hybrid ---',
+        id: 'bingaerial-hybrid',
         pos: 1,
         enabled: true,
+        hybrid: [1, 0],
         data: new ol.layer.Tile({
             source: new ol.source.BingMaps({
                 key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
@@ -67,15 +79,24 @@ var Layers = function() {
     }, {
         title: 'Open Street Map',
         id: 'osm',
-        pos: 5,
+        pos: 3,
         enabled: true,
+        data: new ol.layer.Tile({
+            source: new ol.source.OSM(),
+        })
+    }, {
+        title: 'Open Street Map Hybrid',
+        id: 'osm-hybrid',
+        pos: 2,
+        enabled: true,
+        hybrid: [1, 1],
         data: new ol.layer.Tile({
             source: new ol.source.OSM(),
         })
     }, {
         title: 'Stamen Watercolor',
         id: 'stamenwc',
-        pos: 6,
+        pos: 4,
         enabled: true,
         data: new ol.layer.Tile({
             source: new ol.source.Stamen({
@@ -83,15 +104,16 @@ var Layers = function() {
             })
         }),
     }, {
-        title: 'Stamen Toner',
+        title: 'Stamen Toner Hybrid',
         id: 'stamentoner',
-        pos: 7,
+        pos: 2,
         enabled: true,
+        hybrid: [0, 0],
         data: new ol.layer.Tile({
             source: new ol.source.Stamen({
                 layer: 'toner'
             })
-        }),
+        })
     }, this.dem];
 
     this.getAll = function() {
