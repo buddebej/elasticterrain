@@ -7,8 +7,8 @@ var Viewer = function(config, layers, container) {
 
     // get handle for base layer with elevation data
     this.dem = layers.getDem().data;
-
-    this.mapControls = [new ol.control.Zoom(), new ol.control.Rotate(), new ol.control.ScaleLine(), new ol.control.MousePositionDem(this.dem)];
+    this.elevationIndicator = new ol.control.MousePositionDem(this.dem);
+    this.mapControls = [new ol.control.Zoom(), new ol.control.Rotate(), new ol.control.ScaleLine(), this.elevationIndicator];
 
     // init ol map object
     this.map = new ol.Map({

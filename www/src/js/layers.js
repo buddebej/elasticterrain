@@ -35,7 +35,7 @@ var Layers = function() {
             })
         }),
     }, {
-        title: '--- Aerial Hybrid ---',
+        title: 'Bing Aerial Hybrid',
         id: 'bingaerial-hybrid',
         pos: 1,
         enabled: true,
@@ -97,6 +97,17 @@ var Layers = function() {
         title: 'Stamen Watercolor',
         id: 'stamenwc',
         pos: 4,
+        enabled: true,
+        data: new ol.layer.Tile({
+            source: new ol.source.Stamen({
+                layer: 'watercolor'
+            })
+        }),
+    }, {
+        title: 'Stamen Watercolor Hybrid',
+        id: 'stamenwc-hybrid',
+        pos: 2,
+        hybrid: [0,1],
         enabled: true,
         data: new ol.layer.Tile({
             source: new ol.source.Stamen({

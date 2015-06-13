@@ -20,7 +20,7 @@ var Config = function() {
         texture: 'hypso', // see layers.js
 
         // hypsometric colors
-        stackedCardboard: false, // bool
+        stackedCardboard: true, // bool
         waterBodies: true, // bool
         dynamicColors: true, // bool
         colorScale: [-11000, 9000], // min:max [m]  

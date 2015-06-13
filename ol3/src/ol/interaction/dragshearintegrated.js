@@ -95,6 +95,16 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
     /** @type {ol.events.ConditionType} */
     this.condition = goog.isDef(condition['keypress']) ? condition['keypress'] : ol.events.condition.noModifierKeys;
 
+    /** @type {null|ol.control.MousePositionDem} */
+    this.elevationIndicator = /** @type {ol.control.MousePositionDem} */( this.map.getControls().getArray()[3]);
+
+    // FIXME: The above expression should be better solved like this: (However, InstanceOf does not work correct)
+    // this.elevationIndicator = /** @type {ol.control.MousePositionDem} */ (goog.array.find(this.map.getControls().getArray(),
+    //     function(element, index, array) {
+    //         console.log(element);
+    //         return (goog.asserts.assertInstanceof(element, ol.control.MousePositionDem));
+    //     }, this));
+
     /** @type {number} */
     this.springLength = 0;
 
@@ -115,9 +125,6 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
 
     /** @type {number} */
     this.maxElevationLocal = ol.Elevation.MAX;
-
-    /** @type {number} */
-    this.criticalElevation = 0;
 
     /** @type {ol.Pixel} */
     this.startCenter = [0, 0];
@@ -215,7 +222,6 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
             }
         }
         this.animationDelay.start();
-
         // console.log(this.minElevation, this.maxElevation, this.minElevationLocal, this.maxElevationLocal);
     }
 };
@@ -234,6 +240,12 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
         }
         // unlock minMax
         this.demRenderer.setFreezeMinMax(false);
+
+        // unfreeze values for elevation and coordinate indicator after dragging
+        if (!goog.isNull(this.elevationIndicator)) {
+            this.elevationIndicator.setFreeze(false);
+        }
+
         return true;
     }
     return false;
@@ -278,9 +290,6 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
             this.maxElevationLocal = this.maxElevation;
         }
 
-        // critical elevation value to seperate minima and maxima
-        this.criticalElevation = this.minElevationLocal + (this.maxElevationLocal - this.minElevationLocal) * 0.5;
-
         mapCenter = this.view.getCenter();
         this.startDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
         this.startDragElevation = this.demRenderer.getElevation(mapBrowserEvent.coordinate, this.view.getZoom());
@@ -294,6 +303,11 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         this.vx_t_1 = this.vy_t_1 = 0;
         this.animationFrameCounter = 0;
         this.fpsMean = 0;
+
+        // freeze values for elevation and coordinate indicator when dragging
+        if (!goog.isNull(this.elevationIndicator)) {
+            this.elevationIndicator.setFreeze(true);
+        }
 
         return true;
     }
@@ -484,7 +498,6 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         this.vx_t_1 = this.vy_t_1 = 0;
         this.shear(0, 0);
         this.shearingStatus = ol.interaction.State.NO_SHEARING;
-        // this.frameState.animate = false;
     } else {
         // compute shearing distance
         var shearX = this.distanceX,
@@ -502,7 +515,6 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         var normalizedDraggedElevationLocal = (this.startDragElevation - this.minElevationLocal) / (this.maxElevationLocal - this.minElevationLocal);
 
         // console.log("clicked elevation: ", this.startDragElevation);
-        // console.log("critical elevation: ", this.criticalElevation);
         // console.log("minimum elevation: ", this.minElevation);
         // console.log("maximum elevation: ", this.maxElevation);
         // console.log("relative elevation: ", normalizedDraggedElevation);
@@ -510,7 +522,7 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         // console.log("maximum elevation local: ", this.maxElevationLocal);
         // console.log("relative elevation local: ", normalizedDraggedElevationLocal);
 
-        if (normalizedDraggedElevationLocal > 0.5 /*this.startDragElevation > this.criticalElevation*/ ) {
+        if (normalizedDraggedElevationLocal > 0.5) {
             // console.log('higher point');
             // high elevations
             this.shear(shearX / normalizedDraggedElevation, shearY / normalizedDraggedElevation);
@@ -525,10 +537,7 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
             this.view.setCenter(this.view.constrainCenter([this.currentCenter[0] - this.distanceX, this.currentCenter[1] - this.distanceY]));
         }
 
-        // set global animating hint to avoid lags due to loading tiles
-        // this.frameState.animate = true;
-        this.frameState.viewHints[ol.ViewHint.ANIMATING] += 1;
-        // trigger the next frame rendering            
+        // trigger the next frame rendering   
         this.animationDelay.start();
     }
 };

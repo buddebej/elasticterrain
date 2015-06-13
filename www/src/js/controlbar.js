@@ -446,6 +446,7 @@ var ControlBar = function(viewer) {
         if (state) {
             ui.controls.shearing.body.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
             ui.controls.inclination.cont.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+            viewer.elevationIndicator.disable();
         } else {
             ui.controls.shearing.body.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
@@ -459,6 +460,7 @@ var ControlBar = function(viewer) {
             SWITCH_SHEARING_INTERACTION.collapse(true);
         } else {
             ui.controls.inclination.cont.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
+            viewer.elevationIndicator.enable();            
         }
         viewer.render();
     };

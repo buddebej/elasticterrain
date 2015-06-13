@@ -83,6 +83,18 @@ ol.control.MousePositionDem = function(demLayer) {
 
     /**
      * @private
+     * @type {boolean}
+     */
+    this.enabled_ = true;
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    this.freeze_ = false;
+
+    /**
+     * @private
      * @type {ol.Pixel}
      */
     this.lastMouseMovePixel_ = null;
@@ -108,7 +120,9 @@ ol.control.MousePositionDem.render = function(mapEvent) {
             this.transform_ = null;
         }
     }
-    this.updateHTML_(this.lastMouseMovePixel_);
+    if (!this.freeze_ && !frameState.viewHints[ol.ViewHint.INTERACTING] && !frameState.viewHints[ol.ViewHint.ANIMATING]) {
+        this.updateHTML_(this.lastMouseMovePixel_);
+    }
 };
 
 /**
@@ -133,9 +147,48 @@ goog.exportProperty(
  */
 ol.control.MousePositionDem.prototype.handleMouseMove = function(browserEvent) {
     var map = this.getMap();
-    this.lastMouseMovePixel_ = map.getEventPixel(browserEvent.getBrowserEvent());
+    if (this.enabled_) {
+        this.lastMouseMovePixel_ = map.getEventPixel(browserEvent.getBrowserEvent());
+        if (!this.freeze_) {
+            this.updateHTML_(this.lastMouseMovePixel_);
+        }
+        this.show();
+    }
+};
+
+/**
+ * enables or disables indicator div
+ */
+ol.control.MousePositionDem.prototype.enable = function() {
+    this.enabled_ = true;
+};
+goog.exportProperty(
+    ol.control.MousePositionDem.prototype,
+    'enable',
+    ol.control.MousePositionDem.prototype.enable);
+
+/**
+ * disables or disables indicator div
+ */
+ol.control.MousePositionDem.prototype.disable = function() {
+    this.enabled_ = false;
+    this.hide();
+};
+goog.exportProperty(
+    ol.control.MousePositionDem.prototype,
+    'disable',
+    ol.control.MousePositionDem.prototype.disable);
+
+/**
+ * enables or disables indicator div
+ * @param {boolean} state 
+ * @public
+ */
+ol.control.MousePositionDem.prototype.setFreeze = function(state) {
+    this.freeze_ = state;
+    // if(!state){
     this.updateHTML_(this.lastMouseMovePixel_);
-    this.show();
+    // }
 };
 
 
@@ -143,8 +196,9 @@ ol.control.MousePositionDem.prototype.handleMouseMove = function(browserEvent) {
  * hides indicator div
  */
 ol.control.MousePositionDem.prototype.hide = function() {
-    if (this.element.className !== 'indicator ol-unselectable hidden')
+    if (this.element.className !== 'indicator ol-unselectable hidden') {
         this.element.className = 'indicator ol-unselectable hidden';
+    }
 };
 goog.exportProperty(
     ol.control.MousePositionDem.prototype,
@@ -155,8 +209,9 @@ goog.exportProperty(
  * shows indicator div
  */
 ol.control.MousePositionDem.prototype.show = function() {
-    if (this.element.className !== 'indicator ol-unselectable')
+    if (this.element.className !== 'indicator ol-unselectable') {
         this.element.className = 'indicator ol-unselectable';
+    }
 };
 goog.exportProperty(
     ol.control.MousePositionDem.prototype,
