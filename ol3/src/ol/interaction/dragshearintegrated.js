@@ -511,8 +511,10 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
                 shearY = (this.distanceY / shearLength) * this.options['maxInnerShearingPx'] * this.view.getResolution();
             }
         }
+        // value to normalize shearing factors for visible extent
         var normalizedDraggedElevation = (this.startDragElevation - this.minElevation) / (this.maxElevation - this.minElevation);
-        var normalizedDraggedElevationLocal = (this.startDragElevation - this.minElevationLocal) / (this.maxElevationLocal - this.minElevationLocal);
+        // value to decide for a relatively low or a high point
+        var normalizedDraggedElevationLocal = Math.abs((this.startDragElevation - this.minElevationLocal) / (this.maxElevationLocal - this.minElevationLocal));
 
         // console.log("clicked elevation: ", this.startDragElevation);
         // console.log("minimum elevation: ", this.minElevation);
@@ -532,7 +534,8 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         } else {
             // console.log('lower point');
             // low elevations
-            this.shear(-shearX / (1 - normalizedDraggedElevation), -shearY / (1 - normalizedDraggedElevation));
+            // invert shearing direction
+            this.shear(-shearX, -shearY);
             // FIXME add similar test as for high elevations and only call setCenter if necessary?
             this.view.setCenter(this.view.constrainCenter([this.currentCenter[0] - this.distanceX, this.currentCenter[1] - this.distanceY]));
         }
