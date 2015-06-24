@@ -132,6 +132,7 @@ var Viewer = function(config, layers, container) {
         this.dem.setLightZenith(this.config.get('lightZenith'));
         this.dem.setResolution(this.config.get('resolution'));
         this.dem.setTesting(this.config.get('debug'));
+        this.dem.setWireframe(this.config.get('wireframe'));        
         this.dem.setObliqueInclination(this.config.get('obliqueInclination'));
         this.dem.setWaterBodies(this.config.get('waterBodies'));
         this.dem.setTerrainInteraction(this.config.get('terrainInteraction'));

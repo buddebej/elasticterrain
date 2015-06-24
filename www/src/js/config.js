@@ -29,6 +29,7 @@ var Config = function() {
         // debug         
         resolution: 0.25, // 0;1
         debug: false, // bool       
+        wireframe: false, // bool       
 
         // view
         viewRotation: 0, // 0:360

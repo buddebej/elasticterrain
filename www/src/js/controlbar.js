@@ -46,6 +46,7 @@ var ControlBar = function(viewer) {
         SWITCH_STACKED_CARDBOARD = $('.stackedCardboardSwitch'),
         SWITCH_SHEARING_INTERACTION = $('.shearingInteractionsSwitch'),
         SWITCH_DEBUG = $('.debugModeSwitch'),
+        SWITCH_WIREFRAME = $('.wireframeModeSwitch'),
         SLIDER_AMBIENT_LIGHT = $('.ambientLightSlider'),
         SLIDER_COLOR = $('.colorSlider'),
         SLIDER_DARKNESS = $('.darknessSlider'),
@@ -196,6 +197,7 @@ var ControlBar = function(viewer) {
         SWITCH_SHADING.setState(viewer.get('shading'));
         SWITCH_SHEARING_INTERACTION.setState(viewer.get('terrainInteraction'));
         SWITCH_DEBUG.prop(CHECKED, viewer.get('debug'));
+        SWITCH_WIREFRAME.prop(CHECKED, viewer.get('wireframe'));
 
 
         SLIDER_COLOR.slider({
@@ -260,8 +262,8 @@ var ControlBar = function(viewer) {
         var z = viewer.view.getZoom(),
             extent = viewer.view.calculateExtent(viewer.map.getSize()),
             // add 256 px padding to extent constraint
-            padding = 256*viewer.view.getResolution(),
-            extentPlus = [extent[0]-padding, extent[1]-padding, extent[2]+padding, extent[3]+padding],
+            padding = 256 * viewer.view.getResolution(),
+            extentPlus = [extent[0] - padding, extent[1] - padding, extent[2] + padding, extent[3] + padding],
             zoomConstraint = (SWITCH_SAVE_ZOOM.prop(CHECKED)) ? [z, z] : viewer.get('viewZoomConstraint'),
             centerConstraint = (SWITCH_SAVE_EXTENT.prop(CHECKED)) ? extentPlus : [],
             rotationConstraint = SWITCH_SAVE_ROTATION.prop(CHECKED),
@@ -463,7 +465,7 @@ var ControlBar = function(viewer) {
             SWITCH_SHEARING_INTERACTION.collapse(true);
         } else {
             ui.controls.inclination.cont.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
-            viewer.elevationIndicator.enable();            
+            viewer.elevationIndicator.enable();
         }
         viewer.render();
     };
@@ -523,6 +525,13 @@ var ControlBar = function(viewer) {
         var checkbox = SWITCH_DEBUG.find($('input'));
         viewer.set('debug', !viewer.get('debug'));
         checkbox.prop(CHECKED, !viewer.get('debug'));
+        viewer.render();
+    });
+
+    SWITCH_WIREFRAME.click(function() {
+        var checkbox = SWITCH_WIREFRAME.find($('input'));
+        viewer.set('wireframe', !viewer.get('wireframe'));
+        checkbox.prop(CHECKED, !viewer.get('wireframe'));
         viewer.render();
     });
 

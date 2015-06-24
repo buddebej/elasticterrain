@@ -545,7 +545,7 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
  * @private
  * @return {Object.<string, ol.webgl.Buffer>} vertexBuffer, indexBuffer
  */
-ol.renderer.webgl.TileDemLayer.prototype.getTileMesh = function(meshResolution) {
+ol.renderer.webgl.TileDemLayer.prototype.getTileMesh = function(meshResolution, wireframeMode) {
     var vb = [],
         tb = [],
         ib = [],
@@ -563,7 +563,11 @@ ol.renderer.webgl.TileDemLayer.prototype.getTileMesh = function(meshResolution) 
                 // two triangles
                 // v+vertices *\ * v+vertices+1
                 //          v * \* v+1
-                ib.push(v, v + vertices, v + 1, v + vertices, v + vertices + 1, v + 1);
+                if (!wireframeMode) {
+                    ib.push(v, v + vertices, v + 1, v + vertices, v + vertices + 1, v + 1);
+                } else {
+                    ib.push(v, v + vertices, v, v + 1, v + 1, v + vertices, v + vertices, v + vertices + 1, v + vertices + 1, v + 1);
+                }
             }
             v += 1;
         }
@@ -726,7 +730,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
             if (this.hybridOverlay) {
                 // define blending method for hypsometric + texture hybrid
-                gl.uniform1i(this.locations_.u_blendingMethod, tileDemLayer.getOverlayTiles()['hybrid'][1]); 
+                gl.uniform1i(this.locations_.u_blendingMethod, tileDemLayer.getOverlayTiles()['hybrid'][1]);
             }
 
             // u_minMaxFade: animated minMax for animated color transitions
@@ -772,8 +776,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
 
         // TRIANGLE MESH FOR EACH TILE
-        // check if mesh resolution has changed
-        if (!goog.isObject(this.tileMesh_) || this.tileMesh_.resolution != tileDemLayer.getResolution()) {
+        // compute new mesh on init, when resolution has changed or wireframe mode was enabled or disabled
+        if (!goog.isObject(this.tileMesh_) || this.tileMesh_.resolution != tileDemLayer.getResolution() || this.tileMesh_.wireframe != tileDemLayer.getWireframe()) {
             // drop old buffers
             if (goog.isObject(this.tileMesh_)) {
                 context.deleteBuffer(this.tileMesh_.vertexBuffer);
@@ -781,8 +785,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             }
             // compute mesh for current resolution
             /** @type {Object.<string, ol.webgl.Buffer>} */
-            this.tileMesh_ = this.getTileMesh(goog.math.safeCeil(tileDemLayer.getResolution() * 128));
+            this.tileMesh_ = this.getTileMesh(goog.math.safeCeil(tileDemLayer.getResolution() * 128), tileDemLayer.getWireframe());
             this.tileMesh_.resolution = tileDemLayer.getResolution();
+            this.tileMesh_.wireframe = tileDemLayer.getWireframe();
         }
         // Write the vertex coordinates to the buffer object
         context.bindBuffer(goog.webgl.ARRAY_BUFFER, this.tileMesh_.vertexBuffer);
@@ -924,9 +929,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                             gl.activeTexture(goog.webgl.TEXTURE4);
                             mapRenderer.bindTileTexture(overlayTile, tilePixelSize, 0, goog.webgl.LINEAR, goog.webgl.LINEAR);
                             gl.uniform1i(this.locations_.u_mapTex, 4);
-
                             // draw triangle mesh for each tile
-                            gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
+                            gl.drawElements((tileDemLayer.getWireframe() ? goog.webgl.LINES : goog.webgl.TRIANGLES), this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
                             this.updateCurrentMinMax(tile);
                         }
                     }
@@ -984,7 +988,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     gl.uniform1i(this.locations_.u_demTex, 3);
 
                     // draw triangle mesh for each tile
-                    gl.drawElements(goog.webgl.TRIANGLES, this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
+                    gl.drawElements((tileDemLayer.getWireframe() ? goog.webgl.LINES : goog.webgl.TRIANGLES), this.tileMesh_.indexBuffer.getCount(), goog.webgl.UNSIGNED_INT, 0);
                     this.updateCurrentMinMax(tile);
                 }
             }

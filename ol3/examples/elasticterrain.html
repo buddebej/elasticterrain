@@ -74,8 +74,18 @@
                     <div><i class="fa fa-picture-o fa-fw"></i>&nbsp; Map</div>
                 </div>
                 <div class="controlBody">
-                    <select class="textureSelect">
-                    </select>
+                    <select class="textureSelect"></select>
+                    <!--   <div class="switchBox floatLeft">
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox dynamicColorsSwitch" id="switchDynamicColors">
+                            <label class="onoffswitch-label" for="switchDynamicColors">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                        <span class="checkboxLabel">Hybrid.</span>
+                    </div>
+                    <div class="clearFloat"></div> -->
                     <div class="colorControls">
                         <select class="colorRampSelect">
                             <option value="0">ColorRamp 1</option>
@@ -103,7 +113,7 @@
                                     <span class="onoffswitch-switch"></span>
                                 </label>
                             </div>
-                            <span class="checkboxLabel">Detect Water Bodies.</span>
+                            <span class="checkboxLabel">Detect Inland Water Bodies.</span>
                         </div>
                         <div class="switchBox">
                             <div class="onoffswitch">
@@ -113,7 +123,7 @@
                                     <span class="onoffswitch-switch"></span>
                                 </label>
                             </div>
-                            <span class="checkboxLabel">Ocean floor contours.</span>
+                            <span class="checkboxLabel">Draw Ocean Floor Contours.</span>
                         </div>
                     </div>
                 </div>
@@ -210,16 +220,25 @@
                         </div>
                         <span class="checkboxLabel">Debug mode.</span>
                     </div>
+                    <div class="switchBox">
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox wireframeModeSwitch" id="switchWireframe">
+                            <label class="onoffswitch-label" for="switchWireframe">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                        <span class="checkboxLabel">Draw Wireframes.</span>
+                    </div>
                     <div class="vcenter">
                         Model Resolution
                         <div class="resolutionSlider floatingSlider"></div>
                     </div>
                     <div class="vcenter">
                         <div id="no-download" class="alert alert-error" style="display: none">
-                            This example requires a browser that supports the
-                            <a href="http://caniuse.com/#feat=download">link download</a> attribute.
+                            The export feature is not supported by your browser.
                         </div>
-                        Export Map<a id="export-png" class="controlbutton floatingSlider" download="map.png">Download PNG Image</a>
+                        Export Map (instable)<a id="export-png" class="controlbutton floatingSlider" download="map.png">Download PNG Image</a>
                     </div>
                 </div>
             </div>

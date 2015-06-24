@@ -22,6 +22,7 @@ ol.layer.TileDemProperty = {
   OVERLAY_TILES: 'overlayTiles',
   RESOLUTION : 'resolution',
   TESTING: 'testing',
+  WIREFRAME: 'wireframe',  
   TERRAIN_INTERACTION: 'terrainInteraction',
   TERRAIN_SHEARING: 'terrainShearing',    
   WATER_BODIES: 'waterBodies',
@@ -71,6 +72,7 @@ ol.layer.TileDem = function(opt_options) {
   this.setOverlayTiles(goog.isDef(options.overlayTiles) ? options.overlayTiles : null);
   this.setResolution(goog.isDef(options.resolution) ? options.resolution : 0.25);
   this.setTesting(goog.isDef(options.testing) ? options.testing : false);
+  this.setWireframe(goog.isDef(options.wireframe) ? options.wireframe : false);  
   this.setWaterBodies(goog.isDef(options.waterBodies) ? options.waterBodies : true);
   this.setPreload(goog.isDef(options.preload) ? options.preload : 0);
   this.setUseInterimTilesOnError(goog.isDef(options.useInterimTilesOnError) ? options.useInterimTilesOnError : true);
@@ -469,6 +471,30 @@ goog.exportProperty(
   ol.layer.TileDem.prototype,
   'getTesting',
   ol.layer.TileDem.prototype.getTesting);
+
+
+
+/**
+ * @param {boolean} wireframe Wireframe Flag.
+ */
+ol.layer.TileDem.prototype.setWireframe = function(wireframe) {
+  this.set(ol.layer.TileDemProperty.WIREFRAME, wireframe);
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'setWireframe',
+  ol.layer.TileDem.prototype.setWireframe);
+/**
+ * @return {boolean} Wireframe Flag.
+ */
+ol.layer.TileDem.prototype.getWireframe = function() {
+  return /** @type {boolean} */ (
+    this.get(ol.layer.TileDemProperty.WIREFRAME));
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'getWireframe',
+  ol.layer.TileDem.prototype.getWireframe);
 
 
 

@@ -114,6 +114,9 @@ float rowToCell(in int row) {
 }
 
 void main(void) {
+    
+    // vec2 texCoord = v_texCoord;
+    // gl_FragColor = vec4(texCoord.y,texCoord.x,0.15,1.0);
 
         // Orientation of coordinate system in fragment shader:
         //  NORTH
