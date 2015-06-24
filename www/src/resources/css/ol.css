@@ -6,8 +6,8 @@
 }
 
 .ol-scale-line {
-  background: #95b9e6;
-  background: rgba(0,60,136,0.3);
+  background: #2484C6;
+  background: rgba(36,132,198,0.5);
   border-radius: 4px;
   bottom: 8px;
   left: 8px;
@@ -87,8 +87,8 @@
   height: 1.375em;
   width: 1.375em;
   line-height: .4em;
-  background-color: #7b98bc;
-  background-color: rgba(0,60,136,0.5);
+  background: #2484C6;
+  background: rgba(36,132,198,0.5);
   border: none;
   border-radius: 2px;
 }

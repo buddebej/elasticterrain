@@ -313,7 +313,7 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
             };
 
             latlon = decimalDegToDegMin(coordinate[1], false) + '  ' + decimalDegToDegMin(coordinate[0], true);
-            html = elevation + latlon;
+            html = elevation + latlon + ', z: ' + map.getView().getZoom();
         }
     }
     if (!goog.isDef(this.renderedHTML_) || html != this.renderedHTML_) {

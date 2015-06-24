@@ -14,3 +14,5 @@ www/src/js/analytics.js
 backend/node_modules/
 userstudy/*
 ol3/userstudy
+*tutorial*
+*sample*

@@ -86,10 +86,6 @@ var ControlBar = function(viewer) {
             enabled: true,
             collapsed: false
         },
-        config: {
-            enabled: false,
-            collapsed: true
-        },
         inclination: {
             enabled: false,
             collapsed: false
@@ -114,6 +110,10 @@ var ControlBar = function(viewer) {
         },
         rotation: {
             enabled: true,
+            collapsed: true
+        },
+        config: {
+            enabled: false,
             collapsed: true
         },
         saveConfig: {
@@ -259,8 +259,11 @@ var ControlBar = function(viewer) {
     BUTTON_SAVE_CONFIG.click(function() {
         var z = viewer.view.getZoom(),
             extent = viewer.view.calculateExtent(viewer.map.getSize()),
+            // add 256 px padding to extent constraint
+            padding = 256*viewer.view.getResolution(),
+            extentPlus = [extent[0]-padding, extent[1]-padding, extent[2]+padding, extent[3]+padding],
             zoomConstraint = (SWITCH_SAVE_ZOOM.prop(CHECKED)) ? [z, z] : viewer.get('viewZoomConstraint'),
-            centerConstraint = (SWITCH_SAVE_EXTENT.prop(CHECKED)) ? extent : [],
+            centerConstraint = (SWITCH_SAVE_EXTENT.prop(CHECKED)) ? extentPlus : [],
             rotationConstraint = SWITCH_SAVE_ROTATION.prop(CHECKED),
             constraints = {
                 center: centerConstraint,

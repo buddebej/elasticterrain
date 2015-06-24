@@ -52,12 +52,12 @@ var Config = function() {
 
         // shearingInteraction 
         terrainInteraction: true, 
-        shearingThreshold: 0.333, 
-        springCoefficient: 0.11, 
-        frictionForce: 0.27,             
-        maxInnerShearingPx: 49.0, 
-        maxOuterShearingPx: 49.0, 
-        staticShearFadeOutAnimationSpeed: 0.74,
+        shearingThreshold: 0.444, 
+        springCoefficient: 0.066, 
+        frictionForce: 0.2,             
+        maxInnerShearingPx: 20.0, 
+        maxOuterShearingPx: 20.0, 
+        staticShearFadeOutAnimationSpeed: 1.54,
         hybridDampingDuration: 0.3
     };
 

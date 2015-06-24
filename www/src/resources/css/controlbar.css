@@ -5,7 +5,7 @@ select {
     background-color: #111;
     color: #fff;
     font-size: 9pt;
-    width: 80%;
+    width: 70%;
     margin-top: 0.5em;
     font-family: 'Open Sans', sans-serif;
 }
@@ -18,7 +18,7 @@ h3 {
 
 .controlBar {
     height: 100%;
-    width: 310px;
+    width: 300px;
     right: 0;
     position: absolute;
     background-color: #111;
@@ -112,6 +112,8 @@ h3 {
 
 .infoBox {
     padding: 15px;
+    padding-top:10px;
+    padding-bottom:8px;    
     color: #eee;
     font-size: 8pt;
     border: 0;
@@ -119,7 +121,7 @@ h3 {
 }
 
 .info .menue {
-    color: #4479E3;
+    color: #2484C6;
     clear: both;
 }
 
@@ -136,12 +138,12 @@ h3 {
 }
 
 .info .menue .item:hover {
-    background-color: #4479E3;
+    background-color: #2484C6;
     color: #fefefe;
 }
 
 .info .menue .active {
-    background-color: #4479E3;
+    background-color: #2484C6;
     color: #fefefe;
 }
 
@@ -226,7 +228,7 @@ h3 {
     height: 13px;
     width: 7px;
     border-radius: 2px;
-    background: #4479E3;
+    background: #2484C6;
     z-index: 0;
 }
 
@@ -295,7 +297,7 @@ h3 {
 .onoffswitch-inner:before {
     content: "ON";
     padding-left: 7px;
-    background-color: #4479E3;
+    background-color: #2484C6;
     color: #FFFFFF;
 }
 

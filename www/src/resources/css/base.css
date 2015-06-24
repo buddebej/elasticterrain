@@ -1,10 +1,10 @@
-html, body {
+html,
+body {
     background-color: #111111;
     margin: 0;
     padding: 0;
     height: 100%;
 }
-
 
 .container {
     height: 100%;
@@ -45,7 +45,8 @@ html, body {
     width: auto;
     min-width: 170px;
     text-align: center;
-    background: rgba(0, 60, 136, 0.6);
+    background: #2484C6;
+    background: rgba(36, 132, 198, 0.5);
     font-size: 8pt;
     right: 8px;
     bottom: 8px;
@@ -65,7 +66,7 @@ html, body {
     width: 75px;
 }
 
-.floatLeft{
+.floatLeft {
     float: left;
 }
 
