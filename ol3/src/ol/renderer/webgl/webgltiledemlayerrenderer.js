@@ -483,18 +483,28 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
             // matrix for coordinates of neighbor segments relative to clicked segment
             neighborSegmentsCoordinates = createAdjacentNeighborMatrix(clickedSegmentCoord[0] + tileSegmentsXY, clickedSegmentCoord[1] + tileSegmentsXY, true),
             // number of segments in global segment array
-            neighborSegmentsXY = neighborhoodSize * tileSegmentsXY,
+            neighborSegmentsXY = tileSegmentsXY * neighborhoodSize,
             // array for all segments in one array for entire neighborhood
             neighborSegmentStore = make2dArray(neighborSegmentsXY),
+            // neighborSegmentStoreLog = make2dArray(neighborSegmentsXY),
             localMinMax = [0.0, 0.0];
+
+        // console.log('clickedXyzKey: ' + clickedXyzKey + '\nclickedSegmentCoord: ' + clickedSegmentCoord, '\nclickedSegmentMinMax :' + clickedSegmentMinMax);
+        // console.log(clickedTile);
+        // console.log(neighborTilesCoordinates);
+        // console.log(neighborSegmentsCoordinates);
+        // console.log(neighborSegmentStore);
 
         if (ol.Elevation.MinMaxNeighborhoodSize === 0) {
             // compute only single segment minmax
             localMinMax = clickedSegmentMinMax;
         } else {
-            // compute neighborhood segment minMax
+            // compute neighborhood for 3x3 segments minMax
             // loop through destination tile segments store and get copies of all tile segments 
+
+            var relTileRow = 0;
             for (var segmentRow = 0; segmentRow < neighborSegmentsXY; segmentRow++) {
+                var relTileCol = 0;
                 for (var segmentCol = 0; segmentCol < neighborSegmentsXY; segmentCol++) {
                     var // compute row and column of tile that contains the segment
                         tileRow = goog.math.safeFloor(segmentRow / tileSegmentsXY),
@@ -506,14 +516,26 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
                         tile = this.tileCache.get(xyzKey);
                         // get the segments
                         var nSegments = tile.getSegments(),
-                            // copy the corresponding segment from the tile segment store to the global segment store
-                            segmentCopy = nSegments[goog.math.safeFloor(segmentCol / neighborhoodSize)][goog.math.safeFloor(segmentRow / neighborhoodSize)];
-                        neighborSegmentStore[segmentCol][segmentRow] = segmentCopy;
+                            localCol = segmentCol - relTileCol * tileSegmentsXY,
+                            localRow = segmentRow - relTileRow * tileSegmentsXY;
+
+                        // copy the corresponding segment from the tile segment store to the global segment store
+                        neighborSegmentStore[segmentRow][segmentCol] = nSegments[localCol][localRow];
+                        // neighborSegmentStoreLog[segmentRow][segmentCol] = segmentCopy[0] + ', ' + segmentCopy[1];
+                        if ((segmentCol + 1) % tileSegmentsXY === 0) {
+                            relTileCol++;
+                        }
                     }
                 }
+                if ((segmentRow + 1) % tileSegmentsXY === 0) {
+                    relTileRow++;
+                }
             }
+            // console.table(neighborSegmentStoreLog);
+            // console.log(neighborSegmentsCoordinates);
 
-            var segmentCounter = 0;
+            var localMin = ol.Elevation.MAX,
+                localMax = ol.Elevation.MIN;
             // read minMax for relevant segments
             for (var segmentRow = 0; segmentRow < neighborhoodSize; segmentRow++) {
                 for (var segmentCol = 0; segmentCol < neighborhoodSize; segmentCol++) {
@@ -522,15 +544,18 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
                         segmentY = neighborSegmentsCoordinates[segmentRow][segmentCol].y;
 
                     if (goog.isDef(neighborSegmentStore[segmentX][segmentY])) {
-                        localMinMax[0] += neighborSegmentStore[segmentX][segmentY][0];
-                        localMinMax[1] += neighborSegmentStore[segmentX][segmentY][1];
-                        segmentCounter++;
+                        var segmentMin = neighborSegmentStore[segmentX][segmentY][0],
+                            segmentMax = neighborSegmentStore[segmentX][segmentY][1];
+                        if (segmentMin < localMin) {
+                            localMin = segmentMin;
+                        }
+                        if (segmentMax > localMax) {
+                            localMax = segmentMax;
+                        }
                     }
                 }
             }
-            // average minMax values
-            localMinMax[0] = localMinMax[0] / segmentCounter;
-            localMinMax[1] = localMinMax[1] / segmentCounter;
+            localMinMax = [localMin, localMax];
         }
         return localMinMax;
     } else {
