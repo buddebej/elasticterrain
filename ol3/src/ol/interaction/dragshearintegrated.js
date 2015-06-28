@@ -96,7 +96,7 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
     this.condition = goog.isDef(condition['keypress']) ? condition['keypress'] : ol.events.condition.noModifierKeys;
 
     /** @type {null|ol.control.MousePositionDem} */
-    this.elevationIndicator = /** @type {ol.control.MousePositionDem} */( this.map.getControls().getArray()[3]);
+    this.elevationIndicator = /** @type {ol.control.MousePositionDem} */ (this.map.getControls().getArray()[3]);
 
     // FIXME: The above expression should be better solved like this: (However, InstanceOf does not work correct)
     // this.elevationIndicator = /** @type {ol.control.MousePositionDem} */ (goog.array.find(this.map.getControls().getArray(),
@@ -148,6 +148,10 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
     /** @type {Date}
      * Time when last rendering occured. Used to measure FPS and adjust shearing speed accordingly. */
     this.lastRenderTime = null;
+
+    /** @type {Date}
+     * Time when animation started. Used for debugging and logging. */
+    this.timeSinceAnimationBegin = null;
 
     /** @type {number}
      * Average FPS value */
@@ -397,9 +401,6 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         this.distanceY = currentDragPosition[1] - animatingPositionY;
     }
 
-    // FIXME this constant should not be here. This could be a configurable parameter.
-    // Duration of the animation that fades the length of the spring between static and hybrid shearing.
-
     var currentTime = new Date(),
         timeSinceHybridShearingStart = 0;
     if (this.hybridShearingStartTimeMS > 0) {
@@ -407,8 +408,8 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
     }
 
     // A damping factor for fading the length of the spring between static and hybrid shearing.
-    // When the cursor leaves circle with radius maxOuterShearingMeters, the damping factor is
-    // 1. It fades to 0 within the time interval defined by this.options['hybridDampingDuration'].
+    // When the cursor leaves circle with radius maxOuterShearingMeters, the damping factor is 1. 
+    // It fades to 0 within the time interval defined by this.options['hybridDampingDuration'].
     var hybridShearingStartDamping = 1;
     if (this.shearingStatus === ol.interaction.State.HYBRID_SHEARING) {
         if (timeSinceHybridShearingStart <= this.options['hybridDampingDuration']) {
@@ -426,8 +427,8 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         springLengthX = distance > 0 ? this.distanceX / distance * this.springLength * hybridShearingStartDamping : 0,
         springLengthY = distance > 0 ? this.distanceY / distance * this.springLength * hybridShearingStartDamping : 0;
 
-    // spring coefficient // FIXME: passed springCoefficient paramter should be 60 times larger
-    var k = this.options['springCoefficient'] * 60,
+    // spring coefficient
+    var k = this.options['springCoefficient'],
         // friction for damping previous speed
         friction = 1 - this.options['frictionForce'],
         // stretch or compression of the spring
@@ -437,14 +438,16 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         vx_t0 = k * springStretchX + friction * this.vx_t_1,
         vy_t0 = k * springStretchY + friction * this.vy_t_1;
 
+
+    var
     // time since last frame was rendered [seconds]
-    var dTsec = this.lastRenderTime !== null ? (currentTime.getTime() - this.lastRenderTime.getTime()) / 1000 : 1 / 60,
+        dTsec = this.lastRenderTime !== null ? (currentTime.getTime() - this.lastRenderTime.getTime()) / 1000 : 1 / 60,
         // displacement of clicked point due to spring [meters]
         dx = vx_t0 * dTsec,
         dy = vy_t0 * dTsec;
 
+
     // store values for next rendered frame
-    this.lastRenderTime = currentTime;
     this.vx_t_1 = vx_t0;
     this.vy_t_1 = vy_t0;
 
@@ -457,6 +460,7 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         this.currentCenter[0] -= dx;
         this.currentCenter[1] -= dy;
     }
+
 
     // Test for end of animation: stop animation when speed and acceleration of the animation are close to zero.
     // The acceleration is triggered by the spring, and is proportional to the stretch of the spring.
@@ -489,8 +493,30 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
     // test for other active interactions like zooming or rotation
     var otherInteractionActive = this.view.getHints()[ol.ViewHint.INTERACTING];
 
+    // FOR LOGGING PURPOSES
+    // if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
+    //     if (this.timeSinceAnimationBegin === null) {
+    //         // reset logger
+    //         this.timeSinceAnimationBegin = currentTime.getTime();
+    //         // reset logger for new animation
+    //         this.oscillationLogger = [];
+    //         // add csv header
+    //         this.oscillationLogger = 't;vx;vy;a;dx;dy\n0;0;0;0;\n';
+    //     }
+
+    //     // seconds since animation started
+    //     var t = (currentTime.getTime() - this.timeSinceAnimationBegin) / 1000,
+    //         aPixel = k * (springStretch / this.view.getResolution()) / dTsec;
+
+    //     var newline = t + ';' + vx_t0 / this.view.getResolution() + ';' + vy_t0 / this.view.getResolution() + ';' + aPixel + ';' + dx / this.view.getResolution() + ';' + dy / this.view.getResolution() + '\n';
+    //     this.oscillationLogger += newline;
+    // }
+
+
+    // update last rendering time
+    this.lastRenderTime = currentTime;
+
     if (stopAnimation || otherInteractionActive) {
-        // console.log("stop");
         // stop the animation
         this.animationDelay.stop();
         this.lastRenderTime = null;
@@ -498,6 +524,10 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         this.vx_t_1 = this.vy_t_1 = 0;
         this.shear(0, 0);
         this.shearingStatus = ol.interaction.State.NO_SHEARING;
+        // console.log("animation ended");
+        // console.log('fps: ' + this.getFps());
+        // console.log(this.oscillationLogger);
+        // this.timeSinceAnimationBegin = null;
     } else {
         // compute shearing distance
         var shearX = this.distanceX,

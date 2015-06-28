@@ -13,7 +13,7 @@ var Config = function() {
         shadingDarkness: 0.1, // 0:1
         shadingExaggeration: 0.6, // 0:1         
         lightAzimuth: 315, // 0:360
-        lightZenith: 50, // 0:90
+        lightZenith: 35, // 0:90
         ambientLight: 0.1, // 0:1
 
         // texture
@@ -54,7 +54,7 @@ var Config = function() {
         // shearingInteraction 
         terrainInteraction: true, 
         shearingThreshold: 0.444, 
-        springCoefficient: 0.066, 
+        springCoefficient: 4, 
         frictionForce: 0.2,             
         maxInnerShearingPx: 20.0, 
         maxOuterShearingPx: 20.0, 
@@ -70,7 +70,7 @@ var Config = function() {
         shadingDarkness: [0.0, 1.0],
         shadingExaggeration: [0.0, 1.5],
         shearingThreshold: [0.0, 1.0],
-        springCoefficient: [0.0, 0.4],
+        springCoefficient: [0.0, 24],
         frictionForce: [0.0, 0.5],
         maxInnerShearingPx: [0.0, 120.0],
         maxOuterShearingPx: [0.0, 120.0],
