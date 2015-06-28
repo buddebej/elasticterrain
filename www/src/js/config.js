@@ -13,7 +13,7 @@ var Config = function() {
         shadingDarkness: 0.1, // 0:1
         shadingExaggeration: 0.6, // 0:1         
         lightAzimuth: 315, // 0:360
-        lightZenith: 35, // 0:90
+        lightZenith: 45, // 0:90
         ambientLight: 0.1, // 0:1
 
         // texture
