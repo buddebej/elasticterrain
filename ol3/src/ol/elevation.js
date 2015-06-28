@@ -52,4 +52,4 @@ ol.Elevation.setMinMaxNeighborhoodSize = function(size) {
  * has the size of a square of 256 / sqrt(MinMaxNeighborhoodSize) pixels
  * can be 4, 8, 16, 36, 64, 128, 256 ...
  */
-ol.Elevation.MinMaxNeighborhoodSize = 16;
+ol.Elevation.MinMaxNeighborhoodSize = 36;
