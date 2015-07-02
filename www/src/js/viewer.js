@@ -137,6 +137,8 @@ var Viewer = function(config, layers, container) {
         this.dem.setWaterBodies(this.config.get('waterBodies'));
         this.dem.setTerrainInteraction(this.config.get('terrainInteraction'));
         this.dem.setOverlayTiles((this.config.get('texture') !== 'hypso') ? this.layers[this.config.get('texture')] : null);
+        // hide all overlayers             
+        this.hideLayersExcept((this.config.get('texture') !== 'hypso') ? this.config.get('texture') : null);
         this.shearingInteraction.setOptions(this.getShearingInteractionOptions());
         this.shearingInteraction.setActive(this.config.get('terrainInteraction'));
         this.render();

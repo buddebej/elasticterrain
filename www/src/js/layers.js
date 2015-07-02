@@ -50,7 +50,7 @@ var Layers = function() {
             title: 'Open Street Map Humanitarian',
             id: 'osm-humanitarian',
             pos: 1,
-            enabled: true,
+            enabled: false,
             data: new ol.layer.Tile({
                 source: new ol.source.XYZ({
                     url: 'http://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'

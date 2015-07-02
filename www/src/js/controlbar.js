@@ -323,18 +323,13 @@ var ControlBar = function(viewer) {
     SELECT_TEXTURE.change(function() {
         var selectedLayer = SELECT_TEXTURE.find($('option:selected')).val();
         if (selectedLayer === 'hypso') {
-            viewer.set('texture', 'hypso');
-            // hide all overlayers             
-            viewer.hideLayersExcept(null);
             // show hypsometric color controls               
             COLOR_CONTROLS.show(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         } else {
-            viewer.set('texture', selectedLayer);
-            // hide other layers                             
-            viewer.hideLayersExcept(selectedLayer);
             // hide hypsometric color controls
             COLOR_CONTROLS.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
+        viewer.set('texture', selectedLayer);
     });
 
 
