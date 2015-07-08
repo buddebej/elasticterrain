@@ -120,7 +120,7 @@ var ControlBar = function(viewer) {
             collapsed: true
         },
         saveConfig: {
-            enabled: true,
+            enabled: false,
             collapsed: true
         }
     };
@@ -232,18 +232,20 @@ var ControlBar = function(viewer) {
 
     // update select box with configs from newStore
     ui.updateConfigStore = function(newStore) {
-        // show control
-        ui.controls.config.cont.show();
+        if (ui.controls.config.enabled) {
+            // show control
+            ui.controls.config.cont.show();
 
-        // empty select box
-        SELECT_CONFIG.empty();
-        SELECT_CONFIG.append($('<option></option>').val('default').html('Default')).attr('selected', true);
+            // empty select box
+            SELECT_CONFIG.empty();
+            SELECT_CONFIG.append($('<option></option>').val('default').html('Default')).attr('selected', true);
 
-        // populate select box with available configs
-        $.each(viewer.getConfigStore(), function(val, obj) {
-            var name = (obj.title !== "") ? obj.title : obj.viewCenter[1].toFixed(2) + ', ' + obj.viewCenter[0].toFixed(2) + ' (z ' + obj.viewZoom + ')';
-            SELECT_CONFIG.append($('<option></option>').val(val).html(name));
-        });
+            // populate select box with available configs
+            $.each(viewer.getConfigStore(), function(val, obj) {
+                var name = (obj.title !== "") ? obj.title : obj.viewCenter[1].toFixed(2) + ', ' + obj.viewCenter[0].toFixed(2) + ' (z ' + obj.viewZoom + ')';
+                SELECT_CONFIG.append($('<option></option>').val(val).html(name));
+            });
+        }
     };
 
     // on config select change
