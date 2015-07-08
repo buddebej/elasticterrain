@@ -68,7 +68,9 @@ var ControlBar = function(viewer) {
         SWITCH_SAVE_EXTENT = $('.saveLimitExtentSwitch'),
         SWITCH_SAVE_ROTATION = $('.saveLimitRotationSwitch'),
         TEXT_SAVE_TITLE = $('.configTitleText'),
-        BUTTON_SAVE_CONFIG = $('.saveconfig');
+        BUTTON_SAVE_CONFIG = $('.saveconfig'),
+        BUTTON_EDIT_CONFIG = $('.editconfig').hide();
+
 
     // config control bar
     ui.options = {
@@ -190,7 +192,6 @@ var ControlBar = function(viewer) {
         KNOB_ZENITH.val(viewer.get('lightZenith')).trigger('change');
         KNOB_ROTATION.val(viewer.get('viewRotation')).trigger('change');
 
-        ui.controlActive(ui.controls.rotation, viewer.get('viewRotationEnabled'));
         SWITCH_WATERBODIES.prop(CHECKED, viewer.get('waterBodies'));
         SWITCH_DYNAMIC_COLORS.setState(viewer.get('dynamicColors'));
         SWITCH_STACKED_CARDBOARD.prop(CHECKED, viewer.get('stackedCardboard'));
@@ -214,9 +215,15 @@ var ControlBar = function(viewer) {
         SLIDER_HYBRID_DAMPING.update();
         SLIDER_RESOLUTION.update();
 
-
         SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
         SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
+
+        ui.controlActive(ui.controls.rotation, viewer.get('viewRotationEnabled'));
+
+        SWITCH_SAVE_ZOOM.prop(CHECKED, (viewer.get('viewZoomConstraint')[0] !== this.config.defaultZoomLevelRange[0] && viewer.get('viewZoomConstraint')[1] !== this.config.defaultZoomLevelRange[1]));
+        SWITCH_SAVE_EXTENT.prop(CHECKED, (viewer.get('viewCenterConstraint')[0] !== this.config.defaultMapExtent[0] && viewer.get('viewCenterConstraint')[1] !== this.config.defaultMapExtent[1]));
+        SWITCH_SAVE_ROTATION.prop(CHECKED, !viewer.get('viewRotationEnabled'));
+
     };
 
 
@@ -244,37 +251,65 @@ var ControlBar = function(viewer) {
         var option = SELECT_CONFIG.find($('option:selected')).val();
         if (option !== 'default') {
             viewer.swapConfig(viewer.getConfigStore()[option]);
+            BUTTON_EDIT_CONFIG.show();
         } else {
             viewer.swapConfig(this.config.init);
+            BUTTON_EDIT_CONFIG.hide();
         }
         ui.updateControlTools();
     }.bind(this));
 
+    SWITCH_SAVE_ZOOM.click(function() {
+        var checkbox = SWITCH_SAVE_ZOOM.find($('input'));
+        if (viewer.get('viewZoomConstraint')[0] !== this.config.defaultZoomLevelRange[0] && viewer.get('viewZoomConstraint')[1] !== this.config.defaultZoomLevelRange[1]) {
+            viewer.set('viewZoomConstraint', this.config.defaultZoomLevelRange);
+            checkbox.prop(CHECKED, false);
+        } else {
+            var z = viewer.view.getZoom();
+            viewer.set('viewZoomConstraint', [z, z]);
+            checkbox.prop(CHECKED, true);
+        }
+        viewer.render();
+    }.bind(this));
+
+    SWITCH_SAVE_EXTENT.click(function() {
+        var checkbox = SWITCH_SAVE_EXTENT.find($('input'));
+        if (viewer.get('viewCenterConstraint')[0] !== this.config.defaultMapExtent[0] && viewer.get('viewCenterConstraint')[1] !== this.config.defaultMapExtent[1]) {
+            viewer.set('viewCenterConstraint', this.config.defaultMapExtent);
+            checkbox.prop(CHECKED, false);
+        } else {
+            var extent = viewer.view.calculateExtent(viewer.map.getSize()),
+                // add 256 px padding to extent constraint
+                padding = 256 * viewer.view.getResolution(),
+                extentPlus = [extent[0] - padding, extent[1] - padding, extent[2] + padding, extent[3] + padding];
+            viewer.set('viewCenterConstraint', extentPlus);
+            checkbox.prop(CHECKED, true);
+        }
+        viewer.render();
+    }.bind(this));
+
+    SWITCH_SAVE_ROTATION.click(function() {
+        var checkbox = SWITCH_SAVE_ROTATION.find($('input'));
+        viewer.set('viewRotationEnabled', !viewer.get('viewRotationEnabled'));
+        checkbox.prop(CHECKED, !viewer.get('viewRotationEnabled'));
+        viewer.render();
+    }.bind(this));
+
+    // SAVE AND EDIT PREDEFINED CONFIGURATIONS
+    BUTTON_SAVE_CONFIG.click(function() {
+        ui.configManager.saveConfig(TEXT_SAVE_TITLE.val());
+        BUTTON_SAVE_CONFIG.reset();
+    });
     BUTTON_SAVE_CONFIG.reset = function() {
-        SWITCH_SAVE_ZOOM.prop(CHECKED, false);
-        SWITCH_SAVE_EXTENT.prop(CHECKED, false);
-        SWITCH_SAVE_ROTATION.prop(CHECKED, true);
         TEXT_SAVE_TITLE.val('');
     };
 
-    // SAVE PREDEFINED CONFIGURATIONS
-    BUTTON_SAVE_CONFIG.click(function() {
-        var z = viewer.view.getZoom(),
-            extent = viewer.view.calculateExtent(viewer.map.getSize()),
-            // add 256 px padding to extent constraint
-            padding = 256 * viewer.view.getResolution(),
-            extentPlus = [extent[0] - padding, extent[1] - padding, extent[2] + padding, extent[3] + padding],
-            zoomConstraint = (SWITCH_SAVE_ZOOM.prop(CHECKED)) ? [z, z] : viewer.get('viewZoomConstraint'),
-            centerConstraint = (SWITCH_SAVE_EXTENT.prop(CHECKED)) ? extentPlus : [],
-            rotationConstraint = SWITCH_SAVE_ROTATION.prop(CHECKED),
-            constraints = {
-                center: centerConstraint,
-                rotation: rotationConstraint,
-                zoom: zoomConstraint
-            };
-        ui.configManager.saveConfig(TEXT_SAVE_TITLE.val(), constraints);
-        BUTTON_SAVE_CONFIG.reset();
+    BUTTON_EDIT_CONFIG.click(function() {
+        if (viewer.config.dynamic.hasOwnProperty('_id')) {
+            ui.configManager.updateConfig();
+        }
     });
+
 
     // PLAN OBLIQUE 
     // set inclination for planoblique relief

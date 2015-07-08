@@ -26,19 +26,13 @@ var ConfigManager = function(viewer, controlBar) {
         });
     };
     ol.inherits(this.saveConfigButton, ol.control.Control);
-    // viewer.map.addControl(new this.saveConfigButton());
 
-    this.saveConfig = function(title, constraints) {
+    this.saveConfig = function(title) {
         var newConfig = viewer.config.get();
 
         // add title attribute when specified
         if (typeof title !== 'undefined') {
             newConfig.title = title;
-        }
-        if (typeof constraints !== 'undefined') {
-            newConfig.viewZoomConstraint = constraints.zoom;
-            newConfig.viewCenterConstraint = constraints.center;
-            newConfig.viewRotationEnabled = constraints.rotation;
         }
 
         // delete id element to avoid duplicates in database. every saved config gets a unique id.
@@ -77,6 +71,25 @@ var ConfigManager = function(viewer, controlBar) {
             context: this
         });
     }.bind(this);
+
+    this.updateConfig = function() {
+        $.ajax({
+            type: 'PUT',
+            url: this.url + '/' + viewer.config.get()._id,
+            data: viewer.config.get(),
+            success: function(data) {
+                // reload configStore
+                this.loadAllConfigs();
+                console.log(data.message);
+            }.bind(this),
+            error: function(data) {
+                console.log('could not update config');
+            },
+            dataType: this.dataType,
+            context: this
+        });
+    }.bind(this);
+
 
     // load all available configs and push to gui selectbox
     this.loadAllConfigs();

@@ -3,6 +3,8 @@ var Config = function() {
 
     // static config
     this.dbUrl = 'http://54.69.7.112:8000/api/configs';
+    this.defaultZoomLevelRange = [2, 12];
+    this.defaultMapExtent = [];
     // dynamic config 
     // can be saved and loaded by configManager
     // can be modified by controlBar
@@ -40,13 +42,13 @@ var Config = function() {
         // sicily 17,37
         // vienna 16.4,48.22
         // portland -122.8, 45.7     
-        viewCenterConstraint: [], // [] | [minx, miny, maxx, maxy]
+        viewCenterConstraint: this.defaultMapExtent, // [] | [minx, miny, maxx, maxy]
         //[0, 2504688.542848654, 5009377.085697311, 7514065.628545965]
         // vienna [1790460.950551968, 6124746.202434603, 1868732.4675159885, 6203017.719398623]
         // berlin [1428455.184593372, 6848757.734351791, 1584998.218521413, 7005300.768279833]
 
         viewZoom: 5, // zoomlevel
-        viewZoomConstraint: [2, 12], // [minZoom, maxZoom]
+        viewZoomConstraint: this.defaultZoomLevelRange, // [minZoom, maxZoom]
 
         // static plan oblique
         obliqueInclination: 90.0, // 0:90
