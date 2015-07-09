@@ -35,6 +35,17 @@ var Layers = function() {
                 })
             }),
         }, {
+            title: 'Bing Streets',
+            id: 'bingstreets',
+            pos: 1,
+            enabled: true,
+            data: new ol.layer.Tile({
+                source: new ol.source.BingMaps({
+                    key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
+                    imagerySet: 'Road'
+                })
+            }),
+        }, {
             title: 'Hypsometric Aerial Hybrid',
             id: 'bingaerial-hybrid',
             pos: 1,
