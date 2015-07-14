@@ -1,4 +1,4 @@
-var ConfigManager = function(viewer, controlBar) {
+var ConfigManager = function(viewer, controlBar, initShowCase) {
     'use strict';
 
     if (typeof(controlBar) !== 'undefined') {
@@ -62,6 +62,9 @@ var ConfigManager = function(viewer, controlBar) {
                 viewer.setConfigStore(data);
                 if (typeof(controlBar) !== 'undefined') {
                     controlBar.updateConfigStore();
+                }
+                if (typeof(initShowCase) !== 'undefined') {
+                    initShowCase();
                 }
             },
             error: function(data) {

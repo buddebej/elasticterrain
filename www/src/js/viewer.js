@@ -4,16 +4,27 @@ var Viewer = function(config, layers, container) {
     this.config = config;
     this.configStore = [];
     this.layers = layers.getAll();
-    this.controlBar = null;
+    this.controlBar = undefined;
+    this.showCase = undefined;
 
     this.setControlBar = function(controlbar) {
         this.controlBar = controlbar;
     };
 
+    this.setShowCase = function(showCase) {
+        this.showCase = showCase;
+    };
+
     // get handle for base layer with elevation data
     this.dem = layers.getDem().data;
     this.elevationIndicator = new ol.control.MousePositionDem(this.dem);
-    this.mapControls = [new ol.control.Zoom(), new ol.control.Rotate(), new ol.control.ScaleLine(), this.elevationIndicator];
+    this.attribution = new ol.control.Attribution({
+        collapsible: true,
+        collapseLabel: '«'
+    });
+
+    this.mapControls = [new ol.control.Zoom(), new ol.control.Rotate(), new ol.control.ScaleLine(), this.elevationIndicator, this.attribution];
+    // this.mapControls = [this.attribution, new ol.control.Zoom(), new ol.control.Rotate(), new ol.control.ScaleLine(), this.elevationIndicator];
 
     // init ol map object
     this.map = new ol.Map({
@@ -102,10 +113,8 @@ var Viewer = function(config, layers, container) {
     // wrapper for config.swap
     this.swapConfig = function(newStore) {
         // use a copy of config for read only access during runtime 
-        // container.fadeOut(function(){
-        //     container.fadeIn('fast');
-        // });
         var configCopy = $.extend(true, {}, newStore);
+        this.shearingInteraction.stopAnimation();
         config.swap(configCopy);
         this.update();
     };

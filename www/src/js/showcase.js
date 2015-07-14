@@ -11,7 +11,7 @@ var Showcase = function(viewer) {
                 <i class="fa fa-chevron-circle-right fa-stack-1x"></i>\
                 </span>';
 
-    var bubble = '<div class="bubble">Click here to customize Elastic Terrain Map</div>';
+    var bubble = '<div class="bubble">Click here to customize the Elastic Terrain Map</div>';
 
     var CONTAINER = $('.container'),
         CONTROL_LEFT = $('<div>' + left + '</div>').addClass('showcaseControl').addClass('controlLeft'),
@@ -19,7 +19,7 @@ var Showcase = function(viewer) {
         SHOWCASE_HINT = $('<div>' + bubble + '</div>').addClass('showcaseHint').hide();
 
 
-    CONTAINER.append(CONTROL_RIGHT).append(CONTROL_LEFT);
+    $('.map').append(CONTROL_RIGHT).append(CONTROL_LEFT);
 
     var exampleIndex = 0,
         examplesSeen = 0,
@@ -71,5 +71,5 @@ var Showcase = function(viewer) {
         viewer.controlBar.show();
     });
 
-
+    viewer.setShowCase(this);
 };

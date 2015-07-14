@@ -1,11 +1,11 @@
-var ControlBar = function(viewer, showCase) {
+var ControlBar = function(viewer) {
     'use strict';
     var ui = this,
         ote = {};
 
     this.config = viewer.config;
     viewer.setControlBar(this);
-    
+
     // HELPER FUNCTIONS
     this.initSlider = function(container, attr) {
         var sliderSize = 200;
@@ -110,7 +110,7 @@ var ControlBar = function(viewer, showCase) {
         },
         shearing: {
             enabled: true,
-            collapsed: true,
+            collapsed: false,
             inactive: false
         },
         debug: {
@@ -122,11 +122,11 @@ var ControlBar = function(viewer, showCase) {
             collapsed: true
         },
         config: {
-            enabled: true,
+            enabled: false,
             collapsed: true
         },
         saveConfig: {
-            enabled: true,
+            enabled: false,
             collapsed: true
         }
     };
@@ -624,8 +624,8 @@ var ControlBar = function(viewer, showCase) {
                 }, {
                     duration: ui.options.controlAnimationSpeed,
                     start: function() {
-                        if (showCase !== undefined) {
-                            showCase.hide();
+                        if (viewer.showCase !== undefined) {
+                            viewer.showCase.hide();
                         }
                     },
                     step: updateMapSize,
@@ -640,8 +640,8 @@ var ControlBar = function(viewer, showCase) {
                     duration: ui.options.controlAnimationSpeed,
                     step: updateMapSize,
                     start: function() {
-                        if (showCase !== undefined) {
-                            showCase.show();
+                        if (viewer.showCase !== undefined) {
+                            viewer.showCase.show();
                         }
                     },
                     complete: function() {
