@@ -124,6 +124,12 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
     this.renderCounter = 0;
 
     /**
+     * @private
+     * @type {number}
+     */
+    this.renderCounterMax = 700;
+
+    /**
      * Max Zoomlevel of DEM Layer for z-Ordering in Shader
      * @private
      * @type {number}
@@ -1031,11 +1037,17 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 }
             }
 
-
             // LOOP CONTROL
             // check for completed animatedMinMax fading animation
-            var minMaxAnimationFinished = ((Math.abs(this.deltaMax) <= 1 && Math.abs(this.deltaMin) <= 1));
+            var minMaxAnimationFinished = ((Math.abs(this.deltaMax) <= 1 && Math.abs(this.deltaMin) <= 1) || (this.overlay.Active && !this.hybridOverlay));
 
+            // timeout loading and rendering loop
+            if (this.renderCounter > this.renderCounterMax) {
+                allTilesLoaded = true;
+                console.log('Loading timed out after ' + this.renderCounter + ' frames.');
+            }
+
+            // loop as long as tiles are loaded or hypsometric colors are faded
             if (!minMaxAnimationFinished || !allTilesLoaded) {
                 // continue rendering & tile loading loop
 
@@ -1059,12 +1071,11 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 this.renderCounter++;
             } else {
                 // stop rendering & tile loading loop
-
                 // goog.asserts.assert(this.renderCounter < this.renderCounterMax, 'Loading of tiles timed out.');
                 // console.log('extent: ', this.renderedFramebufferExtent);
                 // console.log('resolution: ',viewState.resolution);
                 // console.log('passes: ', this.renderCounter);
-
+                // console.log(this.renderCounter);
                 // set new animatedMinMaxElevations
                 this.animatedMaxElevation = this.maxElevationInExtent;
                 this.animatedMinElevation = this.minElevationInExtent;
