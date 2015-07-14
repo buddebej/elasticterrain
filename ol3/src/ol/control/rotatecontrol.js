@@ -126,11 +126,13 @@ ol.control.Rotate.prototype.resetNorth_ = function() {
     currentRotation -= 2 * Math.PI;
   }
   if (goog.isDef(currentRotation)) {
+    view.setHint(ol.ViewHint.INTERACTING, 1); // starts block shearing during zooming
     if (this.duration_ > 0) {
       map.beforeRender(ol.animation.rotate({
         rotation: currentRotation,
         duration: this.duration_,
-        easing: ol.easing.easeOut
+        easing: ol.easing.easeOut,
+        finishedCallback: function(){view.setHint(ol.ViewHint.INTERACTING, -1);}
       }));
     }
     view.setRotation(0);

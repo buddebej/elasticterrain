@@ -24,71 +24,71 @@ goog.require('ol.easing');
  */
 ol.control.Zoom = function(opt_options) {
 
-  var options = goog.isDef(opt_options) ? opt_options : {};
+    var options = goog.isDef(opt_options) ? opt_options : {};
 
-  var className = goog.isDef(options.className) ? options.className : 'ol-zoom';
+    var className = goog.isDef(options.className) ? options.className : 'ol-zoom';
 
-  var delta = goog.isDef(options.delta) ? options.delta : 1;
+    var delta = goog.isDef(options.delta) ? options.delta : 1;
 
-  var zoomInLabel = goog.isDef(options.zoomInLabel) ?
-      options.zoomInLabel : '+';
-  var zoomOutLabel = goog.isDef(options.zoomOutLabel) ?
-      options.zoomOutLabel : '\u2212';
+    var zoomInLabel = goog.isDef(options.zoomInLabel) ?
+        options.zoomInLabel : '+';
+    var zoomOutLabel = goog.isDef(options.zoomOutLabel) ?
+        options.zoomOutLabel : '\u2212';
 
-  var zoomInTipLabel = goog.isDef(options.zoomInTipLabel) ?
-      options.zoomInTipLabel : 'Zoom in';
-  var zoomOutTipLabel = goog.isDef(options.zoomOutTipLabel) ?
-      options.zoomOutTipLabel : 'Zoom out';
+    var zoomInTipLabel = goog.isDef(options.zoomInTipLabel) ?
+        options.zoomInTipLabel : 'Zoom in';
+    var zoomOutTipLabel = goog.isDef(options.zoomOutTipLabel) ?
+        options.zoomOutTipLabel : 'Zoom out';
 
-  var inElement = goog.dom.createDom(goog.dom.TagName.BUTTON, {
-    'class': className + '-in',
-    'type' : 'button',
-    'title': zoomInTipLabel
-  }, zoomInLabel);
+    var inElement = goog.dom.createDom(goog.dom.TagName.BUTTON, {
+        'class': className + '-in',
+        'type': 'button',
+        'title': zoomInTipLabel
+    }, zoomInLabel);
 
-  goog.events.listen(inElement,
-      goog.events.EventType.CLICK, goog.partial(
-          ol.control.Zoom.prototype.handleClick_, delta), false, this);
+    goog.events.listen(inElement,
+        goog.events.EventType.CLICK, goog.partial(
+            ol.control.Zoom.prototype.handleClick_, delta), false, this);
 
-  goog.events.listen(inElement, [
-    goog.events.EventType.MOUSEOUT,
-    goog.events.EventType.FOCUSOUT
-  ], function() {
-    this.blur();
-  }, false);
+    goog.events.listen(inElement, [
+        goog.events.EventType.MOUSEOUT,
+        goog.events.EventType.FOCUSOUT
+    ], function() {
+        this.blur();
+    }, false);
 
-  var outElement = goog.dom.createDom(goog.dom.TagName.BUTTON, {
-    'class': className + '-out',
-    'type' : 'button',
-    'title': zoomOutTipLabel
-  }, zoomOutLabel);
+    var outElement = goog.dom.createDom(goog.dom.TagName.BUTTON, {
+        'class': className + '-out',
+        'type': 'button',
+        'title': zoomOutTipLabel
+    }, zoomOutLabel);
 
-  goog.events.listen(outElement,
-      goog.events.EventType.CLICK, goog.partial(
-          ol.control.Zoom.prototype.handleClick_, -delta), false, this);
+    goog.events.listen(outElement,
+        goog.events.EventType.CLICK, goog.partial(
+            ol.control.Zoom.prototype.handleClick_, -delta), false, this);
 
-  goog.events.listen(outElement, [
-    goog.events.EventType.MOUSEOUT,
-    goog.events.EventType.FOCUSOUT
-  ], function() {
-    this.blur();
-  }, false);
+    goog.events.listen(outElement, [
+        goog.events.EventType.MOUSEOUT,
+        goog.events.EventType.FOCUSOUT
+    ], function() {
+        this.blur();
+    }, false);
 
-  var cssClasses = className + ' ' + ol.css.CLASS_UNSELECTABLE + ' ' +
-      ol.css.CLASS_CONTROL;
-  var element = goog.dom.createDom(goog.dom.TagName.DIV, cssClasses, inElement,
-      outElement);
+    var cssClasses = className + ' ' + ol.css.CLASS_UNSELECTABLE + ' ' +
+        ol.css.CLASS_CONTROL;
+    var element = goog.dom.createDom(goog.dom.TagName.DIV, cssClasses, inElement,
+        outElement);
 
-  goog.base(this, {
-    element: element,
-    target: options.target
-  });
+    goog.base(this, {
+        element: element,
+        target: options.target
+    });
 
-  /**
-   * @type {number}
-   * @private
-   */
-  this.duration_ = goog.isDef(options.duration) ? options.duration : 250;
+    /**
+     * @type {number}
+     * @private
+     */
+    this.duration_ = goog.isDef(options.duration) ? options.duration : 250;
 
 };
 goog.inherits(ol.control.Zoom, ol.control.Control);
@@ -100,8 +100,8 @@ goog.inherits(ol.control.Zoom, ol.control.Control);
  * @private
  */
 ol.control.Zoom.prototype.handleClick_ = function(delta, event) {
-  event.preventDefault();
-  this.zoomByDelta_(delta);
+    event.preventDefault();
+    this.zoomByDelta_(delta);
 };
 
 
@@ -110,23 +110,25 @@ ol.control.Zoom.prototype.handleClick_ = function(delta, event) {
  * @private
  */
 ol.control.Zoom.prototype.zoomByDelta_ = function(delta) {
-  var map = this.getMap();
-  var view = map.getView();
-  if (goog.isNull(view)) {
-    // the map does not have a view, so we can't act
-    // upon it
-    return;
-  }
-  var currentResolution = view.getResolution();
-  if (goog.isDef(currentResolution)) {
-    if (this.duration_ > 0) {
-      map.beforeRender(ol.animation.zoom({
-        resolution: currentResolution,
-        duration: this.duration_,
-        easing: ol.easing.easeOut
-      }));
+    var map = this.getMap();
+    var view = map.getView();
+    if (goog.isNull(view)) {
+        // the map does not have a view, so we can't act
+        // upon it
+        return;
     }
-    var newResolution = view.constrainResolution(currentResolution, delta);
-    view.setResolution(newResolution);
-  }
+    var currentResolution = view.getResolution();
+    if (goog.isDef(currentResolution)) {
+        view.setHint(ol.ViewHint.INTERACTING, 1); // starts block shearing during zooming
+        if (this.duration_ > 0) {
+            map.beforeRender(ol.animation.zoom({
+                resolution: currentResolution,
+                duration: this.duration_,
+                easing: ol.easing.easeOut,
+                finishedCallback: function(){view.setHint(ol.ViewHint.INTERACTING, -1);}
+            }));
+        }
+        var newResolution = view.constrainResolution(currentResolution, delta);
+        view.setResolution(newResolution);
+    }
 };

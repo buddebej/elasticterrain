@@ -319,6 +319,20 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
 };
 
 /**
+ * Stop all animations related this interaction
+ */
+ol.interaction.DragShearIntegrated.prototype.stopAnimation = function() {
+    this.animationDelay.stop();
+    this.lastRenderTime = null;
+    this.distanceX = this.distanceY = 0;
+    this.vx_t_1 = this.vy_t_1 = 0;
+    this.shear(0, 0);
+    this.shearingStatus = ol.interaction.State.NO_SHEARING;
+};
+goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'stopAnimation', ol.interaction.DragShearIntegrated.prototype.stopAnimation);
+
+
+/**
  * Enable animations related this interaction
  */
 ol.interaction.DragShearIntegrated.prototype.enable = function() {
@@ -330,8 +344,9 @@ goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'enable', ol.i
  * Disable animations related this interaction
  */
 ol.interaction.DragShearIntegrated.prototype.disable = function() {
-    if (!this.view.getHints()[ol.ViewHint.INTERACTING])
+    if (!this.view.getHints()[ol.ViewHint.INTERACTING]) {
         this.view.setHint(ol.ViewHint.INTERACTING, 1);
+    }
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'disable', ol.interaction.DragShearIntegrated.prototype.disable);
 
@@ -518,12 +533,7 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
 
     if (stopAnimation || otherInteractionActive) {
         // stop the animation
-        this.animationDelay.stop();
-        this.lastRenderTime = null;
-        this.distanceX = this.distanceY = 0;
-        this.vx_t_1 = this.vy_t_1 = 0;
-        this.shear(0, 0);
-        this.shearingStatus = ol.interaction.State.NO_SHEARING;
+        this.stopAnimation();
         // console.log("animation ended");
         // console.log('fps: ' + this.getFps());
         // console.log(this.oscillationLogger);

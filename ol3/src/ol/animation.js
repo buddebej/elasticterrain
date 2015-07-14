@@ -93,7 +93,8 @@ ol.animation.rotate = function(options) {
       options.easing : ol.easing.inAndOut;
   var anchor = goog.isDef(options.anchor) ?
       options.anchor : null;
-
+  var finishedCallback = goog.isDef(options.finishedCallback) ?
+      options.finishedCallback : function(){};
   return (
       /**
        * @param {ol.Map} map Map.
@@ -119,6 +120,7 @@ ol.animation.rotate = function(options) {
           frameState.viewHints[ol.ViewHint.ANIMATING] += 1;
           return true;
         } else {
+          finishedCallback();
           return false;
         }
       });
@@ -136,6 +138,8 @@ ol.animation.zoom = function(options) {
   var duration = goog.isDef(options.duration) ? options.duration : 1000;
   var easing = goog.isDef(options.easing) ?
       options.easing : ol.easing.inAndOut;
+  var finishedCallback = goog.isDef(options.finishedCallback) ?
+      options.finishedCallback : function(){};
   return (
       /**
        * @param {ol.Map} map Map.
@@ -155,6 +159,7 @@ ol.animation.zoom = function(options) {
           frameState.viewHints[ol.ViewHint.ANIMATING] += 1;
           return true;
         } else {
+          finishedCallback();
           return false;
         }
       });
