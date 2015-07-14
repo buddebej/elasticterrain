@@ -1,10 +1,11 @@
-var ControlBar = function(viewer) {
+var ControlBar = function(viewer, showCase) {
     'use strict';
     var ui = this,
         ote = {};
 
     this.config = viewer.config;
-
+    viewer.setControlBar(this);
+    
     // HELPER FUNCTIONS
     this.initSlider = function(container, attr) {
         var sliderSize = 200;
@@ -75,12 +76,17 @@ var ControlBar = function(viewer) {
     // config control bar
     ui.options = {
         knobcolor: '#4479E3',
-        collapsed: false,
+        collapsed: true,
         enabled: true,
         controlAnimation: 'blind', // animation of collapsing and expanding
         controlAnimationSpeed: 300, // animation of collapsing and expanding
         maxElevation: 9000, // max value for scaling of hypsometric color ramp
         minElevation: -11000, // max value for scaling of hypsometric color ramp        
+    };
+
+    ui.enable = function() {
+        ui.options.enabled = true;
+        ui.init();
     };
 
     // config available control boxes
@@ -116,11 +122,11 @@ var ControlBar = function(viewer) {
             collapsed: true
         },
         config: {
-            enabled: false,
+            enabled: true,
             collapsed: true
         },
         saveConfig: {
-            enabled: false,
+            enabled: true,
             collapsed: true
         }
     };
@@ -606,79 +612,96 @@ var ControlBar = function(viewer) {
 
 
     // HIDE & SHOW CONTROL BOX
-    if (ui.options.enabled) {
-        var updateMapSize = function() {
-            viewer.map.updateSize();
-        };
-        var showControlBar = function() {
-            CONTROL_BAR.fadeIn();
-            MAP.animate({
-                width: $(document).width() - CONTROL_BAR.outerWidth()
-            }, {
-                duration: ui.options.controlAnimationSpeed,
-                step: updateMapSize,
-            });
-            ui.options.collapsed = false;
-            $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
-        };
-        var hideControlBar = function() {
-            MAP.animate({
-                width: '100%'
-            }, {
-                duration: ui.options.controlAnimationSpeed,
-                step: updateMapSize,
-                complete: function() {
-                    CONTROL_BAR.fadeOut();
-                },
-            });
-            ui.options.collapsed = true;
-            $('#controlButton').html('<i class="fa fa-cog"></i>');
-        };
-        var toggleControlBar = function() {
-            if (ui.options.collapsed) {
-                showControlBar();
-            } else {
-                hideControlBar();
-            }
-        };
-        ui.controlBarButton = function() {
-            var anchor = document.createElement('button');
-            anchor.innerHTML = '<i class="fa fa-cog"></i>';
-            anchor.id = 'controlButton';
-            var handleControlBarButton = function(e) {
-                e.preventDefault();
-                toggleControlBar();
+    ui.init = function() {
+        if (ui.options.enabled) {
+            var updateMapSize = function() {
+                viewer.map.updateSize();
             };
-            anchor.addEventListener('click', handleControlBarButton, false);
-            anchor.addEventListener('touchstart', handleControlBarButton, false);
-            var element = document.createElement('div');
-            element.className = 'controlBarButton ol-control ol-unselectable';
-            element.appendChild(anchor);
-            ol.control.Control.call(this, {
-                element: element,
-            });
-        };
-        ol.inherits(ui.controlBarButton, ol.control.Control);
-        viewer.map.addControl(new ui.controlBarButton());
+            var showControlBar = function() {
+                CONTROL_BAR.fadeIn();
+                MAP.animate({
+                    width: $(document).width() - CONTROL_BAR.outerWidth()
+                }, {
+                    duration: ui.options.controlAnimationSpeed,
+                    start: function() {
+                        if (showCase !== undefined) {
+                            showCase.hide();
+                        }
+                    },
+                    step: updateMapSize,
+                });
+                ui.options.collapsed = false;
+                $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
+            };
+            var hideControlBar = function() {
+                MAP.animate({
+                    width: '100%'
+                }, {
+                    duration: ui.options.controlAnimationSpeed,
+                    step: updateMapSize,
+                    start: function() {
+                        if (showCase !== undefined) {
+                            showCase.show();
+                        }
+                    },
+                    complete: function() {
+                        CONTROL_BAR.fadeOut();
+                    },
+                });
+                ui.options.collapsed = true;
+                $('#controlButton').html('<i class="fa fa-cog"></i>');
+            };
+            var toggleControlBar = function() {
+                if (ui.options.collapsed) {
+                    showControlBar();
+                } else {
+                    hideControlBar();
+                }
+            };
+            ui.controlBarButton = function() {
+                var anchor = document.createElement('button');
+                anchor.innerHTML = '<i class="fa fa-cog"></i>';
+                anchor.id = 'controlButton';
+                var handleControlBarButton = function(e) {
+                    e.preventDefault();
+                    toggleControlBar();
+                };
+                anchor.addEventListener('click', handleControlBarButton, false);
+                anchor.addEventListener('touchstart', handleControlBarButton, false);
+                var element = document.createElement('div');
+                element.className = 'controlBarButton ol-control ol-unselectable';
+                element.appendChild(anchor);
+                ol.control.Control.call(this, {
+                    element: element,
+                });
+            };
+            ol.inherits(ui.controlBarButton, ol.control.Control);
+            viewer.map.addControl(new ui.controlBarButton());
 
-        $(window).on('resize', function() {
+            $(window).on('resize', function() {
+                if (!ui.options.collapsed) {
+                    MAP.width($(document).width() - CONTROL_BAR.outerWidth());
+                    updateMapSize();
+                }
+            });
+
+            // init control bar
             if (!ui.options.collapsed) {
+                CONTROL_BAR.show();
                 MAP.width($(document).width() - CONTROL_BAR.outerWidth());
                 updateMapSize();
+                $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
             }
-        });
 
-        // init control bar
-        if (!ui.options.collapsed) {
-            CONTROL_BAR.show();
-            MAP.width($(document).width() - CONTROL_BAR.outerWidth());
-            updateMapSize();
-            $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
+            // init control tools        
+            ui.updateControlTools();
+
+            ui.show = function() {
+                showControlBar();
+            };
         }
+    };
 
-        // init control tools        
-        ui.updateControlTools();
-    }
-
+    ui.init();
 
 };

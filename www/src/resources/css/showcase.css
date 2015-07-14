@@ -1,0 +1,71 @@
+.showcaseControl {
+    position: absolute;
+    bottom: 45%;
+    font-family: 'Open Sans', serif;
+    font-weight: 400;
+    font-size: 60pt;
+    z-index: 110;
+    color: rgba(36, 132, 198, 0.9);
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.white {
+    color: rgba(255, 255, 255, 1.0);
+}
+
+.showcaseControl:hover {
+    color: rgba(0, 60, 136, 0.9);
+}
+
+.controlRight {
+    right: -35px;
+}
+
+.controlLeft {
+    left: -35px;
+}
+
+.showcaseHint {
+    position: absolute;
+    top: 16px;
+    right: 50px;
+    z-index: 120;
+}
+
+.bubble {
+    position: relative;
+    min-width: 150px;
+    padding: 0.7em;
+    background: #FFFFFF;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    font-family: 'Open Sans', serif;
+    font-weight: 600;
+    font-size: 8pt;
+    opacity: 0.9;
+    cursor: pointer;
+}
+
+.bubble:after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+    border-width: 6px 0 6px 10px;
+    border-color: transparent #FFFFFF;
+    display: block;
+    width: 0;
+    z-index: 1;
+    right: -10px;
+    top: 8px;
+}
+
+.bubble:hover {
+    background: rgba(0, 60, 136, 0.9);
+    color: #fff;
+}
+
+.bubble:hover:after {
+    border-color: transparent rgba(0, 60, 136, 0.9);
+}

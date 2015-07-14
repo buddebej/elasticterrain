@@ -4,6 +4,11 @@ var Viewer = function(config, layers, container) {
     this.config = config;
     this.configStore = [];
     this.layers = layers.getAll();
+    this.controlBar = null;
+
+    this.setControlBar = function(controlbar) {
+        this.controlBar = controlbar;
+    };
 
     // get handle for base layer with elevation data
     this.dem = layers.getDem().data;
@@ -36,7 +41,7 @@ var Viewer = function(config, layers, container) {
         $.each(this.mapControls, function(i, v) {
             this.map.addControl(v);
         }.bind(this));
-    }.bind(this);    
+    }.bind(this);
 
     // render map with current config
     this.render = function() {
@@ -96,8 +101,11 @@ var Viewer = function(config, layers, container) {
 
     // wrapper for config.swap
     this.swapConfig = function(newStore) {
-        // use a copy of config for read only access during runtime  
-        var configCopy = $.extend(true, {}, newStore);        
+        // use a copy of config for read only access during runtime 
+        // container.fadeOut(function(){
+        //     container.fadeIn('fast');
+        // });
+        var configCopy = $.extend(true, {}, newStore);
         config.swap(configCopy);
         this.update();
     };
@@ -132,7 +140,7 @@ var Viewer = function(config, layers, container) {
         this.dem.setLightZenith(this.config.get('lightZenith'));
         this.dem.setResolution(this.config.get('resolution'));
         this.dem.setTesting(this.config.get('debug'));
-        this.dem.setWireframe(this.config.get('wireframe'));        
+        this.dem.setWireframe(this.config.get('wireframe'));
         this.dem.setObliqueInclination(this.config.get('obliqueInclination'));
         this.dem.setWaterBodies(this.config.get('waterBodies'));
         this.dem.setTerrainInteraction(this.config.get('terrainInteraction'));
