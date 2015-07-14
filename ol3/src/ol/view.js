@@ -219,7 +219,7 @@ goog.exportProperty(
  */
 ol.View.prototype.setRotationConstraint = function(state) {
     if (goog.isDef(state)) {
-        this.options.enableRotation = state; 
+        this.options.enableRotation = state;
         this.constraints_['rotation'] = ol.View.createRotationConstraint_(this.options);
     }
 };
@@ -252,7 +252,10 @@ ol.View.prototype.adaptForHighlevelAreas = function() {
             var center = this.getCenter();
             goog.asserts.assert(goog.isDef(center));
             if (ol.extent.containsCoordinate(this.highlevelAreas[k][2], center)) {
-                newMaxZoom = this.highlevelAreas[k][1];
+                // don't reset maxZoom if minZoom is within highLevel zone 
+                if (this.options.minZoom < 13) {
+                    newMaxZoom = this.highlevelAreas[k][1];
+                }
             }
         }
         this.setZoomConstraint([this.minZoom_, newMaxZoom]);
