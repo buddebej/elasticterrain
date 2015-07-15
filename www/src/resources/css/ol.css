@@ -146,9 +146,28 @@ button.ol-full-screen-true:after {
   padding: 0 .5em;
   font-size: .7rem;
   line-height: 1.375em;
-  color: #000;
+  color: #444;
   text-shadow: 0 0 2px #fff;
 }
+
+.ol-attribution a {
+  font-weight: 400;
+  text-decoration: none;
+  color: #000;
+}
+.ol-attribution a:hover {
+  text-decoration: none;
+  color: #000;
+}
+.ol-attribution a:active {
+  text-decoration: none;
+  color: #000;
+}
+.ol-attribution a:visited {
+  text-decoration: none;
+  color: #000;
+}
+
 .ol-attribution li {
   display: inline;
   list-style: none;
