@@ -33,7 +33,7 @@ var Layers = function() {
                     key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
                     imagerySet: 'Aerial'
                 })
-            }),
+            })
         }, {
             title: 'Bing Streets',
             id: 'bingstreets',
@@ -44,7 +44,7 @@ var Layers = function() {
                     key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
                     imagerySet: 'Road'
                 })
-            }),
+            })
         }, {
             title: 'Hypsometric Aerial Hybrid',
             id: 'bingaerial-hybrid',
@@ -56,7 +56,7 @@ var Layers = function() {
                     key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
                     imagerySet: 'Aerial'
                 })
-            }),
+            })
         }, {
             title: 'Open Street Map Humanitarian',
             id: 'osm-humanitarian',
@@ -77,7 +77,7 @@ var Layers = function() {
                 source: new ol.source.MapQuest({
                     layer: 'osm'
                 })
-            }),
+            })
         }, {
             title: 'Open Street Map',
             id: 'osm',
@@ -104,7 +104,7 @@ var Layers = function() {
                 source: new ol.source.Stamen({
                     layer: 'watercolor'
                 })
-            }),
+            })
         }, {
             title: 'Stamen Watercolor Hybrid',
             id: 'stamen-watercolor-hybrid',
@@ -115,7 +115,7 @@ var Layers = function() {
                 source: new ol.source.Stamen({
                     layer: 'watercolor'
                 })
-            }),
+            })
         }, {
             title: 'Stamen Toner Hybrid',
             id: 'stamen-toner-hybrid',

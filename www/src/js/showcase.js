@@ -13,23 +13,25 @@ var Showcase = function(viewer) {
 
     var bubble = '<div class="bubble">Click here to customize the Elastic Terrain Map</div>';
 
-    var CONTAINER = $('.container'),
-        CONTROL_LEFT = $('<div>' + left + '</div>').addClass('showcaseControl').addClass('controlLeft'),
-        CONTROL_RIGHT = $('<div>' + right + '</div>').addClass('showcaseControl').addClass('controlRight'),
+    var CONTAINER = $('.map'),
+        CONTROL_LEFT = $('<div>' + left + '</div>').addClass('showcaseControl').addClass('controlLeft').hide(),
+        CONTROL_RIGHT = $('<div>' + right + '</div>').addClass('showcaseControl').addClass('controlRight').hide(),
         SHOWCASE_HINT = $('<div>' + bubble + '</div>').addClass('showcaseHint').hide();
 
 
-    $('.map').append(CONTROL_RIGHT).append(CONTROL_LEFT);
+    CONTAINER.append(CONTROL_RIGHT).append(CONTROL_LEFT);
 
     var exampleIndex = 0,
         examplesSeen = 0,
         changeExample = function(i) {
             viewer.swapConfig(viewer.getConfigStore()[i]);
+            viewer.controlBar.updateControlTools();
+            // reset low mesh resolution for new config
+            // this.map.getRenderer().getLayerRenderer(this.dem).setLowMeshResolution(false);
         },
         showHint = function() {
             examplesSeen++;
-
-            if (examplesSeen > 3) {
+            if (examplesSeen === 4) {
                 SHOWCASE_HINT.fadeIn('slow');
             }
         };
@@ -72,4 +74,31 @@ var Showcase = function(viewer) {
     });
 
     viewer.setShowCase(this);
+    this.show();
+
+    // fps alert
+    var ALERT_BUBBLE = $('<div class="alertBubble"><b>Slow Animation <i class="fa fa-times"></i></b><br>Shrink your browser window to increase rendering performance.<br>Use an up-to-date version of Google Chrome, Chromium or Firefox.</div>').hide().click(function() {
+        $(this).fadeOut();
+    });
+    CONTAINER.append(ALERT_BUBBLE);
+    var lowFpsAlert = function(state) {
+        if (state) {
+            if (this.hasOwnProperty('alerts')) {
+                this.alerts++;
+            } else {
+                this.alerts = 1;
+            }
+            if (this.alerts < 5) {
+                ALERT_BUBBLE.fadeIn();
+            }
+        } else {
+            ALERT_BUBBLE.fadeOut();
+        }
+    };
+    viewer.shearingInteraction.setLowFpsAlert(lowFpsAlert);
+
+    // reset low mesh resolution on resize
+    // $(window).resize(function() {
+    //     this.map.getRenderer().getLayerRenderer(this.dem).setLowMeshResolution(false);
+    // }.bind(this));
 };

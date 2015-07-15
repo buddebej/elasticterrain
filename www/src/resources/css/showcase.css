@@ -1,6 +1,7 @@
 .showcaseControl {
     position: absolute;
-    bottom: 45%;
+    top: 50%;
+    margin-top: -80px;
     font-family: 'Open Sans', serif;
     font-weight: 400;
     font-size: 60pt;
@@ -68,4 +69,38 @@
 
 .bubble:hover:after {
     border-color: transparent rgba(0, 60, 136, 0.9);
+}
+
+
+.alertBubble {
+    position: absolute;
+    z-index: 120;
+    bottom: 25px;
+    left: 50%;
+    margin-top: -25px;
+    margin-left: -210px;
+    min-width: 150px;
+    padding: 0.9em;
+    background: #FFFFFF;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    font-family: 'Open Sans', serif;
+    font-size: 8pt;
+    opacity: 0.9;
+    text-align: center;
+}
+
+.alertBubble:after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+    border-width: 8px 8px 0;
+    border-color: #FFFFFF transparent;
+    display: block;
+    width: 0;
+    z-index: 1;
+    margin-left: -8px;
+    bottom: -8px;
+    left: 50%;
 }

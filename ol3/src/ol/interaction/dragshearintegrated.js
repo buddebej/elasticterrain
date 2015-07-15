@@ -49,7 +49,7 @@ ol.interaction.DragShearIntegratedOptions;
  * @param {ol.events.ConditionType} condition
  * @api stable
  */
-ol.interaction.DragShearIntegrated = function(options, map, condition) {
+ol.interaction.DragShearIntegrated = function(options, map, condition, lowFpsAlert) {
     goog.base(this, {
         handleDownEvent: ol.interaction.DragShearIntegrated.handleDownEvent_,
         handleDragEvent: ol.interaction.DragShearIntegrated.handleDragEvent_,
@@ -178,6 +178,13 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
 
     /** @type {?olx.FrameState} */
     this.frameState;
+
+    /**
+     * @this {ol.interaction.DragShearIntegrated}
+     * @param {boolean} state
+     * @private
+     */
+    this.lowFpsAlert = (goog.isDef(lowFpsAlert) ? lowFpsAlert : undefined);
 
     /**
      * @private
@@ -328,6 +335,22 @@ ol.interaction.DragShearIntegrated.prototype.stopAnimation = function() {
     this.vx_t_1 = this.vy_t_1 = 0;
     this.shear(0, 0);
     this.shearingStatus = ol.interaction.State.NO_SHEARING;
+
+    // after every animation, analyse fps and adapt mesh resolution if automatic resolution is enabled
+    // fire lowFpsAlert callback if defined
+    if (this.getFps() < 50) {
+        // if automatic resolution
+        if (this.demLayer.getResolution() === 0) {
+            this.demRenderer.setLowMeshResolution(true);
+        }
+        if (this.lowFpsAlert !== undefined) {
+            this.lowFpsAlert(true);
+        }
+    } else {
+        if (this.demLayer.getResolution() === 0 && this.lowFpsAlert !== undefined) {
+            this.lowFpsAlert(false);
+        }
+    }
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'stopAnimation', ol.interaction.DragShearIntegrated.prototype.stopAnimation);
 
@@ -367,6 +390,15 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
     this.options = options;
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);
+
+/**
+ * Set options
+ * @param {function(boolean)} lowFpsAlert
+ */
+ol.interaction.DragShearIntegrated.prototype.setLowFpsAlert = function(lowFpsAlert) {
+    this.lowFpsAlert = lowFpsAlert;
+};
+goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setLowFpsAlert', ol.interaction.DragShearIntegrated.prototype.setLowFpsAlert);
 
 /**
  * Get average fps 
@@ -527,6 +559,15 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
     //     this.oscillationLogger += newline;
     // }
 
+    // increase mesh resolution when static shearing is active
+    if (this.shearingStatus === ol.interaction.State.STATIC_SHEARING || (timeSinceHybridShearingStart <= this.options['hybridDampingDuration'] && timeSinceHybridShearingStart > 0)) {
+        // if automatic resolution active
+        if (this.demLayer.getResolution() === 0) {
+            this.demRenderer.setHighMeshResolution(true);
+        }
+    } else {
+        this.demRenderer.setHighMeshResolution(false);
+    }
 
     // update last rendering time
     this.lastRenderTime = currentTime;

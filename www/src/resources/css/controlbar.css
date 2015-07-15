@@ -37,6 +37,7 @@ h3 {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    border-left: #cccccc 4px solid;
 }
 
 .controlBarButton {
@@ -112,8 +113,8 @@ h3 {
 
 .infoBox {
     padding: 15px;
-    padding-top:10px;
-    padding-bottom:8px;    
+    padding-top: 10px;
+    padding-bottom: 8px;
     color: #eee;
     font-size: 8pt;
     border: 0;
@@ -189,7 +190,7 @@ h3 {
     cursor: pointer;
     border: #333;
     font-weight: 600;
-    margin-right:3px;
+    margin-right: 3px;
 }
 
 .controlbutton:hover {
@@ -338,6 +339,3 @@ h3 {
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
     right: 0px;
 }
-
-
-

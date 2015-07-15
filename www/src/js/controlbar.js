@@ -372,7 +372,10 @@ var ControlBar = function(viewer) {
             // hide hypsometric color controls
             COLOR_CONTROLS.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
-        viewer.set('texture', selectedLayer);
+        // FIXME for hidden update from showCase
+        if (!ui.options.collapsed) {
+            viewer.set('texture', selectedLayer);
+        }
     });
 
 

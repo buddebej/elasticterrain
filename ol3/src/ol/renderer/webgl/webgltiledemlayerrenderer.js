@@ -164,6 +164,35 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      */
     this.maxZoom = 19;
 
+    /**
+     * low zoom level area max
+     * @private
+     * @type {number}
+     */
+    this.lowZoomLevelMax = 12;
+
+    /**
+     * Mesh resolution
+     * @private
+     * @type {number}
+     */
+    this.meshResolution = 0;
+
+
+    /**
+     * High Mesh resolution
+     * @private
+     * @type {boolean}
+     */
+    this.highMeshResolution = false;
+
+    /**
+     * Low Mesh resolution
+     * @private
+     * @type {boolean}
+     */
+    this.lowMeshResolution = false;
+
     // minMax values 
     /**
      * @private
@@ -274,6 +303,7 @@ ol.renderer.webgl.TileDemLayer.prototype.handleWebGLContextLost = function() {
 ol.renderer.webgl.TileDemLayer.prototype.setFreezeMinMax = function(state) {
     this.freezeMinMax = state;
 };
+
 
 /**
  * @public
@@ -575,11 +605,82 @@ ol.renderer.webgl.TileDemLayer.prototype.getLocalMinMax = function(xy, z) {
     }
 };
 
+/**
+ * @public
+ * @param {number} resolution
+ */
+ol.renderer.webgl.TileDemLayer.prototype.setMeshResolution = function(resolution) {
+    this.meshResolution = resolution;
+};
+
+/**
+ * @public
+ * @param {boolean} state
+ */
+ol.renderer.webgl.TileDemLayer.prototype.setHighMeshResolution = function(state) {
+    this.highMeshResolution = state;
+};
+
+/**
+ * @public
+ * @param {boolean} state
+ */
+ol.renderer.webgl.TileDemLayer.prototype.setLowMeshResolution = function(state) {
+    this.lowMeshResolution = state;
+};
+
+/**
+ * Get tile Mesh Resolution depending on current zoomlevel.
+ * Lower resolutions for lower zoom levels and vice versa
+ * @private
+ * @param {number} z
+ * @return {number}
+ */
+ol.renderer.webgl.TileDemLayer.prototype.getResolutionByZoom = function(z) {
+    var defaultResolutions = {
+            2: 0.1,
+            3: 0.1,
+            4: 0.1,
+            5: 0.1,
+            6: 0.11,
+            7: 0.12,
+            8: 0.13,
+            9: 0.14,
+            10: 0.15,
+            11: 0.16,
+            12: 0.17,
+            'highres': 0.35
+        },
+        highResolutions = {
+            2: 0.05,
+            3: 0.05,
+            4: 0.05,
+            5: 0.05,
+            6: 0.05,
+            7: 0.1,
+            8: 0.15,
+            9: 0.2,
+            10: 0.25,
+            11: 0.3,
+            12: 0.35,
+            'highres': 0.5
+        },
+        lowResFactor = (this.lowMeshResolution) ? 0.5 : 1;
+    // highRes for situations where low resolutions cause artifacts (e.g. strong static shearing)
+    // lowRes when fps rate is too low
+    if (z > this.lowZoomLevelMax) {
+        return lowResFactor * (defaultResolutions['highres'] + ((this.highMeshResolution) ? highResolutions['highres'] : 0));
+    } else {
+        return lowResFactor * (defaultResolutions[z] + ((this.highMeshResolution) ? highResolutions[z] : 0));
+    }
+};
 
 /**
  * VertexBuffer contains vertices: meshResolution * meshResolution
  * IndexBuffer contains elements for vertexBuffer
  * @private
+ * @param {number} meshResolution
+ * @param {boolean} wireframeMode
  * @return {Object.<string, ol.webgl.Buffer>} vertexBuffer, indexBuffer
  */
 ol.renderer.webgl.TileDemLayer.prototype.getTileMesh = function(meshResolution, wireframeMode) {
@@ -817,8 +918,16 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
 
             // TRIANGLE MESH FOR EACH TILE
+            // if set to 0 = automatic resolution is dependend from current zoomlevel
+            if (tileDemLayer.getResolution() === 0) {
+                this.setMeshResolution(this.getResolutionByZoom(z));
+            } else {
+                // use value from config
+                this.setMeshResolution(tileDemLayer.getResolution());
+            }
+
             // compute new mesh on init, when resolution has changed or wireframe mode was enabled or disabled
-            if (!goog.isObject(this.tileMesh_) || this.tileMesh_.resolution != tileDemLayer.getResolution() || this.tileMesh_.wireframe != tileDemLayer.getWireframe()) {
+            if (!goog.isObject(this.tileMesh_) || this.tileMesh_.resolution != this.meshResolution || this.tileMesh_.wireframe != tileDemLayer.getWireframe()) {
                 // drop old buffers
                 if (goog.isObject(this.tileMesh_)) {
                     context.deleteBuffer(this.tileMesh_.vertexBuffer);
@@ -826,8 +935,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 }
                 // compute mesh for current resolution
                 /** @type {Object.<string, ol.webgl.Buffer>} */
-                this.tileMesh_ = this.getTileMesh(goog.math.safeCeil(tileDemLayer.getResolution() * 128), tileDemLayer.getWireframe());
-                this.tileMesh_.resolution = tileDemLayer.getResolution();
+                this.tileMesh_ = this.getTileMesh(goog.math.safeCeil(this.meshResolution * 128), tileDemLayer.getWireframe());
+                this.tileMesh_.resolution = this.meshResolution;
                 this.tileMesh_.wireframe = tileDemLayer.getWireframe();
             }
             // Write the vertex coordinates to the buffer object

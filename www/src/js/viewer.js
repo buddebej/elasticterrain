@@ -24,7 +24,6 @@ var Viewer = function(config, layers, container) {
     });
 
     this.mapControls = [new ol.control.Zoom(), new ol.control.Rotate(), new ol.control.ScaleLine(), this.elevationIndicator, this.attribution];
-    // this.mapControls = [this.attribution, new ol.control.Zoom(), new ol.control.Rotate(), new ol.control.ScaleLine(), this.elevationIndicator];
 
     // init ol map object
     this.map = new ol.Map({

@@ -22,24 +22,6 @@ body {
     background-color: #000;
 }
 
-.saveConfigButton {
-    top: 50px;
-    right: .5em;
-    position: absolute;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 4px;
-    padding: 2px;
-}
-
-.loadConfigButton {
-    top: 100px;
-    right: .5em;
-    position: absolute;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 4px;
-    padding: 2px;
-}
-
 .indicator {
     padding: 5px;
     width: auto;
@@ -90,14 +72,19 @@ body {
 .webglMissing p {
     text-align: left;
     margin: auto;
-    padding: 5em;
+    padding: 3em;
     border: #cccccc 4px solid;
     margin-top: 10%;
-    width: 20%;
-    background-color: #efefef;
-    opacity: 0.9;
-    font: 9pt Verdana;
+    width: 400px;
+    background-color: #111;
+    -moz-box-shadow: inset 10px 0 15px #000000;
+    -webkit-box-shadow: inset 10px 0 15px #000000;
+    box-shadow: inset 10px 0 15px #000000;
+    color: #ffffff;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
     line-height: 2em;
+    font-size: 9.5pt;
 }
 
 .webglMissing span {
@@ -108,12 +95,12 @@ body {
 .webglMissing a:link,
 a:visited,
 a:active {
-    color: #000000;
+    color: #2484C6;
     text-decoration: none;
     font-weight: bold;
 }
 
 .webglMissing a:hover {
-    color: #000000;
-    text-decoration: underline;
+    color: #2484C6;
+    text-decoration: none;
 }

@@ -13,7 +13,7 @@ var Config = function() {
         // shading
         shading: true, // bool
         shadingDarkness: 0.1, // 0:1
-        shadingExaggeration: 0.6, // 0:1         
+        shadingExaggeration: 0.3, // 0:1         
         lightAzimuth: 315, // 0:360
         lightZenith: 45, // 0:90
         ambientLight: 0.1, // 0:1
@@ -29,7 +29,7 @@ var Config = function() {
         colorRamp: 1, // id   
 
         // debug         
-        resolution: 0.25, // 0;1
+        resolution: 0, // 0.1; 0 means automatic detection
         debug: false, // bool       
         wireframe: false, // bool       
 
