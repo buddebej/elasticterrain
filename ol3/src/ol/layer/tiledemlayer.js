@@ -21,6 +21,7 @@ ol.layer.TileDemProperty = {
   OBLIQUE_INCLINATION: 'obliqueInclination',
   OVERLAY_TILES: 'overlayTiles',
   RESOLUTION : 'resolution',
+  AUTO_RESOLUTION : 'autoResolution',  
   TESTING: 'testing',
   WIREFRAME: 'wireframe',  
   TERRAIN_INTERACTION: 'terrainInteraction',
@@ -71,6 +72,7 @@ ol.layer.TileDem = function(opt_options) {
   this.setLightZenith(goog.isDef(options.lightZenith) ? options.lightZenith : 45.0);
   this.setOverlayTiles(goog.isDef(options.overlayTiles) ? options.overlayTiles : null);
   this.setResolution(goog.isDef(options.resolution) ? options.resolution : 0.25);
+  this.setAutoResolution(goog.isDef(options.autoResolution) ? options.autoResolution : {high: false, low: false});
   this.setTesting(goog.isDef(options.testing) ? options.testing : false);
   this.setWireframe(goog.isDef(options.wireframe) ? options.wireframe : false);  
   this.setWaterBodies(goog.isDef(options.waterBodies) ? options.waterBodies : true);
@@ -447,6 +449,41 @@ goog.exportProperty(
   ol.layer.TileDem.prototype,
   'getResolution',
   ol.layer.TileDem.prototype.getResolution);
+
+
+
+/**
+ * @param  {Object.<string, string>} autoResolution AutoResolution State
+ */
+ol.layer.TileDem.prototype.setAutoResolution = function(autoResolution) {
+  var tempAutoResolution = this.get(ol.layer.TileDemProperty.AUTO_RESOLUTION);
+  // initial set of autoResolution
+  if(!goog.isDef(tempAutoResolution)){
+      this.set(ol.layer.TileDemProperty.AUTO_RESOLUTION, autoResolution);  
+  } else {
+      // update autoResolution partially 
+      goog.array.forEach(goog.object.getKeys(autoResolution), function(v, i, array) {
+        tempAutoResolution[v] = autoResolution[v];
+      });
+      this.set(ol.layer.TileDemProperty.AUTO_RESOLUTION, tempAutoResolution); 
+  } 
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'setAutoResolution',
+  ol.layer.TileDem.prototype.setAutoResolution);
+/**
+ * @return {Object.<string, string>} AutoResolution State
+ */
+ol.layer.TileDem.prototype.getAutoResolution = function() {
+  return /** @type {Object.<string, string>} */ (
+    this.get(ol.layer.TileDemProperty.AUTO_RESOLUTION));
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'getAutoResolution',
+  ol.layer.TileDem.prototype.getAutoResolution);
+
 
 
 

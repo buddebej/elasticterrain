@@ -27,7 +27,9 @@ var Showcase = function(viewer) {
             viewer.swapConfig(viewer.getConfigStore()[i]);
             viewer.controlBar.updateControlTools();
             // reset low mesh resolution for new config
-            // this.map.getRenderer().getLayerRenderer(this.dem).setLowMeshResolution(false);
+            viewer.dem.setAutoResolution({
+                low: false
+            });
         },
         showHint = function() {
             examplesSeen++;
@@ -77,7 +79,7 @@ var Showcase = function(viewer) {
     this.show();
 
     // fps alert
-    var ALERT_BUBBLE = $('<div class="alertBubble"><b>Slow Animation <i class="fa fa-times"></i></b><br>Shrink your browser window to increase rendering performance.<br>Use an up-to-date version of Google Chrome, Chromium or Firefox.</div>').hide().click(function() {
+    var ALERT_BUBBLE = $('<div class="alertBubble"><b>Slow Animation <i class="fa fa-times"></i></b><br>Shrink your browser window to increase rendering performance.<br>Performance is best with an up-to-date version of Google Chrome or Chromium.</div>').hide().click(function() {
         $(this).fadeOut();
     });
     CONTAINER.append(ALERT_BUBBLE);
@@ -98,7 +100,9 @@ var Showcase = function(viewer) {
     viewer.shearingInteraction.setLowFpsAlert(lowFpsAlert);
 
     // reset low mesh resolution on resize
-    // $(window).resize(function() {
-    //     this.map.getRenderer().getLayerRenderer(this.dem).setLowMeshResolution(false);
-    // }.bind(this));
+    $(window).resize(function() {
+        viewer.dem.setAutoResolution({
+            low: false
+        });
+    });
 };

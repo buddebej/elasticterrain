@@ -127,7 +127,7 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
      * @private
      * @type {number}
      */
-    this.renderCounterMax = 700;
+    this.renderCounterMax = 1200;
 
     /**
      * Max Zoomlevel of DEM Layer for z-Ordering in Shader
@@ -613,21 +613,6 @@ ol.renderer.webgl.TileDemLayer.prototype.setMeshResolution = function(resolution
     this.meshResolution = resolution;
 };
 
-/**
- * @public
- * @param {boolean} state
- */
-ol.renderer.webgl.TileDemLayer.prototype.setHighMeshResolution = function(state) {
-    this.highMeshResolution = state;
-};
-
-/**
- * @public
- * @param {boolean} state
- */
-ol.renderer.webgl.TileDemLayer.prototype.setLowMeshResolution = function(state) {
-    this.lowMeshResolution = state;
-};
 
 /**
  * Get tile Mesh Resolution depending on current zoomlevel.
@@ -636,7 +621,7 @@ ol.renderer.webgl.TileDemLayer.prototype.setLowMeshResolution = function(state) 
  * @param {number} z
  * @return {number}
  */
-ol.renderer.webgl.TileDemLayer.prototype.getResolutionByZoom = function(z) {
+ol.renderer.webgl.TileDemLayer.prototype.getResolutionByZoom = function(z, lowResActive, highResActive) {
     var defaultResolutions = {
             2: 0.1,
             3: 0.1,
@@ -665,13 +650,13 @@ ol.renderer.webgl.TileDemLayer.prototype.getResolutionByZoom = function(z) {
             12: 0.35,
             'highres': 0.5
         },
-        lowResFactor = (this.lowMeshResolution) ? 0.5 : 1;
+        lowResFactor = (lowResActive) ? 0.5 : 1;
     // highRes for situations where low resolutions cause artifacts (e.g. strong static shearing)
     // lowRes when fps rate is too low
     if (z > this.lowZoomLevelMax) {
-        return lowResFactor * (defaultResolutions['highres'] + ((this.highMeshResolution) ? highResolutions['highres'] : 0));
+        return lowResFactor * (defaultResolutions['highres'] + ((highResActive) ? highResolutions['highres'] : 0));
     } else {
-        return lowResFactor * (defaultResolutions[z] + ((this.highMeshResolution) ? highResolutions[z] : 0));
+        return lowResFactor * (defaultResolutions[z] + ((highResActive) ? highResolutions[z] : 0));
     }
 };
 
@@ -920,7 +905,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             // TRIANGLE MESH FOR EACH TILE
             // if set to 0 = automatic resolution is dependend from current zoomlevel
             if (tileDemLayer.getResolution() === 0) {
-                this.setMeshResolution(this.getResolutionByZoom(z));
+                this.setMeshResolution(this.getResolutionByZoom(z, tileDemLayer.getAutoResolution().low, tileDemLayer.getAutoResolution().high));
             } else {
                 // use value from config
                 this.setMeshResolution(tileDemLayer.getResolution());

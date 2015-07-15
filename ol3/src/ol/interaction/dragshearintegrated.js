@@ -338,10 +338,12 @@ ol.interaction.DragShearIntegrated.prototype.stopAnimation = function() {
 
     // after every animation, analyse fps and adapt mesh resolution if automatic resolution is enabled
     // fire lowFpsAlert callback if defined
-    if (this.getFps() < 50) {
+    if (this.getFps() < 45) {
         // if automatic resolution
         if (this.demLayer.getResolution() === 0) {
-            this.demRenderer.setLowMeshResolution(true);
+            this.demLayer.setAutoResolution({
+                low: true
+            });
         }
         if (this.lowFpsAlert !== undefined) {
             this.lowFpsAlert(true);
@@ -563,10 +565,14 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
     if (this.shearingStatus === ol.interaction.State.STATIC_SHEARING || (timeSinceHybridShearingStart <= this.options['hybridDampingDuration'] && timeSinceHybridShearingStart > 0)) {
         // if automatic resolution active
         if (this.demLayer.getResolution() === 0) {
-            this.demRenderer.setHighMeshResolution(true);
+            this.demLayer.setAutoResolution({
+                high: true
+            });
         }
     } else {
-        this.demRenderer.setHighMeshResolution(false);
+        this.demLayer.setAutoResolution({
+            high: false
+        });
     }
 
     // update last rendering time
