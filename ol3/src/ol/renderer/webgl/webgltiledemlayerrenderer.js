@@ -820,7 +820,6 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             // u_scaleFactor: factors for plan oblique shearing
             gl.uniform2f(this.locations_.u_scaleFactor, shearX, shearY);
 
-
             // SHADING
             // u_shading: flag to activate Shading
             gl.uniform1i(this.locations_.u_shading, tileDemLayer.getShading() === true ? 1 : 0);
@@ -848,6 +847,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, z));
             // u_minMax: static minMax values
             gl.uniform2f(this.locations_.u_minMax, this.staticMinElevation, this.staticMaxElevation);
+            // console.log(this.staticMinElevation, this.staticMaxElevation);
             // reset global minMax for next rendering
             this.resetCurrentMinMax();
 

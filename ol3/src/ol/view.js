@@ -245,18 +245,31 @@ goog.exportProperty(
  * @public
  */
 ol.View.prototype.adaptForHighlevelAreas = function() {
-    if (goog.isDef(this.highlevelAreas) && this.highlevelAreas.length > 0) {
-        var newMaxZoom = this.options.maxZoom;
+    // don't enable highlevel area for constrained zoom control (min = max)
+    var zoomEnabled = this.options.minZoom !== this.options.maxZoom,
+        newMaxZoom = this.options.maxZoom,
+        center = this.getCenter(),
+        notHighlevelArea = 0;
+    goog.asserts.assert(goog.isDef(center));
+
+    if (goog.isDef(this.highlevelAreas) && this.highlevelAreas.length > 0 && zoomEnabled) {
         for (var k = 0; k < this.highlevelAreas.length; k++) {
-            // use higher maxZoom when current center is within high level area
-            var center = this.getCenter();
-            goog.asserts.assert(goog.isDef(center));
-            if (ol.extent.containsCoordinate(this.highlevelAreas[k][2], center)) {
-                // don't reset maxZoom if minZoom is within highLevel zone 
-                if (this.options.minZoom < 13) {
-                    newMaxZoom = this.highlevelAreas[k][1];
+            // don't reset maxZoom if minZoom is within highLevel zone 
+            if (this.options.minZoom < 13) {
+                // use higher maxZoom when current center is within high level area
+                if (ol.extent.containsCoordinate(this.highlevelAreas[k][2], center)) {
+                    // set newMaxZoom only when close enough
+                    if (this.getZoom(true) > 10) {
+                        newMaxZoom = this.highlevelAreas[k][1];
+                    }
+                } else {
+                    notHighlevelArea++;
                 }
             }
+        }
+        // reset max zoom when center in none if highlevelAreas
+        if (notHighlevelArea === this.highlevelAreas.length) {
+            newMaxZoom = 12;
         }
         this.setZoomConstraint([this.minZoom_, newMaxZoom]);
     }
@@ -519,10 +532,11 @@ ol.View.prototype.getState = function() {
 /**
  * Get the current zoom level. Return undefined if the current
  * resolution is undefined or not a "constrained resolution".
+ * @param {boolean=} opt_noAdapt
  * @return {number|undefined} Zoom.
  * @api stable
  */
-ol.View.prototype.getZoom = function() {
+ol.View.prototype.getZoom = function(opt_noAdapt) {
     var offset;
     var resolution = this.getResolution();
 
@@ -538,7 +552,9 @@ ol.View.prototype.getZoom = function() {
         } while (res > this.minResolution_);
     }
 
-    this.adaptForHighlevelAreas();
+    if (!opt_noAdapt) {
+        this.adaptForHighlevelAreas();
+    }
 
     return goog.isDef(offset) ? this.minZoom_ + offset : offset;
 };

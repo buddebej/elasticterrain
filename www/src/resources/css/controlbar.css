@@ -19,7 +19,7 @@ h3 {
 .ui-tooltip {
     font-size: 9pt;
     font-family: 'Open Sans', serif;
-    background-color: #000;
+    background: #000000;
     color: #fff;
     padding: 0.2em;
 }
