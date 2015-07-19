@@ -54,7 +54,7 @@ var Showcase = function(viewer) {
             exampleIndex--;
             showHint();
         } else {
-            exampleIndex = viewer.getConfigStore().length;
+            exampleIndex = viewer.getConfigStore().length-1;
         }
         changeExample(exampleIndex);
     });

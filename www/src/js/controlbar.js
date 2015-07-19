@@ -6,6 +6,10 @@ var ControlBar = function(viewer) {
     this.config = viewer.config;
     viewer.setControlBar(this);
 
+    $(function() {
+        $(document).tooltip();
+    });
+
     // HELPER FUNCTIONS
     this.initSlider = function(container, attr) {
         var sliderSize = 200;
@@ -288,7 +292,7 @@ var ControlBar = function(viewer) {
         } else {
             var extent = viewer.view.calculateExtent(viewer.map.getSize()),
                 // add 256 px padding to extent constraint
-                padding = 256 * viewer.view.getResolution(),
+                padding = 768 * viewer.view.getResolution(),
                 extentPlus = [extent[0] - padding, extent[1] - padding, extent[2] + padding, extent[3] + padding];
             viewer.set('viewCenterConstraint', extentPlus);
             checkbox.prop(CHECKED, true);
@@ -634,7 +638,7 @@ var ControlBar = function(viewer) {
                     step: updateMapSize,
                 });
                 ui.options.collapsed = false;
-                $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
+                $('#controlButton').html('<i class="fa fa-angle-double-right" title="Hide Controls"></i>');
             };
             var hideControlBar = function() {
                 MAP.animate({
@@ -652,7 +656,7 @@ var ControlBar = function(viewer) {
                     },
                 });
                 ui.options.collapsed = true;
-                $('#controlButton').html('<i class="fa fa-cog"></i>');
+                $('#controlButton').html('<i class="fa fa-cog" title="Show Controls"></i>');
             };
             var toggleControlBar = function() {
                 if (ui.options.collapsed) {
@@ -663,7 +667,7 @@ var ControlBar = function(viewer) {
             };
             ui.controlBarButton = function() {
                 var anchor = document.createElement('button');
-                anchor.innerHTML = '<i class="fa fa-cog"></i>';
+                anchor.innerHTML = '<i class="fa fa-cog" title="Show Controls"></i>';
                 anchor.id = 'controlButton';
                 var handleControlBarButton = function(e) {
                     e.preventDefault();
@@ -693,7 +697,7 @@ var ControlBar = function(viewer) {
                 CONTROL_BAR.show();
                 MAP.width($(document).width() - CONTROL_BAR.outerWidth());
                 updateMapSize();
-                $('#controlButton').html('<i class="fa fa-angle-double-right"></i>');
+                $('#controlButton').html('<i class="fa fa-angle-double-right" title="Hide Controls"></i>');
             }
 
             // init control tools        

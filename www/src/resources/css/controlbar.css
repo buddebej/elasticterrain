@@ -16,6 +16,14 @@ h3 {
     font-size: 11pt;
 }
 
+.ui-tooltip {
+    font-size: 9pt;
+    font-family: 'Open Sans', serif;
+    background-color: #000;
+    color: #fff;
+    padding: 0.2em;
+}
+
 .controlBar {
     height: 100%;
     width: 300px;
@@ -224,6 +232,7 @@ h3 {
     width: 130px;
     text-align: center;
     background: #000;
+    border: 1px solid #111;
 }
 
 .ui-slider-horizontal .ui-slider-handle {
