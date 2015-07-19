@@ -5,9 +5,9 @@ Elastic Terrain Map implements a new method for terrain visualization that uses 
 The application renders digital elevation models with WebGL and offers many configurable parameters.
 
 Check out the [demo](http://elasticterrain.xyz). 
-The performance is best with a up-to-date version of Google Chrome or Chromium.
+The performance is best with an up-to-date version of Google Chrome or Chromium.
 
-The client uses precomputed tiles with terrain data that were produced from different publicly available digital elevation models.
+The client uses precomputed tiles with encoded terrain data that can be produced from publicly available digital elevation models.
 
 This project is based on [ol3-dem](http://github.com/buddebej/ol3-dem/), which is a fork of [OpenLayers 3.1.1](https://github.com/openlayers/ol3). 
 OpenLayers 3 is licensed under the [2-Clause BSD](https://tldrlegal.com/license/bsd-2-clause-license-(freebsd)).
