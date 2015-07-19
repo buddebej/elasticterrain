@@ -40,7 +40,7 @@ var Showcase = function(viewer) {
 
 
     CONTROL_RIGHT.click(function() {
-        if (exampleIndex < viewer.getConfigStore().length) {
+        if (exampleIndex < viewer.getConfigStore().length-1) {
             exampleIndex++;
             showHint();
         } else {
@@ -105,4 +105,7 @@ var Showcase = function(viewer) {
             low: false
         });
     });
+
+    viewer.swapConfig(viewer.getConfigStore()[exampleIndex]);
+
 };

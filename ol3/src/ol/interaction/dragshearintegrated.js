@@ -49,7 +49,7 @@ ol.interaction.DragShearIntegratedOptions;
  * @param {ol.events.ConditionType} condition
  * @api stable
  */
-ol.interaction.DragShearIntegrated = function(options, map, condition, lowFpsAlert) {
+ol.interaction.DragShearIntegrated = function(options, map, condition) {
     goog.base(this, {
         handleDownEvent: ol.interaction.DragShearIntegrated.handleDownEvent_,
         handleDragEvent: ol.interaction.DragShearIntegrated.handleDragEvent_,
@@ -180,11 +180,10 @@ ol.interaction.DragShearIntegrated = function(options, map, condition, lowFpsAle
     this.frameState;
 
     /**
-     * @this {ol.interaction.DragShearIntegrated}
-     * @param {boolean} state
+     * @type {function(boolean)}
      * @private
      */
-    this.lowFpsAlert = (goog.isDef(lowFpsAlert) ? lowFpsAlert : undefined);
+    this.lowFpsAlert = function(state) {};
 
     /**
      * @private
@@ -249,9 +248,6 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
             this.shearingStatus = ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING;
             this.springLength = 0;
         }
-        // unlock minMax
-        this.demRenderer.setFreezeMinMax(false);
-
         // unfreeze values for elevation and coordinate indicator after dragging
         if (!goog.isNull(this.elevationIndicator)) {
             this.elevationIndicator.setFreeze(false);
@@ -335,7 +331,8 @@ ol.interaction.DragShearIntegrated.prototype.stopAnimation = function() {
     this.vx_t_1 = this.vy_t_1 = 0;
     this.shear(0, 0);
     this.shearingStatus = ol.interaction.State.NO_SHEARING;
-
+    // unlock minMax
+    this.demRenderer.setFreezeMinMax(false);
     // after every animation, analyse fps and adapt mesh resolution if automatic resolution is enabled
     // fire lowFpsAlert callback if defined
     if (this.getFps() < 45) {
@@ -345,11 +342,9 @@ ol.interaction.DragShearIntegrated.prototype.stopAnimation = function() {
                 low: true
             });
         }
-        if (this.lowFpsAlert !== undefined) {
-            this.lowFpsAlert(true);
-        }
+        this.lowFpsAlert(true);
     } else {
-        if (this.demLayer.getResolution() === 0 && this.lowFpsAlert !== undefined) {
+        if (this.demLayer.getResolution() === 0) {
             this.lowFpsAlert(false);
         }
     }
@@ -394,13 +389,14 @@ ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);
 
 /**
- * Set options
+ * Set callback function for low fps alert
  * @param {function(boolean)} lowFpsAlert
  */
 ol.interaction.DragShearIntegrated.prototype.setLowFpsAlert = function(lowFpsAlert) {
     this.lowFpsAlert = lowFpsAlert;
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setLowFpsAlert', ol.interaction.DragShearIntegrated.prototype.setLowFpsAlert);
+
 
 /**
  * Get average fps 

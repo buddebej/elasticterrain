@@ -130,11 +130,11 @@ ol.renderer.webgl.TileDemLayer = function(mapRenderer, tileDemLayer) {
     this.renderCounterMax = 1200;
 
     /**
-     * Max Zoomlevel of DEM Layer for z-Ordering in Shader
+     * Max Terrain Distortion
      * @private
      * @type {number}
      */
-    this.maxShearing = 150;
+    this.maxShearing = 75;
 
     /**
      * Animation Speed for changing minMax values
@@ -355,8 +355,13 @@ ol.renderer.webgl.TileDemLayer.prototype.getStaticMinMax = function() {
  */
 ol.renderer.webgl.TileDemLayer.prototype.isVisible = function(tile) {
     if (goog.isDef(tile)) {
+        // only tiles that are fully visible within the extent
         var tileCenter = this.tileGrid.getTileCoordCenter(tile.tileCoord);
         return ol.extent.containsCoordinate(this.visibleFramebufferExtent, tileCenter);
+
+        // consider all tiles that are intersected by the visible extent
+        // var tileExtent = this.tileGrid.getTileCoordExtent(tile.tileCoord);
+        // return ol.extent.containsExtent(this.visibleFramebufferExtent, tileExtent);
     } else {
         return false;
     }
@@ -843,14 +848,10 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             // SHADER PARAMETERS
             // u_testing: flag to activate testing mode
             gl.uniform1i(this.locations_.u_testing, tileDemLayer.getTesting() === true ? 1 : 0);
-            // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
-            gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, z));
             // u_minMax: static minMax values
             gl.uniform2f(this.locations_.u_minMax, this.staticMinElevation, this.staticMaxElevation);
-            // console.log(this.staticMinElevation, this.staticMaxElevation);
             // reset global minMax for next rendering
             this.resetCurrentMinMax();
-
 
             // COLORING
             if (!this.overlay.Active || this.hybridOverlay) {
@@ -1054,6 +1055,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                                 // zoomlevel of this tile 
                                 gl.uniform1f(this.locations_.u_zoom, zs[i]);
 
+                                // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
+                                gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, zs[i]));
+
                                 // determine offset for each tile in target framebuffer
                                 defUniformOffset(tile, this);
 
@@ -1113,6 +1117,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                         gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom + 1)));
                         // zoomlevel of this tile 
                         gl.uniform1f(this.locations_.u_zoom, zs[i]);
+
+                        // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
+                        gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, zs[i]));
 
                         // determine offset for each tile in target framebuffer
                         defUniformOffset(tile, this);

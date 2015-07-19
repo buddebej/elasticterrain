@@ -271,6 +271,7 @@ var ControlBar = function(viewer) {
         ui.updateControlTools();
     }.bind(this));
 
+
     SWITCH_SAVE_ZOOM.click(function() {
         var checkbox = SWITCH_SAVE_ZOOM.find($('input'));
         if (viewer.get('viewZoomConstraint')[0] !== this.config.defaultZoomLevelRange[0] && viewer.get('viewZoomConstraint')[1] !== this.config.defaultZoomLevelRange[1]) {
