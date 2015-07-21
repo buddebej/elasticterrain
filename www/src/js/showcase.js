@@ -107,5 +107,5 @@ var Showcase = function(viewer) {
     });
 
     viewer.swapConfig(viewer.getConfigStore()[exampleIndex]);
-
+    viewer.controlBar.updateControlTools();
 };

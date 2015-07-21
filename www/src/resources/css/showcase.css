@@ -4,7 +4,7 @@
     margin-top: -80px;
     font-family: 'Open Sans', serif;
     font-weight: 400;
-    font-size: 60pt;
+    font-size: 50pt;
     z-index: 110;
     color: rgba(36, 132, 198, 0.9);
     cursor: pointer;
@@ -20,11 +20,11 @@
 }
 
 .controlRight {
-    right: -35px;
+    right: -30px;
 }
 
 .controlLeft {
-    left: -35px;
+    left: -30px;
 }
 
 .showcaseHint {
