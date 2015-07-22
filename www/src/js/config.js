@@ -54,14 +54,14 @@ var Config = function() {
         obliqueInclination: 90.0, // 0:90
 
         // shearingInteraction 
-        terrainInteraction: true, 
-        shearingThreshold: 0.444, 
-        springCoefficient: 4, 
-        frictionForce: 0.2,             
-        maxInnerShearingPx: 20.0, 
-        maxOuterShearingPx: 20.0, 
-        staticShearFadeOutAnimationSpeed: 1.54,
-        hybridDampingDuration: 0.3
+        terrainInteraction: true,
+        shearingThreshold: 0.444,
+        springCoefficient: 4,
+        frictionForce: 0.2,
+        maxTerrainDistortion: 20.0,
+        dragDistanceBeforePan: 20.0,
+        explicitFadeOutAnimationSpeed: 1.54,
+        hybridTransitionDampingDuration: 0.3
     };
 
     this.dynamic = this.init;
@@ -71,13 +71,12 @@ var Config = function() {
         ambientLight: [-0.5, 0.5],
         shadingDarkness: [0.0, 1.0],
         shadingExaggeration: [0.0, 1.5],
-        shearingThreshold: [0.0, 1.0],
         springCoefficient: [0.0, 24],
         frictionForce: [0.0, 0.5],
-        maxInnerShearingPx: [0.0, 120.0],
-        maxOuterShearingPx: [0.0, 120.0],
-        staticShearFadeOutAnimationSpeed: [0.1, 2.0],
-        hybridDampingDuration: [0.1, 1.0],
+        maxTerrainDistortion: [0.0, 120.0],
+        dragDistanceBeforePan: [0.0, 120.0],
+        explicitFadeOutAnimationSpeed: [0.1, 2.0],
+        hybridTransitionDampingDuration: [0.1, 0.5],
         resolution: [0.1, 1.0]
     };
 

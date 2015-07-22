@@ -126,11 +126,11 @@ var ControlBar = function(viewer) {
             collapsed: true
         },
         config: {
-            enabled: false,
+            enabled: true,
             collapsed: true
         },
         saveConfig: {
-            enabled: false,
+            enabled: true,
             collapsed: true
         }
     };
@@ -522,10 +522,10 @@ var ControlBar = function(viewer) {
 
     this.initSlider(SLIDER_SPRING_COEFFICIENT, 'springCoefficient');
     this.initSlider(SLIDER_SPRING_FRICTION, 'frictionForce');
-    this.initSlider(SLIDER_SPRING_INNRAD, 'maxInnerShearingPx');
-    this.initSlider(SLIDER_SPRING_OUTRAD, 'maxOuterShearingPx');
-    this.initSlider(SLIDER_SPRING_FADEOUT, 'staticShearFadeOutAnimationSpeed');
-    this.initSlider(SLIDER_HYBRID_DAMPING, 'hybridDampingDuration');
+    this.initSlider(SLIDER_SPRING_INNRAD, 'maxTerrainDistortion');
+    this.initSlider(SLIDER_SPRING_OUTRAD, 'dragDistanceBeforePan');
+    this.initSlider(SLIDER_SPRING_FADEOUT, 'explicitFadeOutAnimationSpeed');
+    this.initSlider(SLIDER_HYBRID_DAMPING, 'hybridTransitionDampingDuration');
 
     // ROTATION 
     KNOB_ROTATION.knob({

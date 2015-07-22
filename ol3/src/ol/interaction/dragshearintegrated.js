@@ -31,10 +31,10 @@ goog.require('ol.Elevation');
  threshold:number,
  springCoefficient:number,
  frictionForce:number,
- maxInnerShearingPx: number,
- maxOuterShearingPx: number,
- staticShearFadeOutAnimationSpeed: number,
- hybridDampingDuration: number }} */
+ maxTerrainDistortion: number,
+ dragDistanceBeforePan: number,
+ explicitFadeOutAnimationSpeed: number,
+ hybridTransitionDampingDuration: number }} */
 ol.interaction.DragShearIntegratedOptions;
 
 
@@ -62,9 +62,9 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
      */
     ol.interaction.State = {
         NO_SHEARING: 0,
-        STATIC_SHEARING: 1,
-        HYBRID_SHEARING: 2,
-        ANIMATION_AFTER_STATIC_SHEARING: 3
+        EXPLICIT_SHEARING: 1,
+        INTEGRATED_SHEARING: 2,
+        ANIMATION_AFTER_EXPLICIT_SHEARING: 3
     };
 
     /** @type {ol.interaction.DragShearIntegratedOptions} */
@@ -163,7 +163,7 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
 
     /** @type {number}
      * Time when static shearing changed to hybrid shearing in milliseconds. */
-    this.hybridShearingStartTimeMS = -1;
+    this.integratedShearingStartTimeMS = -1;
 
     /** @type {number}
      * Distance between current mouse position and point being animated [meters].*/
@@ -184,6 +184,12 @@ ol.interaction.DragShearIntegrated = function(options, map, condition) {
      * @private
      */
     this.lowFpsAlert = function(state) {};
+
+    /**
+     * @type {function(number=, number=)}
+     * @private
+     */
+    this.onMouseUpCallback = function(z, distDragged) {};
 
     /**
      * @private
@@ -207,32 +213,39 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
 
         this.frameState = mapBrowserEvent.frameState;
 
+        // store current drag position
         this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
 
-        if (this.shearingStatus === ol.interaction.State.STATIC_SHEARING) {
-            // position of drag start in meters
+        if (this.shearingStatus === ol.interaction.State.EXPLICIT_SHEARING) {
+
+            // position of drag start and current drag in meters
             var currentDragPosition = this.map.getCoordinateFromPixel(this.currentDragPositionPx),
                 startDragPosition = this.map.getCoordinateFromPixel(this.startDragPositionPx),
-                // position of point that is animated
+
+                // position of point that is animated [meters]. Compensate for shifted map center.
                 animatingPositionX = startDragPosition[0] - (this.currentCenter[0] - this.startCenter[0]),
                 animatingPositionY = startDragPosition[1] - (this.currentCenter[1] - this.startCenter[1]),
+
                 // distance between current mouse position and point being animated
                 distanceX = currentDragPosition[0] - animatingPositionX,
                 distanceY = currentDragPosition[1] - animatingPositionY,
                 distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY),
-                maxOuterShearingMeters = this.options['maxOuterShearingPx'] * this.view.getResolution();
 
-            // set spring length equal to drag distance
-            this.springLength = Math.min(maxOuterShearingMeters, distance);
+                // convert dragDistanceBeforePanning radius to meters
+                dragDistanceBeforePanning = this.options['dragDistanceBeforePan'] * this.view.getResolution();
 
-            // switch from static shearing to hybrid shearing if the pointer is leaving the outer circle.
-            if (distance >= maxOuterShearingMeters) {
-                this.hybridShearingStartTimeMS = new Date().getTime();
-                this.shearingStatus = ol.interaction.State.HYBRID_SHEARING;
+            // set spring length equal to drag distance, limited to dragDistanceBeforePanning
+            this.springLength = Math.min(dragDistanceBeforePanning, distance);
+
+            // switch from explicit shearing to integrated shearing if the pointer is leaving the outer circle.
+            if (distance >= dragDistanceBeforePanning) {
+                this.integratedShearingStartTimeMS = new Date().getTime();
+                this.shearingStatus = ol.interaction.State.INTEGRATED_SHEARING;
             }
         }
+
+        // trigger animation (if not running yet)
         this.animationDelay.start();
-        // console.log(this.minElevation, this.maxElevation, this.minElevationLocal, this.maxElevationLocal);
     }
 };
 
@@ -244,8 +257,8 @@ ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) 
  */
 ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
     if (this.targetPointers.length === 0) {
-        if (this.shearingStatus === ol.interaction.State.STATIC_SHEARING) {
-            this.shearingStatus = ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING;
+        if (this.shearingStatus === ol.interaction.State.EXPLICIT_SHEARING) {
+            this.shearingStatus = ol.interaction.State.ANIMATION_AFTER_EXPLICIT_SHEARING;
             this.springLength = 0;
         }
         // unfreeze values for elevation and coordinate indicator after dragging
@@ -253,7 +266,15 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
             this.elevationIndicator.setFreeze(false);
         }
 
+
+        // to track interaction in userstudy, not needed for production
+        var xDistanceDragPx = (this.currentCenter[0] - this.startCenter[0]) / this.view.getResolution(),
+            yDistanceDragPx = (this.currentCenter[1] - this.startCenter[1]) / this.view.getResolution(),
+            xyDistanceDragPx = Math.round(Math.sqrt(xDistanceDragPx * xDistanceDragPx + yDistanceDragPx * yDistanceDragPx));
+        this.onMouseUpCallback(this.view.getZoom(), xyDistanceDragPx);
+
         return true;
+
     }
     return false;
 };
@@ -265,12 +286,6 @@ ol.interaction.DragShearIntegrated.handleUpEvent_ = function(mapBrowserEvent) {
  * @private
  */
 ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) {
-    // console.log("inner circle radius", this.options['maxInnerShearingPx']);
-    // console.log("outer circle radius", this.options['maxOuterShearingPx']);
-    // console.log("wiggling threshold", this.options['threshold']);
-    // console.log("spring constant", this.options['springCoefficient']);
-    // console.log("velocity friction coefficient", this.options['frictionForce']);
-
     var minMax, minMaxLocal,
         mapCenter;
 
@@ -303,7 +318,7 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         this.startCenter = [mapCenter[0], mapCenter[1]];
         this.currentCenter = [mapCenter[0], mapCenter[1]];
         this.currentDragPositionPx = ol.interaction.Pointer.centroid(this.targetPointers);
-        this.shearingStatus = ol.interaction.State.STATIC_SHEARING;
+        this.shearingStatus = ol.interaction.State.EXPLICIT_SHEARING;
         this.animationDelay.stop();
         this.lastRenderTime = null;
         this.distanceX = this.distanceY = 0;
@@ -315,7 +330,6 @@ ol.interaction.DragShearIntegrated.handleDownEvent_ = function(mapBrowserEvent) 
         if (!goog.isNull(this.elevationIndicator)) {
             this.elevationIndicator.setFreeze(true);
         }
-
         return true;
     }
     return false;
@@ -375,15 +389,13 @@ goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'disable', ol.
  * @param {ol.interaction.DragShearIntegratedOptions} options
  */
 ol.interaction.DragShearIntegrated.prototype.setOptions = function(options) {
-
     goog.asserts.assert(goog.isDef(options.threshold));
     goog.asserts.assert(goog.isDef(options.springCoefficient));
     goog.asserts.assert(goog.isDef(options.frictionForce));
-    goog.asserts.assert(goog.isDef(options.maxInnerShearingPx));
-    goog.asserts.assert(goog.isDef(options.maxOuterShearingPx));
-    goog.asserts.assert(goog.isDef(options.staticShearFadeOutAnimationSpeed));
-    // goog.asserts.assert(goog.isDef(options.hybridDampingDuration) && options.hybridDampingDuration > 0.0);
-
+    goog.asserts.assert(goog.isDef(options.maxTerrainDistortion));
+    goog.asserts.assert(goog.isDef(options.dragDistanceBeforePan));
+    goog.asserts.assert(goog.isDef(options.explicitFadeOutAnimationSpeed));
+    goog.asserts.assert(goog.isDef(options.hybridTransitionDampingDuration) && options.hybridTransitionDampingDuration > 0.0);
     this.options = options;
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOptions', ol.interaction.DragShearIntegrated.prototype.setOptions);
@@ -396,6 +408,16 @@ ol.interaction.DragShearIntegrated.prototype.setLowFpsAlert = function(lowFpsAle
     this.lowFpsAlert = lowFpsAlert;
 };
 goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setLowFpsAlert', ol.interaction.DragShearIntegrated.prototype.setLowFpsAlert);
+
+
+/**
+ * Set callback function to fire on every drag
+ * @param {function()} onMouseUpCallback
+ */
+ol.interaction.DragShearIntegrated.prototype.setOnMouseUpCallback = function(onMouseUpCallback) {
+    this.onMouseUpCallback = onMouseUpCallback;
+};
+goog.exportProperty(ol.interaction.DragShearIntegrated.prototype, 'setOnMouseUpCallback', ol.interaction.DragShearIntegrated.prototype.setOnMouseUpCallback);
 
 
 /**
@@ -437,128 +459,38 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         animatingPositionY = startDragPosition[1] - (this.currentCenter[1] - this.startCenter[1]);
 
     // Distance between current mouse position and point being animated [meters].
-    // This distance is also needed for fading out animation when the mouse is released after a static
-    // shear. The annimation wiggles the mountains back to the start drag position. There
+    // This distance is also needed for fading out animation when the mouse is released during an explicit
+    // shear. The animation wiggles the mountains back to the start drag position. There
     // are no drag events during this animation that would adjust currentDragPositionPx, so we
     // use the previous distanceX and distanceY during the animation.
-    if (this.shearingStatus !== ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
+    if (this.shearingStatus !== ol.interaction.State.ANIMATION_AFTER_EXPLICIT_SHEARING) {
         this.distanceX = currentDragPosition[0] - animatingPositionX;
         this.distanceY = currentDragPosition[1] - animatingPositionY;
     }
 
-    var currentTime = new Date(),
-        timeSinceHybridShearingStart = 0;
-    if (this.hybridShearingStartTimeMS > 0) {
-        timeSinceHybridShearingStart = (currentTime.getTime() - this.hybridShearingStartTimeMS) / 1000;
-    }
 
-    // A damping factor for fading the length of the spring between static and hybrid shearing.
-    // When the cursor leaves circle with radius maxOuterShearingMeters, the damping factor is 1. 
-    // It fades to 0 within the time interval defined by this.options['hybridDampingDuration'].
-    var hybridShearingStartDamping = 1;
-    if (this.shearingStatus === ol.interaction.State.HYBRID_SHEARING) {
-        if (timeSinceHybridShearingStart <= this.options['hybridDampingDuration']) {
-            hybridShearingStartDamping = 1 - timeSinceHybridShearingStart / this.options['hybridDampingDuration'];
+    // Fading the length of the spring during the transition from explicit to integrated shearing.
+    // When the cursor leaves circle with radius dragDistanceBeforePan, the damping factor is 1. 
+    // It fades to 0 within the time interval defined by hybridTransitionDuration.
+    var currentTime = new Date(),
+        timeSinceHybridTransitionStart = 0,
+        hybridTransitionDamping = 1;
+
+    if (this.shearingStatus === ol.interaction.State.INTEGRATED_SHEARING && this.integratedShearingStartTimeMS > -1) {
+        timeSinceHybridTransitionStart = (currentTime.getTime() - this.integratedShearingStartTimeMS) / 1000;
+
+        if (timeSinceHybridTransitionStart <= this.options['hybridTransitionDampingDuration']) {
+            hybridTransitionDamping = 1 - timeSinceHybridTransitionStart / this.options['hybridTransitionDampingDuration'];
         } else {
             // the damping animation is over
-            hybridShearingStartDamping = 0;
-            this.hybridShearingStartTimeMS = -1;
+            hybridTransitionDamping = 0;
+            this.integratedShearingStartTimeMS = -1;
             this.springLength = 0;
         }
     }
 
-    var distance = Math.sqrt(this.distanceX * this.distanceX + this.distanceY * this.distanceY),
-        // spring lengths along the two axes [meters]
-        springLengthX = distance > 0 ? this.distanceX / distance * this.springLength * hybridShearingStartDamping : 0,
-        springLengthY = distance > 0 ? this.distanceY / distance * this.springLength * hybridShearingStartDamping : 0;
-
-    // spring coefficient
-    var k = this.options['springCoefficient'],
-        // friction for damping previous speed
-        friction = 1 - this.options['frictionForce'],
-        // stretch or compression of the spring
-        springStretchX = this.distanceX - springLengthX,
-        springStretchY = this.distanceY - springLengthY,
-        // current velocity of animation [meters per second]
-        vx_t0 = k * springStretchX + friction * this.vx_t_1,
-        vy_t0 = k * springStretchY + friction * this.vy_t_1;
-
-
-    var
-    // time since last frame was rendered [seconds]
-        dTsec = this.lastRenderTime !== null ? (currentTime.getTime() - this.lastRenderTime.getTime()) / 1000 : 1 / 60,
-        // displacement of clicked point due to spring [meters]
-        dx = vx_t0 * dTsec,
-        dy = vy_t0 * dTsec;
-
-
-    // store values for next rendered frame
-    this.vx_t_1 = vx_t0;
-    this.vy_t_1 = vy_t0;
-
-    if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
-        // map center is not moved during animation following static shearing
-        dx *= this.options['staticShearFadeOutAnimationSpeed'];
-        dy *= this.options['staticShearFadeOutAnimationSpeed'];
-    } else {
-        // shift map center
-        this.currentCenter[0] -= dx;
-        this.currentCenter[1] -= dy;
-    }
-
-
-    // Test for end of animation: stop animation when speed and acceleration of the animation are close to zero.
-    // The acceleration is triggered by the spring, and is proportional to the stretch of the spring.
-    // The stretch is the length by which the spring differs from its resting position.
-    var springStretch = Math.sqrt(springStretchX * springStretchX + springStretchY * springStretchY),
-        // acceleration
-        a = k * springStretch / dTsec,
-        // velocity
-        v = Math.sqrt(vx_t0 * vx_t0 + vy_t0 * vy_t0),
-        // minimum distance
-        dTol = this.options['threshold'] * this.view.getResolution(),
-        // minimum velocity
-        vTol = dTol / dTsec,
-        // minimum acceleration
-        aTol = vTol / dTsec / 100, // 100 is an empirical factor
-        stopAnimation = this.shearingStatus !== ol.interaction.State.STATIC_SHEARING && a < aTol && v < vTol;
-
-    // if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
-    //  console.log("FPS", Math.round(1 / dTsec), "v", Math.round(v), "\tvTol", Math.round(vTol), "\ta", Math.round(a), "\taTol", Math.round(aTol));
-    // }
-
-    // compute average fps for userstudy
-    this.animationFrameCounter++;
-    this.fpsMean = this.fpsMean + Math.round(1 / dTsec); //(this.fpsMean + Math.round(1 / dTsec)) / this.animationFrameCounter;
-
-    // Recompute distances after the new velocity is applied.
-    this.distanceX -= dx;
-    this.distanceY -= dy;
-
-    // test for other active interactions like zooming or rotation
-    var otherInteractionActive = this.view.getHints()[ol.ViewHint.INTERACTING];
-
-    // FOR LOGGING PURPOSES
-    // if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
-    //     if (this.timeSinceAnimationBegin === null) {
-    //         // reset logger
-    //         this.timeSinceAnimationBegin = currentTime.getTime();
-    //         // reset logger for new animation
-    //         this.oscillationLogger = [];
-    //         // add csv header
-    //         this.oscillationLogger = 't;vx;vy;a;dx;dy\n0;0;0;0;\n';
-    //     }
-
-    //     // seconds since animation started
-    //     var t = (currentTime.getTime() - this.timeSinceAnimationBegin) / 1000,
-    //         aPixel = k * (springStretch / this.view.getResolution()) / dTsec;
-
-    //     var newline = t + ';' + vx_t0 / this.view.getResolution() + ';' + vy_t0 / this.view.getResolution() + ';' + aPixel + ';' + dx / this.view.getResolution() + ';' + dy / this.view.getResolution() + '\n';
-    //     this.oscillationLogger += newline;
-    // }
-
-    // increase mesh resolution when static shearing is active
-    if (this.shearingStatus === ol.interaction.State.STATIC_SHEARING || (timeSinceHybridShearingStart <= this.options['hybridDampingDuration'] && timeSinceHybridShearingStart > 0)) {
+    // increase mesh resolution when explicit shearing is active
+    if (this.shearingStatus === ol.interaction.State.EXPLICIT_SHEARING || (timeSinceHybridTransitionStart <= this.options['hybridTransitionDampingDuration'] && timeSinceHybridTransitionStart > 0)) {
         // if automatic resolution active
         if (this.demLayer.getResolution() === 0) {
             this.demLayer.setAutoResolution({
@@ -571,57 +503,120 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         });
     }
 
-    // update last rendering time
-    this.lastRenderTime = currentTime;
+    var distance = Math.sqrt(this.distanceX * this.distanceX + this.distanceY * this.distanceY),
+        // spring lengths along the two axes [meters]
+        springLengthX = distance > 0 ? this.distanceX / distance * this.springLength * hybridTransitionDamping : 0,
+        springLengthY = distance > 0 ? this.distanceY / distance * this.springLength * hybridTransitionDamping : 0,
+
+        // spring coefficient
+        k = this.options['springCoefficient'],
+
+        // friction for damping previous speed
+        friction = 1 - this.options['frictionForce'],
+
+        // stretch or compression of the spring
+        springStretchX = this.distanceX - springLengthX,
+        springStretchY = this.distanceY - springLengthY,
+
+        // current velocity of animation [meters per second]
+        vx_t0 = k * springStretchX + friction * this.vx_t_1,
+        vy_t0 = k * springStretchY + friction * this.vy_t_1,
+
+        // time since last frame was rendered [seconds]
+        dTsec = this.lastRenderTime !== null ? (currentTime.getTime() - this.lastRenderTime.getTime()) / 1000 : 1 / 60,
+
+        // displacement of clicked point due to spring [meters]
+        dx = vx_t0 * dTsec,
+        dy = vy_t0 * dTsec,
+
+        // The stretch is the length by which the spring differs from its resting position.
+        springStretch = Math.sqrt(springStretchX * springStretchX + springStretchY * springStretchY),
+
+        // The acceleration is triggered by the spring, and is proportional to the stretch of the spring.
+        a = k * springStretch / dTsec,
+        // velocity
+        v = Math.sqrt(vx_t0 * vx_t0 + vy_t0 * vy_t0),
+        // minimum distance
+        dTol = this.options['threshold'] * this.view.getResolution(),
+        // minimum velocity
+        vTol = dTol / dTsec,
+        // minimum acceleration
+        aTol = vTol / dTsec / 100, // 100 is an empirical factor
+
+        // Test for end of animation: stop animation when speed and acceleration of the animation are close to zero.
+        stopAnimation = this.shearingStatus !== ol.interaction.State.EXPLICIT_SHEARING && a < aTol && v < vTol,
+
+        // test for other active interactions like zooming or rotation
+        otherInteractionActive = this.view.getHints()[ol.ViewHint.INTERACTING];
 
     if (stopAnimation || otherInteractionActive) {
+
         // stop the animation
         this.stopAnimation();
-        // console.log("animation ended");
-        // console.log('fps: ' + this.getFps());
-        // console.log(this.oscillationLogger);
-        // this.timeSinceAnimationBegin = null;
+
     } else {
-        // compute shearing distance
+
+        if (this.shearingStatus === ol.interaction.State.ANIMATION_AFTER_EXPLICIT_SHEARING) {
+            // map center is not moved during animation following static shearing
+            dx *= this.options['explicitFadeOutAnimationSpeed'];
+            dy *= this.options['explicitFadeOutAnimationSpeed'];
+        } else {
+            // shift map center
+            this.currentCenter[0] -= dx;
+            this.currentCenter[1] -= dy;
+        }
+
+
+        // Recompute distances after the new velocity is applied.
+        this.distanceX -= dx;
+        this.distanceY -= dy;
+
+        // store values for next rendered frame
+        this.vx_t_1 = vx_t0;
+        this.vy_t_1 = vy_t0;
+
+
         var shearX = this.distanceX,
             shearY = this.distanceY;
 
-        // if pointer is between the inner and the outer circle, limit shearing to the radius of the inner circle.
-        if (this.shearingStatus === ol.interaction.State.STATIC_SHEARING) {
+        // limit shearing to maxTerrainDistortion.
+        if (this.shearingStatus === ol.interaction.State.EXPLICIT_SHEARING) {
             var shearLength = Math.sqrt(this.distanceX * this.distanceX + this.distanceY * this.distanceY);
-            if (shearLength > this.options['maxInnerShearingPx'] * this.view.getResolution()) {
-                shearX = (this.distanceX / shearLength) * this.options['maxInnerShearingPx'] * this.view.getResolution();
-                shearY = (this.distanceY / shearLength) * this.options['maxInnerShearingPx'] * this.view.getResolution();
+            if (shearLength > this.options['maxTerrainDistortion'] * this.view.getResolution()) {
+                shearX = (this.distanceX / shearLength) * this.options['maxTerrainDistortion'] * this.view.getResolution();
+                shearY = (this.distanceY / shearLength) * this.options['maxTerrainDistortion'] * this.view.getResolution();
             }
         }
-        // value to normalize shearing factors for visible extent
-        var normalizedDraggedElevation = (this.startDragElevation - this.minElevation) / (this.maxElevation - this.minElevation);
-        // value to decide for a relatively low or a high point
-        var normalizedDraggedElevationLocal = Math.abs((this.startDragElevation - this.minElevationLocal) / (this.maxElevationLocal - this.minElevationLocal));
 
-        // console.log("clicked elevation: ", this.startDragElevation);
-        // console.log("minimum elevation: ", this.minElevation);
-        // console.log("maximum elevation: ", this.maxElevation);
-        // console.log("relative elevation: ", normalizedDraggedElevation);
-        // console.log("minimum elevation local: ", this.minElevationLocal);
-        // console.log("maximum elevation local: ", this.maxElevationLocal);
-        // console.log("relative elevation local: ", normalizedDraggedElevationLocal);
+        // normalized elevation between 0 and 1 for the visible minimum and maximum
+        var normalizedDraggedElevation = (this.startDragElevation - this.minElevation) / (this.maxElevation - this.minElevation),
+
+            // normalized elevation between 0 and 1 for the minimum and maximum in the local neighborhood
+            normalizedDraggedElevationLocal = Math.abs((this.startDragElevation - this.minElevationLocal) / (this.maxElevationLocal - this.minElevationLocal)),
+
+            // value to normalize shearing of high points
+            // to give the impression of direct control over terrain shearing, the shearing factor has to be normalized with normalizedDraggedElevation
+            // however, this leads to undesired "over-shearing" effects when shearing at a low relative high point
+            // to avoid this, we use the normalizedDraggedElevationLocal for local high points that are low points globally
+            shearingNormalization = (normalizedDraggedElevation > 0.6) ? normalizedDraggedElevation : normalizedDraggedElevationLocal;
+
 
         if (normalizedDraggedElevationLocal > 0.5) {
-            // console.log('higher point');
             // high elevations
-            this.shear(shearX / normalizedDraggedElevation, shearY / normalizedDraggedElevation);
-            if ((Math.abs(dx) > dTol || Math.abs(dy) > dTol) && this.shearingStatus !== ol.interaction.State.ANIMATION_AFTER_STATIC_SHEARING) {
-                this.view.setCenter(this.view.constrainCenter([this.currentCenter[0], this.currentCenter[1]]));
-            }
+            this.shear(shearX / shearingNormalization, shearY / shearingNormalization);
+            this.view.setCenter(this.view.constrainCenter([this.currentCenter[0], this.currentCenter[1]]));
         } else {
-            // console.log('lower point');
-            // low elevations
-            // invert shearing direction
+            // low elevations: invert shearing direction and normalize panning
             this.shear(-shearX, -shearY);
-            // FIXME add similar test as for high elevations and only call setCenter if necessary?
             this.view.setCenter(this.view.constrainCenter([this.currentCenter[0] - this.distanceX, this.currentCenter[1] - this.distanceY]));
         }
+
+        // update last rendering time
+        this.lastRenderTime = currentTime;
+
+        // log fps
+        this.animationFrameCounter++;
+        this.fpsMean = this.fpsMean + Math.round(1 / dTsec);
 
         // trigger the next frame rendering   
         this.animationDelay.start();

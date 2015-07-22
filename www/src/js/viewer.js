@@ -166,11 +166,10 @@ var Viewer = function(config, layers, container) {
             threshold: this.config.get('shearingThreshold'),
             springCoefficient: this.config.get('springCoefficient'),
             frictionForce: this.config.get('frictionForce'),
-            maxInnerShearingPx: this.config.get('maxInnerShearingPx'),
-            maxOuterShearingPx: this.config.get('maxOuterShearingPx'),
-            staticShearFadeOutAnimationSpeed: this.config.get('staticShearFadeOutAnimationSpeed'),
-            minMaxNeighborhoodSize: this.config.get('minMaxNeighborhoodSize'),
-            hybridDampingDuration: this.config.get('hybridDampingDuration')
+            maxTerrainDistortion: this.config.get('maxTerrainDistortion'),
+            dragDistanceBeforePan: this.config.get('dragDistanceBeforePan'),
+            explicitFadeOutAnimationSpeed: this.config.get('explicitFadeOutAnimationSpeed'),
+            hybridTransitionDampingDuration: this.config.get('hybridTransitionDampingDuration')
         };
     }.bind(this);
 

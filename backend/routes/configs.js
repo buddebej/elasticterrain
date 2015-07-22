@@ -25,4 +25,28 @@ router.route('/configs')
     });
   });
 
+
+// update
+router.route('/configs/:id').put(function(req,res){
+  Config.findOne({ _id: req.params.id }, function(err, configs) {
+    if (err) {
+      return res.send(err);
+    }
+ 
+    for (prop in req.body) {
+      configs[prop] = req.body[prop];
+    }
+ 
+    // save the configs
+    configs.save(function(err) {
+      if (err) {
+        return res.send(err);
+      }
+ 
+      res.json({ message: 'Config updated!' });
+    });
+  });
+});
+
+
 module.exports = router;
