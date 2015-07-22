@@ -1140,7 +1140,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
             // LOOP CONTROL
             // check for completed animatedMinMax fading animation
-            var minMaxAnimationFinished = ((Math.abs(this.deltaMax) <= 1 && Math.abs(this.deltaMin) <= 1) || (this.overlay.Active && !this.hybridOverlay));
+            var minMaxAnimationFinished = ((Math.abs(this.deltaMax) <= 10 && Math.abs(this.deltaMin) <= 10) || (this.overlay.Active && !this.hybridOverlay));
 
             // timeout loading and rendering loop
             if (this.renderCounter > this.renderCounterMax) {
