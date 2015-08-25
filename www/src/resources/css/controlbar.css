@@ -62,22 +62,22 @@ h3 {
 }
 
 .control a:link {
-    color: #aaa;
+    color: #f0f0f0;
     text-decoration: none;
 }
 
 .control a:visited {
-    color: #aaa;
+    color: #f0f0f0;
     text-decoration: none;
 }
 
 .control a:hover {
-    color: #FFFFFF;
+    color: #ccc;
     text-decoration: none;
 }
 
 .control a:active {
-    color: #FFFFFF;
+    color: #ccc;
     text-decoration: none;
 }
 
