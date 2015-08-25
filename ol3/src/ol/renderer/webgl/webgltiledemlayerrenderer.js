@@ -628,32 +628,32 @@ ol.renderer.webgl.TileDemLayer.prototype.setMeshResolution = function(resolution
  */
 ol.renderer.webgl.TileDemLayer.prototype.getResolutionByZoom = function(z, lowResActive, highResActive) {
     var defaultResolutions = {
-            2: 0.1,
-            3: 0.1,
-            4: 0.1,
-            5: 0.1,
-            6: 0.11,
-            7: 0.12,
-            8: 0.13,
-            9: 0.14,
-            10: 0.15,
-            11: 0.16,
-            12: 0.17,
-            'highres': 0.35
+            2: 0.04,
+            3: 0.04,
+            4: 0.04,
+            5: 0.04,
+            6: 0.04,
+            7: 0.05,
+            8: 0.05,
+            9: 0.05,
+            10: 0.05,
+            11: 0.05,
+            12: 0.05,
+            'highres': 0.4
         },
         highResolutions = {
-            2: 0.05,
-            3: 0.05,
-            4: 0.05,
-            5: 0.05,
-            6: 0.05,
-            7: 0.1,
-            8: 0.15,
-            9: 0.2,
-            10: 0.25,
-            11: 0.3,
-            12: 0.35,
-            'highres': 0.5
+            2: 0.03,
+            3: 0.03,
+            4: 0.03,
+            5: 0.03,
+            6: 0.03,
+            7: 0.03,
+            8: 0.03,
+            9: 0.03,
+            10: 0.03,
+            11: 0.03,
+            12: 0.03,
+            'highres': 0.3
         },
         lowResFactor = (lowResActive) ? 0.5 : 1;
     // highRes for situations where low resolutions cause artifacts (e.g. strong static shearing)
