@@ -2,12 +2,12 @@ var Showcase = function(viewer) {
     'use strict';
 
     var left = '<span class="fa-stack">\
-                <i class="fa fa-circle fa-stack-1x white"></i>\
+                <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
                 <i class="fa fa-chevron-circle-left fa-stack-1x"></i>\
                 </span>';
 
     var right = '<span class="fa-stack">\
-                <i class="fa fa-circle fa-stack-1x white"></i>\
+                <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
                 <i class="fa fa-chevron-circle-right fa-stack-1x"></i>\
                 </span>';
 
@@ -33,7 +33,7 @@ var Showcase = function(viewer) {
         },
         showHint = function() {
             examplesSeen++;
-            if (examplesSeen === 4) {
+            if (examplesSeen === 1) {
                 SHOWCASE_HINT.fadeIn('slow');
             }
         };
