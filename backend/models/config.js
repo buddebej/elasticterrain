@@ -28,10 +28,10 @@ var configSchema = new Schema({
     shearingThreshold: Number,
     springCoefficient: Number,
     frictionForce: Number,
-    maxInnerShearingPx: Number,
-    maxOuterShearingPx: Number,
-    staticShearFadeOutAnimationSpeed: Number,
-    hybridDampingDuration: Number
+    maxTerrainDistortion: Number,
+    dragDistanceBeforePan: Number,
+    explicitFadeOutAnimationSpeed: Number,
+    hybridTransitionDampingDuration: Number
 });
 
 module.exports = mongoose.model('Config', configSchema);
