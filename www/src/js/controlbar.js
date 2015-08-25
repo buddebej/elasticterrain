@@ -126,11 +126,11 @@ var ControlBar = function(viewer) {
             collapsed: true
         },
         config: {
-            enabled: true,
+            enabled: false,
             collapsed: true
         },
         saveConfig: {
-            enabled: true,
+            enabled: false,
             collapsed: true
         }
     };
@@ -292,9 +292,9 @@ var ControlBar = function(viewer) {
             checkbox.prop(CHECKED, false);
         } else {
             var extent = viewer.view.calculateExtent(viewer.map.getSize()),
-                // add 256 px padding to extent constraint
-                padding = 768 * viewer.view.getResolution(),
-                extentPlus = [extent[0] - padding, extent[1] - padding, extent[2] + padding, extent[3] + padding];
+                // add padding to extent constraint
+                padding = 512 * viewer.view.getResolution(),
+                extentPlus = [extent[0] - padding, extent[1] - padding * 0.5, extent[2] + padding, extent[3] + padding * 0.5];
             viewer.set('viewCenterConstraint', extentPlus);
             checkbox.prop(CHECKED, true);
         }
