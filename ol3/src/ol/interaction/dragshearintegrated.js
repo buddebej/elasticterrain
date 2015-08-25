@@ -349,7 +349,7 @@ ol.interaction.DragShearIntegrated.prototype.stopAnimation = function() {
     this.demRenderer.setFreezeMinMax(false);
     // after every animation, analyse fps and adapt mesh resolution if automatic resolution is enabled
     // fire lowFpsAlert callback if defined
-    if (this.getFps() < 45) {
+    if (this.getFps() < 50) {
         // if automatic resolution
         if (this.demLayer.getResolution() === 0) {
             this.demLayer.setAutoResolution({
@@ -589,7 +589,7 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
         }
 
         // normalized elevation between 0 and 1 for the visible minimum and maximum
-        var normalizedDraggedElevation = (this.startDragElevation - this.minElevation) / (this.maxElevation - this.minElevation),
+        var normalizedDraggedElevation = Math.abs((this.startDragElevation - this.minElevation) / (this.maxElevation - this.minElevation)),
 
             // normalized elevation between 0 and 1 for the minimum and maximum in the local neighborhood
             normalizedDraggedElevationLocal = Math.abs((this.startDragElevation - this.minElevationLocal) / (this.maxElevationLocal - this.minElevationLocal)),
@@ -599,8 +599,7 @@ ol.interaction.DragShearIntegrated.prototype.animation = function() {
             // however, this leads to undesired "over-shearing" effects when shearing at a low relative high point
             // to avoid this, we use the normalizedDraggedElevationLocal for local high points that are low points globally
             shearingNormalization = (normalizedDraggedElevation > 0.6) ? normalizedDraggedElevation : normalizedDraggedElevationLocal;
-
-
+            
         if (normalizedDraggedElevationLocal > 0.5) {
             // high elevations
             this.shear(shearX / shearingNormalization, shearY / shearingNormalization);
