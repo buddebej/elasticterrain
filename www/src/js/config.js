@@ -77,7 +77,7 @@ var Config = function() {
         dragDistanceBeforePan: [0.0, 120.0],
         explicitFadeOutAnimationSpeed: [0.1, 2.0],
         hybridTransitionDampingDuration: [0.1, 0.5],
-        resolution: [0.1, 1.0]
+        resolution: [0.1, 0.45]
     };
 
 
