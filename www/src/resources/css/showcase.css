@@ -27,11 +27,12 @@
     left: -8px;
 }
 
-.showcaseHint {
+.showcaseHintControlPanel {
     position: absolute;
     top: 16px;
     right: 50px;
     z-index: 120;
+    opacity: 0.7;
 }
 
 .bubble {

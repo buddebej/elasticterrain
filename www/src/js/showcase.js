@@ -1,22 +1,21 @@
 var Showcase = function(viewer) {
     'use strict';
 
-    var left = '<span class="fa-stack">\
+    var left = '<span class="fa-stack" title="Browse maps">\
                 <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
                 <i class="fa fa-chevron-circle-left fa-stack-1x"></i>\
                 </span>';
 
-    var right = '<span class="fa-stack">\
+    var right = '<span class="fa-stack" title="Browse maps">\
                 <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
                 <i class="fa fa-chevron-circle-right fa-stack-1x"></i>\
                 </span>';
 
-    var bubble = '<div class="bubble">Click here to customize the Elastic Terrain Map</div>';
 
     var CONTAINER = $('.map'),
         CONTROL_LEFT = $('<div>' + left + '</div>').addClass('showcaseControl').addClass('controlLeft').hide(),
         CONTROL_RIGHT = $('<div>' + right + '</div>').addClass('showcaseControl').addClass('controlRight').hide(),
-        SHOWCASE_HINT = $('<div>' + bubble + '</div>').addClass('showcaseHint').hide();
+        SHOWCASE_HINT = $('<div><div class="bubble">Click here to customize the Elastic Terrain Map</div></div>').addClass('showcaseHintControlPanel').hide();
 
 
     CONTAINER.append(CONTROL_RIGHT).append(CONTROL_LEFT);
