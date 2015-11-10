@@ -2,7 +2,7 @@ var Config = function() {
     'use strict';
 
     // static config
-    this.dbUrl = 'http://54.69.7.112:8000/api/configs';
+    this.dbUrl = 'http://52.32.174.118:8000/api/configs';
     this.defaultZoomLevelRange = [2, 12];
     this.defaultMapExtent = [];
     // dynamic config 

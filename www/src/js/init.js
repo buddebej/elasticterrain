@@ -30,7 +30,8 @@ $(document).ready(function() {
             return new Showcase(viewer);
         };
         controlBar = new ControlBar(viewer);
-        configManager = new ConfigManager(viewer, controlBar, initShowCase);
+        // configManager = new ConfigManager(viewer, controlBar, initShowCase);
+        configManager = new ConfigManagerStatic(viewer, controlBar, initShowCase);
 
     } else {
         $('body').append('<div class="webglMissing"><p><img src="resources/images/elasticterrain_logo.svg" width="174px"></img><br><span class="title">WebGL Not Supported</span><br> WebGL is required for this application, and your Web browser does not support WebGL. Google Chrome or Firefox are recommended browsers with WebGL support. Click <a href="http://www.browserleaks.com/webgl" target="_blank">here</a> to check the WebGL specifications of your browser.</p></div>');
