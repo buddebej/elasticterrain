@@ -7,6 +7,8 @@ The application renders digital elevation models with WebGL and offers many conf
 Check out the [demo](http://elasticterrain.xyz). 
 The performance is best with an up-to-date version of Google Chrome or Chromium.
 
+Watch [demo movie I](https://vimeo.com/140837757) or [demo movie II](https://vimeo.com/140798332).
+
 The client uses precomputed tiles with encoded terrain data that can be produced from publicly available digital elevation models.
 
 This project is based on [ol3-dem](http://github.com/buddebej/ol3-dem/), which is a fork of [OpenLayers 3.1.1](https://github.com/openlayers/ol3). 
