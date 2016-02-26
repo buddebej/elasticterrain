@@ -30,7 +30,7 @@ var Layers = function() {
             enabled: true,
             data: new ol.layer.Tile({
                 source: new ol.source.BingMaps({
-                    key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
+                    key: 'AmlgZxGXLcWdn_JVKX-N-tm1CQMQIkEd9gcO-gNl7tGR8STBEnb9qa5Na6woGsK_',
                     imagerySet: 'Aerial'
                 })
             })
@@ -41,7 +41,7 @@ var Layers = function() {
             enabled: true,
             data: new ol.layer.Tile({
                 source: new ol.source.BingMaps({
-                    key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
+                    key: 'AmlgZxGXLcWdn_JVKX-N-tm1CQMQIkEd9gcO-gNl7tGR8STBEnb9qa5Na6woGsK_',
                     imagerySet: 'Road'
                 })
             })
@@ -53,7 +53,7 @@ var Layers = function() {
             hybrid: [1, 0],
             data: new ol.layer.Tile({
                 source: new ol.source.BingMaps({
-                    key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
+                    key: 'AmlgZxGXLcWdn_JVKX-N-tm1CQMQIkEd9gcO-gNl7tGR8STBEnb9qa5Na6woGsK_',
                     imagerySet: 'Aerial'
                 })
             })
