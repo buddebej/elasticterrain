@@ -106,7 +106,7 @@ uniform float u_hsExaggeration;
 uniform float u_ambient_light;    
 
 // cellsize for tile resolution of 256x256 pixel = 1.0/256.0
-const highp float CELLSIZE = 0.00390625; 
+const highp float CELLSIZE = 1.0 / 256.0; //0.00390625; 
 
 float rowToCell(in int row) { 
     float v = (float(row)*2.0+1.0)/512.0;

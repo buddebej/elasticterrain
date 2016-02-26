@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
 from optparse import OptionParser
+import json
 import re
 import sys
 
-import pystache
 
 
 ESCAPE_SEQUENCE = {
@@ -42,7 +42,6 @@ def main(argv):
     option_parser = OptionParser()
     option_parser.add_option('--input')
     option_parser.add_option('--output')
-    option_parser.add_option('--template')
     options, args = option_parser.parse_args(argv[1:])
 
     context = {}
@@ -70,7 +69,7 @@ def main(argv):
             if m:
                 block = vertex
                 continue
-            m = re.match(r'//!\s+FRAGMENT\s*\Z', line)            
+            m = re.match(r'//!\s+FRAGMENT\s*\Z', line)
             if m:
                 block = fragment
                 continue
@@ -136,7 +135,7 @@ def main(argv):
         output = open(options.output, 'wb')
     else:
         output = sys.stdout
-    output.write(pystache.render(open(options.template, 'rb').read(), context))
+    json.dump(context, output)
 
 
 if __name__ == '__main__':
