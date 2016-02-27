@@ -1,6 +1,3 @@
-var fs = require('fs');
-var path = require('path');
-
 var async = require('async');
 var fse = require('fs-extra');
 var nomnom = require('nomnom');
@@ -11,7 +8,7 @@ var googRegEx = /^goog\..*$/;
 
 /**
  * Read the symbols from info file.
- * @param {funciton(Error, Array.<string>, Array.<Object>)} callback Called
+ * @param {function(Error, Array.<string>, Array.<Object>)} callback Called
  *     with the patterns and symbols (or any error).
  */
 function getInfo(callback) {
@@ -161,7 +158,7 @@ function generateExterns(typedefs, symbols, externs, base) {
   // defined as types in the ol externs file. But the corresponding @typedef's
   // are not marked with an @api annotation because abstract base classes are
   // not instantiated by applications. Yet, we need to have a type defined
-  // in the ol externs file for these options types. So we just use
+  // in the ol externs file for these options types. So we just use
   // @typedef {Object}.
   Object.keys(constructorOptionsTypes).forEach(function(key) {
     lines.push('/**');

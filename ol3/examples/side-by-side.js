@@ -5,7 +5,7 @@ goog.require('ol.layer.Tile');
 goog.require('ol.source.MapQuest');
 
 
-var domMap = new ol.Map({
+var map1 = new ol.Map({
   layers: [
     new ol.layer.Tile({
       source: new ol.source.MapQuest({layer: 'sat'})
@@ -19,13 +19,19 @@ var domMap = new ol.Map({
   })
 });
 
+var map2 = new ol.Map({
+  target: 'canvasMap',
+  layers: map1.getLayers(),
+  view: map1.getView()
+});
+
 if (ol.has.WEBGL) {
-  var webglMap = new ol.Map({
+  var map3 = new ol.Map({
     renderer: 'webgl',
-    target: 'webglMap'
+    target: 'webglMap',
+    layers: map1.getLayers(),
+    view: map1.getView()
   });
-  webglMap.bindTo('layergroup', domMap);
-  webglMap.bindTo('view', domMap);
 } else {
   var info = document.getElementById('no-webgl');
   /**
@@ -33,9 +39,3 @@ if (ol.has.WEBGL) {
    */
   info.style.display = '';
 }
-
-var canvasMap = new ol.Map({
-  target: 'canvasMap'
-});
-canvasMap.bindTo('layergroup', domMap);
-canvasMap.bindTo('view', domMap);

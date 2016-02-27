@@ -1,9 +1,10 @@
 goog.require('ol.Map');
 goog.require('ol.View');
+goog.require('ol.format.TopoJSON');
 goog.require('ol.layer.Tile');
 goog.require('ol.layer.Vector');
 goog.require('ol.source.TileJSON');
-goog.require('ol.source.TopoJSON');
+goog.require('ol.source.Vector');
 goog.require('ol.style.Fill');
 goog.require('ol.style.Stroke');
 goog.require('ol.style.Style');
@@ -11,11 +12,11 @@ goog.require('ol.style.Style');
 
 var raster = new ol.layer.Tile({
   source: new ol.source.TileJSON({
-    url: 'http://api.tiles.mapbox.com/v3/mapbox.world-dark.jsonp'
+    url: 'http://api.tiles.mapbox.com/v3/mapbox.world-dark.json'
   })
 });
 
-var styleArray = [new ol.style.Style({
+var style = new ol.style.Style({
   fill: new ol.style.Fill({
     color: 'rgba(255, 255, 255, 0.6)'
   }),
@@ -23,16 +24,16 @@ var styleArray = [new ol.style.Style({
     color: '#319FD3',
     width: 1
   })
-})];
+});
 
 var vector = new ol.layer.Vector({
-  source: new ol.source.TopoJSON({
-    projection: 'EPSG:3857',
-    url: 'data/topojson/world-110m.json'
+  source: new ol.source.Vector({
+    url: 'data/topojson/world-110m.json',
+    format: new ol.format.TopoJSON()
   }),
-  style: function(feature, resolution) {
+  style: function(feature) {
     // don't want to render the full world polygon, which repeats all countries
-    return feature.getId() !== undefined ? styleArray : null;
+    return feature.getId() !== undefined ? style : null;
   }
 });
 

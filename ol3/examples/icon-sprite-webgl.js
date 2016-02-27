@@ -1,5 +1,4 @@
 goog.require('ol.Feature');
-goog.require('ol.FeatureOverlay');
 goog.require('ol.Map');
 goog.require('ol.View');
 goog.require('ol.geom.Point');
@@ -79,14 +78,8 @@ var vector = new ol.layer.Vector({
   source: vectorSource
 });
 
-// Use the "webgl" renderer by default.
-var renderer = exampleNS.getRendererFromQueryString();
-if (!renderer) {
-  renderer = 'webgl';
-}
-
 var map = new ol.Map({
-  renderer: renderer,
+  renderer: common.getRendererFromQueryString('webgl'),
   layers: [vector],
   target: document.getElementById('map'),
   view: new ol.View({
@@ -102,10 +95,43 @@ for (i = 0; i < featureCount; i += 30) {
   overlayFeatures.push(clone);
 }
 
-var featureOverlay = new ol.FeatureOverlay({
+new ol.layer.Vector({
   map: map,
+  source: new ol.source.Vector({
+    features: overlayFeatures
+  }),
   style: new ol.style.Style({
     image: icons[iconCount - 1]
-  }),
-  features: overlayFeatures
+  })
+});
+
+map.on('click', function(evt) {
+  var info = document.getElementById('info');
+  info.innerHTML =
+      'Hold on a second, while I catch those butterflies for you ...';
+
+  window.setTimeout(function() {
+    var features = [];
+    map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+      features.push(feature);
+      return false;
+    });
+
+    if (features.length === 1) {
+      info.innerHTML = 'Got one butterfly';
+    } else if (features.length > 1) {
+      info.innerHTML = 'Got ' + features.length + ' butterflies';
+    } else {
+      info.innerHTML = 'Couldn\'t catch a single butterfly';
+    }
+  }, 1);
+});
+
+map.on('pointermove', function(evt) {
+  if (evt.dragging) {
+    return;
+  }
+  var pixel = map.getEventPixel(evt.originalEvent);
+  var hit = map.hasFeatureAtPixel(pixel);
+  map.getTarget().style.cursor = hit ? 'pointer' : '';
 });

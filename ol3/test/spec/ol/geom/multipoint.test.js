@@ -5,8 +5,7 @@ describe('ol.geom.MultiPoint', function() {
 
   it('can be constructed with a null geometry', function() {
     expect(function() {
-      var multiPoint = new ol.geom.MultiPoint(null);
-      multiPoint = multiPoint; // suppress gjslint warning
+      return new ol.geom.MultiPoint(null);
     }).not.to.throwException();
   });
 
@@ -71,6 +70,18 @@ describe('ol.geom.MultiPoint', function() {
 
     it('has stride the expected stride', function() {
       expect(multiPoint.getStride()).to.be(2);
+    });
+
+    describe('#intersectsExtent()', function() {
+
+      it('returns true for extent covering a point', function() {
+        expect(multiPoint.intersectsExtent([1, 2, 2, 2])).to.be(true);
+      });
+
+      it('returns false for non-matching extent within own extent', function() {
+        expect(multiPoint.intersectsExtent([2, 3, 2, 4])).to.be(false);
+      });
+
     });
 
   });
@@ -253,5 +264,6 @@ describe('ol.geom.MultiPoint', function() {
 
 
 goog.require('ol.extent');
+goog.require('ol.geom.GeometryLayout');
 goog.require('ol.geom.MultiPoint');
 goog.require('ol.geom.Point');

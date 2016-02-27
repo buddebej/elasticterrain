@@ -49,16 +49,17 @@ var displayCountryInfo = function(coordinate) {
         //  info.innerHTML = Mustache.render(gridSource.getTemplate(), data);
         mapElement.style.cursor = data ? 'pointer' : '';
         if (data) {
-          /* jshint -W069 */
           flagElement.src = 'data:image/png;base64,' + data['flag_png'];
           nameElement.innerHTML = data['admin'];
-          /* jshint +W069 */
         }
         infoOverlay.setPosition(data ? coordinate : undefined);
       });
 };
 
-$(map.getViewport()).on('mousemove', function(evt) {
+map.on('pointermove', function(evt) {
+  if (evt.dragging) {
+    return;
+  }
   var coordinate = map.getEventCoordinate(evt.originalEvent);
   displayCountryInfo(coordinate);
 });

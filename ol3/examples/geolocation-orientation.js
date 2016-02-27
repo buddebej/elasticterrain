@@ -10,7 +10,7 @@ goog.require('ol.source.OSM');
 
 // creating the view
 var view = new ol.View({
-  center: ol.proj.transform([5.8713, 45.6452], 'EPSG:4326', 'EPSG:3857'),
+  center: ol.proj.fromLonLat([5.8713, 45.6452]),
   zoom: 19
 });
 
@@ -58,7 +58,7 @@ var geolocation = new ol.Geolocation(/** @type {olx.GeolocationOptions} */ ({
 var deltaMean = 500; // the geolocation sampling period mean in ms
 
 // Listen to position changes
-geolocation.on('change', function(evt) {
+geolocation.on('change', function() {
   var position = geolocation.getPosition();
   var accuracy = geolocation.getAccuracy();
   var heading = geolocation.getHeading() || 0;
@@ -113,7 +113,7 @@ function addPosition(position, heading, m, speed) {
     // force the rotation change to be less than 180°
     if (Math.abs(headingDiff) > Math.PI) {
       var sign = (headingDiff >= 0) ? 1 : -1;
-      headingDiff = - sign * (2 * Math.PI - Math.abs(headingDiff));
+      headingDiff = -sign * (2 * Math.PI - Math.abs(headingDiff));
     }
     heading = prevHeading + headingDiff;
   }
@@ -180,9 +180,18 @@ geolocateBtn.addEventListener('click', function() {
 
 // simulate device move
 var simulationData;
-$.getJSON('data/geolocation-orientation.json', function(data) {
-  simulationData = data.data;
-});
+var client = new XMLHttpRequest();
+client.open('GET', 'data/geolocation-orientation.json');
+
+
+/**
+ * Handle data loading.
+ */
+client.onload = function() {
+  simulationData = JSON.parse(client.responseText).data;
+};
+client.send();
+
 var simulateBtn = document.getElementById('simulate');
 simulateBtn.addEventListener('click', function() {
   var coordinates = simulationData;

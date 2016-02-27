@@ -18,7 +18,7 @@ for (i = 0, ii = styles.length; i < ii; ++i) {
     visible: false,
     preload: Infinity,
     source: new ol.source.BingMaps({
-      key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
+      key: 'AkGbxXx6tDWf1swIhPJyoAVp06H0s0gDTYslNWWHZ6RoPqMpB9ld5FY1WutX8UoF',
       imagerySet: styles[i]
       // use maxZoom 19 to see stretched tiles instead of the BingMaps
       // "no photos at this zoom level" tiles
@@ -28,7 +28,7 @@ for (i = 0, ii = styles.length; i < ii; ++i) {
 }
 var map = new ol.Map({
   layers: layers,
-  renderer: exampleNS.getRendererFromQueryString(),
+  renderer: common.getRendererFromQueryString(),
   // Improve user experience by loading tiles while dragging/zooming. Will make
   // zooming choppy on mobile or slow devices.
   loadTilesWhileInteracting: true,
@@ -39,11 +39,12 @@ var map = new ol.Map({
   })
 });
 
-$('#layer-select').change(function() {
-  var style = $(this).find(':selected').val();
-  var i, ii;
-  for (i = 0, ii = layers.length; i < ii; ++i) {
-    layers[i].setVisible(styles[i] == style);
+var select = document.getElementById('layer-select');
+function onChange() {
+  var style = select.value;
+  for (var i = 0, ii = layers.length; i < ii; ++i) {
+    layers[i].setVisible(styles[i] === style);
   }
-});
-$('#layer-select').trigger('change');
+}
+select.addEventListener('change', onChange);
+onChange();

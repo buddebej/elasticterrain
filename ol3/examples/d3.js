@@ -1,5 +1,4 @@
 // NOCOMPILE
-// this example uses d3 for which we don't have an externs file.
 goog.require('ol');
 goog.require('ol.Map');
 goog.require('ol.View');
@@ -21,7 +20,7 @@ var map = new ol.Map({
   ],
   target: 'map',
   view: new ol.View({
-    center: ol.proj.transform([-97, 38], 'EPSG:4326', 'EPSG:3857'),
+    center: ol.proj.fromLonLat([-97, 38]),
     zoom: 4
   })
 });
@@ -40,7 +39,7 @@ d3.json('data/topojson/us.json', function(error, us) {
    * @param {number} pixelRatio Pixel ratio.
    * @param {ol.Size} size Size.
    * @param {ol.proj.Projection} projection Projection.
-   * @return {HTMLCanvasElement}
+   * @return {HTMLCanvasElement} A canvas element.
    */
   var canvasFunction = function(extent, resolution, pixelRatio,
       size, projection) {

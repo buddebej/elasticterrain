@@ -329,6 +329,70 @@ describe('ol.format.WFS', function() {
   });
 
   describe('when writing out a Transaction request', function() {
+
+    it('does not create an update if no fid', function() {
+      var format = new ol.format.WFS();
+      var updateFeature = new ol.Feature();
+      updateFeature.setGeometryName('the_geom');
+      updateFeature.setGeometry(new ol.geom.MultiLineString([[
+        [-12279454, 6741885],
+        [-12064207, 6732101],
+        [-11941908, 6595126],
+        [-12240318, 6507071],
+        [-12416429, 6604910]
+      ]]));
+      var error = false;
+      try {
+        format.writeTransaction(null, [updateFeature], null, {
+          featureNS: 'http://foo',
+          featureType: 'FAULTS',
+          featurePrefix: 'foo',
+          gmlOptions: {srsName: 'EPSG:900913'}
+        });
+      } catch (e) {
+        error = true;
+      }
+      expect(error).to.be(true);
+    });
+  });
+
+  describe('when writing out a Transaction request', function() {
+    var text, filename = 'spec/ol/format/wfs/TransactionUpdateMultiGeoms.xml';
+    before(function(done) {
+      afterLoadText(filename, function(xml) {
+        text = xml;
+        done();
+      }
+      );
+    });
+
+    it('handles multiple geometries', function() {
+      var format = new ol.format.WFS();
+      var updateFeature = new ol.Feature();
+      updateFeature.setGeometryName('the_geom');
+      updateFeature.setGeometry(new ol.geom.MultiLineString([[
+        [-12279454, 6741885],
+        [-12064207, 6732101],
+        [-11941908, 6595126],
+        [-12240318, 6507071],
+        [-12416429, 6604910]
+      ]]));
+      updateFeature.set('geom2', new ol.geom.MultiLineString([[
+        [-12000000, 6700000],
+        [-12000001, 6700001],
+        [-12000002, 6700002]
+      ]]));
+      var serialized = format.writeTransaction([updateFeature], [], null, {
+        featureNS: 'http://foo',
+        featureType: 'FAULTS',
+        featurePrefix: 'foo',
+        gmlOptions: {srsName: 'EPSG:900913'}
+      });
+      expect(serialized).to.xmleql(ol.xml.parse(text));
+    });
+  });
+
+  describe('when writing out a Transaction request', function() {
     var text;
     before(function(done) {
       afterLoadText('spec/ol/format/wfs/TransactionMulti.xml', function(xml) {
@@ -396,6 +460,7 @@ describe('ol.format.WFS', function() {
     });
   });
 
+
   describe('when writing out a GetFeature request', function() {
     var text;
     before(function(done) {
@@ -444,6 +509,49 @@ describe('ol.format.WFS', function() {
       expect(feature.getId()).to.equal(fid);
       expect(feature.get('titel')).to.equal('Arnstadt');
       expect(feature.getGeometry()).to.be.an(ol.geom.Polygon);
+    });
+
+  });
+
+  describe('when parsing multiple feature types', function() {
+
+    var features;
+    before(function(done) {
+      afterLoadText('spec/ol/format/gml/multiple-typenames.xml', function(xml) {
+        try {
+          features = new ol.format.WFS({
+            featureNS: 'http://localhost:8080/official',
+            featureType: ['planet_osm_polygon', 'planet_osm_line']
+          }).readFeatures(xml);
+        } catch (e) {
+          done(e);
+        }
+        done();
+      });
+    });
+
+    it('reads all features', function() {
+      expect(features.length).to.be(12);
+    });
+
+  });
+
+  describe('when parsing multiple feature types', function() {
+
+    var features;
+    before(function(done) {
+      afterLoadText('spec/ol/format/gml/multiple-typenames.xml', function(xml) {
+        try {
+          features = new ol.format.WFS().readFeatures(xml);
+        } catch (e) {
+          done(e);
+        }
+        done();
+      });
+    });
+
+    it('reads all features with autoconfigure', function() {
+      expect(features.length).to.be(12);
     });
 
   });

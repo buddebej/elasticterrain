@@ -27,6 +27,15 @@ describe('ol.format.GeoJSON', function() {
     }
   };
 
+  var zeroIdGeoJSON = {
+    'type': 'Feature',
+    'id': 0,
+    'geometry': null,
+    'properties': {
+      'prop0': 'value0'
+    }
+  };
+
   var lineStringGeoJSON = {
     'type': 'Feature',
     'geometry': {
@@ -62,66 +71,64 @@ describe('ol.format.GeoJSON', function() {
 
   var data = {
     'type': 'FeatureCollection',
-    'features': [
-      {
-        'type': 'Feature',
-        'properties': {
-          'LINK_ID': 573730499,
-          'RP_TYPE': 14,
-          'RP_FUNC': 0,
-          'DIRECTION': 2,
-          'LOGKOD': '',
-          'CHANGED': '',
-          'USERID': '',
-          'ST_NAME': '',
-          'L_REFADDR': '',
-          'L_NREFADDR': '',
-          'R_REFADDR': '',
-          'R_NREFADDR': '',
-          'SPEED_CAT': '7',
-          'ZIPCODE': '59330',
-          'SHAPE_LEN': 46.3826
-        },
-        'geometry': {
-          'type': 'LineString',
-          'coordinates': [
-            [1549497.66985, 6403707.96],
-            [1549491.1, 6403710.1],
-            [1549488.03995, 6403716.7504],
-            [1549488.5401, 6403724.5504],
-            [1549494.37985, 6403733.54],
-            [1549499.6799, 6403738.0504],
-            [1549506.22, 6403739.2504]
-          ]
-        }
-      }, {
-        'type': 'Feature',
-        'properties': {
-          'LINK_ID': 30760556,
-          'RP_TYPE': 12,
-          'RP_FUNC': 1,
-          'DIRECTION': 0,
-          'LOGKOD': '',
-          'CHANGED': '',
-          'USERID': '',
-          'ST_NAME': 'BRUNNSGATAN',
-          'L_REFADDR': '24',
-          'L_NREFADDR': '16',
-          'R_REFADDR': '',
-          'R_NREFADDR': '',
-          'SPEED_CAT': '7',
-          'ZIPCODE': '59330',
-          'SHAPE_LEN': 70.3106
-        },
-        'geometry': {
-          'type': 'LineString',
-          'coordinates': [
-            [1549754.2769, 6403854.8024],
-            [1549728.45985, 6403920.2]
-          ]
-        }
+    'features': [{
+      'type': 'Feature',
+      'properties': {
+        'LINK_ID': 573730499,
+        'RP_TYPE': 14,
+        'RP_FUNC': 0,
+        'DIRECTION': 2,
+        'LOGKOD': '',
+        'CHANGED': '',
+        'USERID': '',
+        'ST_NAME': '',
+        'L_REFADDR': '',
+        'L_NREFADDR': '',
+        'R_REFADDR': '',
+        'R_NREFADDR': '',
+        'SPEED_CAT': '7',
+        'ZIPCODE': '59330',
+        'SHAPE_LEN': 46.3826
+      },
+      'geometry': {
+        'type': 'LineString',
+        'coordinates': [
+          [1549497.66985, 6403707.96],
+          [1549491.1, 6403710.1],
+          [1549488.03995, 6403716.7504],
+          [1549488.5401, 6403724.5504],
+          [1549494.37985, 6403733.54],
+          [1549499.6799, 6403738.0504],
+          [1549506.22, 6403739.2504]
+        ]
       }
-    ]
+    }, {
+      'type': 'Feature',
+      'properties': {
+        'LINK_ID': 30760556,
+        'RP_TYPE': 12,
+        'RP_FUNC': 1,
+        'DIRECTION': 0,
+        'LOGKOD': '',
+        'CHANGED': '',
+        'USERID': '',
+        'ST_NAME': 'BRUNNSGATAN',
+        'L_REFADDR': '24',
+        'L_NREFADDR': '16',
+        'R_REFADDR': '',
+        'R_NREFADDR': '',
+        'SPEED_CAT': '7',
+        'ZIPCODE': '59330',
+        'SHAPE_LEN': 70.3106
+      },
+      'geometry': {
+        'type': 'LineString',
+        'coordinates': [
+          [1549754.2769, 6403854.8024],
+          [1549728.45985, 6403920.2]
+        ]
+      }
+    }]
   };
 
   describe('#readFeature', function() {
@@ -164,6 +171,12 @@ describe('ol.format.GeoJSON', function() {
       var geometry = feature.getGeometry();
       expect(geometry).to.eql(null);
       expect(feature.get('prop0')).to.be('value0');
+    });
+
+    it('can read a feature with id equal to 0', function() {
+      var feature = format.readFeature(zeroIdGeoJSON);
+      expect(feature).to.be.an(ol.Feature);
+      expect(feature.getId()).to.be(0);
     });
 
     it('can read a feature collection', function() {
@@ -216,8 +229,8 @@ describe('ol.format.GeoJSON', function() {
   describe('#readFeatures', function() {
 
     it('parses feature collection', function() {
-      var str = JSON.stringify(data),
-          array = format.readFeatures(str);
+      var str = JSON.stringify(data);
+      var array = format.readFeatures(str);
 
       expect(array.length).to.be(2);
 
@@ -301,6 +314,7 @@ describe('ol.format.GeoJSON', function() {
       var obj = format.readGeometry(str);
       expect(obj).to.be.a(ol.geom.Point);
       expect(obj.getCoordinates()).to.eql([10, 20]);
+      expect(obj.getLayout()).to.eql(ol.geom.GeometryLayout.XY);
     });
 
     it('parses linestring', function() {
@@ -312,19 +326,33 @@ describe('ol.format.GeoJSON', function() {
       var obj = format.readGeometry(str);
       expect(obj).to.be.a(ol.geom.LineString);
       expect(obj.getCoordinates()).to.eql([[10, 20], [30, 40]]);
+      expect(obj.getLayout()).to.eql(ol.geom.GeometryLayout.XY);
+    });
+
+    it('parses XYZ linestring', function() {
+      var str = JSON.stringify({
+        type: 'LineString',
+        coordinates: [[10, 20, 1534], [30, 40, 1420]]
+      });
+
+      var obj = format.readGeometry(str);
+      expect(obj).to.be.a(ol.geom.LineString);
+      expect(obj.getLayout()).to.eql(ol.geom.GeometryLayout.XYZ);
+      expect(obj.getCoordinates()).to.eql([[10, 20, 1534], [30, 40, 1420]]);
     });
 
     it('parses polygon', function() {
-      var outer = [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]],
-          inner1 = [[1, 1], [2, 1], [2, 2], [1, 2], [1, 1]],
-          inner2 = [[8, 8], [9, 8], [9, 9], [8, 9], [8, 8]],
-          str = JSON.stringify({
-            type: 'Polygon',
-            coordinates: [outer, inner1, inner2]
-          });
+      var outer = [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]];
+      var inner1 = [[1, 1], [2, 1], [2, 2], [1, 2], [1, 1]];
+      var inner2 = [[8, 8], [9, 8], [9, 9], [8, 9], [8, 8]];
+      var str = JSON.stringify({
+        type: 'Polygon',
+        coordinates: [outer, inner1, inner2]
+      });
 
       var obj = format.readGeometry(str);
       expect(obj).to.be.a(ol.geom.Polygon);
+      expect(obj.getLayout()).to.eql(ol.geom.GeometryLayout.XY);
       var rings = obj.getLinearRings();
       expect(rings.length).to.be(3);
       expect(rings[0]).to.be.a(ol.geom.LinearRing);
@@ -346,7 +374,9 @@ describe('ol.format.GeoJSON', function() {
       var array = geometryCollection.getGeometries();
       expect(array.length).to.be(2);
       expect(array[0]).to.be.a(ol.geom.Point);
+      expect(array[0].getLayout()).to.eql(ol.geom.GeometryLayout.XY);
       expect(array[1]).to.be.a(ol.geom.LineString);
+      expect(array[1].getLayout()).to.eql(ol.geom.GeometryLayout.XY);
     });
 
   });
@@ -463,8 +493,8 @@ describe('ol.format.GeoJSON', function() {
   describe('#writeFeatures', function() {
 
     it('encodes feature collection', function() {
-      var str = JSON.stringify(data),
-          array = format.readFeatures(str);
+      var str = JSON.stringify(data);
+      var array = format.readFeatures(str);
       var geojson = format.writeFeaturesObject(array);
       var result = format.readFeatures(geojson);
       expect(array.length).to.equal(result.length);
@@ -483,8 +513,8 @@ describe('ol.format.GeoJSON', function() {
     });
 
     it('transforms and encodes feature collection', function() {
-      var str = JSON.stringify(data),
-          array = format.readFeatures(str);
+      var str = JSON.stringify(data);
+      var array = format.readFeatures(str);
       var geojson = format.writeFeatures(array, {
         featureProjection: 'EPSG:3857'
       });
@@ -507,6 +537,24 @@ describe('ol.format.GeoJSON', function() {
           expect(geojson.features[0].properties.mygeom).to.eql(undefined);
         });
 
+    it('writes out a feature without properties correctly', function() {
+      var feature = new ol.Feature(new ol.geom.Point([5, 10]));
+      var geojson = format.writeFeatureObject(feature);
+      expect(geojson.properties).to.eql(null);
+    });
+
+    it('writes out a feature without geometry correctly', function() {
+      var feature = new ol.Feature();
+      var geojson = format.writeFeatureObject(feature);
+      expect(geojson.geometry).to.eql(null);
+    });
+
+    it('writes out a feature with id equal to 0 correctly', function() {
+      var feature = new ol.Feature();
+      feature.setId(0);
+      var geojson = format.writeFeatureObject(feature);
+      expect(geojson.id).to.eql(0);
+    });
   });
 
   describe('#writeGeometry', function() {
@@ -526,13 +574,113 @@ describe('ol.format.GeoJSON', function() {
     });
 
     it('encodes polygon', function() {
-      var outer = [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]],
-          inner1 = [[1, 1], [2, 1], [2, 2], [1, 2], [1, 1]],
-          inner2 = [[8, 8], [9, 8], [9, 9], [8, 9], [8, 8]];
+      var outer = [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]];
+      var inner1 = [[1, 1], [2, 1], [2, 2], [1, 2], [1, 1]];
+      var inner2 = [[8, 8], [9, 8], [9, 9], [8, 9], [8, 8]];
       var polygon = new ol.geom.Polygon([outer, inner1, inner2]);
       var geojson = format.writeGeometry(polygon);
       expect(polygon.getCoordinates()).to.eql(
           format.readGeometry(geojson).getCoordinates());
+    });
+
+    it('maintains coordinate order by default', function() {
+
+      var cw = [[-180, -90], [-180, 90], [180, 90], [180, -90], [-180, -90]];
+      var ccw = [[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]];
+
+      var right = new ol.geom.Polygon([ccw, cw]);
+      var rightMulti = new ol.geom.MultiPolygon([[ccw, cw]]);
+      var left = new ol.geom.Polygon([cw, ccw]);
+      var leftMulti = new ol.geom.MultiPolygon([[cw, ccw]]);
+
+      var rightObj = {
+        type: 'Polygon',
+        coordinates: [ccw, cw]
+      };
+
+      var rightMultiObj = {
+        type: 'MultiPolygon',
+        coordinates: [[ccw, cw]]
+      };
+
+      var leftObj = {
+        type: 'Polygon',
+        coordinates: [cw, ccw]
+      };
+
+      var leftMultiObj = {
+        type: 'MultiPolygon',
+        coordinates: [[cw, ccw]]
+      };
+
+      expect(JSON.parse(format.writeGeometry(right))).to.eql(rightObj);
+      expect(
+          JSON.parse(format.writeGeometry(rightMulti))).to.eql(rightMultiObj);
+      expect(JSON.parse(format.writeGeometry(left))).to.eql(leftObj);
+      expect(JSON.parse(format.writeGeometry(leftMulti))).to.eql(leftMultiObj);
+
+    });
+
+    it('allows serializing following the right-hand rule', function() {
+
+      var cw = [[-180, -90], [-180, 90], [180, 90], [180, -90], [-180, -90]];
+      var ccw = [[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]];
+      var right = new ol.geom.Polygon([ccw, cw]);
+      var rightMulti = new ol.geom.MultiPolygon([[ccw, cw]]);
+      var left = new ol.geom.Polygon([cw, ccw]);
+      var leftMulti = new ol.geom.MultiPolygon([[cw, ccw]]);
+
+      var rightObj = {
+        type: 'Polygon',
+        coordinates: [ccw, cw]
+      };
+
+      var rightMultiObj = {
+        type: 'MultiPolygon',
+        coordinates: [[ccw, cw]]
+      };
+
+      var json = format.writeGeometry(right, {rightHanded: true});
+      expect(JSON.parse(json)).to.eql(rightObj);
+      json = format.writeGeometry(rightMulti, {rightHanded: true});
+      expect(JSON.parse(json)).to.eql(rightMultiObj);
+
+      json = format.writeGeometry(left, {rightHanded: true});
+      expect(JSON.parse(json)).to.eql(rightObj);
+      json = format.writeGeometry(leftMulti, {rightHanded: true});
+      expect(JSON.parse(json)).to.eql(rightMultiObj);
+
+    });
+
+    it('allows serializing following the left-hand rule', function() {
+
+      var cw = [[-180, -90], [-180, 90], [180, 90], [180, -90], [-180, -90]];
+      var ccw = [[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]];
+      var right = new ol.geom.Polygon([ccw, cw]);
+      var rightMulti = new ol.geom.MultiPolygon([[ccw, cw]]);
+      var left = new ol.geom.Polygon([cw, ccw]);
+      var leftMulti = new ol.geom.MultiPolygon([[cw, ccw]]);
+
+      var leftObj = {
+        type: 'Polygon',
+        coordinates: [cw, ccw]
+      };
+
+      var leftMultiObj = {
+        type: 'MultiPolygon',
+        coordinates: [[cw, ccw]]
+      };
+
+      var json = format.writeGeometry(right, {rightHanded: false});
+      expect(JSON.parse(json)).to.eql(leftObj);
+      json = format.writeGeometry(rightMulti, {rightHanded: false});
+      expect(JSON.parse(json)).to.eql(leftMultiObj);
+
+      json = format.writeGeometry(left, {rightHanded: false});
+      expect(JSON.parse(json)).to.eql(leftObj);
+      json = format.writeGeometry(leftMulti, {rightHanded: false});
+      expect(JSON.parse(json)).to.eql(leftMultiObj);
+
     });
 
     it('encodes geometry collection', function() {
@@ -570,7 +718,8 @@ describe('ol.format.GeoJSON', function() {
       var newPoint = format.readGeometry(geojson, {
         featureProjection: 'EPSG:3857'
       });
-      expect(point.getCoordinates()[0]).to.eql(newPoint.getCoordinates()[0]);
+      expect(point.getCoordinates()[0]).to.roughlyEqual(
+          newPoint.getCoordinates()[0], 1e-8);
       expect(
           Math.abs(point.getCoordinates()[1] - newPoint.getCoordinates()[1]))
           .to.be.lessThan(0.0000001);
@@ -585,9 +734,11 @@ goog.require('ol.Feature');
 goog.require('ol.extent');
 goog.require('ol.format.GeoJSON');
 goog.require('ol.geom.Circle');
+goog.require('ol.geom.GeometryLayout');
 goog.require('ol.geom.GeometryCollection');
 goog.require('ol.geom.LineString');
 goog.require('ol.geom.LinearRing');
+goog.require('ol.geom.MultiPolygon');
 goog.require('ol.geom.Point');
 goog.require('ol.geom.Polygon');
 goog.require('ol.proj');

@@ -1,5 +1,4 @@
 var fs = require('fs');
-var path = require('path');
 
 var async = require('async');
 var fse = require('fs-extra');
@@ -72,7 +71,7 @@ function getSymbols(patterns, callback) {
 /**
  * Generate a list of symbol names given a list of patterns.  Patterns may
  * include a * wildcard at the end of the string, in which case all symbol names
- * that start with the preceeding string will be matched (e.g 'foo.Bar#*' will
+ * that start with the preceding string will be matched (e.g 'foo.Bar#*' will
  * match all symbol names that start with 'foo.Bar#').
  *
  * @param {Array.<string>} patterns A list of symbol names to match.  Wildcards
@@ -175,7 +174,7 @@ function generateExports(symbols, namespace) {
   blocks.unshift(
       '/**\n' +
       ' * @fileoverview Custom exports file.\n' +
-      ' * @suppress {checkVars}\n' +
+      ' * @suppress {checkVars,extraRequire}\n' +
       ' */\n');
   return blocks.join('\n');
 }
