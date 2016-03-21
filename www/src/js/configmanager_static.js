@@ -25,4 +25,11 @@ var ConfigManagerStatic = function(viewer, controlBar, initShowCase) {
 
     // load all available configs and push to gui selectbox
     this.loadAllConfigs();
+
+    this.getConfig = function() {
+        var newConfig = JSON.stringify(viewer.config.get());
+        console.log(newConfig);
+    }.bind(this);
+
+    return {getConfig:this.getConfig};
 };
