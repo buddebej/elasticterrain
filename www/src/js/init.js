@@ -16,12 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+var configManager;
 $(document).ready(function() {
     'use strict';
     if (webgl_detect()) {
 
-        var viewer, controlBar, configManager, config, layers, initShowCase;
+        var viewer, controlBar, config, layers, initShowCase;
 
         config = new Config();
         layers = new Layers();

@@ -1,13 +1,14 @@
 goog.require('ol.Map');
 goog.require('ol.View');
 goog.require('ol.extent');
+goog.require('ol.format.KML');
 goog.require('ol.interaction');
 goog.require('ol.interaction.Select');
 goog.require('ol.layer.Tile');
 goog.require('ol.layer.Vector');
 goog.require('ol.source.Cluster');
-goog.require('ol.source.KML');
 goog.require('ol.source.Stamen');
+goog.require('ol.source.Vector');
 goog.require('ol.style.Circle');
 goog.require('ol.style.Fill');
 goog.require('ol.style.RegularShape');
@@ -55,7 +56,7 @@ function createEarthquakeStyle(feature) {
   });
 }
 
-var maxFeatureCount;
+var maxFeatureCount, vector;
 function calculateClusterInfo(resolution) {
   maxFeatureCount = 0;
   var features = vector.getSource().getFeatures();
@@ -64,7 +65,8 @@ function calculateClusterInfo(resolution) {
     feature = features[i];
     var originalFeatures = feature.get('features');
     var extent = ol.extent.createEmpty();
-    for (var j = 0, jj = originalFeatures.length; j < jj; ++j) {
+    var j, jj;
+    for (j = 0, jj = originalFeatures.length; j < jj; ++j) {
       ol.extent.extend(extent, originalFeatures[j].getGeometry().getExtent());
     }
     maxFeatureCount = Math.max(maxFeatureCount, jj);
@@ -83,7 +85,7 @@ function styleFunction(feature, resolution) {
   var style;
   var size = feature.get('features').length;
   if (size > 1) {
-    style = [new ol.style.Style({
+    style = new ol.style.Style({
       image: new ol.style.Circle({
         radius: feature.get('radius'),
         fill: new ol.style.Fill({
@@ -95,15 +97,15 @@ function styleFunction(feature, resolution) {
         fill: textFill,
         stroke: textStroke
       })
-    })];
+    });
   } else {
     var originalFeature = feature.get('features')[0];
-    style = [createEarthquakeStyle(originalFeature)];
+    style = createEarthquakeStyle(originalFeature);
   }
   return style;
 }
 
-function selectStyleFunction(feature, resolution) {
+function selectStyleFunction(feature) {
   var styles = [new ol.style.Style({
     image: new ol.style.Circle({
       radius: feature.get('radius'),
@@ -119,13 +121,14 @@ function selectStyleFunction(feature, resolution) {
   return styles;
 }
 
-var vector = new ol.layer.Vector({
+vector = new ol.layer.Vector({
   source: new ol.source.Cluster({
     distance: 40,
-    source: new ol.source.KML({
-      extractStyles: false,
-      projection: 'EPSG:3857',
-      url: 'data/kml/2012_Earthquakes_Mag5.kml'
+    source: new ol.source.Vector({
+      url: 'data/kml/2012_Earthquakes_Mag5.kml',
+      format: new ol.format.KML({
+        extractStyles: false
+      })
     })
   }),
   style: styleFunction

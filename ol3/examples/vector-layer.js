@@ -1,10 +1,10 @@
-goog.require('ol.FeatureOverlay');
 goog.require('ol.Map');
 goog.require('ol.View');
+goog.require('ol.format.GeoJSON');
 goog.require('ol.layer.Tile');
 goog.require('ol.layer.Vector');
-goog.require('ol.source.GeoJSON');
 goog.require('ol.source.MapQuest');
+goog.require('ol.source.Vector');
 goog.require('ol.style.Fill');
 goog.require('ol.style.Stroke');
 goog.require('ol.style.Style');
@@ -30,15 +30,15 @@ var style = new ol.style.Style({
     })
   })
 });
-var styles = [style];
+
 var vectorLayer = new ol.layer.Vector({
-  source: new ol.source.GeoJSON({
-    projection: 'EPSG:3857',
-    url: 'data/geojson/countries.geojson'
+  source: new ol.source.Vector({
+    url: 'data/geojson/countries.geojson',
+    format: new ol.format.GeoJSON()
   }),
   style: function(feature, resolution) {
     style.getText().setText(resolution < 5000 ? feature.get('name') : '');
-    return styles;
+    return style;
   }
 });
 
@@ -58,12 +58,13 @@ var map = new ol.Map({
 
 var highlightStyleCache = {};
 
-var featureOverlay = new ol.FeatureOverlay({
+var featureOverlay = new ol.layer.Vector({
+  source: new ol.source.Vector(),
   map: map,
   style: function(feature, resolution) {
     var text = resolution < 5000 ? feature.get('name') : '';
     if (!highlightStyleCache[text]) {
-      highlightStyleCache[text] = [new ol.style.Style({
+      highlightStyleCache[text] = new ol.style.Style({
         stroke: new ol.style.Stroke({
           color: '#f00',
           width: 1
@@ -82,7 +83,7 @@ var featureOverlay = new ol.FeatureOverlay({
             width: 3
           })
         })
-      })];
+      });
     }
     return highlightStyleCache[text];
   }
@@ -91,7 +92,7 @@ var featureOverlay = new ol.FeatureOverlay({
 var highlight;
 var displayFeatureInfo = function(pixel) {
 
-  var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+  var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
     return feature;
   });
 
@@ -104,17 +105,20 @@ var displayFeatureInfo = function(pixel) {
 
   if (feature !== highlight) {
     if (highlight) {
-      featureOverlay.removeFeature(highlight);
+      featureOverlay.getSource().removeFeature(highlight);
     }
     if (feature) {
-      featureOverlay.addFeature(feature);
+      featureOverlay.getSource().addFeature(feature);
     }
     highlight = feature;
   }
 
 };
 
-$(map.getViewport()).on('mousemove', function(evt) {
+map.on('pointermove', function(evt) {
+  if (evt.dragging) {
+    return;
+  }
   var pixel = map.getEventPixel(evt.originalEvent);
   displayFeatureInfo(pixel);
 });

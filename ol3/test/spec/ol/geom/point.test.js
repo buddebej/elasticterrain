@@ -5,8 +5,7 @@ describe('ol.geom.Point', function() {
 
   it('can be constructed with a null geometry', function() {
     expect(function() {
-      var point = new ol.geom.Point(null);
-      point = point; // suppress gjslint warning
+      return new ol.geom.Point(null);
     }).not.to.throwException();
   });
 
@@ -35,6 +34,14 @@ describe('ol.geom.Point', function() {
 
     it('has stride the expected stride', function() {
       expect(point.getStride()).to.be(2);
+    });
+
+    it('does not intersect non matching extent', function() {
+      expect(point.intersectsExtent([0, 0, 10, 0.5])).to.be(false);
+    });
+
+    it('does intersect it\'s extent', function() {
+      expect(point.intersectsExtent(point.getExtent())).to.be(true);
     });
 
   });
@@ -66,6 +73,14 @@ describe('ol.geom.Point', function() {
       expect(point.getStride()).to.be(3);
     });
 
+    it('does not intersect non matching extent', function() {
+      expect(point.intersectsExtent([0, 0, 10, 0.5])).to.be(false);
+    });
+
+    it('does intersect it\'s extent', function() {
+      expect(point.intersectsExtent(point.getExtent())).to.be(true);
+    });
+
   });
 
   describe('construct with 4D coordinates', function() {
@@ -93,6 +108,14 @@ describe('ol.geom.Point', function() {
 
     it('has the expected stride', function() {
       expect(point.getStride()).to.be(4);
+    });
+
+    it('does not intersect non matching extent', function() {
+      expect(point.intersectsExtent([0, 0, 10, 0.5])).to.be(false);
+    });
+
+    it('does intersect it\'s extent', function() {
+      expect(point.intersectsExtent(point.getExtent())).to.be(true);
     });
 
     describe('#getClosestPoint', function() {
@@ -171,4 +194,5 @@ describe('ol.geom.Point', function() {
 
 
 goog.require('ol.extent');
+goog.require('ol.geom.GeometryLayout');
 goog.require('ol.geom.Point');

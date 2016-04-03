@@ -1,9 +1,10 @@
 goog.require('ol.Map');
 goog.require('ol.View');
+goog.require('ol.format.KML');
 goog.require('ol.layer.Tile');
 goog.require('ol.layer.Vector');
-goog.require('ol.source.KML');
 goog.require('ol.source.Stamen');
+goog.require('ol.source.Vector');
 goog.require('ol.style.Circle');
 goog.require('ol.style.Fill');
 goog.require('ol.style.Stroke');
@@ -11,7 +12,7 @@ goog.require('ol.style.Style');
 
 
 var styleCache = {};
-var styleFunction = function(feature, resolution) {
+var styleFunction = function(feature) {
   // 2012_Earthquakes_Mag5.kml stores the magnitude of each earthquake in a
   // standards-violating <magnitude> tag in each Placemark.  We extract it from
   // the Placemark's name instead.
@@ -20,7 +21,7 @@ var styleFunction = function(feature, resolution) {
   var radius = 5 + 20 * (magnitude - 5);
   var style = styleCache[radius];
   if (!style) {
-    style = [new ol.style.Style({
+    style = new ol.style.Style({
       image: new ol.style.Circle({
         radius: radius,
         fill: new ol.style.Fill({
@@ -31,17 +32,18 @@ var styleFunction = function(feature, resolution) {
           width: 1
         })
       })
-    })];
+    });
     styleCache[radius] = style;
   }
   return style;
 };
 
 var vector = new ol.layer.Vector({
-  source: new ol.source.KML({
-    extractStyles: false,
-    projection: 'EPSG:3857',
-    url: 'data/kml/2012_Earthquakes_Mag5.kml'
+  source: new ol.source.Vector({
+    url: 'data/kml/2012_Earthquakes_Mag5.kml',
+    format: new ol.format.KML({
+      extractStyles: false
+    })
   }),
   style: styleFunction
 });
@@ -72,7 +74,7 @@ var displayFeatureInfo = function(pixel) {
     left: pixel[0] + 'px',
     top: (pixel[1] - 15) + 'px'
   });
-  var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+  var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
     return feature;
   });
   if (feature) {
@@ -85,7 +87,11 @@ var displayFeatureInfo = function(pixel) {
   }
 };
 
-$(map.getViewport()).on('mousemove', function(evt) {
+map.on('pointermove', function(evt) {
+  if (evt.dragging) {
+    info.tooltip('hide');
+    return;
+  }
   displayFeatureInfo(map.getEventPixel(evt.originalEvent));
 });
 

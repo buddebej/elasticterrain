@@ -23,7 +23,6 @@ var iconStyle = new ol.style.Style({
     anchor: [0.5, 46],
     anchorXUnits: 'fraction',
     anchorYUnits: 'pixels',
-    opacity: 0.75,
     src: 'data/icon.png'
   }))
 });
@@ -40,11 +39,13 @@ var vectorLayer = new ol.layer.Vector({
 
 var rasterLayer = new ol.layer.Tile({
   source: new ol.source.TileJSON({
-    url: 'http://api.tiles.mapbox.com/v3/mapbox.geography-class.jsonp'
+    url: 'http://api.tiles.mapbox.com/v3/mapbox.geography-class.json',
+    crossOrigin: ''
   })
 });
 
 var map = new ol.Map({
+  renderer: common.getRendererFromQueryString(),
   layers: [rasterLayer, vectorLayer],
   target: document.getElementById('map'),
   view: new ol.View({
@@ -65,13 +66,11 @@ map.addOverlay(popup);
 // display popup on click
 map.on('click', function(evt) {
   var feature = map.forEachFeatureAtPixel(evt.pixel,
-      function(feature, layer) {
+      function(feature) {
         return feature;
       });
   if (feature) {
-    var geometry = feature.getGeometry();
-    var coord = geometry.getCoordinates();
-    popup.setPosition(coord);
+    popup.setPosition(evt.coordinate);
     $(element).popover({
       'placement': 'top',
       'html': true,
@@ -84,14 +83,12 @@ map.on('click', function(evt) {
 });
 
 // change mouse cursor when over marker
-$(map.getViewport()).on('mousemove', function(e) {
-  var pixel = map.getEventPixel(e.originalEvent);
-  var hit = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-    return true;
-  });
-  if (hit) {
-    map.getTarget().style.cursor = 'pointer';
-  } else {
-    map.getTarget().style.cursor = '';
+map.on('pointermove', function(e) {
+  if (e.dragging) {
+    $(element).popover('destroy');
+    return;
   }
+  var pixel = map.getEventPixel(e.originalEvent);
+  var hit = map.hasFeatureAtPixel(pixel);
+  map.getTarget().style.cursor = hit ? 'pointer' : '';
 });

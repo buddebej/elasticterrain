@@ -5,21 +5,21 @@ goog.require('ol.layer.Tile');
 goog.require('ol.layer.Vector');
 goog.require('ol.proj');
 goog.require('ol.source.BingMaps');
-goog.require('ol.source.KML');
+goog.require('ol.source.Vector');
 
 var projection = ol.proj.get('EPSG:3857');
 
 var raster = new ol.layer.Tile({
   source: new ol.source.BingMaps({
     imagerySet: 'Aerial',
-    key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3'
+    key: 'AkGbxXx6tDWf1swIhPJyoAVp06H0s0gDTYslNWWHZ6RoPqMpB9ld5FY1WutX8UoF'
   })
 });
 
 var vector = new ol.layer.Vector({
-  source: new ol.source.KML({
-    projection: projection,
-    url: 'data/kml/2012-02-10.kml'
+  source: new ol.source.Vector({
+    url: 'data/kml/2012-02-10.kml',
+    format: new ol.format.KML()
   })
 });
 
@@ -35,7 +35,7 @@ var map = new ol.Map({
 
 var displayFeatureInfo = function(pixel) {
   var features = [];
-  map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+  map.forEachFeatureAtPixel(pixel, function(feature) {
     features.push(feature);
   });
   if (features.length > 0) {
@@ -52,7 +52,10 @@ var displayFeatureInfo = function(pixel) {
   }
 };
 
-$(map.getViewport()).on('mousemove', function(evt) {
+map.on('pointermove', function(evt) {
+  if (evt.dragging) {
+    return;
+  }
   var pixel = map.getEventPixel(evt.originalEvent);
   displayFeatureInfo(pixel);
 });
@@ -60,29 +63,3 @@ $(map.getViewport()).on('mousemove', function(evt) {
 map.on('click', function(evt) {
   displayFeatureInfo(evt.pixel);
 });
-
-var exportKMLElement = document.getElementById('export-kml');
-if ('download' in exportKMLElement) {
-  var vectorSource = vector.getSource();
-  exportKMLElement.addEventListener('click', function(e) {
-    if (!exportKMLElement.href) {
-      var features = [];
-      vectorSource.forEachFeature(function(feature) {
-        var clone = feature.clone();
-        clone.setId(feature.getId());  // clone does not set the id
-        clone.getGeometry().transform(projection, 'EPSG:4326');
-        features.push(clone);
-      });
-      var string = new ol.format.KML().writeFeatures(features);
-      var base64 = exampleNS.strToBase64(string);
-      exportKMLElement.href =
-          'data:application/vnd.google-earth.kml+xml;base64,' + base64;
-    }
-  }, false);
-} else {
-  var info = document.getElementById('no-download');
-  /**
-   * display error message
-   */
-  info.style.display = '';
-}

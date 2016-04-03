@@ -24,28 +24,29 @@ for (var i = 0; i < count; ++i) {
 }
 
 var styles = {
-  '10': [new ol.style.Style({
+  '10': new ol.style.Style({
     image: new ol.style.Circle({
       radius: 5,
       fill: new ol.style.Fill({color: '#666666'}),
       stroke: new ol.style.Stroke({color: '#bada55', width: 1})
     })
-  })],
-  '20': [new ol.style.Style({
+  }),
+  '20': new ol.style.Style({
     image: new ol.style.Circle({
       radius: 10,
       fill: new ol.style.Fill({color: '#666666'}),
       stroke: new ol.style.Stroke({color: '#bada55', width: 1})
     })
-  })]
+  })
 };
 
 var vectorSource = new ol.source.Vector({
-  features: features
+  features: features,
+  wrapX: false
 });
 var vector = new ol.layer.Vector({
   source: vectorSource,
-  style: function(feature, resolution) {
+  style: function(feature) {
     return styles[feature.get('size')];
   }
 });
@@ -83,7 +84,10 @@ var displaySnap = function(coordinate) {
   map.render();
 };
 
-$(map.getViewport()).on('mousemove', function(evt) {
+map.on('pointermove', function(evt) {
+  if (evt.dragging) {
+    return;
+  }
   var coordinate = map.getEventCoordinate(evt.originalEvent);
   displaySnap(coordinate);
 });
@@ -116,13 +120,12 @@ map.on('postcompose', function(evt) {
   }
 });
 
-$(map.getViewport()).on('mousemove', function(e) {
-  var pixel = map.getEventPixel(e.originalEvent);
-
-  var hit = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-    return true;
-  });
-
+map.on('pointermove', function(evt) {
+  if (evt.dragging) {
+    return;
+  }
+  var pixel = map.getEventPixel(evt.originalEvent);
+  var hit = map.hasFeatureAtPixel(pixel);
   if (hit) {
     map.getTarget().style.cursor = 'pointer';
   } else {

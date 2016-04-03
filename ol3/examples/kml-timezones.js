@@ -1,9 +1,10 @@
 goog.require('ol.Map');
 goog.require('ol.View');
+goog.require('ol.format.KML');
 goog.require('ol.layer.Tile');
 goog.require('ol.layer.Vector');
-goog.require('ol.source.KML');
 goog.require('ol.source.Stamen');
+goog.require('ol.source.Vector');
 goog.require('ol.style.Fill');
 goog.require('ol.style.Stroke');
 goog.require('ol.style.Style');
@@ -16,7 +17,7 @@ goog.require('ol.style.Style');
  * currently midnight would have an opacity of 0.  This doesn't account for
  * daylight savings, so don't use it to plan your vacation.
  */
-var styleFunction = function(feature, resolution) {
+var styleFunction = function(feature) {
   var offset = 0;
   var name = feature.get('name'); // e.g. GMT -08:30
   var match = name.match(/([\-+]\d{2}):(\d{2})$/);
@@ -34,21 +35,22 @@ var styleFunction = function(feature, resolution) {
     delta = 24 - delta;
   }
   var opacity = 0.75 * (1 - delta / 12);
-  return [new ol.style.Style({
+  return new ol.style.Style({
     fill: new ol.style.Fill({
       color: [0xff, 0xff, 0x33, opacity]
     }),
     stroke: new ol.style.Stroke({
       color: '#ffffff'
     })
-  })];
+  });
 };
 
 var vector = new ol.layer.Vector({
-  source: new ol.source.KML({
-    extractStyles: false,
-    projection: 'EPSG:3857',
-    url: 'data/kml/timezones.kml'
+  source: new ol.source.Vector({
+    url: 'data/kml/timezones.kml',
+    format: new ol.format.KML({
+      extractStyles: false
+    })
   }),
   style: styleFunction
 });
@@ -79,7 +81,7 @@ var displayFeatureInfo = function(pixel) {
     left: pixel[0] + 'px',
     top: (pixel[1] - 15) + 'px'
   });
-  var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+  var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
     return feature;
   });
   if (feature) {
@@ -92,7 +94,11 @@ var displayFeatureInfo = function(pixel) {
   }
 };
 
-$(map.getViewport()).on('mousemove', function(evt) {
+map.on('pointermove', function(evt) {
+  if (evt.dragging) {
+    info.tooltip('hide');
+    return;
+  }
   displayFeatureInfo(map.getEventPixel(evt.originalEvent));
 });
 

@@ -19,14 +19,14 @@ var map = new ol.Map({
     new ol.layer.Tile({
       source: new ol.source.TileJSON({
         url: 'http://api.tiles.mapbox.com/v3/' +
-            'mapbox.natural-earth-hypso-bathy.jsonp',
+            'mapbox.natural-earth-hypso-bathy.json',
         crossOrigin: 'anonymous'
       }),
       minResolution: 2000,
       maxResolution: 20000
     })
   ],
-  renderer: exampleNS.getRendererFromQueryString(),
+  renderer: common.getRendererFromQueryString(),
   target: 'map',
   controls: ol.control.defaults({
     attributionOptions: /** @type {olx.control.AttributionOptions} */ ({

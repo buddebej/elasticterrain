@@ -5,32 +5,24 @@ goog.require('ol.layer.Tile');
 goog.require('ol.layer.Vector');
 goog.require('ol.loadingstrategy');
 goog.require('ol.source.BingMaps');
-goog.require('ol.source.ServerVector');
+goog.require('ol.source.Vector');
 goog.require('ol.style.Stroke');
 goog.require('ol.style.Style');
-goog.require('ol.tilegrid.XYZ');
 
-var vectorSource = new ol.source.ServerVector({
+
+var vectorSource = new ol.source.Vector({
   format: new ol.format.GeoJSON(),
-  loader: function(extent, resolution, projection) {
-    var url = 'http://demo.boundlessgeo.com/geoserver/wfs?service=WFS&' +
+  url: function(extent) {
+    return 'http://demo.boundlessgeo.com/geoserver/wfs?service=WFS&' +
         'version=1.1.0&request=GetFeature&typename=osm:water_areas&' +
-        'outputFormat=text/javascript&format_options=callback:loadFeatures' +
-        '&srsname=EPSG:3857&bbox=' + extent.join(',') + ',EPSG:3857';
-    $.ajax({
-      url: url,
-      dataType: 'jsonp'
-    });
+        'outputFormat=application/json&srsname=EPSG:3857&' +
+        'bbox=' + extent.join(',') + ',EPSG:3857';
   },
-  strategy: ol.loadingstrategy.createTile(new ol.tilegrid.XYZ({
+  strategy: ol.loadingstrategy.tile(ol.tilegrid.createXYZ({
     maxZoom: 19
-  })),
-  projection: 'EPSG:3857'
+  }))
 });
 
-var loadFeatures = function(response) {
-  vectorSource.addFeatures(vectorSource.readFeatures(response));
-};
 
 var vector = new ol.layer.Vector({
   source: vectorSource,
@@ -45,7 +37,7 @@ var vector = new ol.layer.Vector({
 var raster = new ol.layer.Tile({
   source: new ol.source.BingMaps({
     imagerySet: 'Aerial',
-    key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3'
+    key: 'AkGbxXx6tDWf1swIhPJyoAVp06H0s0gDTYslNWWHZ6RoPqMpB9ld5FY1WutX8UoF'
   })
 });
 

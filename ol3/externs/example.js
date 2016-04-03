@@ -1,18 +1,19 @@
 /**
  * @type {Object}
  */
-var exampleNS;
+var common;
 
 
 
 /**
+ * @param {string=} opt_default Default renderer.
  * @return {string} Renderer type.
  */
-exampleNS.getRendererFromQueryString = function() {};
+common.getRendererFromQueryString = function(opt_default) {};
 
 
 /**
- * @param {string} str String.
- * @return {string} Base64 string.
+ * @return {function((ol.Feature|ol.render.Feature), number):
+ *     Array.<ol.style.Style>}
  */
-exampleNS.strToBase64 = function(str) {};
+var createMapboxStreetsV6Style = function() {};

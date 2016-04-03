@@ -133,6 +133,8 @@ describe('ol.format.KML', function() {
             '  <Placemark>' +
             '    <Point>' +
             '      <coordinates>1,2,3</coordinates>' +
+            '      <extrude>0</extrude>' +
+            '      <altitudeMode>absolute</altitudeMode>' +
             '    </Point>' +
             '  </Placemark>' +
             '</kml>';
@@ -143,6 +145,8 @@ describe('ol.format.KML', function() {
         var g = f.getGeometry();
         expect(g).to.be.an(ol.geom.Point);
         expect(g.getCoordinates()).to.eql([1, 2, 3]);
+        expect(g.get('extrude')).to.be(false);
+        expect(g.get('altitudeMode')).to.be('absolute');
       });
 
       it('can transform and read Point geometries', function() {
@@ -338,6 +342,8 @@ describe('ol.format.KML', function() {
             '  <Placemark>' +
             '    <LineString>' +
             '      <coordinates>1,2,3 4,5,6</coordinates>' +
+            '      <extrude>0</extrude>' +
+            '      <altitudeMode>absolute</altitudeMode>' +
             '    </LineString>' +
             '  </Placemark>' +
             '</kml>';
@@ -348,6 +354,8 @@ describe('ol.format.KML', function() {
         var g = f.getGeometry();
         expect(g).to.be.an(ol.geom.LineString);
         expect(g.getCoordinates()).to.eql([[1, 2, 3], [4, 5, 6]]);
+        expect(g.get('extrude')).to.be(false);
+        expect(g.get('altitudeMode')).to.be('absolute');
       });
 
       it('can write XY LineString geometries', function() {
@@ -540,6 +548,8 @@ describe('ol.format.KML', function() {
             '<kml xmlns="http://earth.google.com/kml/2.2">' +
             '  <Placemark>' +
             '    <Polygon>' +
+            '      <extrude>0</extrude>' +
+            '      <altitudeMode>absolute</altitudeMode>' +
             '      <outerBoundaryIs>' +
             '        <LinearRing>' +
             '          <coordinates>0,0,1 0,5,1 5,5,2 5,0,3</coordinates>' +
@@ -556,6 +566,8 @@ describe('ol.format.KML', function() {
         expect(g).to.be.an(ol.geom.Polygon);
         expect(g.getCoordinates()).to.eql(
             [[[0, 0, 1], [0, 5, 1], [5, 5, 2], [5, 0, 3]]]);
+        expect(g.get('extrude')).to.be(false);
+        expect(g.get('altitudeMode')).to.be('absolute');
       });
 
       it('can write XY Polygon geometries', function() {
@@ -742,9 +754,13 @@ describe('ol.format.KML', function() {
             '    <MultiGeometry>' +
             '      <Point>' +
             '        <coordinates>1,2,3</coordinates>' +
+            '        <extrude>0</extrude>' +
+            '        <altitudeMode>absolute</altitudeMode>' +
             '      </Point>' +
             '      <Point>' +
             '        <coordinates>4,5,6</coordinates>' +
+            '        <extrude>1</extrude>' +
+            '        <altitudeMode>clampToGround</altitudeMode>' +
             '      </Point>' +
             '    </MultiGeometry>' +
             '  </Placemark>' +
@@ -756,6 +772,14 @@ describe('ol.format.KML', function() {
         var g = f.getGeometry();
         expect(g).to.be.an(ol.geom.MultiPoint);
         expect(g.getCoordinates()).to.eql([[1, 2, 3], [4, 5, 6]]);
+        expect(g.get('extrude')).to.be.an('array');
+        expect(g.get('extrude')).to.have.length(2);
+        expect(g.get('extrude')[0]).to.be(false);
+        expect(g.get('extrude')[1]).to.be(true);
+        expect(g.get('altitudeMode')).to.be.an('array');
+        expect(g.get('altitudeMode')).to.have.length(2);
+        expect(g.get('altitudeMode')[0]).to.be('absolute');
+        expect(g.get('altitudeMode')[1]).to.be('clampToGround');
       });
 
       it('can write MultiPoint geometries', function() {
@@ -790,6 +814,8 @@ describe('ol.format.KML', function() {
             '  <Placemark>' +
             '    <MultiGeometry>' +
             '      <LineString>' +
+            '        <extrude>0</extrude>' +
+            '        <altitudeMode>absolute</altitudeMode>' +
             '        <coordinates>1,2,3 4,5,6</coordinates>' +
             '      </LineString>' +
             '      <LineString>' +
@@ -806,6 +832,14 @@ describe('ol.format.KML', function() {
         expect(g).to.be.an(ol.geom.MultiLineString);
         expect(g.getCoordinates()).to.eql(
             [[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]]);
+        expect(g.get('extrude')).to.be.an('array');
+        expect(g.get('extrude')).to.have.length(2);
+        expect(g.get('extrude')[0]).to.be(false);
+        expect(g.get('extrude')[1]).to.be(undefined);
+        expect(g.get('altitudeMode')).to.be.an('array');
+        expect(g.get('altitudeMode')).to.have.length(2);
+        expect(g.get('altitudeMode')[0]).to.be('absolute');
+        expect(g.get('altitudeMode')[1]).to.be(undefined);
       });
 
       it('can write MultiLineString geometries', function() {
@@ -840,6 +874,8 @@ describe('ol.format.KML', function() {
             '  <Placemark>' +
             '    <MultiGeometry>' +
             '      <Polygon>' +
+            '        <extrude>0</extrude>' +
+            '        <altitudeMode>absolute</altitudeMode>' +
             '        <outerBoundaryIs>' +
             '          <LinearRing>' +
             '            <coordinates>0,0,0 0,1,0 1,1,0 1,0,0</coordinates>' +
@@ -865,6 +901,14 @@ describe('ol.format.KML', function() {
         expect(g.getCoordinates()).to.eql(
             [[[[0, 0, 0], [0, 1, 0], [1, 1, 0], [1, 0, 0]]],
              [[[3, 0, 0], [3, 1, 0], [4, 1, 0], [4, 0, 0]]]]);
+        expect(g.get('extrude')).to.be.an('array');
+        expect(g.get('extrude')).to.have.length(2);
+        expect(g.get('extrude')[0]).to.be(false);
+        expect(g.get('extrude')[1]).to.be(undefined);
+        expect(g.get('altitudeMode')).to.be.an('array');
+        expect(g.get('altitudeMode')).to.have.length(2);
+        expect(g.get('altitudeMode')[0]).to.be('absolute');
+        expect(g.get('altitudeMode')[1]).to.be(undefined);
       });
 
       it('can write MultiPolygon geometries', function() {
@@ -919,7 +963,7 @@ describe('ol.format.KML', function() {
         expect(g.getGeometries()).to.be.empty();
       });
 
-      it('can read heterogenous GeometryCollection geometries', function() {
+      it('can read heterogeneous GeometryCollection geometries', function() {
         var text =
             '<kml xmlns="http://earth.google.com/kml/2.2">' +
             '  <Placemark>' +
@@ -1293,6 +1337,7 @@ describe('ol.format.KML', function() {
         expect(imageStyle.getOrigin()).to.be(null);
         expect(imageStyle.getRotation()).to.eql(0);
         expect(imageStyle.getSize()).to.be(null);
+        expect(imageStyle.getScale()).to.be(1);
         expect(style.getText()).to.be(ol.format.KML.DEFAULT_TEXT_STYLE_);
         expect(style.getZIndex()).to.be(undefined);
       });
@@ -1304,6 +1349,7 @@ describe('ol.format.KML', function() {
             '  <Placemark>' +
             '    <Style>' +
             '      <IconStyle>' +
+            '        <scale>3.0</scale>' +
             '        <Icon>' +
             '          <href>http://foo.png</href>' +
             '          <gx:x>24</gx:x>' +
@@ -1336,6 +1382,7 @@ describe('ol.format.KML', function() {
         expect(imageStyle.getAnchor()).to.eql([24, 36]);
         expect(imageStyle.getOrigin()).to.eql([24, 108]);
         expect(imageStyle.getRotation()).to.eql(0);
+        expect(imageStyle.getScale()).to.eql(Math.sqrt(3));
         expect(style.getText()).to.be(ol.format.KML.DEFAULT_TEXT_STYLE_);
         expect(style.getZIndex()).to.be(undefined);
       });
@@ -1455,7 +1502,6 @@ describe('ol.format.KML', function() {
             '  </Placemark>' +
             '</kml>';
         var fs = format.readFeatures(text);
-
 
 
         expect(fs).to.have.length(1);
@@ -1589,6 +1635,104 @@ describe('ol.format.KML', function() {
             expect(style.getZIndex()).to.be(undefined);
           });
 
+      it('can create text style for named point placemarks', function() {
+        var text =
+            '<kml xmlns="http://www.opengis.net/kml/2.2"' +
+            ' xmlns:gx="http://www.google.com/kml/ext/2.2"' +
+            ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
+            ' xsi:schemaLocation="http://www.opengis.net/kml/2.2' +
+            ' https://developers.google.com/kml/schema/kml22gx.xsd">' +
+            '  <Style id="sh_ylw-pushpin">' +
+            '    <IconStyle>' +
+            '      <scale>0.3</scale>' +
+            '      <Icon>' +
+            '        <href>http://maps.google.com/mapfiles/kml/pushpin/' +
+            'ylw-pushpin.png</href>' +
+            '      </Icon>' +
+            '      <hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>' +
+            '    </IconStyle>' +
+            '  </Style>' +
+            '  <StyleMap id="msn_ylw-pushpin0">' +
+            '    <Pair>' +
+            '      <key>normal</key>' +
+            '      <styleUrl>#sn_ylw-pushpin</styleUrl>' +
+            '    </Pair>' +
+            '    <Pair>' +
+            '      <key>highlight</key>' +
+            '      <styleUrl>#sh_ylw-pushpin</styleUrl>' +
+            '    </Pair>' +
+            '  </StyleMap>' +
+            '  <Placemark>' +
+            '    <name>Test</name>' +
+            '    <styleUrl>#msn_ylw-pushpin0</styleUrl>' +
+            '    <Point>' +
+            '      <coordinates>1,2</coordinates>' +
+            '    </Point>' +
+            '  </Placemark>' +
+            '</kml>';
+        var fs = format.readFeatures(text);
+        expect(fs).to.have.length(1);
+        var f = fs[0];
+        expect(f).to.be.an(ol.Feature);
+        var styleFunction = f.getStyleFunction();
+        expect(styleFunction).not.to.be(undefined);
+        var styleArray = styleFunction.call(f, 0);
+        expect(styleArray).to.be.an(Array);
+        expect(styleArray).to.have.length(2);
+        var style = styleArray[1];
+        expect(style).to.be.an(ol.style.Style);
+        expect(style.getText().getText()).to.eql(f.getProperties()['name']);
+      });
+
+      it('can create text style for named point placemarks', function() {
+        var text =
+            '<kml xmlns="http://www.opengis.net/kml/2.2"' +
+            ' xmlns:gx="http://www.google.com/kml/ext/2.2"' +
+            ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
+            ' xsi:schemaLocation="http://www.opengis.net/kml/2.2' +
+            ' https://developers.google.com/kml/schema/kml22gx.xsd">' +
+            '  <Style id="sh_ylw-pushpin">' +
+            '    <IconStyle>' +
+            '      <scale>0.3</scale>' +
+            '      <Icon>' +
+            '        <href>http://maps.google.com/mapfiles/kml/pushpin/' +
+            'ylw-pushpin.png</href>' +
+            '      </Icon>' +
+            '      <hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>' +
+            '    </IconStyle>' +
+            '  </Style>' +
+            '  <StyleMap id="msn_ylw-pushpin0">' +
+            '    <Pair>' +
+            '      <key>normal</key>' +
+            '      <styleUrl>#sn_ylw-pushpin</styleUrl>' +
+            '    </Pair>' +
+            '    <Pair>' +
+            '      <key>highlight</key>' +
+            '      <styleUrl>#sh_ylw-pushpin</styleUrl>' +
+            '    </Pair>' +
+            '  </StyleMap>' +
+            '  <Placemark>' +
+            '    <name>Test</name>' +
+            '    <styleUrl>#msn_ylw-pushpin0</styleUrl>' +
+            '    <Point>' +
+            '      <coordinates>1,2</coordinates>' +
+            '    </Point>' +
+            '  </Placemark>' +
+            '</kml>';
+        var fs = format.readFeatures(text);
+        expect(fs).to.have.length(1);
+        var f = fs[0];
+        expect(f).to.be.an(ol.Feature);
+        var styleFunction = f.getStyleFunction();
+        expect(styleFunction).not.to.be(undefined);
+        var styleArray = styleFunction.call(f, 0);
+        expect(styleArray).to.be.an(Array);
+        expect(styleArray).to.have.length(2);
+        var style = styleArray[1];
+        expect(style).to.be.an(ol.style.Style);
+        expect(style.getText().getText()).to.eql(f.getProperties()['name']);
+      });
+
       it('can write an feature\'s icon style', function() {
         var style = new ol.style.Style({
           image: new ol.style.Icon({
@@ -1631,6 +1775,54 @@ describe('ol.format.KML', function() {
             '        <hotSpot x="12" y="12" xunits="pixels" ' +
             '                 yunits="pixels"/>' +
             '      </IconStyle>' +
+            '    </Style>' +
+            '  </Placemark>' +
+            '</kml>';
+        expect(node).to.xmleql(ol.xml.parse(text));
+      });
+
+      it('does not write styles when writeStyles option is false', function() {
+        format = new ol.format.KML({writeStyles: false});
+        var style = new ol.style.Style({
+          image: new ol.style.Icon({
+            src: 'http://foo.png'
+          })
+        });
+        var feature = new ol.Feature();
+        feature.setStyle([style]);
+        var node = format.writeFeaturesNode([feature]);
+        var text =
+            '<kml xmlns="http://www.opengis.net/kml/2.2"' +
+            ' xmlns:gx="http://www.google.com/kml/ext/2.2"' +
+            ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
+            ' xsi:schemaLocation="http://www.opengis.net/kml/2.2' +
+            ' https://developers.google.com/kml/schema/kml22gx.xsd">' +
+            '  <Placemark>' +
+            '  </Placemark>' +
+            '</kml>';
+        expect(node).to.xmleql(ol.xml.parse(text));
+      });
+
+      it('skips image styles that are not icon styles', function() {
+        var style = new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: 4,
+            fill: new ol.style.Fill({
+              color: 'rgb(12, 34, 223)'
+            })
+          })
+        });
+        var feature = new ol.Feature();
+        feature.setStyle([style]);
+        var node = format.writeFeaturesNode([feature]);
+        var text =
+            '<kml xmlns="http://www.opengis.net/kml/2.2"' +
+            ' xmlns:gx="http://www.google.com/kml/ext/2.2"' +
+            ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
+            ' xsi:schemaLocation="http://www.opengis.net/kml/2.2' +
+            ' https://developers.google.com/kml/schema/kml22gx.xsd">' +
+            '  <Placemark>' +
+            '    <Style>' +
             '    </Style>' +
             '  </Placemark>' +
             '</kml>';
@@ -1722,6 +1914,43 @@ describe('ol.format.KML', function() {
             '</kml>';
         expect(node).to.xmleql(ol.xml.parse(text));
       });
+
+      it('can write multiple features with Style', function() {
+        var style = new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: 'rgba(12, 34, 223, 0.7)'
+          })
+        });
+        var feature = new ol.Feature();
+        feature.setStyle(style);
+        var feature2 = new ol.Feature();
+        feature2.setStyle(style);
+        var node = format.writeFeaturesNode([feature, feature2]);
+        var text =
+            '<kml xmlns="http://www.opengis.net/kml/2.2"' +
+            ' xmlns:gx="http://www.google.com/kml/ext/2.2"' +
+            ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' +
+            ' xsi:schemaLocation="http://www.opengis.net/kml/2.2' +
+            ' https://developers.google.com/kml/schema/kml22gx.xsd">' +
+            '  <Document>' +
+            '    <Placemark>' +
+            '      <Style>' +
+            '        <PolyStyle>' +
+            '          <color>b2df220c</color>' +
+            '        </PolyStyle>' +
+            '      </Style>' +
+            '    </Placemark>' +
+            '    <Placemark>' +
+            '      <Style>' +
+            '        <PolyStyle>' +
+            '          <color>b2df220c</color>' +
+            '        </PolyStyle>' +
+            '      </Style>' +
+            '    </Placemark>' +
+            '  </Document>' +
+            '</kml>';
+        expect(node).to.xmleql(ol.xml.parse(text));
+      });
     });
 
     describe('style maps', function() {
@@ -1766,7 +1995,7 @@ describe('ol.format.KML', function() {
             '    <Placemark>' +
             '      <StyleMap>' +
             '        <Pair>' +
-            '          <key>highlighted</key>' +
+            '          <key>highlight</key>' +
             '          <Style>' +
             '            <PolyStyle>' +
             '              <color>00000000</color>' +
@@ -1807,7 +2036,7 @@ describe('ol.format.KML', function() {
             '          </Style>' +
             '        </Pair>' +
             '        <Pair>' +
-            '          <key>highlighted</key>' +
+            '          <key>highlight</key>' +
             '          <Style>' +
             '            <PolyStyle>' +
             '              <color>ffffffff</color>' +
@@ -1867,7 +2096,7 @@ describe('ol.format.KML', function() {
         expect(s.getFill().getColor()).to.eql([0, 0, 0, 0]);
       });
 
-      it('ignores highlighted styleUrls', function() {
+      it('ignores highlight styleUrls', function() {
         var text =
             '<kml xmlns="http://earth.google.com/kml/2.2">' +
             '  <Document>' +
@@ -1879,7 +2108,7 @@ describe('ol.format.KML', function() {
             '    <Placemark>' +
             '      <StyleMap>' +
             '        <Pair>' +
-            '          <key>highlighted</key>' +
+            '          <key>highlight</key>' +
             '          <styleUrl>#foo</styleUrl>' +
             '        </Pair>' +
             '      </StyleMap>' +
@@ -2052,6 +2281,19 @@ describe('ol.format.KML', function() {
             '<Document xmlns="http://earth.google.com/kml/2.2">' +
             '  <Placemark>' +
             '  </Placemark>' +
+            '</Document>';
+        var fs = format.readFeatures(text);
+        expect(fs).to.have.length(1);
+        expect(fs[0]).to.be.an(ol.Feature);
+      });
+
+      it('can read a single feature from nested Document', function() {
+        var text =
+            '<Document xmlns="http://earth.google.com/kml/2.2">' +
+            '  <Document>' +
+            '    <Placemark>' +
+            '    </Placemark>' +
+            '  </Document>' +
             '</Document>';
         var fs = format.readFeatures(text);
         expect(fs).to.have.length(1);
@@ -2407,7 +2649,7 @@ describe('ol.format.KML', function() {
       expect(features).to.have.length(50);
     });
 
-    it('creates features with heterogenous geometry collections', function() {
+    it('creates features with heterogeneous geometry collections', function() {
       // FIXME decide if we should instead create features with multiple geoms
       var feature = features[0];
       expect(feature).to.be.an(ol.Feature);
@@ -2416,7 +2658,7 @@ describe('ol.format.KML', function() {
     });
 
     it('creates a Point and a MultiPolygon for Alaska', function() {
-      var alaska = goog.array.find(features, function(feature) {
+      var alaska = ol.array.find(features, function(feature) {
         return feature.get('name') === 'Alaska';
       });
       expect(alaska).to.be.an(ol.Feature);
@@ -2426,6 +2668,31 @@ describe('ol.format.KML', function() {
       expect(components).to.have.length(2);
       expect(components[0]).to.be.an(ol.geom.Point);
       expect(components[1]).to.be.an(ol.geom.MultiPolygon);
+    });
+
+  });
+
+  describe('#JSONExport', function() {
+
+    var features;
+    before(function(done) {
+      afterLoadText('spec/ol/format/kml/style.kml', function(xml) {
+        try {
+          features = format.readFeatures(xml);
+        } catch (e) {
+          done(e);
+        }
+        done();
+      });
+    });
+
+    it('feature must not have a properties property', function() {
+      var geojsonFormat = new ol.format.GeoJSON();
+      features.forEach(function(feature) {
+        var geojsonFeature = geojsonFormat.writeFeatureObject(feature);
+        expect(geojsonFeature.properties).to.be(null);
+        JSON.stringify(geojsonFeature);
+      });
     });
 
   });
@@ -2489,14 +2756,55 @@ describe('ol.format.KML', function() {
 
   });
 
+  describe('#readNetworkLinks', function() {
+    it('returns empty array if no network links found', function() {
+      var text =
+          '<kml xmlns="http://www.opengis.net/kml/2.2">' +
+          '  <Document>' +
+          '  </Document>' +
+          '</kml>';
+      var nl = format.readNetworkLinks(text);
+      expect(nl).to.have.length(0);
+    });
+
+    it('returns an array of network links', function() {
+      var text =
+          '<kml xmlns="http://www.opengis.net/kml/2.2">' +
+          '  <Document>' +
+          '    <NetworkLink>' +
+          '      <name>bar</name>' +
+          '      <Link>' +
+          '        <href>bar/bar.kml</href>' +
+          '      </Link>' +
+          '    </NetworkLink>' +
+          '  </Document>' +
+          '  <Folder>' +
+          '    <NetworkLink>' +
+          '      <Link>' +
+          '        <href>http://foo.com/foo.kml</href>' +
+          '      </Link>' +
+          '    </NetworkLink>' +
+          '  </Folder>' +
+          '</kml>';
+      var nl = format.readNetworkLinks(text);
+      expect(nl).to.have.length(2);
+      expect(nl[0].name).to.be('bar');
+      expect(nl[0].href.replace(window.location.href, '')).to.be('bar/bar.kml');
+      expect(nl[1].href).to.be('http://foo.com/foo.kml');
+    });
+
+  });
+
 });
 
 
-goog.require('goog.array');
+goog.require('ol.array');
 goog.require('goog.dom.xml');
 goog.require('ol.Feature');
+goog.require('ol.format.GeoJSON');
 goog.require('ol.format.KML');
 goog.require('ol.geom.GeometryCollection');
+goog.require('ol.geom.GeometryLayout');
 goog.require('ol.geom.LineString');
 goog.require('ol.geom.LinearRing');
 goog.require('ol.geom.MultiLineString');
@@ -2504,6 +2812,7 @@ goog.require('ol.geom.MultiPoint');
 goog.require('ol.geom.MultiPolygon');
 goog.require('ol.geom.Point');
 goog.require('ol.geom.Polygon');
+goog.require('ol.style.Circle');
 goog.require('ol.style.Fill');
 goog.require('ol.style.Icon');
 goog.require('ol.style.IconOrigin');

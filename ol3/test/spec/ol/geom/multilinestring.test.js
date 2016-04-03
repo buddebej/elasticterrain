@@ -5,8 +5,7 @@ describe('ol.geom.MultiLineString', function() {
 
   it('can be constructed with a null geometry', function() {
     expect(function() {
-      var multiLineString = new ol.geom.MultiLineString(null);
-      multiLineString = multiLineString; // suppress gjslint warning
+      return new ol.geom.MultiLineString(null);
     }).not.to.throwException();
   });
 
@@ -84,6 +83,18 @@ describe('ol.geom.MultiLineString', function() {
 
       it('returns the expected result', function() {
         expect(multiLineString.getFlatMidpoints()).to.eql([2, 3, 6, 7]);
+      });
+
+    });
+
+    describe('#intersectsExtent()', function() {
+
+      it('returns true for intersecting part of lineString', function() {
+        expect(multiLineString.intersectsExtent([1, 2, 2, 3])).to.be(true);
+      });
+
+      it('returns false for non-matching extent within own extent', function() {
+        expect(multiLineString.intersectsExtent([1, 7, 2, 8])).to.be(false);
       });
 
     });
@@ -322,5 +333,6 @@ describe('ol.geom.MultiLineString', function() {
 
 
 goog.require('ol.extent');
+goog.require('ol.geom.GeometryLayout');
 goog.require('ol.geom.LineString');
 goog.require('ol.geom.MultiLineString');
