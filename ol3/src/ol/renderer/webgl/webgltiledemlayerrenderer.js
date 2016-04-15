@@ -861,8 +861,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                     gl.uniform1i(this.locations_.u_blendingMethod, tileDemLayer.getOverlayTiles()['hybrid'][1]);
                 }
 
-                // u_minMaxFade: animated minMax for animated color transitions
-                gl.uniform2f(this.locations_.u_minMaxFade, this.animatedMinElevation, this.animatedMaxElevation);
+                // u_animatedMinMax: animated minMax for animated color transitions
+                gl.uniform2f(this.locations_.u_animatedMinMax, this.animatedMinElevation, this.animatedMaxElevation);
 
                 // u_dynamicColors: dynamicColors flag
                 gl.uniform1i(this.locations_.u_dynamicColors, tileDemLayer.getDynamicColors() === true ? 1 : 0);
@@ -1051,9 +1051,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                                 tile = tilesToDraw[tileKey];
 
                                 // original zoom level of current tile for reverse z-ordering to avoid artifacts 
-                                gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom + 1)));
+                                gl.uniform1f(this.locations_.u_viewZoom, 1.0 - ((zs[i] + 1) / (this.maxZoom + 1)));
                                 // zoomlevel of this tile 
-                                gl.uniform1f(this.locations_.u_zoom, zs[i]);
+                                gl.uniform1f(this.locations_.u_tileZoom, zs[i]);
 
                                 // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
                                 gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, zs[i]));
@@ -1114,9 +1114,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                         tile = tilesToDraw[tileKey];
 
                         // original zoom level of current tile for reverse z-ordering to avoid artifacts 
-                        gl.uniform1f(this.locations_.u_z, 1.0 - ((zs[i] + 1) / (this.maxZoom + 1)));
+                        gl.uniform1f(this.locations_.u_viewZoom, 1.0 - ((zs[i] + 1) / (this.maxZoom + 1)));
                         // zoomlevel of this tile 
-                        gl.uniform1f(this.locations_.u_zoom, zs[i]);
+                        gl.uniform1f(this.locations_.u_tileZoom, zs[i]);
 
                         // u_tileSizeM: estimated size of one tile in meter at the equator (dependend of current zoomlevel z)
                         gl.uniform1f(this.locations_.u_tileSizeM, 40000000.0 / Math.pow(2.0, zs[i]));

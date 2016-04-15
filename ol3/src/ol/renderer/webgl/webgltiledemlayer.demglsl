@@ -31,13 +31,13 @@ uniform float u_tileSizeM;
 varying vec2 v_texCoord;
 
 // zoomlevel of current tile
-uniform float u_zoom;   
+uniform float u_tileZoom;   
 
 // decodes input data elevation value using texture colors from two channels combined
 float decodeElevation(in vec2 colorChannels) {
     // use float decoding for higher zoomlevels
     float decimalDecode = 1.0;
-    if(u_zoom > 12.0){
+    if(u_tileZoom > 12.0){
         decimalDecode = 0.01;
     }
     float elevationM = ((colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0)*decimalDecode;    
@@ -62,7 +62,7 @@ uniform vec2 u_minMax;
 uniform vec4 u_tileOffset;
 
 // current depth depends on zoomlevel
-uniform float u_z;
+uniform float u_viewZoom;
 
 void main(void) { 
 
@@ -87,7 +87,7 @@ void main(void) {
     float zOrderElevation = absElevation/100.0;
  
     gl_Position = vec4((a_position+(nElevation * u_scaleFactor.xy) / u_tileSizeM) * u_tileOffset.xy + u_tileOffset.zw, 
-                        u_z-(zOrderElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
+                        u_viewZoom-(zOrderElevation/u_tileSizeM), // depth sort rendered tiles depending on their zoomlevel
                         1.0);
 }
 
@@ -134,7 +134,7 @@ void main(void) {
 
         // use different tile border decoding for zoomlevel 12 data
         // to fix this, tiles for zoomlevel 12 have to be recomputed (a long and boring process)
-        if(u_zoom == 12.0){
+        if(u_tileZoom == 12.0){
             if(atEastBorder){ // eastern border of tile                
                 texCoord.x = texCoord.x - CELLSIZE;
             }
@@ -167,7 +167,7 @@ void main(void) {
 
         // use different tile border decoding for zoomlevel 12 data
         // to fix this, tiles for zoomlevel 12 have to be recomputed (a long and boring process) 
-        if(u_zoom != 12.0){
+        if(u_tileZoom != 12.0){
             // display tile borders properly: use alternative decoding
             // last eight rows of blue channel contain neighbor values
             if(atNorthBorder){ 
@@ -312,7 +312,7 @@ uniform vec2 u_colorScale;
 uniform bool u_dynamicColors;
 
 // absolute minMax Elevations in current extent, animated on transition
-uniform vec2 u_minMaxFade;
+uniform vec2 u_animatedMinMax;
 
 vec4 getFragColor(in float CELLSIZE, in float absElevation, in vec2 texCoord){
     
@@ -325,20 +325,20 @@ vec4 getFragColor(in float CELLSIZE, in float absElevation, in vec2 texCoord){
         // dynamic and animated colors
         if(absElevation > 0.0){
             // location is hypsometry
-            if(u_minMaxFade.x > 0.0){
+            if(u_animatedMinMax.x > 0.0){
                 // only hypsometry is visible
-                relativeElevation = (absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x);
+                relativeElevation = (absElevation-u_animatedMinMax.x)/(u_animatedMinMax.y-u_animatedMinMax.x);
             } else {
-                relativeElevation = absElevation/u_minMaxFade.y;
+                relativeElevation = absElevation/u_animatedMinMax.y;
             }
             fragColor = abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation)));
         } else {
             // location is bathymetry
-            if(u_minMaxFade.y < 0.0){
+            if(u_animatedMinMax.y < 0.0){
                 // only bathymatry is visible
-                relativeElevation = 1.0 - abs((absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x));
+                relativeElevation = 1.0 - abs((absElevation-u_animatedMinMax.x)/(u_animatedMinMax.y-u_animatedMinMax.x));
             } else {
-                relativeElevation = abs(absElevation/u_minMaxFade.x);
+                relativeElevation = abs(absElevation/u_animatedMinMax.x);
             }
             fragColor = abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation)));
         }
@@ -441,7 +441,7 @@ uniform bool u_dynamicColors;
 uniform int u_blendingMethod;
 
 // animated minMax Elevations in current Extent 
-uniform vec2 u_minMaxFade;
+uniform vec2 u_animatedMinMax;
 
 vec4 doBlend(in vec4 baseMap, in vec4 hypso, in float ff){
         vec4 blended;
@@ -478,17 +478,17 @@ vec4 getFragColor(in float CELLSIZE, in float absElevation, in vec2 texCoord){
 
             // dynamic and animated colors
             if(absElevation > 0.1){
-                if(u_minMaxFade.x > 0.1){
-                    relativeElevation = (absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x);
+                if(u_animatedMinMax.x > 0.1){
+                    relativeElevation = (absElevation-u_animatedMinMax.x)/(u_animatedMinMax.y-u_animatedMinMax.x);
                 } else {
-                    relativeElevation = absElevation/u_minMaxFade.y;
+                    relativeElevation = absElevation/u_animatedMinMax.y;
                 }
                 fragColor = doBlend(aerial,abs(texture2D(u_hypsoColors,vec2(0.5,relativeElevation))), 0.4);
             } else {
-                if(u_minMaxFade.y < 0.1){
-                    relativeElevation = 1.0 - abs((absElevation-u_minMaxFade.x)/(u_minMaxFade.y-u_minMaxFade.x));
+                if(u_animatedMinMax.y < 0.1){
+                    relativeElevation = 1.0 - abs((absElevation-u_animatedMinMax.x)/(u_animatedMinMax.y-u_animatedMinMax.x));
                 } else {
-                    relativeElevation = abs(absElevation/u_minMaxFade.x);
+                    relativeElevation = abs(absElevation/u_animatedMinMax.x);
                 }
                 fragColor = doBlend(aerial,abs(texture2D(u_bathyColors,vec2(0.5,relativeElevation))), 0.4);
             }
