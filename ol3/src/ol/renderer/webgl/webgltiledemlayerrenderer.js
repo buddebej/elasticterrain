@@ -864,6 +864,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
                 // u_animatedMinMax: animated minMax for animated color transitions
                 gl.uniform2f(this.locations_.u_animatedMinMax, this.animatedMinElevation, this.animatedMaxElevation);
 
+                // callback to gui slider for hypsocolors
+                tileDemLayer.getOnMinMaxChange()(this.animatedMaxElevation, this.animatedMinElevation);
+                
                 // u_dynamicColors: dynamicColors flag
                 gl.uniform1i(this.locations_.u_dynamicColors, tileDemLayer.getDynamicColors() === true ? 1 : 0);
 
@@ -1161,9 +1164,8 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
 
                 if (!minMaxAnimationFinished) {
                     this.animatedMaxElevation = this.animatedMaxElevation + this.deltaMax / this.minMaxAnimationSpeed;
-                }
-                if (!minMaxAnimationFinished) {
                     this.animatedMinElevation = this.animatedMinElevation + this.deltaMin / this.minMaxAnimationSpeed;
+
                 }
 
                 this.renderedTileRange = null;

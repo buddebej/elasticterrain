@@ -11,6 +11,7 @@ ol.layer.TileDemProperty = {
   AMBIENT_LIGHT: 'ambientLight',
   COLOR_RAMP: 'colorRamp',
   DYNAMIC_COLORS: 'dynamicColors',
+  ON_MINMAX_CHANGE: 'onMinMaxChange',  
   COLOR_SCALE: 'colorScale',  
   STACKED_CARDBOARD: 'stackedCardboard',
   SHADING : 'shading',
@@ -60,6 +61,7 @@ ol.layer.TileDem = function(opt_options) {
   this.setAmbientLight(goog.isDef(options.ambientLight) ? options.ambientLight : 0.0);
   this.setColorRamp(goog.isDef(options.colorRamp) ? options.colorRamp : 0);  
   this.setDynamicColors(goog.isDef(options.dynamicColors) ? options.dynamicColors : true);    
+  this.setOnMinMaxChange(goog.isDef(options.onMinMaxChange) ? options.onMinMaxChange : function(){});    
   this.setColorScale(goog.isDef(options.colorScale) ? options.colorScale : [0.0,1.0]);  
   this.setStackedCardboard(goog.isDef(options.stackedCardboard) ? options.stackedCardboard : true);  
   this.setShading(goog.isDef(options.shading) ? options.shading : true);
@@ -185,6 +187,32 @@ goog.exportProperty(
   ol.layer.TileDem.prototype,
   'getDynamicColors',
   ol.layer.TileDem.prototype.getDynamicColors);
+
+
+
+
+/**
+ * @param {function(min, max)} onMinMaxChange OnMinMaxChange.
+ */
+ol.layer.TileDem.prototype.setOnMinMaxChange = function(onMinMaxChange) {
+  this.set(ol.layer.TileDemProperty.ON_MINMAX_CHANGE, onMinMaxChange);
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'setOnMinMaxChange',
+  ol.layer.TileDem.prototype.setOnMinMaxChange);
+/**
+ * @return {function(min, max)} OnMinMaxChange.
+ */
+ol.layer.TileDem.prototype.getOnMinMaxChange = function() {
+  return /** @type {function(min, max)} */ (
+    this.get(ol.layer.TileDemProperty.ON_MINMAX_CHANGE));
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'getOnMinMaxChange',
+  ol.layer.TileDem.prototype.getOnMinMaxChange);
+
 
 
 
