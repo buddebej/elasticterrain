@@ -18,4 +18,4 @@ Set up the development environment as for OpenLayers 3 ([How to Contribute to ol
 
 For comments or contribution please contact [Cartography and Geovisualization Group, Oregon State University](http://cartography.oregonstate.edu/).
 
-![Screenshots](https://raw.github.com/buddebej/elasticterrain/master/elastic_terrain_screenshot.jpg) 
+![Screenshots](https://raw.github.com/buddebej/elasticterrain/master/elastic_terrain_screenshot_01.jpg) 
