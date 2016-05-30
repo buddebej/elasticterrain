@@ -23,7 +23,7 @@ make install
 make serve
 ```
 
-Use a browser with enabled CORS to load remote tiles. 
+Browse to example (sample data with global coverage up to zoomlevel 4): 
 
 ```
 http://localhost:3000/build/examples/elasticterrain.html
