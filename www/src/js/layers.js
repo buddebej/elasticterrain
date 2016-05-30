@@ -13,7 +13,6 @@ var Layers = function() {
             source: new ol.source.XYZ({
                 // url: '../www/src/data/tiles/{z}/{x}/{y}.png',                                
                 url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png',
-                // url: 'data/tiles/{z}/{x}/{y}.png',                
                 dem: true
             })
         }),
@@ -79,6 +78,17 @@ var Layers = function() {
                 })
             })
         }, {
+            title: 'Map Quest Sat',
+            id: 'mapquestsat',
+            pos: 2,
+            enabled: true,
+            data: new ol.layer.Tile({
+                source: new ol.source.MapQuest({
+                    layer: 'sat'
+                })
+            })
+        },
+        {
             title: 'Open Street Map',
             id: 'osm',
             pos: 3,
