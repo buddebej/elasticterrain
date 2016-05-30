@@ -177,6 +177,12 @@ var Viewer = function(config, layers, container) {
     this.shearingInteraction = new ol.interaction.DragShearIntegrated(this.getShearingInteractionOptions(), this.map, ol.events.condition.noModifierKeys);
     this.map.addInteraction(this.shearingInteraction);
 
+    // add pinch rotate and pinch zoom interactions
+    var pinchRotate = new ol.interaction.PinchRotate(),
+        pinchZoom = new ol.interaction.PinchZoom();
+    this.map.addInteraction(pinchRotate);
+    this.map.addInteraction(pinchZoom);
+
     // update config file when zooming
     this.view.on('change:resolution', function() {
         this.config.set('viewZoom', this.view.getZoom());

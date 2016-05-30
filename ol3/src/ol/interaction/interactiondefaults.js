@@ -71,19 +71,19 @@ ol.interaction.defaults = function(opt_options) {
     }));
   }  
 
-  var pinchRotate = goog.isDef(options.pinchRotate) ?
-      options.pinchRotate : true;
-  if (pinchRotate) {
-    interactions.push(new ol.interaction.PinchRotate());
-  }
+  // var pinchRotate = goog.isDef(options.pinchRotate) ?
+  //     options.pinchRotate : true;
+  // if (pinchRotate) {
+  //   interactions.push(new ol.interaction.PinchRotate());
+  // }
 
-  var pinchZoom = goog.isDef(options.pinchZoom) ?
-      options.pinchZoom : true;
-  if (pinchZoom) {
-    interactions.push(new ol.interaction.PinchZoom({
-      duration: options.zoomDuration
-    }));
-  }
+  // var pinchZoom = goog.isDef(options.pinchZoom) ?
+  //     options.pinchZoom : true;
+  // if (pinchZoom) {
+  //   interactions.push(new ol.interaction.PinchZoom({
+  //     duration: options.zoomDuration
+  //   }));
+  // }
 
   // var keyboard = goog.isDef(options.keyboard) ?
   //     options.keyboard : true;

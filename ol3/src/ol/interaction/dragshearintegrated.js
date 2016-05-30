@@ -208,7 +208,7 @@ goog.inherits(ol.interaction.DragShearIntegrated, ol.interaction.Pointer);
 
 ol.interaction.DragShearIntegrated.handleDragEvent_ = function(mapBrowserEvent) {
 
-    if (this.targetPointers.length > 0 && this.condition(mapBrowserEvent)) {
+    if (this.targetPointers.length === 1 && this.condition(mapBrowserEvent)) {
         goog.asserts.assert(this.targetPointers.length >= 1);
 
         this.frameState = mapBrowserEvent.frameState;
