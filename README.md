@@ -29,6 +29,8 @@ Browse to example (sample data with global coverage up to zoomlevel 4):
 http://localhost:3000/build/examples/elasticterrain.html
 ```
 
+A solution for potential node errors of the watch process can be found [here](http://stackoverflow.com/questions/16748737/grunt-watch-error-waiting-fatal-error-watch-enospc).
+
 ### Data
 
 The application uses precomputed tiles with encoded terrain data that can be produced from publicly available digital elevation models. For this purpose, we used [a collection of python scripts](https://github.com/buddebej/dem2tiles).
