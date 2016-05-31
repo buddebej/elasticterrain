@@ -284,7 +284,7 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
 
         if (!goog.isNull(coordinate)) {
             elevation = /** @type {ol.renderer.webgl.TileDemLayer} */ (map.getRenderer().getLayerRenderer(this.demLayer_)).getElevation(coordinate, map.getView().getZoom());
-            elevation = (elevation === -11000) ? '' : elevation.toFixed(1) + ' m, ';
+            elevation = (elevation === ol.Elevation.MIN) ? '' : elevation.toFixed(1) + ' m, ';
 
             this.transform_(coordinate, coordinate);
 

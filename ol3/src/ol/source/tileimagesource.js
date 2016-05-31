@@ -22,7 +22,7 @@ goog.require('ol.TileRange');
  * @param {boolean=} opt_isDem
  * @api
  */
-ol.source.TileImage = function(options, opt_isDem) {
+ol.source.TileImage = function(options, opt_isDem, opt_minMax) {
 
   goog.base(this, {
     attributions: options.attributions,
@@ -41,6 +41,13 @@ ol.source.TileImage = function(options, opt_isDem) {
    * @type {boolean}
    */ 
   this.isDemTileImage = (goog.isDef(opt_isDem)) ? opt_isDem : false;
+
+  /**
+   * @public
+   * @type {Array}
+   */ 
+  this.demMinMax = (goog.isDef(opt_minMax)) ? opt_minMax : [];
+
 
   /**
    * @protected

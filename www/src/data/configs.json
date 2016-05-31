@@ -1,5 +1,5 @@
 [{
-    "_id": "55a51bd6481ebc7d04954dfb",
+    "model": "earth",
     "shading": true,
     "shadingDarkness": 0,
     "shadingExaggeration": 0,
@@ -33,7 +33,7 @@
     "viewCenter": [16.365363280347236, 48.20747690667801],
     "colorScale": [-11000, 9000]
 }, {
-    "_id": "55a51b26481ebc7d04954dfa",
+    "model": "earth",
     "shading": true,
     "shadingDarkness": 1,
     "shadingExaggeration": 1.38,
@@ -67,7 +67,7 @@
     "viewCenter": [-14.156969348747237, 46.99964290405063],
     "colorScale": [-11000, 9000]
 }, {
-    "_id": "55ae1898d7141e095a11d7ed",
+    "model": "earth",
     "shading": true,
     "shadingDarkness": 0,
     "shadingExaggeration": 0.8175,
@@ -101,7 +101,7 @@
     "viewCenter": [-67.93530481560141, -29.054092994623268],
     "colorScale": [-11000, 9000]
 }, {
-    "_id": "55a519f0481ebc7d04954df9",
+    "model": "earth",
     "shading": true,
     "shadingDarkness": 0.37,
     "shadingExaggeration": 0,
@@ -135,7 +135,7 @@
     "viewCenter": [141.87558221423416, 34.99852502174775],
     "colorScale": [-11000, 9000]
 }, {
-    "_id": "55b50a3ae421a79c5f3181a0",
+    "model": "earth",
     "shading": true,
     "shadingDarkness": 0.34500000000000003,
     "shadingExaggeration": 1.5,
@@ -169,7 +169,7 @@
     "viewCenter": [9.532864368990234, 46.83742242511212],
     "colorScale": [-11000, 9000]
 }, {
-    "_id": "55ae1be4d7141e095a11d7ee",
+    "model": "earth",
     "shading": true,
     "shadingDarkness": 0,
     "shadingExaggeration": 0.32999999999999996,
@@ -203,7 +203,7 @@
     "viewCenter": [-519.018396854949, 20.312991490790296],
     "colorScale": [-7899, 2101]
 }, {
-    "_id": "55a518c1481ebc7d04954df6",
+    "model": "earth",
     "shading": true,
     "shadingDarkness": 0.255,
     "shadingExaggeration": 0.6599999999999999,
@@ -237,7 +237,7 @@
     "viewCenter": [35.62080177461709, -3.2500117643578506],
     "colorScale": [-11000, 9000]
 }, {
-    "_id": "560c4e6e491848a379d9270c",
+    "model": "earth",
     "shading": true,
     "shadingDarkness": 0.35000000000000003,
     "shadingExaggeration": 0.63,
@@ -270,4 +270,38 @@
     "viewCenterConstraint": [],
     "viewCenter": [-119.62429828449594, 46.05213483651153],
     "colorScale": [-11000, 9000]
+},
+{
+    "model": "mars",
+    "shading": true,
+    "shadingDarkness": 0.6900000000000001,
+    "shadingExaggeration": 0,
+    "lightAzimuth": 315,
+    "lightZenith": 65,
+    "ambientLight": -0.015000000000000013,
+    "texture": "hypso",
+    "stackedCardboard": false,
+    "waterBodies": false,
+    "dynamicColors": true,
+    "colorRamp": 2,
+    "resolution": 0.45,
+    "debug": false,
+    "viewRotation": 0,
+    "viewRotationEnabled": true,
+    "viewZoom": 5,
+    "obliqueInclination": 90,
+    "terrainInteraction": true,
+    "shearingThreshold": 0.444,
+    "springCoefficient": 3.5999999999999996,
+    "frictionForce": 0.20500000000000002,
+    "title": "mars",
+    "order": -6,
+    "maxTerrainDistortion": 21.599999999999998,
+    "dragDistanceBeforePan": 35.4,
+    "explicitFadeOutAnimationSpeed": 1.54,
+    "hybridTransitionDampingDuration": 0.3,
+    "viewZoomConstraint": [2, 6],
+    "viewCenterConstraint": [],
+    "viewCenter": [-36.41828426450292, -5.514301875390657],
+    "colorScale": [-10000, 25000]
 }]

@@ -22,6 +22,9 @@
 //! COMMON
 
 // texture with encoded elevation values
+uniform vec2 globalElevation;
+
+// texture with encoded elevation values
 uniform sampler2D u_demTex;
 
 // length of one tile in meter at equator
@@ -40,8 +43,8 @@ float decodeElevation(in vec2 colorChannels) {
     if(u_tileZoom > 12.0){
         decimalDecode = 0.01;
     }
-    float elevationM = ((colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)-11000.0)*decimalDecode;    
-    if(elevationM > 9000.0){
+    float elevationM = ((colorChannels.x*255.0 + (colorChannels.y*255.0)*256.0)+globalElevation.x)*decimalDecode;    
+    if(elevationM > globalElevation.y){
         elevationM = 0.0;
     }
     return elevationM;

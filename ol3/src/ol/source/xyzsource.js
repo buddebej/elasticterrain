@@ -26,16 +26,21 @@ ol.source.XYZ = function(options) {
     tileSize: options.tileSize
   });
 
-  goog.base(this, {
-    attributions: options.attributions,
-    crossOrigin: options.crossOrigin,
-    logo: options.logo,
-    projection: projection,
-    tileGrid: tileGrid,
-    tileLoadFunction: options.tileLoadFunction,
-    tilePixelRatio: options.tilePixelRatio,
-    tileUrlFunction: ol.TileUrlFunction.nullTileUrlFunction
-  }, (goog.isDef(options['dem'])) ? options['dem'] : false);
+  goog.base(
+    this, 
+    {
+      attributions: options.attributions,
+      crossOrigin: options.crossOrigin,
+      logo: options.logo,
+      projection: projection,
+      tileGrid: tileGrid,
+      tileLoadFunction: options.tileLoadFunction,
+      tilePixelRatio: options.tilePixelRatio,
+      tileUrlFunction: ol.TileUrlFunction.nullTileUrlFunction
+    }, 
+    (goog.isDef(options['dem'])) ? options['dem'] : false,
+    (goog.isDef(options['minMax'])) ? options['minMax'] : [] 
+  );
 
   /**
    * @private

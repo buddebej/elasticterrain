@@ -721,9 +721,9 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
     goog.asserts.assertInstanceof(tileDemLayer, ol.layer.TileDem);
     var tileSource = tileDemLayer.getSource();
 
-    if (goog.isNull(this.tileCache)) {
+    // if (goog.isNull(this.tileCache)) {
         this.tileCache = /** @type {ol.source.TileImage} */ (tileSource).tileCache;
-    }
+    // }
     var tileGrid = tileSource.getTileGridForProjection(projection);
     if (goog.isNull(this.tileGrid)) {
         this.tileGrid = tileGrid;
@@ -807,6 +807,7 @@ ol.renderer.webgl.TileDemLayer.prototype.prepareFrame = function(frameState, lay
             gl.clearDepth(1.0);
             gl.clear(goog.webgl.DEPTH_BUFFER_BIT);
 
+            gl.uniform2f(this.locations_.globalElevation, ol.Elevation.MIN, ol.Elevation.MAX);
 
             // TERRAIN SHEARING
             var shearX, shearY, shearingFactor;

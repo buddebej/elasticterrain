@@ -1,9 +1,23 @@
 goog.provide('ol.Elevation');
 
 /**
+ * @public
+ * @type {number}
+ */
+ol.Elevation.MAX = 0;
+
+/**
+ * @public
+ * @type {number}
+ */
+
+ol.Elevation.MIN = 0;
+
+/**
  * Decode Elevation from Color Values 
  * @public
  * @param {Array} rgba
+ * @param {number} rgba
  * @return {number} elevationM Elevation in meters
  */
 ol.Elevation.decode = function(rgba,zoom) {
@@ -12,26 +26,15 @@ ol.Elevation.decode = function(rgba,zoom) {
     if(goog.isDef(zoom) && zoom > 12){
         decimalDecode = 0.01;
     }
-    var elevationM = ((rgba[0] + rgba[1] * 256.0) - 11000.0)*decimalDecode;
-    if (elevationM > 9000.0) {
+    var elevationM = ((rgba[0] + rgba[1] * 256.0) + ol.Elevation.MIN)*decimalDecode;
+    if (elevationM > ol.Elevation.MAX) {
         elevationM = 0.0;
     }
+
     return elevationM;
 };
 
-/**
- * @public
- * @const 
- * @type {number}
- */
-ol.Elevation.MAX = 9000;
 
-/**
- * @public
- * @const 
- * @type {number}
- */
-ol.Elevation.MIN = -11000;
 
 /**
  * Decode Elevation from Color Values 

@@ -2,6 +2,7 @@ goog.provide('ol.layer.TileDem');
 
 goog.require('goog.object');
 goog.require('ol.layer.Layer');
+goog.require('ol.Elevation');
 
 
 /**
@@ -57,7 +58,8 @@ ol.layer.TileDem = function(opt_options) {
   delete baseOptions.useInterimTilesOnError;
 
   goog.base(this,  /** @type {olx.layer.LayerOptions} */ (baseOptions));
-
+  ol.Elevation.MIN = this.getSource().demMinMax[0];  
+  ol.Elevation.MAX = this.getSource().demMinMax[1];
   this.setAmbientLight(goog.isDef(options.ambientLight) ? options.ambientLight : 0.0);
   this.setColorRamp(goog.isDef(options.colorRamp) ? options.colorRamp : 0);  
   this.setDynamicColors(goog.isDef(options.dynamicColors) ? options.dynamicColors : true);    
@@ -93,6 +95,14 @@ goog.inherits(ol.layer.TileDem, ol.layer.Layer);
 ol.layer.TileDem.prototype.getSource;
 
 
+ol.layer.TileDem.prototype.updateMinMax = function() {
+  ol.Elevation.MIN = this.getSource().demMinMax[0];  
+  ol.Elevation.MAX = this.getSource().demMinMax[1];
+};
+goog.exportProperty(
+  ol.layer.TileDem.prototype,
+  'updateMinMax',
+  ol.layer.TileDem.prototype.updateMinMax);
 
 /**
  * @param {number} ambientLight Ambientlight.

@@ -115,6 +115,13 @@ var Viewer = function(config, layers, container) {
         var configCopy = $.extend(true, {}, newStore);
         this.shearingInteraction.stopAnimation();
         config.swap(configCopy);
+
+        // change model according to config
+        var demLayer = this.map.getLayers().getArray()[this.map.getLayers().getArray().length - 1];
+        
+        demLayer.setSource(layers[this.config.get('model')]);
+        demLayer.updateMinMax();
+
         this.update();
     };
 
