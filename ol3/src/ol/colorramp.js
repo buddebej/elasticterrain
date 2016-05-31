@@ -69,7 +69,22 @@ ol.ColorRamp.hypso1 = new Array(
  * @const 
  * @type {Array}
  */
-ol.ColorRamp.hypsometry = [ol.ColorRamp.hypso0, ol.ColorRamp.hypso1];
+ol.ColorRamp.marsHypso = new Array(
+    102, 45, 26, 255,
+    // 173,73,24, 255,
+    117, 57, 31, 255,
+    116, 56, 29, 255,
+    184, 130, 66, 255,
+    197, 159, 95, 255,
+    226, 206, 145, 255
+);
+
+/**
+ * @public
+ * @const 
+ * @type {Array}
+ */
+ol.ColorRamp.hypsometry = [ol.ColorRamp.hypso0, ol.ColorRamp.hypso1, ol.ColorRamp.marsHypso];
 
 /**
  * @public
@@ -111,10 +126,27 @@ ol.ColorRamp.bathy1 = new Array(
     113, 171, 216, 255
 );
 
+/**
+ * @public
+ * @const 
+ * @type {Array}
+ */
+ol.ColorRamp.marsBathy = new Array(
+    102, 45, 26, 255,
+    64, 37, 20, 255, 
+    63,24,27, 255,
+    94,34,26, 
+    3,3,15, 255
+  // 151,64,57, 255,
+  // 138,62,74, 255,
+  //   111,58,88, 255,
+  //     87, 41, 90, 255,
+  //       34, 18, 91, 255
+);
 
 /**
  * @public
  * @const 
  * @type {Array}
  */
-ol.ColorRamp.bathymetry = [ol.ColorRamp.bathy0, ol.ColorRamp.bathy1];
+ol.ColorRamp.bathymetry = [ol.ColorRamp.bathy0, ol.ColorRamp.bathy1, ol.ColorRamp.marsBathy];
