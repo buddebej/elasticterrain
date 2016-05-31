@@ -44,7 +44,6 @@ var ControlBar = function(viewer) {
         KNOB_AZIMUTH = $('.lightAzimuthKnob'),
         KNOB_ZENITH = $('.lightZenithKnob'),
         KNOB_ROTATION = $('.rotationKnob'),
-        KNOB_ROTATION1 = $('.rotationKnob1'),
         SWITCH_SHADING = $('.shadingSwitch'),
         SWITCH_WATERBODIES = $('.waterBodiesSwitch'),
         SWITCH_DYNAMIC_COLORS = $('.dynamicColorsSwitch'),
