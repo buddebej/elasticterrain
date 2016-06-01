@@ -50,8 +50,8 @@ module.exports = function(grunt) {
                 src: ['dist/temp.js'],
                 overwrite: true,
                 replacements: [{
-                    from: "url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png",
-                    to: "url: 'data/tiles/{z}/{x}/{y}.png"
+                    from: "url: 'http://eu.elasticterrain.xyz/",
+                    to: "url: '"
                 }]
             }
         },

@@ -3,7 +3,7 @@ var Layers = function() {
 
     this.layers_enabled = [];
 
-    this.earth = new ol.source.XYZ({
+  this.earth = new ol.source.XYZ({
         url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png',
         dem: true,
         minMax : [-11000, 9000]
@@ -12,9 +12,8 @@ var Layers = function() {
     this.mars = new ol.source.XYZ({
         url: 'http://eu.elasticterrain.xyz/data/mars/{z}/{x}/{y}.png',
         dem: true,
-        minMax : [-9000, 25000]
+        minMax : [-9000, 24000]
     });
-
 
     this.dem = {
         title: 'Hypsometric Colors',
