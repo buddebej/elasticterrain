@@ -10,6 +10,9 @@ var Config = function() {
     // can be modified by controlBar
     // initial values
     this.init = {
+
+        model: 'earth',
+        
         // shading
         shading: true, // bool
         shadingDarkness: 0.1, // 0:1

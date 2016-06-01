@@ -118,9 +118,14 @@ var Viewer = function(config, layers, container) {
 
         // change model according to config
         var demLayer = this.map.getLayers().getArray()[this.map.getLayers().getArray().length - 1];
-        
         demLayer.setSource(layers[this.config.get('model')]);
         demLayer.updateMinMax();
+
+        if(this.config.get('model')==='mars'){
+            this.view.setHighlevelAreas([]);
+        } else {
+            this.view.setHighlevelAreas(layers.getDem().highLevelAreas);
+        }
 
         this.update();
     };

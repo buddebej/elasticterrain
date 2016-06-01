@@ -195,7 +195,7 @@ var ControlBar = function(viewer) {
     };
 
     // update control tools to current parameters
-    ui.updateControlTools = function() {
+    ui.updateControlTools = function(init) {
         KNOB_INCLINATION.val(viewer.get('obliqueInclination')).trigger('change');
         KNOB_AZIMUTH.val(viewer.get('lightAzimuth')).trigger('change');
         KNOB_ZENITH.val(viewer.get('lightZenith')).trigger('change');
@@ -224,8 +224,13 @@ var ControlBar = function(viewer) {
         SLIDER_HYBRID_DAMPING.update();
         SLIDER_RESOLUTION.update();
 
-        SELECT_TEXTURE.find('option[value=' + viewer.get('texture') + ']').attr('selected', true).change();
-        SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').attr('selected', true);
+        
+        if(init === undefined){ 
+            SELECT_TEXTURE.find('option:selected').prop('selected', false);
+            SELECT_TEXTURE.find('option[value="' + viewer.get('texture') + '"]').prop('selected', true).change();
+        }
+        
+        SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').prop('selected', true);
 
         ui.controlActive(ui.controls.rotation, viewer.get('viewRotationEnabled'));
 
@@ -377,9 +382,9 @@ var ControlBar = function(viewer) {
             COLOR_CONTROLS.hide(ui.options.controlAnimation, ui.options.controlAnimationSpeed);
         }
         // FIXME for hidden update from showCase
-        if (!ui.options.collapsed) {
+        // if (!ui.options.collapsed) {
             viewer.set('texture', selectedLayer);
-        }
+        // }
     });
 
 
@@ -631,9 +636,9 @@ var ControlBar = function(viewer) {
                 }, {
                     duration: ui.options.controlAnimationSpeed,
                     start: function() {
-                        if (viewer.showCase !== undefined) {
-                            viewer.showCase.hide();
-                        }
+                        // if (viewer.showCase !== undefined) {
+                        //     viewer.showCase.hide();
+                        // }
                     },
                     step: updateMapSize,
                 });
@@ -701,7 +706,7 @@ var ControlBar = function(viewer) {
             }
 
             // init control tools        
-            ui.updateControlTools();
+            ui.updateControlTools(true);
 
             ui.show = function() {
                 showControlBar();
