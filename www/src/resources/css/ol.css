@@ -9,8 +9,8 @@
   background: #2484C6;
   background: rgba(36,132,198,0.5);
   border-radius: 4px;
-  bottom: 8px;
-  right: 10px;
+  bottom: .5em;
+  right: .5em;
   padding: 4px;
   position: absolute;
 }
@@ -49,14 +49,23 @@
   background-color: rgba(255,255,255,0.6);
 }
 .ol-zoom {
-  top: 55px;
+  top: 3em;
   right: .5em;
 }
 .ol-rotate {
-  top: 123px;
+  top: 7.2em;
   right: .5em;
   transition: opacity .25s;
 }
+
+.ol-touch .ol-rotate{
+  top: 9.5em;
+}
+
+.ol-touch .ol-zoom{
+  top: 4em;
+}
+
 .ol-rotate.ol-hidden {
   opacity: 0;
   display: none;

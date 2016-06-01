@@ -1,12 +1,12 @@
 var Showcase = function(viewer) {
     'use strict';
 
-    var left = '<span class="fa-stack" title="Browse maps">\
+    var left = '<span class="fa-stack">\
                 <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
                 <i class="fa fa-chevron-circle-left fa-stack-1x"></i>\
                 </span>';
 
-    var right = '<span class="fa-stack" title="Browse maps">\
+    var right = '<span class="fa-stack">\
                 <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
                 <i class="fa fa-chevron-circle-right fa-stack-1x"></i>\
                 </span>';
@@ -69,7 +69,6 @@ var Showcase = function(viewer) {
         CONTROL_RIGHT.fadeIn();
     };
 
-    CONTAINER.append(SHOWCASE_HINT);
     SHOWCASE_HINT.click(function() {
         viewer.controlBar.show();
     });
@@ -81,7 +80,12 @@ var Showcase = function(viewer) {
     var ALERT_BUBBLE = $('<div class="alertBubble"><b>Slow Animation <i class="fa fa-times"></i></b><br>Shrink your browser window to increase rendering performance.<br>Performance is best with an up-to-date version of Google Chrome or Chromium.</div>').hide().click(function() {
         $(this).fadeOut();
     });
-    CONTAINER.append(ALERT_BUBBLE);
+
+    if(!('ontouchstart' in document.documentElement)){
+            CONTAINER.append(SHOWCASE_HINT);
+            CONTAINER.append(ALERT_BUBBLE);
+    }
+
     var lowFpsAlert = function(state) {
         if (state) {
             if (this.hasOwnProperty('alerts')) {
