@@ -209,8 +209,8 @@ goog.exportProperty(
  * shows indicator div
  */
 ol.control.MousePositionDem.prototype.show = function() {
-    if (this.element.className !== 'indicator ol-unselectable') {
-        this.element.className = 'indicator ol-unselectable';
+    if (this.element.className !== 'ol-indicator ol-unselectable') {
+        this.element.className = 'ol-indicator ol-unselectable';
     }
 };
 goog.exportProperty(
@@ -284,7 +284,7 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
 
         if (!goog.isNull(coordinate)) {
             elevation = /** @type {ol.renderer.webgl.TileDemLayer} */ (map.getRenderer().getLayerRenderer(this.demLayer_)).getElevation(coordinate, map.getView().getZoom());
-            elevation = (elevation === ol.Elevation.MIN) ? '' : elevation.toFixed(1) + ' m, ';
+            elevation = (elevation === ol.Elevation.MIN) ? '' : '<span class="bold-elevation">'+elevation.toFixed(1) + ' m</span>, ';
 
             this.transform_(coordinate, coordinate);
 
@@ -313,7 +313,7 @@ ol.control.MousePositionDem.prototype.updateHTML_ = function(pixel) {
             };
 
             latlon = decimalDegToDegMin(coordinate[1], false) + '  ' + decimalDegToDegMin(coordinate[0], true);
-            html = elevation + latlon + ', z: ' + map.getView().getZoom();
+            html = elevation + latlon;// + ', z: ' + map.getView().getZoom();
         }
     }
     if (!goog.isDef(this.renderedHTML_) || html != this.renderedHTML_) {

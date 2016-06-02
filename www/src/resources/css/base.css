@@ -22,28 +22,6 @@ body {
     background-color: #000;
 }
 
-.indicator {
-    padding: 5px;
-    width: auto;
-    min-width: 170px;
-    text-align: center;
-    background: #2484C6;
-    background: rgba(36, 132, 198, 0.5);
-    font-size: 8pt;
-    right: .5em;
-    bottom: 4em;
-    margin-right: 3px;
-    position: absolute;
-    color: #eee;
-    font-family: 'Open Sans', sans-serif;
-    -webkit-tap-highlight-color: none;
-    border-radius: 4px;
-}
-
-.ol-touch .indicator{
-    visibility: hidden;
-}
-
 .hidden {
     visibility: hidden;
 }
