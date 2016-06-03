@@ -7,7 +7,7 @@ The application renders digital elevation models with WebGL and offers many conf
 
 Check out the [live demo](http://elasticterrain.xyz) at [elasticterrain.xyz](http://elasticterrain.xyz). 
 
-Watch [demo movie](https://vimeo.com/140798332).
+Watch [demo movie](https://vimeo.com/140730282).
 
 The live demo performs best with an up-to-date version of Google Chrome.
 
