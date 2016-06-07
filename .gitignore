@@ -5,11 +5,11 @@ ol3/examples/example-list.js
 ol3/examples/example-list.xml
 ol3/node_modules/
 ol3/src/ol/renderer/webgl/webgltiledemlayershader_d.js
-www/src/data/*
-www/node_modules/
-www/dist/*
-www/src/js/analytics.js
-!www/src/data/blank.png
+map/src/data/*
+map/node_modules/
+map/dist/*
+map/src/js/analytics.js
+!map/src/data/blank.png
 .DS_Store
 backend/node_modules/
 userstudy/*
