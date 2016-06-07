@@ -51,7 +51,7 @@ module.exports = function(grunt) {
                 overwrite: true,
                 replacements: [{
                     from: "url: 'http://eu.elasticterrain.xyz/",
-                    to: "url: '"
+                    to: "url: '../"
                 }]
             }
         },
