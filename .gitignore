@@ -12,7 +12,7 @@ map/src/js/analytics.js
 !map/src/data/blank.png
 .DS_Store
 backend/*
-userstudy/*
-ol3/userstudy
+custom/*
+ol3/custom
 *tutorial*
 *sample*
