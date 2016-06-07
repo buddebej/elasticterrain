@@ -21,6 +21,8 @@ var Showcase = function(viewer) {
     CONTAINER.append(CONTROL_RIGHT).append(CONTROL_LEFT);
 
     var exampleIndex = 0,
+        url = window.location.href,
+        mapConfig = '',
         examplesSeen = 0,
         changeExample = function(i) {
             viewer.swapConfig(viewer.getConfigStore()[i]);
@@ -29,6 +31,8 @@ var Showcase = function(viewer) {
             viewer.dem.setAutoResolution({
                 low: false
             });
+            // pass configname to url
+            window.location.hash = viewer.getConfigStore()[i].title;
         },
         showHint = function() {
             examplesSeen++;
@@ -37,9 +41,22 @@ var Showcase = function(viewer) {
             }
         };
 
+    // get url behind last /# and return configname
+    mapConfig = url.substring(url.lastIndexOf('/#') + 1).replace('#', '');
+    // remove trailing slash
+    mapConfig = (mapConfig.indexOf("/") > -1) ? mapConfig.replace('/', '') : mapConfig;
+
+    // set exampleIndex according to url mapConfig-parameter
+    if (mapConfig !== '') {
+        $.each(viewer.getConfigStore(), function(k, v) {
+            if (v.title === mapConfig) {
+                exampleIndex = k;
+            }
+        });
+    }
 
     CONTROL_RIGHT.click(function() {
-        if (exampleIndex < viewer.getConfigStore().length-1) {
+        if (exampleIndex < viewer.getConfigStore().length - 1) {
             exampleIndex++;
             showHint();
         } else {
@@ -53,7 +70,7 @@ var Showcase = function(viewer) {
             exampleIndex--;
             showHint();
         } else {
-            exampleIndex = viewer.getConfigStore().length-1;
+            exampleIndex = viewer.getConfigStore().length - 1;
         }
         changeExample(exampleIndex);
     });
@@ -81,9 +98,9 @@ var Showcase = function(viewer) {
         $(this).fadeOut();
     });
 
-    if(!('ontouchstart' in document.documentElement)){
-            CONTAINER.append(SHOWCASE_HINT);
-            CONTAINER.append(ALERT_BUBBLE);
+    if (!('ontouchstart' in document.documentElement)) {
+        CONTAINER.append(SHOWCASE_HINT);
+        CONTAINER.append(ALERT_BUBBLE);
     }
 
     var lowFpsAlert = function(state) {
@@ -108,6 +125,8 @@ var Showcase = function(viewer) {
             low: false
         });
     });
+
+
 
     viewer.swapConfig(viewer.getConfigStore()[exampleIndex]);
     viewer.controlBar.updateControlTools();
