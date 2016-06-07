@@ -126,57 +126,26 @@ h3 {
     color: #eee;
     font-size: 8pt;
     border: 0;
-    border-bottom: #333 solid 5px;
+    border-bottom: #333 solid 2px;
 }
 
-.info .menue {
-    color: #2484C6;
-    clear: both;
-}
-
-.info .menue .item {
-    float: left;
+.infoBox .item {
     padding: 4px;
     margin-top: 4px;
     margin-right: 6px;
     margin-left: -4px;
     margin-bottom: 0;
     background-color: none;
-    font-weight: 600;
+    font-weight: 900;
     cursor: pointer;
 }
 
-.info .menue .item:hover {
-    background-color: #2484C6;
-    color: #fefefe;
+.infoBox a {
+    color: #2484C6 !important;
 }
 
-.info .menue .active {
-    background-color: #2484C6;
-    color: #fefefe;
-}
-
-.info .content {
-    clear: both;
-    color: #ccc;
-    -webkit-touch-callout: all;
-    -webkit-user-select: all;
-    -khtml-user-select: all;
-    -moz-user-select: all;
-    -ms-user-select: all;
-    user-select: all;
-}
-
-.info .topborder {
-    border-top: 1px solid #333;
-    padding-top: 5px;
-}
-
-.info p {
-    padding: 0;
-    margin: 0;
-    margin-bottom: 5px;
-    color: #ccc;
+.infoBox .item:hover {
+    color: #fefefe !important;
 }
 
 .logoContainer {
