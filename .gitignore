@@ -11,7 +11,7 @@ map/dist/*
 map/src/js/analytics.js
 !map/src/data/blank.png
 .DS_Store
-backend/node_modules/
+backend/*
 userstudy/*
 ol3/userstudy
 *tutorial*
