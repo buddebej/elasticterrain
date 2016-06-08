@@ -4,61 +4,26 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <link rel="stylesheet" href="../../www/src/resources/css/ol.css" type="text/css">
-    <link rel="stylesheet" href="../../www/src/resources/css/jquery-ui.min.css" />
-    <link rel="stylesheet" href="../../www/src/resources/css/base.css" type="text/css" />
-    <link rel="stylesheet" href="../../www/src/resources/css/controlbar.css" type="text/css" />
-    <link rel="stylesheet" href="../../www/src/resources/css/showcase.css" type="text/css" />
+    <link rel="stylesheet" href="../../map/src/resources/css/ol.css" type="text/css">
+    <link rel="stylesheet" href="../../map/src/resources/css/jquery-ui.min.css" />
+    <link rel="stylesheet" href="../../map/src/resources/css/base.css" type="text/css" />
+    <link rel="stylesheet" href="../../map/src/resources/css/controlbar.css" type="text/css" />
+    <link rel="stylesheet" href="../../map/src/resources/css/showcase.css" type="text/css" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" href="../../www/src/resources/font-awesome/css/font-awesome.min.css">
-    <script src="../../www/src/resources/js/jquery-2.1.3.min.js"></script>
-    <script src="../../www/src/resources/js/jquery-ui.min.js"></script>
-    <script src="../../www/src/resources/js/jquery_knob.js"></script>
+    <link rel="stylesheet" href="../../map/src/resources/font-awesome/css/font-awesome.min.css">
+    <script src="../../map/src/resources/js/jquery-2.1.3.min.js"></script>
+    <script src="../../map/src/resources/js/jquery-ui.min.js"></script>
+    <script src="../../map/src/resources/js/jquery_knob.js"></script>
     <title>Elastic Terrain Map</title>
 </head>
 
 <body>
     <div class="container">
         <div class="controlBar">
-            <a href="https://github.com/buddebej/elasticterrain"><img style="position: absolute; width: 90px; height: 90px; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
             <div class="control info">
                 <div class="infoBox">
-                    <img src="../../www/src/resources/images/elasticterrain_logo.svg" width="174px"></img>
+                    <img src="../../map/src/resources/images/elasticterrain_logo.svg" width="174px"></img>
                     <br>Jonas Buddeberg, Bernhard Jenny
-                    <div class="menue">
-                        <div id="minfo" class="item">What is this?</div>
-                        <div id="mdata" class="item">Data</div>
-                        <div id="mproblems" class="item">Problems</div>
-                        <div id="mabout" class="item">About</div>
-                    </div>
-                    <div class="content">
-                        <div class="minfo topborder">
-                            Elastic Terrain is a new method for terrain visualization that uses animation.
-                            <br>The Elastic Terrain Map is based on <a href="http://openlayers.org/" target="_blank">OpenLayers</a>.
-                        </div>
-                        <div class="mdata topborder">
-                            <p><a href="http://fbinter.stadt-berlin.de/fb/berlin/service.jsp?id=a_dgm2@senstadt&type=FEED" target="_blank">Geoportal Berlin / ATKIS DGM2</a></p>
-                            <p><a href="http://www.eea.europa.eu/data-and-maps/data/eu-dem" target="_blank">EUDEM<br>Produced using Copernicus data and information funded by the European Union</a></p>
-                            <p><a href="http://www.gebco.net" target="_blank">The GEBCO Digital Atlas<br> published by the British Oceanographic Data Centre on behalf of IOC and IHO 2003</a></p>
-                            <p><a href="http://research.bpcrc.osu.edu/GDG/gimpdem.php" target="_blank">Greenland Mapping Project (GIMP)<br> Digital Elevation Model by BPRC Glacier Dynamics Research Group, Ohio State University</a></p>
-                            <p><a href="https://lta.cr.usgs.gov/SRTM1Arc" target="_blank">NASA's Shuttle Radar Topography Mission<br>1 arc-second</a></p>
-                            <p><a href="https://lta.cr.usgs.gov/SRTM1Arc" target="_blank">NASA's Shuttle Radar Topography Mission<br>3 arc-seconds</a></p>
-                            <p><a href="http://www.wien.gv.at/stadtentwicklung/stadtvermessung/geodaten/dgm/produkt.html" target="_blank">Digital surface model of Vienna – data.wien.gv.at</a></p>
-                        </div>
-                        <div class="mabout topborder">
-                            <p>The Elastic Terrain Map software is licensed under <a href="https://github.com/buddebej/elasticterrain/blob/master/LICENSE.md" target="_blank">GPL v3</a>. The source code is available on <a href="https://github.com/buddebej/elasticterrain" target="_blank">Github</a>. <a href="https://github.com/buddebej/elasticterrain" target="_blank">Feel free to fork our repository.</a></p>
-                            <div class="logoContainer">
-                                <a href="http://cartography.oregonstate.edu/" target="_blank" title="Cartography and Geovisualization Group at Oregon State University">
-                                    <img src="../../www/src/resources/images/cartogroup_logo.svg"></img>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="mproblems topborder">
-                            <p>This application is optimized for an up-to-date version of Google Chrome, Chromium or Firefox. 3D animations may be slow or laggy on older devices. You can try to reduce your browser window.
-                                <br>
-                                <br>Please report bugs on github.</p>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="control inclination">
@@ -78,21 +43,11 @@
                 </div>
                 <div class="controlBody">
                     <select class="textureSelect"></select>
-                    <!--   <div class="switchBox floatLeft">
-                        <div class="onoffswitch">
-                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox dynamicColorsSwitch" id="switchDynamicColors">
-                            <label class="onoffswitch-label" for="switchDynamicColors">
-                                <span class="onoffswitch-inner"></span>
-                                <span class="onoffswitch-switch"></span>
-                            </label>
-                        </div>
-                        <span class="checkboxLabel">Hybrid.</span>
-                    </div>
-                    <div class="clearFloat"></div> -->
                     <div class="colorControls">
                         <select class="colorRampSelect">
                             <option value="0">ColorRamp 1</option>
                             <option value="1">ColorRamp 2</option>
+                            <option value="2">ColorRamp 2</option>
                         </select>
                         <div class="switchBox">
                             <div class="onoffswitch">
@@ -317,145 +272,145 @@
     </div>
 </body>
 <script src="loader.js?id=elasticterrain" type="text/javascript"></script>
-<script src="../../www/src/js/webglcheck.js" type="text/javascript"></script>
-<script src="../../www/src/js/layers.js" type="text/javascript"></script>
-<script src="../../www/src/js/viewer.js" type="text/javascript"></script>
-<script src="../../www/src/js/controlbar.js" type="text/javascript"></script>
-<script src="../../www/src/js/configmanager_static.js" type="text/javascript"></script>
-<script src="../../www/src/js/showcase.js" type="text/javascript"></script>
+<script src="../../map/src/js/webglcheck.js" type="text/javascript"></script>
+<script src="../../map/src/js/layers.js" type="text/javascript"></script>
+<script src="../../map/src/js/viewer.js" type="text/javascript"></script>
+<script src="../../map/src/js/controlbar.js" type="text/javascript"></script>
+<script src="../../map/src/js/configmanager_static.js" type="text/javascript"></script>
+<script src="../../map/src/js/showcase.js" type="text/javascript"></script>
 <script>
-    
-
+var viewer, layers;
 $(document).ready(function() {
     'use strict';
 
-var Config = function() {
-    'use strict';
 
-    // static config
-    this.defaultZoomLevelRange = [2, 4];
-    this.defaultMapExtent = [];
-    // dynamic config 
-    // can be saved and loaded by configManager
-    // can be modified by controlBar
-    // initial values
-    this.init = {
-        // shading
-        shading: true, // bool
-        shadingDarkness: 0.1, // 0:1
-        shadingExaggeration: 0.3, // 0:1         
-        lightAzimuth: 315, // 0:360
-        lightZenith: 45, // 0:90
-        ambientLight: 0.1, // 0:1
+    var Config = function() {
+        'use strict';
 
-        // texture
-        texture: 'hypso', // see layers.js
+        // static config
+        this.defaultZoomLevelRange = [2, 4];
+        this.defaultMapExtent = [];
+        // dynamic config 
+        // can be saved and loaded by configManager
+        // can be modified by controlBar
+        // initial values
+        this.init = {
+            // shading
+            shading: true, // bool
+            shadingDarkness: 0.1, // 0:1
+            shadingExaggeration: 0.3, // 0:1         
+            lightAzimuth: 315, // 0:360
+            lightZenith: 45, // 0:90
+            ambientLight: 0.1, // 0:1
 
-        // hypsometric colors
-        stackedCardboard: true, // bool
-        waterBodies: true, // bool
-        dynamicColors: true, // bool
-        colorScale: [-11000, 9000], // min:max [m]  
-        colorRamp: 1, // id   
+            // texture
+            texture: 'hypso', // see layers.js
 
-        // debug         
-        resolution: 0, // 0.1; 0 means automatic detection
-        debug: false, // bool       
-        wireframe: false, // bool       
+            // hypsometric colors
+            stackedCardboard: true, // bool
+            waterBodies: true, // bool
+            dynamicColors: true, // bool
+            colorScale: [-11000, 9000], // min:max [m]  
+            colorRamp: 1, // id   
 
-        // view
-        viewRotation: 0, // 0:360
-        viewRotationEnabled: true, // 0:360
+            // debug         
+            resolution: 0, // 0.1; 0 means automatic detection
+            debug: false, // bool       
+            wireframe: false, // bool       
 
-        viewCenter: [17, 37], // center of map in latlon 
-        // potsdam 13.04,52.40
-        // sicily 17,37
-        // vienna 16.4,48.22
-        // portland -122.8, 45.7     
-        viewCenterConstraint: this.defaultMapExtent, // [] | [minx, miny, maxx, maxy]
-        //[0, 2504688.542848654, 5009377.085697311, 7514065.628545965]
-        // vienna [1790460.950551968, 6124746.202434603, 1868732.4675159885, 6203017.719398623]
-        // berlin [1428455.184593372, 6848757.734351791, 1584998.218521413, 7005300.768279833]
+            // view
+            viewRotation: 0, // 0:360
+            viewRotationEnabled: true, // 0:360
 
-        viewZoom: 4, // zoomlevel
-        viewZoomConstraint: this.defaultZoomLevelRange, // [minZoom, maxZoom]
+            viewCenter: [17, 37], // center of map in latlon 
+            // potsdam 13.04,52.40
+            // sicily 17,37
+            // vienna 16.4,48.22
+            // portland -122.8, 45.7     
+            viewCenterConstraint: this.defaultMapExtent, // [] | [minx, miny, maxx, maxy]
+            //[0, 2504688.542848654, 5009377.085697311, 7514065.628545965]
+            // vienna [1790460.950551968, 6124746.202434603, 1868732.4675159885, 6203017.719398623]
+            // berlin [1428455.184593372, 6848757.734351791, 1584998.218521413, 7005300.768279833]
 
-        // static plan oblique
-        obliqueInclination: 90.0, // 0:90
+            viewZoom: 4, // zoomlevel
+            viewZoomConstraint: this.defaultZoomLevelRange, // [minZoom, maxZoom]
 
-        // shearingInteraction 
-        terrainInteraction: true,
-        shearingThreshold: 0.444,
-        springCoefficient: 4,
-        frictionForce: 0.2,
-        maxTerrainDistortion: 20.0,
-        dragDistanceBeforePan: 20.0,
-        explicitFadeOutAnimationSpeed: 1.54,
-        hybridTransitionDampingDuration: 0.3
-    };
+            // static plan oblique
+            obliqueInclination: 90.0, // 0:90
 
-    this.dynamic = this.init;
+            // shearingInteraction 
+            terrainInteraction: true,
+            shearingThreshold: 0.444,
+            springCoefficient: 4,
+            frictionForce: 0.2,
+            maxTerrainDistortion: 20.0,
+            dragDistanceBeforePan: 20.0,
+            explicitFadeOutAnimationSpeed: 1.54,
+            hybridTransitionDampingDuration: 0.3
+        };
 
-    // minMax values for slider controls
-    this.sliderConstraints = {
-        ambientLight: [-0.5, 0.5],
-        shadingDarkness: [0.0, 1.0],
-        shadingExaggeration: [0.0, 1.5],
-        springCoefficient: [0.0, 24],
-        frictionForce: [0.0, 0.5],
-        maxTerrainDistortion: [0.0, 120.0],
-        dragDistanceBeforePan: [0.0, 120.0],
-        explicitFadeOutAnimationSpeed: [0.1, 2.0],
-        hybridTransitionDampingDuration: [0.1, 0.5],
-        resolution: [0.1, 0.45]
-    };
+        this.dynamic = this.init;
+
+        // minMax values for slider controls
+        this.sliderConstraints = {
+            ambientLight: [-0.5, 0.5],
+            shadingDarkness: [0.0, 1.0],
+            shadingExaggeration: [0.0, 1.5],
+            springCoefficient: [0.0, 24],
+            frictionForce: [0.0, 0.5],
+            maxTerrainDistortion: [0.0, 120.0],
+            dragDistanceBeforePan: [0.0, 120.0],
+            explicitFadeOutAnimationSpeed: [0.1, 2.0],
+            hybridTransitionDampingDuration: [0.1, 0.5],
+            resolution: [0.1, 0.45]
+        };
 
 
-    this.set = function(attr, val) {
-        this.dynamic[attr] = val;
-    };
+        this.set = function(attr, val) {
+            this.dynamic[attr] = val;
+        };
 
-    this.get = function(attr) {
-        if (attr !== undefined) {
-            // return single attribute
-            if (!this.dynamic.hasOwnProperty(attr)) {
-                // use default value 
-                return this.init[attr];
+        this.get = function(attr) {
+            if (attr !== undefined) {
+                // return single attribute
+                if (!this.dynamic.hasOwnProperty(attr)) {
+                    // use default value 
+                    return this.init[attr];
+                } else {
+                    return this.dynamic[attr];
+                }
+
             } else {
-                return this.dynamic[attr];
+                // return entire config
+                return this.dynamic;
             }
+        };
 
-        } else {
-            // return entire config
-            return this.dynamic;
-        }
-    };
-
-    this.getConstraints = function(attr) {
-        if (attr !== undefined) {
-            if (this.sliderConstraints.hasOwnProperty(attr)) {
-                return this.sliderConstraints[attr];
-            } else {
-                return [0.0, 1.0];
+        this.getConstraints = function(attr) {
+            if (attr !== undefined) {
+                if (this.sliderConstraints.hasOwnProperty(attr)) {
+                    return this.sliderConstraints[attr];
+                } else {
+                    return [0.0, 1.0];
+                }
             }
-        }
-    };
+        };
 
-    this.swap = function(newConfig) {
-        this.dynamic = newConfig;
+        this.swap = function(newConfig) {
+            this.dynamic = newConfig;
+        };
     };
-};
 
 
 
     if (webgl_detect()) {
 
-        var viewer, controlBar, config, layers, configManager;
+        var controlBar, config, configManager;
 
         config = new Config();
         layers = new Layers();
         viewer = new Viewer(config, layers, $('#map'));
-        
+
         controlBar = new ControlBar(viewer);
         configManager = new ConfigManagerStatic(viewer, controlBar);
 
@@ -463,11 +418,6 @@ var Config = function() {
         $('body').append('<div class="webglMissing"><p><img src="resources/images/elasticterrain_logo.svg" width="174px"></img><br><span class="title">WebGL Not Supported</span><br> WebGL is required for this application, and your Web browser does not support WebGL. Google Chrome or Firefox are recommended browsers with WebGL support. Click <a href="http://www.browserleaks.com/webgl" target="_blank">here</a> to check the WebGL specifications of your browser.</p></div>');
     }
 });
-
-
 </script>
 
 </html>
-
-
-
