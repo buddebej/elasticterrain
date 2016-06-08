@@ -42,3 +42,5 @@ OpenLayers 3 is licensed under the [2-Clause BSD](https://tldrlegal.com/license/
 For comments or contribution please contact [Cartography and Geovisualization Group, Oregon State University](http://cartography.oregonstate.edu/).
 
 ![Screenshots](https://raw.github.com/buddebej/elasticterrain/master/elastic_terrain_screenshot_01.jpg) 
+
+![Screenshots](https://raw.github.com/buddebej/elasticterrain/master/elastic_terrain_screenshot_02.jpg) 
