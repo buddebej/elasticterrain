@@ -1,26 +1,8 @@
 var Showcase = function(viewer) {
     'use strict';
 
-    var left = '<span class="fa-stack">\
-                <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
-                <i class="fa fa-chevron-circle-left fa-stack-1x"></i>\
-                </span>';
-
-    var right = '<span class="fa-stack">\
-                <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
-                <i class="fa fa-chevron-circle-right fa-stack-1x"></i>\
-                </span>';
-
-
-    var CONTAINER = $('.map'),
-        CONTROL_LEFT = $('<div>' + left + '</div>').addClass('showcaseControl').addClass('controlLeft').hide(),
-        CONTROL_RIGHT = $('<div>' + right + '</div>').addClass('showcaseControl').addClass('controlRight').hide(),
-        SHOWCASE_HINT = $('<div><div class="bubble">Click here to customize the Elastic Terrain Map</div></div>').addClass('showcaseHintControlPanel').hide();
-
-
-    CONTAINER.append(CONTROL_RIGHT).append(CONTROL_LEFT);
-
     var exampleIndex = 0,
+        marsIndex = 1,
         url = window.location.href,
         mapConfig = '',
         examplesSeen = 0,
@@ -36,10 +18,40 @@ var Showcase = function(viewer) {
         },
         showHint = function() {
             examplesSeen++;
-            if (examplesSeen === 1) {
-                SHOWCASE_HINT.fadeIn('slow');
+            // if (examplesSeen === 1) {
+            //     // SHOWCASE_HINT.fadeIn('slow');
+            // }
+            if (examplesSeen === 2 || exampleIndex === 1) {
+                SHOWCASE_MARS.fadeOut('fast');
             }
         };
+
+    var left = '<span class="fa-stack">\
+                <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
+                <i class="fa fa-chevron-circle-left fa-stack-1x"></i>\
+                </span>';
+
+    var right = '<span class="fa-stack">\
+                <i class="fa fa-circle fa-stack-1x white fa-lg"></i>\
+                <i class="fa fa-chevron-circle-right fa-stack-1x"></i>\
+                </span>';
+
+
+    var CONTAINER = $('.map'),
+        CONTROL_LEFT = $('<div>' + left + '</div>').addClass('showcaseControl').addClass('controlLeft').hide(),
+        CONTROL_RIGHT = $('<div>' + right + '</div>').addClass('showcaseControl').addClass('controlRight').hide(),
+        SHOWCASE_HINT = $('<div><div class="bubble">Click here to customize the Elastic Terrain Map</div></div>').addClass('showcaseHintControlPanel').hide(),
+        SHOWCASE_HINT = $('<div><div class="bubble">Click here to customize the Elastic Terrain Map</div></div>').addClass('showcaseHintControlPanel').hide(),
+        SHOWCASE_MARS = $('<div class="mars-bubble"></div>').click(function() {
+            changeExample(marsIndex);
+            $(this).fadeOut('fast');
+        }).hide();
+
+
+    CONTAINER.append(CONTROL_RIGHT).append(CONTROL_LEFT);
+    CONTAINER.append(SHOWCASE_MARS);
+
+
 
     // get url behind last /# and return configname
     mapConfig = url.substring(url.lastIndexOf('/#') + 1).replace('#', '');
@@ -53,6 +65,10 @@ var Showcase = function(viewer) {
                 exampleIndex = k;
             }
         });
+    }
+
+    if (exampleIndex !== marsIndex) {
+        SHOWCASE_MARS.show();
     }
 
     CONTROL_RIGHT.click(function() {

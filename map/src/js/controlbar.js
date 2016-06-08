@@ -224,12 +224,12 @@ var ControlBar = function(viewer) {
         SLIDER_HYBRID_DAMPING.update();
         SLIDER_RESOLUTION.update();
 
-        
-        if(init === undefined){ 
+
+        if (init === undefined) {
             SELECT_TEXTURE.find('option:selected').prop('selected', false);
             SELECT_TEXTURE.find('option[value="' + viewer.get('texture') + '"]').prop('selected', true).change();
         }
-        
+
         SELECT_COLOR_RAMP.find('option[value=' + viewer.get('colorRamp') + ']').prop('selected', true);
 
         ui.controlActive(ui.controls.rotation, viewer.get('viewRotationEnabled'));
@@ -383,7 +383,7 @@ var ControlBar = function(viewer) {
         }
         // FIXME for hidden update from showCase
         // if (!ui.options.collapsed) {
-            viewer.set('texture', selectedLayer);
+        viewer.set('texture', selectedLayer);
         // }
     });
 

@@ -72,7 +72,6 @@
     border-color: transparent rgba(0, 60, 136, 0.9);
 }
 
-
 .alertBubble {
     position: absolute;
     z-index: 120;
@@ -104,4 +103,22 @@
     margin-left: -8px;
     bottom: -8px;
     left: 50%;
+}
+
+.mars-bubble {
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 200px;
+    height: 200px;
+    background-image: url(../images/mars-overlay.png);
+    background-size: cover;
+    cursor: pointer;
+}
+
+@media(max-height:600px) {
+    .mars-bubble {
+        display: none;
+    }
 }
