@@ -79,7 +79,7 @@ var ControlBar = function(viewer) {
     // config control bar
     ui.options = {
         knobcolor: '#4479E3',
-        collapsed: true,
+        collapsed: false,
         enabled: true,
         controlAnimation: 'blind', // animation of collapsing and expanding
         controlAnimationSpeed: 300, // animation of collapsing and expanding

@@ -44,6 +44,7 @@ var Showcase = function(viewer) {
         SHOWCASE_HINT = $('<div><div class="bubble">Click here to customize the Elastic Terrain Map</div></div>').addClass('showcaseHintControlPanel').hide(),
         SHOWCASE_MARS = $('<div class="mars-bubble"></div>').click(function() {
             changeExample(marsIndex);
+            exampleIndex = marsIndex;
             $(this).fadeOut('fast');
         }).hide();
 
