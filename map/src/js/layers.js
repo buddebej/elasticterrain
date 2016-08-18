@@ -3,16 +3,16 @@ var Layers = function() {
 
     this.layers_enabled = [];
 
-  this.earth = new ol.source.XYZ({
+    this.earth = new ol.source.XYZ({
         url: 'http://eu.elasticterrain.xyz/data/tiles/{z}/{x}/{y}.png',
         dem: true,
-        minMax : [-11000, 9000]
+        minMax: [-11000, 9000]
     });
 
     this.mars = new ol.source.XYZ({
         url: 'http://eu.elasticterrain.xyz/data/mars/{z}/{x}/{y}.png',
         dem: true,
-        minMax : [-9000, 24000]
+        minMax: [-9000, 24000]
     });
 
     this.dem = {
@@ -22,7 +22,7 @@ var Layers = function() {
         base: true,
         enabled: true,
         data: new ol.layer.TileDem({
-            source: this.earth 
+            source: this.earth
         }),
         highLevelAreas: [
             ['Vienna', 19, [1790460.950551968, 6124746.202434603, 1868732.4675159885, 6203017.719398623]],
@@ -74,28 +74,29 @@ var Layers = function() {
                     url: 'http://b.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
                 })
             })
-        }, {
-            title: 'Map Quest',
-            id: 'mapquest',
-            pos: 2,
-            enabled: true,
-            data: new ol.layer.Tile({
-                style: 'Road',
-                source: new ol.source.MapQuest({
-                    layer: 'osm'
-                })
-            })
-        }, {
-            title: 'Map Quest Sat',
-            id: 'mapquestsat',
-            pos: 2,
-            enabled: true,
-            data: new ol.layer.Tile({
-                source: new ol.source.MapQuest({
-                    layer: 'sat'
-                })
-            })
         },
+        /*{
+                   title: 'Map Quest',
+                   id: 'mapquest',
+                   pos: 2,
+                   enabled: true,
+                   data: new ol.layer.Tile({
+                       style: 'Road',
+                       source: new ol.source.MapQuest({
+                           layer: 'osm'
+                       })
+                   })
+               }, {
+                   title: 'Map Quest Sat',
+                   id: 'mapquestsat',
+                   pos: 2,
+                   enabled: true,
+                   data: new ol.layer.Tile({
+                       source: new ol.source.MapQuest({
+                           layer: 'sat'
+                       })
+                   })
+               },*/
         {
             title: 'Open Street Map',
             id: 'osm',

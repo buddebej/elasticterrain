@@ -40,7 +40,7 @@
     "lightAzimuth": 315,
     "lightZenith": 28,
     "ambientLight": 0.040000000000000036,
-    "texture": "mapquest",
+    "texture": "osm-hybrid",
     "stackedCardboard": false,
     "waterBodies": true,
     "dynamicColors": true,
