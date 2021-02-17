@@ -1,4 +1,4 @@
-##Elastic Terrain Map
+## Elastic Terrain Map
 
 Elastic Terrain Map implements a new method for terrain visualization that uses animation.
 The application renders digital elevation models with WebGL and offers many configurable parameters.
